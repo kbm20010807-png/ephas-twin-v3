@@ -113,10 +113,11 @@
 </div>
 
 <!-- PRO TABS -->
-<div class="tab-bar" id="proTabs" style="display:none;">
-  <div class="tab-btn on" onclick="switchTab('pro','posts',this)">POSTS</div>
-  <div class="tab-btn" onclick="switchTab('pro','stats',this)">STATS</div>
-  <div class="tab-btn" onclick="switchTab('pro','courses',this)">COURSES</div>
+<div class="tab-bar" id="proTabs" style="display:none;overflow-x:auto;scrollbar-width:none;">
+  <div class="tab-btn on" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','posts',this)">POSTS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','threads',this)">THREADS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','achievements',this)">AWARDS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','courses',this)">COURSES</div>
 </div>
 
 <!-- TWIN: STATS -->
@@ -169,40 +170,116 @@
   </div>
 </div>
 
-<!-- PRO: POSTS -->
+<!-- PRO: POSTS & REELS -->
 <div class="tab-pane" id="pane-pro-posts">
   <div style="height:16px;"></div>
+  <!-- Photo post -->
   <div class="prof-post">
     <div class="pp-meta">2h ago · Mindset</div>
-    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think.</div>
+    <div style="height:180px;background:var(--bg-2);border-radius:var(--r);margin-bottom:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);overflow:hidden;">
+      <i data-lucide="image" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    </div>
+    <div class="pp-body">Cold shower at 5AM. Body domain jumped 8% this week. Cold exposure + consistent sleep = a different game.</div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 93</div><div class="pp-act"><i data-lucide="message-circle"></i> 8</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+  </div>
+  <!-- Reel post -->
+  <div class="prof-post">
+    <div class="pp-meta">Yesterday · Fitness</div>
+    <div style="height:220px;background:#09090B;border-radius:var(--r);margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #1C1C1C;position:relative;overflow:hidden;cursor:pointer;">
+      <i data-lucide="play-circle" style="width:48px;height:48px;stroke:var(--gold);fill:none;stroke-width:1.25;"></i>
+      <div style="font-size:10px;color:#666;margin-top:8px;letter-spacing:1px;">0:43</div>
+      <div style="position:absolute;bottom:12px;left:12px;right:48px;font-size:11px;color:#fff;font-weight:600;line-height:1.4;">My morning routine — 43 sec</div>
+      <div style="position:absolute;top:10px;right:10px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.25);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:1px;">REEL</div>
+    </div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 214</div><div class="pp-act"><i data-lucide="message-circle"></i> 31</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+  </div>
+  <!-- Text post -->
+  <div class="prof-post">
+    <div class="pp-meta">3d ago · Wealth</div>
+    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think about it.</div>
     <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 47</div><div class="pp-act"><i data-lucide="message-circle"></i> 12</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
   </div>
   <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share your journey</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create Post</a>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share a post or reel</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create</a>
   </div>
 </div>
 
-<!-- PRO: STATS -->
-<div class="tab-pane" id="pane-pro-stats">
-  <div class="xp-zone" style="padding-top:16px;">
-    <div class="xp-hd">
-      <div class="t-label">Level {{ u.level }} → {{ u.level + 1 }}</div>
-      <div style="font-size:11px;color:var(--sub);">{{ u.xp }} / {{ u.xp_needed }} XP</div>
-    </div>
-    <div class="prog-bar"><div class="prog-fill" style="width:{{ u.progress_pct }}%"></div></div>
-  </div>
-  <div class="sect-lbl">Life Domains</div>
-  <div class="domain-g">
-    {% for d in stats.domains %}
-    <div class="dom-c">
-      <div class="dom-top"><div class="dom-name">{{ d.name }}</div><div class="dom-pct">{{ d.pct }}%</div></div>
-      <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
-      <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
-    </div>
-    {% endfor %}
-  </div>
+<!-- PRO: THREADS -->
+<div class="tab-pane" id="pane-pro-threads">
   <div style="height:16px;"></div>
+  <div class="prof-post">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;">THREAD</div>
+      <div style="font-size:9px;color:var(--sub);">5 parts · 3d ago</div>
+    </div>
+    <div class="pp-body" style="margin-bottom:10px;">How I went from 0 to a 12-day streak when nothing else worked. [1/5]<br><br>The first 3 days are the hardest. Not because of willpower — because you haven't built the environmental cue yet. Here's exactly what changed...</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;margin-bottom:12px;">Read full thread →</div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 187</div><div class="pp-act"><i data-lucide="message-circle"></i> 43</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+  </div>
+  <div class="prof-post">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;">THREAD</div>
+      <div style="font-size:9px;color:var(--sub);">3 parts · 1w ago</div>
+    </div>
+    <div class="pp-body" style="margin-bottom:10px;">The Wealth domain was at 12% when I started. Here's the exact system I used to get it to 55% in 6 weeks. [1/3]<br><br>Step 1: track your spending daily. Not to judge it — just to see it. Awareness before action...</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;margin-bottom:12px;">Read full thread →</div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 92</div><div class="pp-act"><i data-lucide="message-circle"></i> 19</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+  </div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Start a thread</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="align-left"></i> New Thread</a>
+  </div>
+</div>
+
+<!-- PRO: ACHIEVEMENTS -->
+<div class="tab-pane" id="pane-pro-achievements">
+  <div style="height:16px;"></div>
+  <!-- Milestone cards -->
+  <div class="prof-post">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="flame" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);">12-Day Streak</div>
+        <div style="font-size:11px;color:var(--sub);">Active now · Best: 14 days</div>
+      </div>
+      <div class="pill pill-green" style="margin-left:auto;font-size:8px;">ACTIVE</div>
+    </div>
+  </div>
+  <div class="prof-post">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="sunrise" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);">Early Riser</div>
+        <div style="font-size:11px;color:var(--sub);">Checked in before 7AM for 7 days</div>
+      </div>
+      <div class="pill pill-gold" style="font-size:8px;">EARNED</div>
+    </div>
+  </div>
+  <div class="prof-post">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="book-open" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);">Reader</div>
+        <div style="font-size:11px;color:var(--sub);">30 min reading logged 10+ days</div>
+      </div>
+      <div class="pill pill-gold" style="font-size:8px;">EARNED</div>
+    </div>
+  </div>
+  <!-- Locked achievements -->
+  <div class="sect-lbl">Next to unlock</div>
+  <div class="badges-row" style="margin-bottom:16px;">
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="star"></i></div><div class="badge-nm">100 Check-Ins</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="layers"></i></div><div class="badge-nm">All Domains</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="zap"></i></div><div class="badge-nm">Level 10</div></div>
+  </div>
 </div>
 
 <!-- PRO: COURSES -->
@@ -258,7 +335,7 @@ function switchTab(mode, tab, el) {
   el.classList.add('on');
   const panes = mode === 'twin'
     ? ['pane-twin-stats','pane-twin-posts']
-    : ['pane-pro-posts','pane-pro-stats','pane-pro-courses'];
+    : ['pane-pro-posts','pane-pro-threads','pane-pro-achievements','pane-pro-courses'];
   panes.forEach(id => document.getElementById(id).classList.remove('on'));
   document.getElementById('pane-' + mode + '-' + tab).classList.add('on');
 }
