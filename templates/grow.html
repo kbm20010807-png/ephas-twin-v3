@@ -56,6 +56,29 @@
 .cta-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
 .cta-txt b{color:var(--black);}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
+.reel-card{margin:0 20px 10px;border-radius:var(--r-lg);overflow:hidden;background:#09090B;position:relative;min-height:220px;cursor:pointer;box-shadow:var(--sh);}
+.rc-bg{position:absolute;inset:0;background:linear-gradient(160deg,#111 0%,#0D0800 60%,#111 100%);}
+.rc-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-70%);width:52px;height:52px;border-radius:50%;background:rgba(212,170,53,.15);border:1.5px solid rgba(212,170,53,.3);display:flex;align-items:center;justify-content:center;}
+.rc-play svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;margin-left:3px;}
+.rc-info{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);}
+.rc-user{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:4px;}
+.rc-caption{font-size:12px;color:#fff;font-weight:600;line-height:1.4;margin-bottom:10px;}
+.rc-stats{display:flex;gap:14px;}
+.rc-stat{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:rgba(255,255,255,.5);}
+.rc-stat svg{width:11px;height:11px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:1.75;}
+.rc-badge{position:absolute;top:12px;right:12px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.3);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;}
+.thread-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);cursor:pointer;}
+.tc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.tc-meta{font-size:10px;color:var(--sub);}
+.tc-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:8px;line-height:1.4;}
+.tc-body{font-size:12px;color:var(--text);line-height:1.65;margin-bottom:12px;}
+.tc-thread-line{width:2px;background:var(--border);height:24px;margin-left:19px;margin-bottom:-4px;}
+.tc-reply{display:flex;align-items:flex-start;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.tc-reply-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
+.tc-foot{display:flex;gap:14px;align-items:center;margin-top:10px;}
+.tc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
+.tc-action svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.tc-replies-count{margin-left:auto;font-size:10px;color:var(--muted);font-weight:600;}
 </style>
 {% endblock %}
 
@@ -74,12 +97,12 @@
 </div>
 
 <div class="main-tabs">
-  <div class="mt-btn on" onclick="switchTab('posts',this)">Posts</div>
-  <div class="mt-btn" onclick="switchTab('reels',this)">Reels</div>
+  <div class="mt-btn on" onclick="switchTab('posts',this)">Posts & Reels</div>
+  <div class="mt-btn" onclick="switchTab('threads',this)">Threads</div>
   <div class="mt-btn" onclick="switchTab('courses',this)">Courses</div>
 </div>
 
-<!-- POSTS -->
+<!-- POSTS & REELS -->
 <div class="tab-pane on" id="pane-posts">
   <div class="chip-row">
     <div class="chip on" onclick="chipSet(this)">All</div>
@@ -91,14 +114,13 @@
     <div class="chip" onclick="chipSet(this)">Running</div>
   </div>
   <div style="height:10px;"></div>
-  {% for p in feed %}
+
+  <!-- post 1 -->
+  {% set p = feed[0] %}
   <div class="post-card">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
-      <div>
-        <div class="pc-user">{{ p.user }}</div>
-        <div class="pc-time">{{ p.time }}</div>
-      </div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">Mindset</div>
     </div>
     <div class="pc-body">{{ p.text }}</div>
@@ -109,7 +131,90 @@
       <div class="pc-action"><i data-lucide="share-2"></i></div>
     </div>
   </div>
-  {% endfor %}
+
+  <!-- post 2 -->
+  {% set p = feed[1] %}
+  <div class="post-card">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
+      <div class="pc-cat">Mindset</div>
+    </div>
+    <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+
+  <!-- reel card 1 -->
+  <div class="reel-card">
+    <div class="rc-bg"></div>
+    <div class="rc-badge"><i data-lucide="video" style="width:9px;height:9px;stroke:var(--gold);fill:none;stroke-width:2;vertical-align:middle;margin-right:3px;"></i>REEL</div>
+    <div class="rc-play"><i data-lucide="play"></i></div>
+    <div class="rc-info">
+      <div class="rc-user">Jordan L.</div>
+      <div class="rc-caption">How I built a 5AM routine in 14 days — no alarm needed anymore</div>
+      <div class="rc-stats">
+        <div class="rc-stat"><i data-lucide="eye"></i> 4.2K</div>
+        <div class="rc-stat"><i data-lucide="heart"></i> 312</div>
+        <div class="rc-stat"><i data-lucide="message-circle"></i> 28</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- post 3 -->
+  {% set p = feed[2] %}
+  <div class="post-card">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
+      <div class="pc-cat">Mind</div>
+    </div>
+    <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+
+  <!-- reel card 2 -->
+  <div class="reel-card">
+    <div class="rc-bg"></div>
+    <div class="rc-badge"><i data-lucide="video" style="width:9px;height:9px;stroke:var(--gold);fill:none;stroke-width:2;vertical-align:middle;margin-right:3px;"></i>REEL</div>
+    <div class="rc-play"><i data-lucide="play"></i></div>
+    <div class="rc-info">
+      <div class="rc-user">Priya K.</div>
+      <div class="rc-caption">Day 30 cold shower check-in. My body is different. My mind is different.</div>
+      <div class="rc-stats">
+        <div class="rc-stat"><i data-lucide="eye"></i> 8.7K</div>
+        <div class="rc-stat"><i data-lucide="heart"></i> 621</div>
+        <div class="rc-stat"><i data-lucide="message-circle"></i> 74</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- post 4 -->
+  {% set p = feed[3] %}
+  <div class="post-card">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
+      <div class="pc-cat">Body</div>
+    </div>
+    <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+
   <div class="coaches-cta">
     <div class="cta-ico"><i data-lucide="users"></i></div>
     <div class="cta-txt"><b>Coaches & Mentors</b> — Connect with vetted coaches across mindset, fitness, and wealth. Coming soon.</div>
@@ -118,14 +223,79 @@
   <div style="height:16px;"></div>
 </div>
 
-<!-- REELS -->
-<div class="tab-pane" id="pane-reels">
-  <div class="reels-soon">
-    <div class="rs-ico"><i data-lucide="video"></i></div>
-    <div class="t-lg mb-2">Reels</div>
-    <div style="font-size:13px;color:var(--sub);line-height:1.6;max-width:240px;margin:0 auto;">Short-form self-improvement videos are coming. Share your journey in 60 seconds.</div>
-    <div class="pill pill-muted" style="margin:16px auto 0;display:inline-flex;">COMING SOON</div>
+<!-- THREADS -->
+<div class="tab-pane" id="pane-threads">
+  <div style="height:10px;"></div>
+
+  <div class="thread-card">
+    <div class="tc-head">
+      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">M</div>
+      <div><div class="pc-user">Marcus R.</div><div class="tc-meta">3h ago · Mindset</div></div>
+    </div>
+    <div class="tc-title">Why 99% of people fail their goals in February</div>
+    <div class="tc-body">They start with motivation. Motivation is a feeling. Feelings fade.<br><br>The people who actually change their lives build systems — not goals. Systems run even when you don't feel like it. That's the difference.</div>
+    <div class="tc-reply">
+      <div class="av av-28" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:10px;flex-shrink:0;">J</div>
+      <div class="tc-reply-txt">This is exactly what shifted things for me. Same goal, different system = different result.</div>
+    </div>
+    <div class="tc-foot">
+      <div class="tc-action"><i data-lucide="heart"></i> 184</div>
+      <div class="tc-action"><i data-lucide="message-circle"></i> 43</div>
+      <div class="tc-action"><i data-lucide="repeat-2"></i> 29</div>
+      <div class="tc-replies-count">View 43 replies</div>
+    </div>
   </div>
+
+  <div class="thread-card">
+    <div class="tc-head">
+      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">P</div>
+      <div><div class="pc-user">Priya K.</div><div class="tc-meta">Yesterday · Finance</div></div>
+    </div>
+    <div class="tc-title">I went from 0 savings to 3 months emergency fund in 11 months. Here's the framework:</div>
+    <div class="tc-body">1. Pay yourself first — automatically, day 1 of salary.<br>2. Make saving boring. No investment apps, no tracking obsession.<br>3. Cut one thing per month. Not everything at once.<br><br>The trick is making it invisible until it isn't.</div>
+    <div class="tc-reply">
+      <div class="av av-28" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:10px;flex-shrink:0;">S</div>
+      <div class="tc-reply-txt">Step 1 alone changed my life. Automate the hard part.</div>
+    </div>
+    <div class="tc-foot">
+      <div class="tc-action"><i data-lucide="heart"></i> 267</div>
+      <div class="tc-action"><i data-lucide="message-circle"></i> 61</div>
+      <div class="tc-action"><i data-lucide="repeat-2"></i> 88</div>
+      <div class="tc-replies-count">View 61 replies</div>
+    </div>
+  </div>
+
+  <div class="thread-card">
+    <div class="tc-head">
+      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">J</div>
+      <div><div class="pc-user">Jordan L.</div><div class="tc-meta">2d ago · Fitness</div></div>
+    </div>
+    <div class="tc-title">The real reason you're not getting results in the gym</div>
+    <div class="tc-body">You're not undertrained. You're under-recovered.<br><br>Sleep, food, and stress are doing more damage than your workouts are doing good. Fix the basics before adding volume. Most people don't want to hear this — it's not as exciting as a new program.</div>
+    <div class="tc-foot">
+      <div class="tc-action"><i data-lucide="heart"></i> 312</div>
+      <div class="tc-action"><i data-lucide="message-circle"></i> 57</div>
+      <div class="tc-action"><i data-lucide="repeat-2"></i> 41</div>
+      <div class="tc-replies-count">View 57 replies</div>
+    </div>
+  </div>
+
+  <div class="thread-card">
+    <div class="tc-head">
+      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">S</div>
+      <div><div class="pc-user">Sam T.</div><div class="tc-meta">3d ago · Sales</div></div>
+    </div>
+    <div class="tc-title">Closed my first $10K deal. Here's what nobody tells you about B2B sales:</div>
+    <div class="tc-body">The close happens in the first 5 minutes, not the last 5.<br><br>If you haven't built trust by then, no technique saves you. Stop trying to be clever. Ask real questions. Listen twice as much as you talk.</div>
+    <div class="tc-foot">
+      <div class="tc-action"><i data-lucide="heart"></i> 198</div>
+      <div class="tc-action"><i data-lucide="message-circle"></i> 39</div>
+      <div class="tc-action"><i data-lucide="repeat-2"></i> 53</div>
+      <div class="tc-replies-count">View 39 replies</div>
+    </div>
+  </div>
+
+  <div style="height:16px;"></div>
 </div>
 
 <!-- COURSES -->

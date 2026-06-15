@@ -81,7 +81,7 @@
 
 <div class="prof-zone">
   <div class="prof-av">{{ u.name[0]|upper }}<div class="prof-av-lv">{{ u.level }}</div></div>
-  <div class="edit-prof-btn"><i data-lucide="edit-2"></i> Edit Profile</div>
+  <a href="/edit-profile" class="edit-prof-btn"><i data-lucide="edit-2"></i> Edit Profile</a>
 </div>
 
 <div class="prof-info">
@@ -108,20 +108,21 @@
 
 <!-- TWIN TABS -->
 <div class="tab-bar" id="twinTabs">
-  <div class="tab-btn on" onclick="switchTab('twin','stats',this)">STATS</div>
-  <div class="tab-btn" onclick="switchTab('twin','posts',this)">POSTS</div>
+  <div class="tab-btn on" onclick="switchTab('twin','posts',this)">POSTS</div>
+  <div class="tab-btn" onclick="switchTab('twin','stats',this)">STATS</div>
 </div>
 
 <!-- PRO TABS -->
 <div class="tab-bar" id="proTabs" style="display:none;overflow-x:auto;scrollbar-width:none;">
   <div class="tab-btn on" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','posts',this)">POSTS</div>
   <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','threads',this)">THREADS</div>
-  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','achievements',this)">AWARDS</div>
   <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','courses',this)">COURSES</div>
+  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','achievements',this)">AWARDS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','stats',this)">STATS</div>
 </div>
 
 <!-- TWIN: STATS -->
-<div class="tab-pane on" id="pane-twin-stats">
+<div class="tab-pane" id="pane-twin-stats">
   <div class="xp-zone" style="padding-top:16px;">
     <div class="xp-hd">
       <div class="t-label">Level {{ u.level }} → {{ u.level + 1 }}</div>
@@ -152,7 +153,7 @@
 </div>
 
 <!-- TWIN: POSTS -->
-<div class="tab-pane" id="pane-twin-posts">
+<div class="tab-pane on" id="pane-twin-posts">
   <div style="height:16px;"></div>
   <div class="prof-post">
     <div class="pp-meta">2h ago · Mindset</div>
@@ -296,6 +297,39 @@
   </div>
 </div>
 
+<!-- PRO: STATS (so viewers can verify the instructor walks the talk) -->
+<div class="tab-pane" id="pane-pro-stats">
+  <div style="padding:16px 20px 0;">
+    <div style="font-size:11px;color:var(--sub);line-height:1.5;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:12px 14px;">
+      Real data from {{ u.name }}'s daily check-ins. Every number is earned, not claimed.
+    </div>
+  </div>
+  <div class="xp-zone" style="padding-top:14px;">
+    <div class="xp-hd">
+      <div class="t-label">Level {{ u.level }} · {{ u.level_title }}</div>
+      <div style="font-size:11px;color:var(--sub);">{{ u.xp }} XP · {{ u.progress_pct }}%</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:{{ u.progress_pct }}%"></div></div>
+  </div>
+  <div class="stats-row" style="margin:16px 0;">
+    <div class="stat-c"><div class="stat-v">{{ u.total_checkins }}</div><div class="stat-l">Check-Ins</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.streak }}</div><div class="stat-l">Streak</div></div>
+    <div class="stat-c"><div class="stat-v">{{ u.best_streak }}</div><div class="stat-l">Best</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.level }}</div><div class="stat-l">Level</div></div>
+  </div>
+  <div class="sect-lbl">Life Domains</div>
+  <div class="domain-g">
+    {% for d in stats.domains %}
+    <div class="dom-c">
+      <div class="dom-top"><div class="dom-name">{{ d.name }}</div><div class="dom-pct">{{ d.pct }}%</div></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
+      <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="height:16px;"></div>
+</div>
+
 <div class="tw-foot">
   <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
@@ -316,7 +350,7 @@ function applyAcct(type) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   if(type === 'twin') {
-    document.getElementById('pane-twin-stats').classList.add('on');
+    document.getElementById('pane-twin-posts').classList.add('on');
     document.querySelector('#twinTabs .tab-btn').classList.add('on');
   } else {
     document.getElementById('pane-pro-posts').classList.add('on');
@@ -334,8 +368,8 @@ function switchTab(mode, tab, el) {
   el.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   const panes = mode === 'twin'
-    ? ['pane-twin-stats','pane-twin-posts']
-    : ['pane-pro-posts','pane-pro-threads','pane-pro-achievements','pane-pro-courses'];
+    ? ['pane-twin-posts','pane-twin-stats']
+    : ['pane-pro-posts','pane-pro-threads','pane-pro-courses','pane-pro-achievements','pane-pro-stats'];
   panes.forEach(id => document.getElementById(id).classList.remove('on'));
   document.getElementById('pane-' + mode + '-' + tab).classList.add('on');
 }

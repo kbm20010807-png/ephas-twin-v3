@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block head %}
+<style>
+.ep-banner{position:relative;height:120px;background:linear-gradient(135deg,#09090B,#1A1200);cursor:pointer;overflow:hidden;}
+.ep-banner-img{width:100%;height:100%;object-fit:cover;}
+.ep-banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px;}
+.ep-banner-overlay svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.75;}
+.ep-av-wrap{position:relative;width:76px;height:76px;margin:-38px 0 0 20px;z-index:2;}
+.ep-av{width:76px;height:76px;border-radius:50%;background:var(--bg-2);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:26px;font-weight:900;color:var(--gold);overflow:hidden;}
+.ep-av img{width:100%;height:100%;object-fit:cover;}
+.ep-av-btn{position:absolute;bottom:2px;right:2px;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.ep-av-btn svg{width:11px;height:11px;stroke:#000;fill:none;stroke-width:2.5;}
+.ep-fields{padding:20px 20px 0;}
+.username-lock{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;margin-top:8px;}
+.username-lock svg{width:12px;height:12px;flex-shrink:0;}
+.username-lock-txt{font-size:10px;color:var(--sub);line-height:1.4;flex:1;}
+.ep-save-btn{margin:24px 20px 40px;}
+.char-count{font-size:10px;color:var(--sub);text-align:right;margin-top:4px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/profile" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Edit Profile</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<!-- BANNER -->
+<div class="ep-banner" id="bannerWrap" onclick="document.getElementById('bannerFile').click()">
+  <img class="ep-banner-img" id="bannerPreview" src="" style="display:none;" alt="">
+  <div class="ep-banner-overlay" id="bannerOverlay">
+    <i data-lucide="camera"></i> Change Banner
+  </div>
+</div>
+<input type="file" id="bannerFile" style="display:none;" accept="image/*">
+
+<!-- AVATAR -->
+<div class="ep-av-wrap">
+  <div class="ep-av" id="avCircle">{{ u.name[0]|upper }}</div>
+  <div class="ep-av-btn" onclick="document.getElementById('avatarFile').click()">
+    <i data-lucide="camera"></i>
+  </div>
+</div>
+<input type="file" id="avatarFile" style="display:none;" accept="image/*">
+
+<!-- FIELDS -->
+<div class="ep-fields">
+
+  <!-- First name -->
+  <div class="form-group">
+    <label class="form-label">First Name <span style="color:var(--red);">*</span></label>
+    <input class="form-input" id="firstName" placeholder="First name" value="{{ u.first }}" maxlength="32" oninput="count('firstName','fnCount',32)">
+    <div class="char-count" id="fnCount">{{ u.first|length }}/32</div>
+  </div>
+
+  <!-- Last name -->
+  <div class="form-group">
+    <label class="form-label">Last Name <span style="color:var(--sub);font-weight:500;">(optional)</span></label>
+    <input class="form-input" id="lastName" placeholder="Last name" maxlength="32" oninput="count('lastName','lnCount',32)">
+    <div class="char-count" id="lnCount">0/32</div>
+  </div>
+
+  <!-- Username -->
+  <div class="form-group">
+    <label class="form-label">Username</label>
+    <input class="form-input" id="username" placeholder="@username" id="usernameInput" maxlength="24" oninput="onUsernameInput(this)">
+    <div id="usernameLock" class="username-lock" style="display:none;">
+      <i data-lucide="lock" style="stroke:var(--sub);"></i>
+      <div class="username-lock-txt" id="lockMsg"></div>
+    </div>
+  </div>
+
+  <!-- Bio -->
+  <div class="form-group">
+    <label class="form-label">Bio</label>
+    <textarea class="form-input form-textarea" id="bioInput" placeholder="Tell the community who you are..." maxlength="160" oninput="count('bioInput','bioCount',160)" style="min-height:80px;">{{ u.bio }}</textarea>
+    <div class="char-count" id="bioCount">{{ u.bio|length }}/160</div>
+  </div>
+
+</div>
+
+<div class="ep-save-btn">
+  <button class="btn btn-primary btn-full" onclick="saveProfile()" style="border-radius:var(--r-xl);">
+    <i data-lucide="check"></i> SAVE CHANGES
+  </button>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div id="toast" style="position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:#09090B;border:1px solid var(--gold-b);border-radius:var(--r-full);padding:10px 20px;font-size:12px;font-weight:700;color:var(--gold);opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;z-index:9999;">
+  <i data-lucide="check-circle" style="width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:2;vertical-align:middle;margin-right:6px;"></i>Profile updated
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const USERNAME_KEY = 'twin_username_change';
+const USERNAME_LAST_KEY = 'twin_username_last_change';
+
+function count(inputId, countId, max) {
+  const len = document.getElementById(inputId).value.length;
+  document.getElementById(countId).textContent = len + '/' + max;
+}
+
+/* username once-per-month lock */
+function initUsername() {
+  const stored = localStorage.getItem(USERNAME_KEY) || 'alex_builds';
+  document.getElementById('username').value = stored;
+
+  const lastChange = localStorage.getItem(USERNAME_LAST_KEY);
+  if (lastChange) {
+    const last = new Date(lastChange);
+    const now = new Date();
+    const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+    if (diffDays < 30) {
+      const nextDate = new Date(last);
+      nextDate.setDate(nextDate.getDate() + 30);
+      const opts = { month: 'short', day: 'numeric' };
+      const formatted = nextDate.toLocaleDateString('en-US', opts);
+      document.getElementById('username').disabled = true;
+      document.getElementById('username').style.opacity = '.5';
+      document.getElementById('usernameLock').style.display = 'flex';
+      document.getElementById('lockMsg').textContent = 'Username can only be changed once per month. Next change available: ' + formatted + '.';
+    }
+  }
+}
+
+function onUsernameInput(el) {
+  el.value = el.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase();
+}
+
+/* avatar preview */
+document.getElementById('avatarFile').addEventListener('change', function() {
+  if (!this.files.length) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const circle = document.getElementById('avCircle');
+    circle.innerHTML = '<img src="' + e.target.result + '" alt="">';
+  };
+  reader.readAsDataURL(this.files[0]);
+});
+
+/* banner preview */
+document.getElementById('bannerFile').addEventListener('change', function() {
+  if (!this.files.length) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('bannerPreview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    document.getElementById('bannerOverlay').style.background = 'rgba(0,0,0,.35)';
+    document.getElementById('bannerOverlay').innerHTML = '<i data-lucide="camera" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:1.75;"></i> Change Banner';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
+  reader.readAsDataURL(this.files[0]);
+});
+
+function saveProfile() {
+  const fn = document.getElementById('firstName').value.trim();
+  if (!fn) {
+    document.getElementById('firstName').style.borderColor = 'var(--red)';
+    document.getElementById('firstName').focus();
+    return;
+  }
+  document.getElementById('firstName').style.borderColor = '';
+
+  const uname = document.getElementById('username').value.trim();
+  const stored = localStorage.getItem(USERNAME_KEY) || 'alex_builds';
+  if (uname && uname !== stored && !document.getElementById('username').disabled) {
+    localStorage.setItem(USERNAME_KEY, uname);
+    localStorage.setItem(USERNAME_LAST_KEY, new Date().toISOString());
+  }
+
+  const toast = document.getElementById('toast');
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => { window.location.href = '/profile'; }, 280);
+  }, 1400);
+}
+
+initUsername();
+</script>
+{% endblock %}

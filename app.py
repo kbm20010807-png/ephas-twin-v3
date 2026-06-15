@@ -152,5 +152,10 @@ def apply_pro():
     if not auth(): return redirect('/login')
     return render_template('apply_pro.html', u=DEMO_USER, active='settings')
 
+@app.route('/edit-profile')
+def edit_profile():
+    if not auth(): return redirect('/login')
+    return render_template('edit_profile.html', u=DEMO_USER, active='profile')
+
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
