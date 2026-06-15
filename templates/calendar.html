@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %}Calendar{% endblock %}
+
+{% block head %}
+<style>
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0;}
+.cal-month{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);}
+.cal-arrow{width:34px;height:34px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cal-arrow svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
+.cal-grid{padding:16px 20px 0;}
+.dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;}
+.dow{text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--sub);padding:4px 0;font-family:'Arpubes',sans-serif;}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;position:relative;transition:background .12s;}
+.day.has-checkin{background:var(--gold);color:#000;font-weight:800;}
+.day.today{border:2px solid var(--black);color:var(--black);}
+.day.today.has-checkin{border-color:var(--gold-2);}
+.day.other-month{opacity:.25;}
+.day:hover:not(.has-checkin){background:var(--bg-2);}
+.streak-badge{position:absolute;bottom:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#22C55E;border:1.5px solid var(--bg);}
+.legend{display:flex;gap:16px;padding:14px 20px 0;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--sub);}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+.stats-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:20px 20px 0;}
+.ss-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;text-align:center;box-shadow:var(--sh);}
+.ss-val{font-family:'Arpubes',sans-serif;font-size:26px;letter-spacing:-2px;color:var(--black);}
+.ss-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:3px;font-family:'Arpubes',sans-serif;}
+.history-list{padding:20px 20px 0;}
+.hist-day{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
+.hist-day:last-child{border-bottom:none;}
+.hist-date-box{width:42px;height:42px;border-radius:var(--r);background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.hdb-day{font-family:'Arpubes',sans-serif;font-size:18px;letter-spacing:-1px;color:var(--gold);line-height:1;}
+.hdb-mon{font-size:8px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;}
+.hist-info{flex:1;}
+.hist-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:3px;}
+.hist-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.hist-chip{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:2px 9px;font-size:9px;font-weight:700;color:var(--sub);}
+.hist-score{font-family:'Arpubes',sans-serif;font-size:18px;color:var(--gold);font-weight:900;flex-shrink:0;}
+.tw-foot{padding:28px 20px 16px;text-align:center;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/analytics" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand">
+    <div class="tb-twin">Calendar</div>
+    <div class="tb-tag">by EPHAS</div>
+  </div>
+  <a href="/checkin" class="tb-btn" style="background:var(--gold-dim);border-color:var(--gold-b);">
+    <i data-lucide="plus" style="stroke:var(--gold);"></i>
+  </a>
+</div>
+
+<div class="cal-nav">
+  <div class="cal-arrow" onclick="prevMonth()"><i data-lucide="chevron-left"></i></div>
+  <div class="cal-month" id="calTitle">June 2026</div>
+  <div class="cal-arrow" onclick="nextMonth()"><i data-lucide="chevron-right"></i></div>
+</div>
+
+<div class="cal-grid">
+  <div class="dow-row">
+    <div class="dow">Sun</div><div class="dow">Mon</div><div class="dow">Tue</div>
+    <div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div>
+  </div>
+  <div class="days-grid" id="daysGrid"></div>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--gold);"></div> Check-in logged</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#22C55E;"></div> Streak day</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--border);"></div> No check-in</div>
+</div>
+
+<div class="stats-strip">
+  <div class="ss-card">
+    <div class="ss-val" style="color:var(--gold);">{{ u.streak }}</div>
+    <div class="ss-lbl">Current Streak</div>
+  </div>
+  <div class="ss-card">
+    <div class="ss-val">{{ stats.total_checkins }}</div>
+    <div class="ss-lbl">This Month</div>
+  </div>
+  <div class="ss-card">
+    <div class="ss-val" style="color:var(--gold);">{{ u.best_streak }}</div>
+    <div class="ss-lbl">Best Streak</div>
+  </div>
+</div>
+
+<div class="history-list">
+  <div class="t-label mb-3">Recent check-ins</div>
+
+  <div class="hist-day">
+    <div class="hist-date-box"><div class="hdb-day">14</div><div class="hdb-mon">Jun</div></div>
+    <div class="hist-info">
+      <div class="hist-title">Sleep 7.5h · Energy 8 · Mood 8.5</div>
+      <div class="hist-chips">
+        <div class="hist-chip">Workout</div><div class="hist-chip">Reading</div><div class="hist-chip">Deep Work</div>
+      </div>
+    </div>
+    <div class="hist-score">8.3</div>
+  </div>
+  <div class="hist-day">
+    <div class="hist-date-box"><div class="hdb-day">13</div><div class="hdb-mon">Jun</div></div>
+    <div class="hist-info">
+      <div class="hist-title">Sleep 6.8h · Energy 7 · Mood 7</div>
+      <div class="hist-chips">
+        <div class="hist-chip">Cold Shower</div><div class="hist-chip">Journaling</div>
+      </div>
+    </div>
+    <div class="hist-score">7.0</div>
+  </div>
+  <div class="hist-day">
+    <div class="hist-date-box"><div class="hdb-day">12</div><div class="hdb-mon">Jun</div></div>
+    <div class="hist-info">
+      <div class="hist-title">Sleep 8h · Energy 9 · Mood 9</div>
+      <div class="hist-chips">
+        <div class="hist-chip">Workout</div><div class="hist-chip">Meditation</div><div class="hist-chip">Hydration</div><div class="hist-chip">Deep Work</div>
+      </div>
+    </div>
+    <div class="hist-score">9.0</div>
+  </div>
+  <div class="hist-day">
+    <div class="hist-date-box"><div class="hdb-day">11</div><div class="hdb-mon">Jun</div></div>
+    <div class="hist-info">
+      <div class="hist-title">Sleep 7h · Energy 7.5 · Mood 8</div>
+      <div class="hist-chips">
+        <div class="hist-chip">Reading</div><div class="hist-chip">Cold Shower</div>
+      </div>
+    </div>
+    <div class="hist-score">7.5</div>
+  </div>
+  <div class="hist-day">
+    <div class="hist-date-box"><div class="hdb-day">10</div><div class="hdb-mon">Jun</div></div>
+    <div class="hist-info">
+      <div class="hist-title">Sleep 7.2h · Energy 8 · Mood 8</div>
+      <div class="hist-chips">
+        <div class="hist-chip">Workout</div><div class="hist-chip">Journaling</div><div class="hist-chip">No Screens</div>
+      </div>
+    </div>
+    <div class="hist-score">8.0</div>
+  </div>
+</div>
+
+<div class="tw-foot">
+  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const checkedDays = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+let viewYear = 2026, viewMonth = 5; // June 2026 (0-indexed)
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderCal() {
+  document.getElementById('calTitle').textContent = monthNames[viewMonth] + ' ' + viewYear;
+  const grid = document.getElementById('daysGrid');
+  grid.innerHTML = '';
+  const today = new Date();
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPrev = new Date(viewYear, viewMonth, 0).getDate();
+
+  // prev month padding
+  for(let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'day other-month';
+    d.textContent = daysInPrev - i;
+    grid.appendChild(d);
+  }
+  // current month
+  for(let i = 1; i <= daysInMonth; i++) {
+    const d = document.createElement('div');
+    const isToday = (viewYear === today.getFullYear() && viewMonth === today.getMonth() && i === today.getDate());
+    const hasCI = checkedDays.includes(i) && viewMonth === 5 && viewYear === 2026;
+    d.className = 'day' + (hasCI ? ' has-checkin' : '') + (isToday ? ' today' : '');
+    d.textContent = i;
+    if(hasCI && i > 7 && i <= 14) {
+      const dot = document.createElement('div');
+      dot.className = 'streak-badge';
+      d.appendChild(dot);
+    }
+    grid.appendChild(d);
+  }
+  // next month padding
+  const total = firstDay + daysInMonth;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for(let i = 1; i <= remaining; i++) {
+    const d = document.createElement('div');
+    d.className = 'day other-month';
+    d.textContent = i;
+    grid.appendChild(d);
+  }
+}
+
+function prevMonth(){if(viewMonth===0){viewMonth=11;viewYear--;}else{viewMonth--;}renderCal();}
+function nextMonth(){if(viewMonth===11){viewMonth=0;viewYear++;}else{viewMonth++;}renderCal();}
+renderCal();
+</script>
+{% endblock %}

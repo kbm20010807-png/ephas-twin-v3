@@ -134,7 +134,10 @@
 <div style="padding:20px 20px 0;">
   <div class="flex justify-b items-c mb-3">
     <div class="t-label">This week</div>
-    <div style="font-size:11px;color:var(--sub);">avg <span style="color:var(--gold);font-weight:700;">{{ stats.avg_mood }}</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-size:11px;color:var(--sub);">avg <span style="color:var(--gold);font-weight:700;">{{ stats.avg_mood }}</span></div>
+      <a href="/calendar" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);font-weight:600;"><i data-lucide="calendar" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.75;"></i></a>
+    </div>
   </div>
   <div class="week-bars">
     {% set h = [70,75,80,78,82,0,0] %}

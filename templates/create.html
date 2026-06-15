@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block title %}Create{% endblock %}
+
+{% block head %}
+<style>
+body{min-height:100vh;display:flex;flex-direction:column;}
+.cr-wrap{flex:1;display:flex;flex-direction:column;}
+.cr-top{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.cr-close{width:34px;height:34px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-decoration:none;}
+.cr-close svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
+.type-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:20px;}
+.type-btn{border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;transition:all .15s;background:var(--card);box-shadow:var(--sh);}
+.type-btn.sel{border-color:var(--gold);background:var(--gold-dim);}
+.type-ico{width:38px;height:38px;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.type-ico svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:1.75;transition:stroke .15s;}
+.type-btn.sel .type-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.type-btn.sel .type-ico svg{stroke:var(--gold);}
+.type-name{font-size:12px;font-weight:800;color:var(--black);letter-spacing:-.3px;}
+.type-desc{font-size:10px;color:var(--sub);margin-top:1px;line-height:1.4;}
+.composer{padding:0 20px;flex:1;display:flex;flex-direction:column;gap:14px;}
+.vis-row{display:flex;gap:8px;}
+.vis-btn{padding:7px 16px;border-radius:var(--r-full);border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;background:var(--bg-2);display:flex;align-items:center;gap:5px;transition:all .15s;}
+.vis-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;}
+.vis-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.cat-chips{display:flex;gap:7px;flex-wrap:wrap;}
+.cat-chip{padding:6px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;background:var(--bg-2);white-space:nowrap;transition:all .15s;}
+.cat-chip.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.course-fields{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;}
+.cr-section{display:none;flex:1;flex-direction:column;gap:14px;padding:0 20px;}
+.cr-section.active{display:flex;}
+.media-row{display:flex;gap:8px;}
+.media-btn{flex:1;border:1.5px dashed var(--border);border-radius:var(--r-lg);padding:20px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;background:var(--surface);transition:border-color .15s;}
+.media-btn:hover{border-color:var(--gold);}
+.media-btn svg{width:22px;height:22px;stroke:var(--sub);fill:none;stroke-width:1.5;}
+.media-lbl{font-size:10px;font-weight:700;color:var(--sub);text-align:center;}
+.cr-footer{padding:16px 20px 28px;border-top:1px solid var(--border);margin-top:auto;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cr-wrap">
+  <div class="cr-top">
+    <a href="/grow" class="cr-close"><i data-lucide="x"></i></a>
+    <div class="tb-brand">
+      <div class="tb-twin">Create</div>
+      <div class="tb-tag">by EPHAS</div>
+    </div>
+    <div style="width:34px;"></div>
+  </div>
+
+  <!-- TYPE SELECTION -->
+  <div id="typeStep">
+    <div class="sect-lbl">What are you creating?</div>
+    <div class="type-select">
+      <div class="type-btn" onclick="selectType('post',this)">
+        <div class="type-ico"><i data-lucide="file-text"></i></div>
+        <div>
+          <div class="type-name">Post</div>
+          <div class="type-desc">Share a thought, update, or reflection</div>
+        </div>
+      </div>
+      <div class="type-btn" onclick="selectType('goal',this)">
+        <div class="type-ico"><i data-lucide="target"></i></div>
+        <div>
+          <div class="type-name">Goal</div>
+          <div class="type-desc">Announce a goal and hold yourself accountable</div>
+        </div>
+      </div>
+      <div class="type-btn" onclick="selectType('achievement',this)">
+        <div class="type-ico"><i data-lucide="award"></i></div>
+        <div>
+          <div class="type-name">Achievement</div>
+          <div class="type-desc">Celebrate a win and inspire others</div>
+        </div>
+      </div>
+      <div class="type-btn" onclick="selectType('course',this)">
+        <div class="type-ico"><i data-lucide="graduation-cap"></i></div>
+        <div>
+          <div class="type-name">Course</div>
+          <div class="type-desc">Share knowledge — free or paid</div>
+        </div>
+      </div>
+      <div class="type-btn" onclick="selectType('reel',this)" style="opacity:.7;">
+        <div class="type-ico"><i data-lucide="video"></i></div>
+        <div>
+          <div class="type-name">Reel</div>
+          <div class="type-desc">Short video — coming soon</div>
+        </div>
+        <div class="pill pill-muted" style="font-size:8px;padding:2px 8px;">SOON</div>
+      </div>
+      <div class="type-btn" onclick="selectType('challenge',this)">
+        <div class="type-ico"><i data-lucide="zap"></i></div>
+        <div>
+          <div class="type-name">Challenge</div>
+          <div class="type-desc">Start a group challenge — 7d, 30d, 90d</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST / GOAL / ACHIEVEMENT COMPOSER -->
+  <div class="cr-section" id="composerStep">
+    <div class="flex items-c gap-2 mb-2">
+      <div class="av av-32">{{ u.name[0]|upper }}</div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--black);">{{ u.name }}</div>
+        <div class="vis-row" id="visRow">
+          <div class="vis-btn on" onclick="setVis('public',this)"><i data-lucide="globe"></i> Public</div>
+          <div class="vis-btn" onclick="setVis('circle',this)"><i data-lucide="users"></i> Circle</div>
+          <div class="vis-btn" onclick="setVis('private',this)"><i data-lucide="lock"></i> Only me</div>
+        </div>
+      </div>
+    </div>
+    <textarea class="form-input form-textarea" id="postTxt" placeholder="What's on your mind?" style="min-height:140px;" oninput="document.getElementById('postCt').textContent=this.value.length+'/500'"></textarea>
+    <div style="text-align:right;font-size:10px;color:var(--sub);" id="postCt">0/500</div>
+
+    <div>
+      <div class="t-label mb-2">Category</div>
+      <div class="cat-chips">
+        <div class="cat-chip on" onclick="togCat(this)">Mindset</div>
+        <div class="cat-chip" onclick="togCat(this)">Fitness</div>
+        <div class="cat-chip" onclick="togCat(this)">Wealth</div>
+        <div class="cat-chip" onclick="togCat(this)">Entrepreneurship</div>
+        <div class="cat-chip" onclick="togCat(this)">Nutrition</div>
+        <div class="cat-chip" onclick="togCat(this)">Running</div>
+        <div class="cat-chip" onclick="togCat(this)">Savings</div>
+        <div class="cat-chip" onclick="togCat(this)">Relationships</div>
+        <div class="cat-chip" onclick="togCat(this)">Spirituality</div>
+        <div class="cat-chip" onclick="togCat(this)">Productivity</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="t-label mb-2">Add media</div>
+      <div class="media-row">
+        <div class="media-btn"><i data-lucide="image"></i><div class="media-lbl">Photo</div></div>
+        <div class="media-btn"><i data-lucide="bar-chart-2"></i><div class="media-lbl">My Stats</div></div>
+        <div class="media-btn"><i data-lucide="link"></i><div class="media-lbl">Link</div></div>
+      </div>
+    </div>
+
+    <div class="cr-footer">
+      <button class="btn btn-primary btn-full" onclick="submitPost()" style="border-radius:var(--r-xl);">
+        <i data-lucide="send"></i> PUBLISH
+      </button>
+    </div>
+  </div>
+
+  <!-- COURSE CREATOR -->
+  <div class="cr-section" id="courseStep">
+    <div class="course-fields">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Course Title</label>
+        <input class="form-input" placeholder="e.g. My 90-Day Discipline System">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Description</label>
+        <textarea class="form-input form-textarea" placeholder="What will members learn?" style="min-height:80px;"></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Category</label>
+        <div class="cat-chips">
+          <div class="cat-chip on" onclick="togCat(this)">Fitness</div>
+          <div class="cat-chip" onclick="togCat(this)">Entrepreneurship</div>
+          <div class="cat-chip" onclick="togCat(this)">Finance</div>
+          <div class="cat-chip" onclick="togCat(this)">Mindset</div>
+          <div class="cat-chip" onclick="togCat(this)">Marathon</div>
+          <div class="cat-chip" onclick="togCat(this)">Savings</div>
+          <div class="cat-chip" onclick="togCat(this)">Coaching</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="t-label mb-2">Pricing</div>
+      <div class="vis-row">
+        <div class="vis-btn on" onclick="setVis('free',this)"><i data-lucide="gift"></i> Free</div>
+        <div class="vis-btn" onclick="setVis('paid',this)"><i data-lucide="dollar-sign"></i> Paid</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="t-label mb-2">Visibility</div>
+      <div class="vis-row">
+        <div class="vis-btn on" onclick="setVis('pub',this)"><i data-lucide="globe"></i> Public</div>
+        <div class="vis-btn" onclick="setVis('priv',this)"><i data-lucide="lock"></i> Private</div>
+      </div>
+    </div>
+
+    <div class="cr-footer" style="padding:16px 0 0;">
+      <button class="btn btn-primary btn-full" onclick="submitPost()" style="border-radius:var(--r-xl);">
+        <i data-lucide="upload-cloud"></i> CREATE COURSE
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="successOv" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="width:72px;height:72px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+    <i data-lucide="check" style="width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:2;"></i>
+  </div>
+  <div class="t-xl mb-2">Published!</div>
+  <div style="font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:28px;">Your post is live. AXON will notify your circle.</div>
+  <a href="/grow" class="btn btn-primary btn-full" style="border-radius:var(--r-xl);">
+    <i data-lucide="compass"></i> VIEW IN GROW
+  </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentType = '';
+function selectType(type, el) {
+  if(type === 'reel') return;
+  currentType = type;
+  document.getElementById('typeStep').style.display = 'none';
+  if(type === 'course') {
+    document.getElementById('courseStep').classList.add('active');
+  } else {
+    const ta = document.getElementById('postTxt');
+    const placeholders = {
+      post:'What\'s on your mind?',
+      goal:'I am committing to... My deadline is... My why is...',
+      achievement:'I just hit a milestone: ...',
+      challenge:'Join my challenge: ...'
+    };
+    ta.placeholder = placeholders[type] || 'Share something...';
+    document.getElementById('composerStep').classList.add('active');
+  }
+}
+function togCat(el){el.classList.toggle('on');}
+function setVis(v,el){el.closest('.vis-row').querySelectorAll('.vis-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+function submitPost(){
+  const ov=document.getElementById('successOv');
+  ov.style.display='flex';
+  if(typeof lucide!=='undefined')lucide.createIcons();
+}
+</script>
+{% endblock %}

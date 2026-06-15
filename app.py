@@ -132,5 +132,20 @@ def settings():
     if not auth(): return redirect('/login')
     return render_template('settings.html', u=DEMO_USER, active='settings')
 
+@app.route('/calendar')
+def calendar():
+    if not auth(): return redirect('/login')
+    return render_template('calendar.html', u=DEMO_USER, stats=DEMO_STATS, active='analytics')
+
+@app.route('/create')
+def create():
+    if not auth(): return redirect('/login')
+    return render_template('create.html', u=DEMO_USER, active='grow')
+
+@app.route('/axon-settings')
+def axon_settings():
+    if not auth(): return redirect('/login')
+    return render_template('axon_settings.html', u=DEMO_USER, active='settings')
+
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

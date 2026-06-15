@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block title %}AXON Settings{% endblock %}
+
+{% block head %}
+<style>
+.axon-hero{padding:24px 20px 0;text-align:center;}
+.ax-logo{width:64px;height:64px;border-radius:20px;background:#09090B;border:1px solid #1C1C1C;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.ax-logo svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.ax-name{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);margin-bottom:4px;}
+.ax-desc{font-size:12px;color:var(--sub);line-height:1.6;max-width:280px;margin:0 auto;}
+.domain-toggle-list{padding:0 20px;}
+.dt-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.dt-row:last-child{border-bottom:none;}
+.dt-left{display:flex;align-items:center;gap:12px;}
+.dt-ico{width:38px;height:38px;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
+.dt-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.dt-active .dt-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.dt-active .dt-ico svg{stroke:var(--gold);}
+.dt-name{font-size:13px;font-weight:700;color:var(--black);}
+.dt-desc{font-size:10px;color:var(--sub);margin-top:1px;}
+.sync-card{margin:0 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;}
+.sync-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.sync-item:last-child{border-bottom:none;}
+.sync-ico{width:38px;height:38px;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sync-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.sync-info{flex:1;}
+.sync-name{font-size:13px;font-weight:700;color:var(--black);}
+.sync-sub{font-size:10px;color:var(--sub);margin-top:1px;}
+.insight-card{margin:0 20px;background:#09090B;border:1px solid #1C1C1C;border-radius:var(--r-lg);padding:16px;}
+[data-theme="dark"] .insight-card{background:#0F0F0F;}
+.ic-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ic-ico{width:30px;height:30px;border-radius:9px;background:rgba(212,170,53,.1);border:1px solid rgba(212,170,53,.18);display:flex;align-items:center;justify-content:center;}
+.ic-ico svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.freq-row{display:flex;gap:7px;flex-wrap:wrap;}
+.freq-btn{padding:7px 16px;border-radius:var(--r-full);border:1.5px solid #1C1C1C;font-size:11px;font-weight:700;color:#666;cursor:pointer;transition:all .15s;}
+.freq-btn.on{border-color:var(--gold);color:var(--gold);}
+.save-btn{margin:20px 20px 0;}
+.tw-foot{padding:28px 20px 16px;text-align:center;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand">
+    <div class="tb-twin">AXON AI</div>
+    <div class="tb-tag">by EPHAS</div>
+  </div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="axon-hero">
+  <div class="ax-logo"><i data-lucide="zap"></i></div>
+  <div class="ax-name">AXON Coach</div>
+  <div class="ax-desc">Customize what AXON monitors and how it coaches you. More data = smarter insights.</div>
+</div>
+
+<!-- DOMAINS TO MONITOR -->
+<div class="sect-lbl">What AXON monitors</div>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin:0 20px;padding:0 16px;box-shadow:var(--sh);">
+  <div class="dt-row dt-active">
+    <div class="dt-left">
+      <div class="dt-ico"><i data-lucide="brain"></i></div>
+      <div><div class="dt-name">Mindset</div><div class="dt-desc">Sleep, mood, energy, focus levels</div></div>
+    </div>
+    <label class="toggle"><input type="checkbox" checked onchange="togDomain(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="dt-row dt-active">
+    <div class="dt-left">
+      <div class="dt-ico"><i data-lucide="dumbbell"></i></div>
+      <div><div class="dt-name">Body</div><div class="dt-desc">Workouts, nutrition, hydration, rest</div></div>
+    </div>
+    <label class="toggle"><input type="checkbox" checked onchange="togDomain(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="dt-row dt-active">
+    <div class="dt-left">
+      <div class="dt-ico"><i data-lucide="trending-up"></i></div>
+      <div><div class="dt-name">Wealth</div><div class="dt-desc">Goals, habits, income-building actions</div></div>
+    </div>
+    <label class="toggle"><input type="checkbox" checked onchange="togDomain(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="dt-row">
+    <div class="dt-left">
+      <div class="dt-ico"><i data-lucide="heart"></i></div>
+      <div><div class="dt-name">Relationships</div><div class="dt-desc">Social energy, circle quality, connection</div></div>
+    </div>
+    <label class="toggle"><input type="checkbox" onchange="togDomain(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="dt-row">
+    <div class="dt-left">
+      <div class="dt-ico"><i data-lucide="sun"></i></div>
+      <div><div class="dt-name">Spirituality</div><div class="dt-desc">Reflection, gratitude, purpose, inner peace</div></div>
+    </div>
+    <label class="toggle"><input type="checkbox" onchange="togDomain(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="dt-row">
+    <div class="dt-left">
+      <div class="dt-ico"><i data-lucide="book-open"></i></div>
+      <div><div class="dt-name">Knowledge</div><div class="dt-desc">Reading, learning, skills, courses</div></div>
+    </div>
+    <label class="toggle"><input type="checkbox" onchange="togDomain(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+</div>
+
+<!-- BANK / DATA SYNC -->
+<div class="sect-lbl">Data sync</div>
+<div class="sync-card">
+  <div class="sync-item">
+    <div class="sync-ico"><i data-lucide="landmark"></i></div>
+    <div class="sync-info">
+      <div class="sync-name">Bank Sync</div>
+      <div class="sync-sub">Track spending vs savings goals automatically</div>
+    </div>
+    <div class="pill pill-muted" style="font-size:8px;">SOON</div>
+  </div>
+  <div class="sync-item">
+    <div class="sync-ico"><i data-lucide="activity"></i></div>
+    <div class="sync-info">
+      <div class="sync-name">Fitness Tracker</div>
+      <div class="sync-sub">Apple Health / Google Fit / Garmin</div>
+    </div>
+    <div class="pill pill-muted" style="font-size:8px;">SOON</div>
+  </div>
+  <div class="sync-item">
+    <div class="sync-ico"><i data-lucide="moon"></i></div>
+    <div class="sync-info">
+      <div class="sync-name">Sleep Tracker</div>
+      <div class="sync-sub">Auto-import sleep data from your device</div>
+    </div>
+    <div class="pill pill-muted" style="font-size:8px;">SOON</div>
+  </div>
+  <div class="sync-item">
+    <div class="sync-ico"><i data-lucide="calendar"></i></div>
+    <div class="sync-info">
+      <div class="sync-name">Calendar Sync</div>
+      <div class="sync-sub">AXON sees your schedule to plan coaching</div>
+    </div>
+    <div class="pill pill-muted" style="font-size:8px;">SOON</div>
+  </div>
+</div>
+
+<!-- INSIGHT FREQUENCY -->
+<div class="sect-lbl">AXON insight frequency</div>
+<div class="insight-card">
+  <div class="ic-top">
+    <div class="ic-ico"><i data-lucide="zap"></i></div>
+    <div style="font-family:'Arpubes',sans-serif;font-size:12px;color:#888;letter-spacing:.5px;">How often should AXON brief you?</div>
+  </div>
+  <div class="freq-row">
+    <div class="freq-btn" onclick="setFreq(this)">Daily</div>
+    <div class="freq-btn on" onclick="setFreq(this)">Morning only</div>
+    <div class="freq-btn" onclick="setFreq(this)">After check-in</div>
+    <div class="freq-btn" onclick="setFreq(this)">Weekly</div>
+  </div>
+</div>
+
+<div class="save-btn">
+  <button class="btn btn-primary btn-full" onclick="saveSettings()" style="border-radius:var(--r-xl);">
+    <i data-lucide="save"></i> SAVE AXON SETTINGS
+  </button>
+</div>
+
+<div class="tw-foot">
+  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togDomain(inp){
+  const row=inp.closest('.dt-row');
+  if(inp.checked)row.classList.add('dt-active');else row.classList.remove('dt-active');
+}
+function setFreq(el){document.querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+function saveSettings(){
+  const btn=event.target.closest('button');
+  btn.innerHTML='<i data-lucide="check"></i> SAVED';
+  if(typeof lucide!=='undefined')lucide.createIcons();
+  setTimeout(()=>{btn.innerHTML='<i data-lucide="save"></i> SAVE AXON SETTINGS';if(typeof lucide!=='undefined')lucide.createIcons();},2000);
+}
+</script>
+{% endblock %}
