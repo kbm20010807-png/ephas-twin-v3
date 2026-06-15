@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>TWIN — Discover</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
+:root{--gold:#D4AA35;--gold-2:#C4961E;--gold-3:#F0D47A;--gold-dim:rgba(212,170,53,0.12);--bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;--black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;--r-sm:12px;--r-md:18px;--r-lg:24px;--shadow:0 2px 12px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);}
+[data-theme="dark"]{--bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;--black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;}
+[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
+[data-theme="dark"] .eph-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+body{animation:fadeUp .25s ease;}
+
+/* TOPBAR */
+.topbar{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(250,250,250,.92);backdrop-filter:blur(20px);}
+[data-theme="dark"] .topbar{background:rgba(10,10,10,.92);}
+.tb-brand{text-align:center;}
+.tb-twin{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);}
+.tb-ephas{display:flex;justify-content:center;margin-top:3px;}
+.eph-logo{height:7px;width:auto;mix-blend-mode:multiply;}
+.lv-pill{background:var(--gold-dim);border:1px solid rgba(212,170,53,.3);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.prof-btn{width:36px;height:36px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--gold);text-decoration:none;}
+
+/* DISC HEADER */
+.disc-hd{padding:6px 20px 14px;display:flex;align-items:center;gap:10px;}
+.disc-title{font-family:'Arpubes',sans-serif;font-size:26px;font-weight:900;letter-spacing:-1px;color:var(--black);}
+.coming-tag{background:var(--gold-dim);border:1px solid rgba(212,170,53,.3);border-radius:20px;padding:4px 12px;font-size:9px;font-weight:800;letter-spacing:2px;color:var(--gold);}
+
+/* SEARCH */
+.search-wrap{position:relative;padding:0 20px 14px;}
+.search-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-md);padding:13px 16px 13px 44px;font-family:'Josefin Sans',sans-serif;font-size:13px;color:var(--black);outline:none;transition:border-color .2s;box-shadow:var(--shadow);}
+.search-input:focus{border-color:var(--gold);}
+.search-ico{position:absolute;left:34px;top:50%;transform:translateY(-50%);}
+.search-ico svg{width:18px;height:18px;stroke:var(--sub);stroke-width:1.75;fill:none;}
+
+/* TYPE TABS */
+.type-tabs{display:flex;gap:8px;padding:0 20px 14px;overflow-x:auto;scrollbar-width:none;}
+.type-tabs::-webkit-scrollbar{display:none;}
+.tab{padding:8px 18px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;white-space:nowrap;border:1.5px solid var(--border);background:var(--card);color:var(--sub);transition:all .2s;}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#000;}
+
+/* CATEGORIES */
+.cat-lbl{padding:0 20px 10px;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Arpubes',sans-serif;}
+.cats{display:flex;gap:8px;padding:0 20px 18px;overflow-x:auto;scrollbar-width:none;}
+.cats::-webkit-scrollbar{display:none;}
+.cat{padding:7px 16px;border-radius:20px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .2s;}
+.cat.on{background:var(--gold-dim);border-color:rgba(212,170,53,.3);color:var(--gold);}
+
+/* FEED CARDS */
+.feed{padding:0 20px;}
+.fc{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow);}
+.fc-vis{height:140px;display:flex;align-items:center;justify-content:center;position:relative;}
+.fc-cat-badge{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:800;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;}
+.fc-body{padding:14px 16px;}
+.fc-title{font-size:15px;font-weight:800;color:var(--black);letter-spacing:-.3px;margin-bottom:8px;}
+.fc-foot{display:flex;align-items:center;justify-content:space-between;}
+.fc-user{display:flex;align-items:center;gap:8px;}
+.fc-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
+.fc-uname{font-size:11px;font-weight:600;color:var(--sub);}
+.fc-stats{display:flex;gap:10px;}
+.fc-stat{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--sub);font-weight:600;}
+.fc-stat svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.75;}
+
+/* AI BANNER */
+.ai-banner{margin:0 20px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.ai-ico{width:36px;height:36px;border-radius:var(--r-sm);background:var(--gold-dim);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ai-ico svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.ai-text{font-size:11px;color:var(--sub);line-height:1.5;}
+.ai-text b{color:var(--black);}
+
+/* PT + NAV */
+.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.pt.on{opacity:1;pointer-events:all;}
+.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;text-align:center;}
+.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
+[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+.spacer{height:100px;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
+.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
+.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;}
+.nav-item.active .nav-ico{background:var(--gold-dim);}
+.nav-item.active .nav-ico svg{stroke:var(--gold);}
+.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
+.nav-item.active .nav-lbl{color:var(--gold);}
+.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
+.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/profile" class="lv-pill">LV {{ profile.level }}</a>
+  <div class="tb-brand">
+    <div class="tb-twin">TWIN</div>
+    <div class="tb-ephas"><img src="/static/ephas_logo2.png" class="eph-logo" alt="EPHAS"></div>
+  </div>
+  <a href="/profile" class="prof-btn">{{ (profile.name or 'K')[0]|upper }}</a>
+</div>
+
+<div class="disc-hd">
+  <div class="disc-title">Discover</div>
+  <span class="coming-tag">COMING SOON</span>
+</div>
+
+<div class="search-wrap">
+  <div class="search-ico"><i data-lucide="search"></i></div>
+  <input type="text" class="search-input" placeholder="Search posts, courses, coaches...">
+</div>
+
+<div class="type-tabs">
+  <div class="tab active">All</div>
+  <div class="tab">Posts</div>
+  <div class="tab">Reels</div>
+  <div class="tab">Courses</div>
+  <div class="tab">Coaches</div>
+  <div class="tab">People</div>
+</div>
+
+<div class="cat-lbl">Topics</div>
+<div class="cats">
+  <div class="cat on">#Discipline</div>
+  <div class="cat">#Morning</div>
+  <div class="cat">#Mindset</div>
+  <div class="cat">#Fitness</div>
+  <div class="cat">#Wealth</div>
+  <div class="cat">#Faith</div>
+  <div class="cat">#Goals</div>
+  <div class="cat">#Habits</div>
+  <div class="cat">#Books</div>
+  <div class="cat">#Focus</div>
+</div>
+
+<div class="feed">
+
+  <div class="fc">
+    <div class="fc-vis" style="background:linear-gradient(135deg,#0A0A0A,#1A1200);">
+      <span class="fc-cat-badge">DISCIPLINE</span>
+      <span style="font-size:48px;">🔥</span>
+    </div>
+    <div class="fc-body">
+      <div class="fc-title">5AM Morning Routine That Changed My Life</div>
+      <div class="fc-foot">
+        <div class="fc-user">
+          <div class="fc-av" style="background:linear-gradient(135deg,#1A1A1A,#333);">A</div>
+          <div class="fc-uname">@abdullah_k</div>
+        </div>
+        <div class="fc-stats">
+          <div class="fc-stat"><i data-lucide="heart"></i> 247</div>
+          <div class="fc-stat"><i data-lucide="message-circle"></i> 38</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc">
+    <div class="fc-vis" style="background:linear-gradient(135deg,#0D1A0D,#1A3A1A);">
+      <span class="fc-cat-badge">MINDSET</span>
+      <span style="font-size:48px;">🧠</span>
+    </div>
+    <div class="fc-body">
+      <div class="fc-title">How Journaling 10 Min a Day Rewired My Brain</div>
+      <div class="fc-foot">
+        <div class="fc-user">
+          <div class="fc-av" style="background:linear-gradient(135deg,#0D1A0D,#1A3A1A);">S</div>
+          <div class="fc-uname">@sara_mindset</div>
+        </div>
+        <div class="fc-stats">
+          <div class="fc-stat"><i data-lucide="heart"></i> 183</div>
+          <div class="fc-stat"><i data-lucide="message-circle"></i> 24</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc">
+    <div class="fc-vis" style="background:linear-gradient(135deg,#1A1200,#2A2000);">
+      <span class="fc-cat-badge">WEALTH</span>
+      <span style="font-size:48px;">💰</span>
+    </div>
+    <div class="fc-body">
+      <div class="fc-title">Free Course: Building Your First Income Stream</div>
+      <div class="fc-foot">
+        <div class="fc-user">
+          <div class="fc-av" style="background:linear-gradient(135deg,#1A1200,#2A2000);">K</div>
+          <div class="fc-uname">@khalid_builds</div>
+        </div>
+        <div class="fc-stats">
+          <div class="fc-stat"><i data-lucide="heart"></i> 412</div>
+          <div class="fc-stat"><i data-lucide="play-circle"></i> FREE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="ai-banner">
+  <div class="ai-ico"><i data-lucide="shield-check"></i></div>
+  <div class="ai-text"><b>AI Moderation Active.</b> Every post is reviewed by AXON before going live — only content that builds you up is allowed.</div>
+</div>
+
+<div class="spacer"></div>
+<div class="nav-bar">
+  <a href="/home" class="nav-item">
+    <div class="nav-ico"><i data-lucide="home"></i></div>
+    <div class="nav-lbl">Home</div>
+  </a>
+  <a href="/analytics" class="nav-item">
+    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
+    <div class="nav-lbl">Analytics</div>
+  </a>
+  <a href="/checkin" class="nav-ctr">
+    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
+    <div class="nav-lbl" id="navCtrLbl">Check In</div>
+  </a>
+  <a href="/grow" class="nav-item active">
+    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
+    <div class="nav-lbl">Grow</div>
+  </a>
+  <a href="/profile" class="nav-item">
+    <div class="nav-ico"><i data-lucide="user"></i></div>
+    <div class="nav-lbl">Profile</div>
+  </a>
+</div>
+<div id="pt" class="pt">
+  <div><div class="pt-twin">TWIN</div><img src="/static/ephas_logo2.png" class="pt-logo" alt=""></div>
+</div>
+<script>
+lucide.createIcons();
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));this.classList.add('active');}));
+document.querySelectorAll('.cat').forEach(c=>c.addEventListener('click',function(){this.classList.toggle('on');}));
+const h=new Date().getHours();const n=document.getElementById('navCtrLbl');if(n)n.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
+document.querySelectorAll('a[href^="/"]').forEach(a=>{a.addEventListener('click',function(e){const href=this.getAttribute('href');if(!href||href==='#'||href===window.location.pathname)return;e.preventDefault();document.getElementById('pt').classList.add('on');setTimeout(()=>{window.location.href=href;},240);});});
+</script>
+</body>
+</html>

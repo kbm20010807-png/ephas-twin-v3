@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>TWIN — Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
+:root{
+  --gold:#D4AA35;--gold-2:#C4961E;--gold-3:#F0D47A;
+  --gold-dim:rgba(212,170,53,0.12);
+  --bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;
+  --black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;
+  --r-sm:12px;--r-md:18px;--r-lg:24px;
+  --shadow:0 2px 12px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="dark"]{--bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;--black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;}
+[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
+[data-theme="dark"] .eph-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+[data-theme="dark"] .lv-card{background:#111;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+body{animation:fadeUp .25s ease;}
+
+/* HEADER */
+.header{padding:54px 20px 20px;display:flex;align-items:center;justify-content:space-between;}
+.hd-brand{display:flex;flex-direction:column;align-items:flex-start;}
+.hd-twin{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);}
+.hd-ephas{display:flex;margin-top:3px;}
+.eph-logo{height:7px;width:auto;mix-blend-mode:multiply;}
+.page-title{font-size:26px;font-weight:900;letter-spacing:-1px;margin-top:2px;}
+
+/* LEVEL CARD */
+.lv-card{background:var(--black);border-radius:var(--r-lg);margin:0 20px 16px;padding:22px 20px;position:relative;overflow:hidden;}
+.lv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.lv-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.lv-num{font-size:42px;font-weight:900;color:var(--gold);letter-spacing:-3px;line-height:1;}
+.lv-name{font-size:10px;font-weight:700;letter-spacing:2px;color:#666;text-transform:uppercase;margin-top:4px;}
+.lv-right{text-align:right;}
+.lv-xp{font-size:18px;font-weight:900;color:var(--gold);}
+.lv-next{font-size:10px;color:#555;margin-top:2px;}
+.xp-track{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--gold-2),var(--gold-3));border-radius:3px;transition:width 1s ease;}
+.xp-meta{display:flex;justify-content:space-between;margin-top:5px;}
+.xp-mt{font-size:9px;color:#555;}
+
+/* BIG STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 16px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.stat-card.s-sleep::before{background:linear-gradient(90deg,#4A90D9,#7BB5F0);}
+.stat-card.s-energy::before{background:linear-gradient(90deg,var(--gold-2),var(--gold-3));}
+.stat-card.s-mood::before{background:linear-gradient(90deg,#9B59B6,#C39BD3);}
+.stat-card.s-checkins::before{background:linear-gradient(90deg,#27AE60,#82E0AA);}
+.stat-big{font-size:32px;font-weight:900;color:var(--black);letter-spacing:-2px;line-height:1;}
+.stat-unit{font-size:12px;color:var(--sub);font-weight:400;}
+.stat-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+.stat-trend{font-size:10px;font-weight:700;margin-top:4px;}
+.stat-trend.up{color:#27AE60;}
+.stat-trend.down{color:#E74C3C;}
+
+/* SECTION */
+.sec-lbl{font-family:'Arpubes',sans-serif;font-size:9px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase;padding:4px 20px 12px;}
+
+/* CHART */
+.chart-card{margin:0 20px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow);}
+.chart-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:12px;letter-spacing:.3px;}
+.chart-wrap{position:relative;height:140px;}
+
+/* HABITS */
+.habits-card{margin:0 20px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow);}
+.habit-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);}
+.habit-row:last-child{border:none;padding-bottom:0;}
+.habit-name{font-size:12px;font-weight:600;color:var(--text);min-width:110px;}
+.habit-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.habit-fill{height:100%;background:linear-gradient(90deg,var(--gold-2),var(--gold));border-radius:3px;}
+.habit-ct{font-size:10px;color:var(--gold);font-weight:700;min-width:20px;text-align:right;}
+
+/* HISTORY LINK */
+.hist-link{display:flex;align-items:center;justify-content:space-between;margin:0 20px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;text-decoration:none;color:var(--black);box-shadow:var(--shadow);}
+.hl-left{display:flex;align-items:center;gap:10px;}
+.hl-left svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.hl-text{font-size:13px;font-weight:700;}
+.hl-arr{color:var(--gold);font-size:18px;}
+
+/* PT */
+.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.pt.on{opacity:1;pointer-events:all;}
+.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;text-align:center;}
+.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
+[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+
+/* NAV */
+.spacer{height:100px;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
+.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
+.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;}
+.nav-item.active .nav-ico{background:var(--gold-dim);}
+.nav-item.active .nav-ico svg{stroke:var(--gold);}
+.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
+.nav-item.active .nav-lbl{color:var(--gold);}
+.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
+.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="hd-brand">
+      <div class="hd-twin">TWIN</div>
+      <div class="hd-ephas"><img src="/static/ephas_logo2.png" class="eph-logo" alt="EPHAS"></div>
+    </div>
+    <div class="page-title">Analytics</div>
+  </div>
+</div>
+
+<!-- LEVEL -->
+<div class="lv-card">
+  <div class="lv-row">
+    <div>
+      <div class="lv-num">LV {{ profile.level }}</div>
+      <div class="lv-name">{{ profile.level_title }}</div>
+    </div>
+    <div class="lv-right">
+      <div class="lv-xp">{{ profile.xp }} XP</div>
+      <div class="lv-next">{{ profile.xp }} / {{ profile.xp_needed }} → LV {{ profile.level + 1 }}</div>
+    </div>
+  </div>
+  <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+  <div class="xp-meta">
+    <span class="xp-mt">LV {{ profile.level }}</span>
+    <span class="xp-mt">LV {{ profile.level + 1 }}</span>
+  </div>
+</div>
+
+<!-- BIG STATS -->
+<div class="stats-grid">
+  <div class="stat-card s-sleep">
+    <div class="stat-big">{{ stats.avg_sleep }}<span class="stat-unit">h</span></div>
+    <div class="stat-lbl">Avg Sleep</div>
+    <div class="stat-trend up">↑ +0.4h this week</div>
+  </div>
+  <div class="stat-card s-energy">
+    <div class="stat-big">{{ stats.avg_energy }}<span class="stat-unit">/10</span></div>
+    <div class="stat-lbl">Avg Energy</div>
+    <div class="stat-trend up">↑ +0.6 this week</div>
+  </div>
+  <div class="stat-card s-mood">
+    <div class="stat-big">{{ stats.avg_mood }}<span class="stat-unit">/10</span></div>
+    <div class="stat-lbl">Avg Mood</div>
+    <div class="stat-trend up">↑ Trending up</div>
+  </div>
+  <div class="stat-card s-checkins">
+    <div class="stat-big">{{ stats.total_checkins }}</div>
+    <div class="stat-lbl">Check-ins</div>
+    <div class="stat-trend up">🔥 {{ profile.streak }} day streak</div>
+  </div>
+</div>
+
+<!-- ENERGY CHART -->
+<div class="sec-lbl">7-Day Energy</div>
+<div class="chart-card">
+  <div class="chart-title">Energy Levels This Week</div>
+  <div class="chart-wrap"><canvas id="energyChart"></canvas></div>
+</div>
+
+<!-- SLEEP CHART -->
+<div class="sec-lbl">7-Day Sleep</div>
+<div class="chart-card">
+  <div class="chart-title">Sleep Hours This Week</div>
+  <div class="chart-wrap"><canvas id="sleepChart"></canvas></div>
+</div>
+
+<!-- HABITS -->
+<div class="sec-lbl">Top Habits</div>
+<div class="habits-card">
+  {% for h in stats.habits %}
+  <div class="habit-row">
+    <div class="habit-name">{{ h.name }}</div>
+    <div class="habit-track"><div class="habit-fill" style="width:{{ (h.count / 30 * 100)|int }}%"></div></div>
+    <div class="habit-ct">{{ h.count }}x</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- HISTORY LINK -->
+<a href="#" class="hist-link">
+  <div class="hl-left">
+    <i data-lucide="clock"></i>
+    <div class="hl-text">View Full History</div>
+  </div>
+  <div class="hl-arr">›</div>
+</a>
+
+<div class="spacer"></div>
+
+<div class="nav-bar">
+  <a href="/home" class="nav-item">
+    <div class="nav-ico"><i data-lucide="home"></i></div>
+    <div class="nav-lbl">Home</div>
+  </a>
+  <a href="/analytics" class="nav-item active">
+    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
+    <div class="nav-lbl">Analytics</div>
+  </a>
+  <a href="/checkin" class="nav-ctr">
+    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
+    <div class="nav-lbl" id="navCtrLbl">Check In</div>
+  </a>
+  <a href="/grow" class="nav-item">
+    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
+    <div class="nav-lbl">Grow</div>
+  </a>
+  <a href="/profile" class="nav-item">
+    <div class="nav-ico"><i data-lucide="user"></i></div>
+    <div class="nav-lbl">Profile</div>
+  </a>
+</div>
+
+<div id="pt" class="pt">
+  <div><div class="pt-twin">TWIN</div><img src="/static/ephas_logo2.png" class="pt-logo" alt=""></div>
+</div>
+
+<script>
+lucide.createIcons();
+const h=new Date().getHours();
+const n=document.getElementById('navCtrLbl');
+if(n)n.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
+setTimeout(()=>{document.getElementById('xpFill').style.width='{{ profile.progress_pct }}%';},200);
+
+const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const gold='#D4AA35';
+const chartOpts=(label,data,color,type='line')=>({
+  type,
+  data:{labels:days,datasets:[{label,data,borderColor:color,backgroundColor:color+'22',borderWidth:2.5,pointBackgroundColor:color,pointRadius:4,tension:.4,fill:true}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#888',font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#888',font:{size:9}}}}}
+});
+new Chart(document.getElementById('energyChart'),chartOpts('Energy',[6,7,8,7.5,8,7,8],gold));
+new Chart(document.getElementById('sleepChart'),chartOpts('Sleep',[7,6.5,7.5,8,7,6,7.2],'#4A90D9'));
+
+document.querySelectorAll('a[href^="/"]').forEach(a=>{
+  a.addEventListener('click',function(e){
+    const href=this.getAttribute('href');
+    if(!href||href==='#'||href===window.location.pathname)return;
+    e.preventDefault();
+    document.getElementById('pt').classList.add('on');
+    setTimeout(()=>{window.location.href=href;},240);
+  });
+});
+</script>
+</body>
+</html>

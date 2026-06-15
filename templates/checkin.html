@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>TWIN — Daily Check-In</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
+:root{--gold:#D4AA35;--gold-2:#C4961E;--gold-dim:rgba(212,170,53,0.12);--bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;--black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;--r-sm:12px;--r-md:18px;--r-lg:24px;--shadow:0 2px 12px rgba(0,0,0,0.06);}
+[data-theme="dark"]{--bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;--black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;}
+[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
+[data-theme="dark"] .eph-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+body{animation:fadeUp .25s ease;}
+
+/* TOPBAR */
+.topbar{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(250,250,250,.92);backdrop-filter:blur(20px);}
+[data-theme="dark"] .topbar{background:rgba(10,10,10,.92);}
+.tb-back{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
+.tb-back svg{width:18px;height:18px;stroke:var(--black);fill:none;stroke-width:2;}
+.tb-brand{text-align:center;}
+.tb-twin{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:var(--black);}
+.tb-ephas{display:flex;justify-content:center;margin-top:3px;}
+.eph-logo{height:7px;width:auto;mix-blend-mode:multiply;}
+.streak-pill{background:var(--gold-dim);border:1px solid rgba(212,170,53,.3);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.5px;}
+
+/* HERO */
+.ci-hero{padding:20px 20px 0;text-align:center;}
+.ci-day{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Arpubes',sans-serif;margin-bottom:4px;}
+.ci-title{font-family:'Arpubes',sans-serif;font-size:28px;font-weight:900;letter-spacing:-1.5px;color:var(--black);margin-bottom:6px;}
+.ci-sub{font-size:12px;color:var(--sub);line-height:1.5;}
+
+/* SECTION */
+.sect{margin:20px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow);}
+.sect-head{font-family:'Arpubes',sans-serif;font-size:13px;font-weight:900;color:var(--black);letter-spacing:-.3px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sect-ico{font-size:16px;}
+
+/* SLIDER ROW */
+.slider-row{margin-bottom:18px;}
+.slider-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sl-name{font-size:12px;font-weight:600;color:var(--text);}
+.sl-val{font-family:'Arpubes',sans-serif;font-size:18px;font-weight:900;color:var(--gold);}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:var(--surface);outline:none;cursor:pointer;}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(212,170,53,.4);}
+.slider-emoji{display:flex;justify-content:space-between;font-size:14px;margin-top:6px;}
+.slider-row:last-child{margin-bottom:0;}
+
+/* HABITS */
+.habit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.habit-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s;}
+.habit-btn.on{background:var(--gold-dim);border-color:rgba(212,170,53,.4);}
+.habit-ico{font-size:20px;flex-shrink:0;}
+.habit-name{font-size:11px;font-weight:700;color:var(--sub);line-height:1.3;}
+.habit-btn.on .habit-name{color:var(--gold);}
+.habit-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);margin-left:auto;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.habit-btn.on .habit-check{background:var(--gold);border-color:var(--gold);}
+.habit-btn.on .habit-check::after{content:'✓';font-size:10px;font-weight:900;color:#000;}
+
+/* TEXTAREA */
+.txt-area{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:14px;font-family:'Josefin Sans',sans-serif;font-size:12px;color:var(--black);resize:none;outline:none;transition:border-color .2s;line-height:1.6;}
+.txt-area:focus{border-color:var(--gold);}
+.txt-area::placeholder{color:var(--muted);}
+.char-ct{text-align:right;font-size:10px;color:var(--muted);margin-top:5px;}
+
+/* SUBMIT */
+.submit-zone{padding:20px;}
+.submit-btn{width:100%;background:var(--black);color:#fff;font-family:'Arpubes',sans-serif;font-size:15px;font-weight:900;letter-spacing:1px;border:none;border-radius:var(--r-lg);padding:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s;}
+[data-theme="dark"] .submit-btn{background:var(--gold);color:#000;}
+.submit-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;}
+.submit-btn:active{opacity:.85;}
+.xp-reward{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;}
+.xp-reward b{color:var(--gold);}
+
+/* SUCCESS OVERLAY */
+.success-ov{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.success-ov.show{opacity:1;pointer-events:all;}
+.success-ov .s-ico{font-size:72px;margin-bottom:20px;animation:pop .4s .1s both;}
+.success-ov .s-ttl{font-family:'Arpubes',sans-serif;font-size:28px;color:var(--black);letter-spacing:-1.5px;margin-bottom:8px;text-align:center;}
+.success-ov .s-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.5;max-width:260px;}
+.success-ov .s-xp{font-family:'Arpubes',sans-serif;font-size:32px;color:var(--gold);margin-top:16px;}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.s-back{margin-top:28px;background:var(--black);color:#fff;font-family:'Arpubes',sans-serif;font-size:13px;font-weight:900;letter-spacing:1px;border:none;border-radius:var(--r-lg);padding:16px 36px;cursor:pointer;}
+[data-theme="dark"] .s-back{background:var(--gold);color:#000;}
+
+/* NAV */
+.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.pt.on{opacity:1;pointer-events:all;}
+.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;text-align:center;}
+.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
+[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+.spacer{height:110px;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
+.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
+.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;}
+.nav-item.active .nav-ico{background:var(--gold-dim);}
+.nav-item.active .nav-ico svg{stroke:var(--gold);}
+.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
+.nav-item.active .nav-lbl{color:var(--gold);}
+.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
+.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/home" class="tb-back"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand">
+    <div class="tb-twin">Check-In</div>
+    <div class="tb-ephas"><img src="/static/ephas_logo2.png" class="eph-logo" alt="EPHAS"></div>
+  </div>
+  <div class="streak-pill">🔥 {{ profile.streak }}d</div>
+</div>
+
+<div class="ci-hero">
+  <div class="ci-day" id="ciDay">Loading...</div>
+  <div class="ci-title">How was your day?</div>
+  <div class="ci-sub">Rate yourself honestly. Your data, your growth.</div>
+</div>
+
+<!-- VITALS -->
+<div class="sect">
+  <div class="sect-head"><span class="sect-ico">📊</span> Daily Vitals</div>
+  <div class="slider-row">
+    <div class="slider-lbl">
+      <span class="sl-name">Sleep Quality</span>
+      <span class="sl-val" id="sleepVal">7</span>
+    </div>
+    <input type="range" class="slider" min="1" max="10" value="7" id="sleepSlider">
+    <div class="slider-emoji"><span>😴</span><span>💤</span><span>⚡</span></div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-lbl">
+      <span class="sl-name">Energy Level</span>
+      <span class="sl-val" id="energyVal">7</span>
+    </div>
+    <input type="range" class="slider" min="1" max="10" value="7" id="energySlider">
+    <div class="slider-emoji"><span>🪫</span><span>⚡</span><span>🚀</span></div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-lbl">
+      <span class="sl-name">Mood</span>
+      <span class="sl-val" id="moodVal">7</span>
+    </div>
+    <input type="range" class="slider" min="1" max="10" value="7" id="moodSlider">
+    <div class="slider-emoji"><span>😞</span><span>😌</span><span>😁</span></div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-lbl">
+      <span class="sl-name">Productivity</span>
+      <span class="sl-val" id="prodVal">7</span>
+    </div>
+    <input type="range" class="slider" min="1" max="10" value="7" id="prodSlider">
+    <div class="slider-emoji"><span>📉</span><span>📊</span><span>📈</span></div>
+  </div>
+</div>
+
+<!-- HABITS -->
+<div class="sect">
+  <div class="sect-head"><span class="sect-ico">✅</span> Habits Completed</div>
+  <div class="habit-grid">
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">🕌</div><div class="habit-name">Morning Prayer</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">🚿</div><div class="habit-name">Cold Shower</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">📖</div><div class="habit-name">Reading</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">💪</div><div class="habit-name">Gym / Exercise</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">✍️</div><div class="habit-name">Journaling</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">🚫</div><div class="habit-name">No Social Media</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">💧</div><div class="habit-name">2L Water</div><div class="habit-check"></div>
+    </div>
+    <div class="habit-btn" onclick="toggleHabit(this)">
+      <div class="habit-ico">🍽️</div><div class="habit-name">Clean Eating</div><div class="habit-check"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OF THE DAY -->
+<div class="sect">
+  <div class="sect-head"><span class="sect-ico">🏆</span> Win of the Day</div>
+  <textarea class="txt-area" id="winTxt" rows="3" maxlength="200" placeholder="What was your biggest win today?" oninput="document.getElementById('winCt').textContent=this.value.length+'/200'"></textarea>
+  <div class="char-ct" id="winCt">0/200</div>
+</div>
+
+<!-- REFLECTION -->
+<div class="sect">
+  <div class="sect-head"><span class="sect-ico">💭</span> Evening Reflection</div>
+  <textarea class="txt-area" id="refTxt" rows="4" maxlength="400" placeholder="What will you do differently tomorrow? What are you grateful for?" oninput="document.getElementById('refCt').textContent=this.value.length+'/400'"></textarea>
+  <div class="char-ct" id="refCt">0/400</div>
+</div>
+
+<div class="submit-zone">
+  <button class="submit-btn" onclick="submitCheckin()">
+    <i data-lucide="check-circle"></i>
+    COMPLETE CHECK-IN
+  </button>
+  <div class="xp-reward">You'll earn <b>+50 XP</b> for completing today's check-in</div>
+</div>
+
+<div class="spacer"></div>
+<div class="nav-bar">
+  <a href="/home" class="nav-item">
+    <div class="nav-ico"><i data-lucide="home"></i></div>
+    <div class="nav-lbl">Home</div>
+  </a>
+  <a href="/analytics" class="nav-item">
+    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
+    <div class="nav-lbl">Analytics</div>
+  </a>
+  <a href="/checkin" class="nav-ctr active">
+    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
+    <div class="nav-lbl" id="navCtrLbl">Check In</div>
+  </a>
+  <a href="/grow" class="nav-item">
+    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
+    <div class="nav-lbl">Grow</div>
+  </a>
+  <a href="/profile" class="nav-item">
+    <div class="nav-ico"><i data-lucide="user"></i></div>
+    <div class="nav-lbl">Profile</div>
+  </a>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-ov" id="successOv">
+  <div class="s-ico">🏆</div>
+  <div class="s-ttl">Check-In Complete!</div>
+  <div class="s-sub">Another day of growth locked in. AXON is analyzing your data...</div>
+  <div class="s-xp">+50 XP</div>
+  <button class="s-back" onclick="window.location='/home'">BACK TO HOME</button>
+</div>
+
+<div id="pt" class="pt">
+  <div><div class="pt-twin">TWIN</div><img src="/static/ephas_logo2.png" class="pt-logo" alt=""></div>
+</div>
+<script>
+lucide.createIcons();
+const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const now=new Date();
+document.getElementById('ciDay').textContent=days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate();
+const h=now.getHours();
+const n=document.getElementById('navCtrLbl');
+if(n)n.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
+['sleep','energy','mood','prod'].forEach(k=>{
+  const s=document.getElementById(k+'Slider');
+  const v=document.getElementById(k+'Val');
+  s.addEventListener('input',()=>{v.textContent=s.value;});
+});
+function toggleHabit(el){el.classList.toggle('on');}
+function submitCheckin(){
+  document.getElementById('successOv').classList.add('show');
+}
+document.querySelectorAll('a[href^="/"]').forEach(a=>{a.addEventListener('click',function(e){const href=this.getAttribute('href');if(!href||href==='#'||href===window.location.pathname)return;e.preventDefault();document.getElementById('pt').classList.add('on');setTimeout(()=>{window.location.href=href;},240);});});
+</script>
+</body>
+</html>

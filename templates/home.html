@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>TWIN — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
+:root{
+  --gold:#D4AA35;--gold-2:#C4961E;--gold-3:#F0D47A;
+  --gold-dim:rgba(212,170,53,0.12);--gold-glow:rgba(212,170,53,0.22);
+  --bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;
+  --black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;
+  --r-sm:12px;--r-md:18px;--r-lg:24px;--r-xl:32px;
+  --shadow:0 2px 12px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);
+  --shadow-gold:0 6px 24px rgba(212,170,53,0.18);
+}
+[data-theme="dark"]{
+  --bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;
+  --black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;
+}
+[data-theme="dark"] .eph-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
+[data-theme="dark"] .checkin-card{background:linear-gradient(135deg,#111 0%,#1C1600 60%,#0A0A0A 100%);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.4}}
+body{animation:fadeUp .25s ease;}
+
+/* TOPBAR */
+.topbar{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(250,250,250,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+[data-theme="dark"] .topbar{background:rgba(10,10,10,.92);}
+.tb-av{width:40px;height:40px;border-radius:50%;background:var(--gold-dim);border:2.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--gold);text-decoration:none;position:relative;flex-shrink:0;}
+.tb-dot{position:absolute;top:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:#FF3B30;border:2px solid var(--bg);}
+.tb-brand{text-align:center;}
+.tb-twin{font-family:'Arpubes',sans-serif;font-size:32px;font-weight:900;letter-spacing:-2.5px;color:var(--black);line-height:1;}
+.tb-ephas{display:flex;justify-content:center;margin-top:4px;}
+.eph-logo{height:7px;width:auto;mix-blend-mode:multiply;}
+.tb-msg{width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;}
+.tb-msg svg{width:19px;height:19px;stroke:var(--black);stroke-width:1.8;fill:none;}
+
+/* STORIES */
+.stories{display:flex;gap:14px;padding:4px 20px 20px;overflow-x:auto;scrollbar-width:none;}
+.stories::-webkit-scrollbar{display:none;}
+.story{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;text-decoration:none;}
+.s-ring{width:62px;height:62px;border-radius:50%;padding:2.5px;background:linear-gradient(135deg,var(--gold-2),var(--gold),var(--gold-3));}
+.s-ring.grey{background:var(--border);}
+.s-ring.add{background:none;border:2px dashed var(--border);padding:0;}
+.s-av{width:100%;height:100%;border-radius:50%;background:var(--surface);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;overflow:hidden;}
+.s-ring.add .s-av{border:none;background:var(--surface);}
+.s-ring.add .s-av svg{width:20px;height:20px;stroke:var(--gold);stroke-width:2;fill:none;}
+.s-name{font-size:9px;font-weight:600;color:var(--sub);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.s-name.you{color:var(--gold);}
+
+/* TODAY SNAPSHOT */
+.snap-row{display:flex;gap:10px;padding:0 20px 16px;}
+.snap-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;}
+.snap-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.snap-card.sleep::before{background:linear-gradient(90deg,#4A90D9,#7BB5F0);}
+.snap-card.energy::before{background:linear-gradient(90deg,var(--gold-2),var(--gold-3));}
+.snap-card.mood::before{background:linear-gradient(90deg,#9B59B6,#C39BD3);}
+.snap-val{font-size:22px;font-weight:900;color:var(--black);letter-spacing:-1px;line-height:1;}
+.snap-unit{font-size:9px;color:var(--sub);font-weight:400;}
+.snap-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+
+/* CHECK-IN CARD */
+.checkin-card{margin:0 20px 16px;border-radius:var(--r-xl);background:linear-gradient(135deg,#0A0A0A 0%,#1C1200 55%,#0A0A0A 100%);padding:28px 24px;position:relative;overflow:hidden;}
+.cc-top-line{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.cc-glow{position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,0.09) 0%,transparent 70%);pointer-events:none;}
+.cc-label{font-size:9px;font-weight:700;letter-spacing:3px;color:rgba(212,170,53,.5);text-transform:uppercase;margin-bottom:8px;}
+.cc-title{font-size:24px;font-weight:900;color:#fff;line-height:1.2;letter-spacing:-.5px;margin-bottom:22px;}
+.cc-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(90deg,var(--gold-2),var(--gold));color:#000;font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:14px 24px;border-radius:var(--r-md);text-decoration:none;border:none;cursor:pointer;box-shadow:var(--shadow-gold);transition:transform .15s;}
+.cc-btn:active{transform:scale(.97);}
+.pulse{width:7px;height:7px;border-radius:50%;background:#000;animation:pulse 2s infinite;}
+
+/* STREAK */
+.streak-bar{margin:0 20px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.streak-bar::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.sb-fire{font-size:32px;line-height:1;flex-shrink:0;}
+.sb-info{flex:1;}
+.sb-num{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:-2px;line-height:1;}
+.sb-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sub);margin-top:2px;}
+.sb-badge{display:inline-block;margin-top:6px;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.sb-badge.lit{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(212,170,53,.25);}
+.sb-badge.dim{background:var(--surface);color:var(--sub);border:1px solid var(--border);}
+.sb-icon svg{width:24px;height:24px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+
+/* AXON */
+.axon-wrap{margin:0 20px 16px;}
+.axon-card{background:var(--black);border-radius:var(--r-lg);padding:18px 20px;display:flex;align-items:center;gap:14px;text-decoration:none;position:relative;overflow:hidden;}
+[data-theme="dark"] .axon-card{background:#1A1A1A;border:1px solid #2A2A2A;}
+.axon-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.axon-av{width:44px;height:44px;border-radius:var(--r-sm);background:rgba(212,170,53,.1);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.axon-av img{width:30px;height:30px;object-fit:contain;}
+.axon-text{flex:1;}
+.axon-name{font-family:'Arpubes',sans-serif;font-size:14px;color:#fff;margin-bottom:2px;}
+.axon-sub{font-size:10px;color:rgba(255,255,255,.4);}
+.axon-arr{font-size:20px;color:var(--gold);line-height:1;}
+
+/* SECTION HEADER */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:4px 20px 12px;}
+.sec-lbl{font-family:'Arpubes',sans-serif;font-size:9px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase;}
+.sec-act{font-size:10px;color:var(--gold);font-weight:700;text-decoration:none;background:none;border:none;font-family:'Josefin Sans',sans-serif;cursor:pointer;}
+
+/* DOMAINS */
+.domains{padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.dom{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.dom.on{border-color:rgba(212,170,53,.3);box-shadow:0 4px 20px rgba(212,170,53,.08);}
+.dom.on::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-2),var(--gold-3));}
+.dom.soon{opacity:.4;cursor:default;}
+.dom-tog{position:absolute;top:12px;right:12px;width:28px;height:16px;border-radius:8px;background:var(--border);}
+.dom-tog::after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#B0B0B0;top:3px;left:3px;transition:all .2s;}
+.dom.on .dom-tog{background:rgba(212,170,53,.25);}
+.dom.on .dom-tog::after{background:var(--gold);left:15px;box-shadow:0 0 6px var(--gold);}
+.dom-ico{margin-bottom:9px;}
+.dom-ico svg{width:20px;height:20px;stroke:var(--muted);stroke-width:1.75;fill:none;transition:stroke .2s;}
+.dom.on .dom-ico svg{stroke:var(--gold);}
+.dom-name{font-family:'Arpubes',sans-serif;font-size:10px;font-weight:700;color:var(--black);margin-bottom:2px;}
+.dom-sub{font-size:9px;color:var(--sub);line-height:1.4;margin-bottom:3px;}
+.dom-tag{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--muted);}
+.dom.on .dom-tag{color:var(--gold);}
+
+/* COMMUNITY FEED */
+.feed-card{margin:0 20px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 18px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.feed-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.2;}
+.fc-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.fc-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;}
+.fc-name{font-size:13px;font-weight:700;color:var(--black);line-height:1;}
+.fc-meta{font-size:10px;color:var(--sub);margin-top:2px;}
+.fc-tag{margin-left:auto;font-size:8px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:20px;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(212,170,53,.2);}
+.fc-body{font-size:13px;line-height:1.65;color:var(--text);margin-bottom:14px;}
+.fc-actions{display:flex;gap:18px;padding-top:12px;border-top:1px solid var(--border);}
+.fc-btn{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--sub);background:none;border:none;font-family:'Josefin Sans',sans-serif;cursor:pointer;padding:0;transition:color .15s;}
+.fc-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.75;}
+.fc-btn.on{color:var(--gold);}
+.fc-btn.on svg{fill:var(--gold);stroke:var(--gold);}
+
+/* POWERED BY */
+.powered{text-align:center;padding:20px 0 10px;}
+.powered span{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.powered b{color:var(--gold);}
+
+/* TOAST */
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(12px);background:#0A0A0A;color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;padding:11px 22px;border-radius:30px;border:1px solid var(--gold);opacity:0;transition:opacity .25s,transform .25s;z-index:500;white-space:nowrap;pointer-events:none;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* PAGE TRANSITION */
+.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.pt.on{opacity:1;pointer-events:all;}
+.pt-inner{text-align:center;}
+.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;}
+.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
+[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
+
+/* NAV */
+.spacer{height:100px;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
+.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
+.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;transition:stroke .2s;}
+.nav-item.active .nav-ico{background:var(--gold-dim);}
+.nav-item.active .nav-ico svg{stroke:var(--gold);}
+.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
+.nav-item.active .nav-lbl{color:var(--gold);}
+.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
+.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/profile" class="tb-av">
+    {{ (profile.name or 'K')[0]|upper }}
+    <div class="tb-dot"></div>
+  </a>
+  <div class="tb-brand">
+    <div class="tb-twin">TWIN</div>
+    <div class="tb-ephas"><img src="/static/ephas_logo2.png" class="eph-logo" alt="EPHAS"></div>
+  </div>
+  <a href="/messages" class="tb-msg"><i data-lucide="message-circle"></i></a>
+</div>
+
+<!-- STORIES -->
+<div class="stories">
+  <a href="/checkin" class="story">
+    <div class="s-ring add"><div class="s-av"><i data-lucide="plus"></i></div></div>
+    <div class="s-name you">Your Day</div>
+  </a>
+  <div class="story">
+    <div class="s-ring"><div class="s-av" style="background:linear-gradient(135deg,#1A1A1A,#333);">A</div></div>
+    <div class="s-name">Abdullah</div>
+  </div>
+  <div class="story">
+    <div class="s-ring"><div class="s-av" style="background:linear-gradient(135deg,#0D1F0D,#1A3A1A);">S</div></div>
+    <div class="s-name">Sara</div>
+  </div>
+  <div class="story">
+    <div class="s-ring grey"><div class="s-av" style="background:linear-gradient(135deg,#1A0D0D,#2E1515);">M</div></div>
+    <div class="s-name">Mohammed</div>
+  </div>
+  <div class="story">
+    <div class="s-ring"><div class="s-av" style="background:linear-gradient(135deg,#0D0D1F,#15152E);">R</div></div>
+    <div class="s-name">Reem</div>
+  </div>
+  <div class="story">
+    <div class="s-ring grey"><div class="s-av" style="background:linear-gradient(135deg,#1A1400,#2E2200);">J</div></div>
+    <div class="s-name">Jaber</div>
+  </div>
+</div>
+
+<!-- TODAY SNAPSHOT -->
+<div class="snap-row">
+  <div class="snap-card sleep">
+    <div class="snap-val">7.2<span class="snap-unit">h</span></div>
+    <div class="snap-lbl">Sleep</div>
+  </div>
+  <div class="snap-card energy">
+    <div class="snap-val">8<span class="snap-unit">/10</span></div>
+    <div class="snap-lbl">Energy</div>
+  </div>
+  <div class="snap-card mood">
+    <div class="snap-val">8<span class="snap-unit">/10</span></div>
+    <div class="snap-lbl">Mood</div>
+  </div>
+</div>
+
+<!-- CHECK IN HERO -->
+<div class="checkin-card">
+  <div class="cc-top-line"></div>
+  <div class="cc-glow"></div>
+  <div class="cc-label" id="ccLabel">GOOD MORNING</div>
+  <div class="cc-title" id="ccTitle">How are you<br>showing up today?</div>
+  <a href="/checkin" class="cc-btn">
+    <div class="pulse"></div>
+    <span id="ccBtn">CHECK IN</span>
+  </a>
+</div>
+
+<!-- STREAK -->
+<div class="streak-bar">
+  <div class="sb-fire">🔥</div>
+  <div class="sb-info">
+    <div class="sb-num">{{ profile.streak }}</div>
+    <div class="sb-lbl">Day Streak</div>
+    {% if profile.streak >= 14 %}
+    <span class="sb-badge lit">ON FIRE</span>
+    {% elif profile.streak >= 7 %}
+    <span class="sb-badge lit">LOCKED IN</span>
+    {% else %}
+    <span class="sb-badge dim">BUILDING</span>
+    {% endif %}
+  </div>
+  <div class="sb-icon"><i data-lucide="zap"></i></div>
+</div>
+
+<!-- AXON -->
+<div class="axon-wrap">
+  <a href="/checkin" class="axon-card">
+    <div class="axon-av"><img src="/static/axon_logo.png" alt="AXON"></div>
+    <div class="axon-text">
+      <div class="axon-name">AXON — AI Coach</div>
+      <div class="axon-sub">Growth, habits, goals & mindset</div>
+    </div>
+    <div class="axon-arr">›</div>
+  </a>
+</div>
+
+<!-- DOMAINS -->
+<div class="sec-hd" style="margin-top:6px;">
+  <div class="sec-lbl">Upgrade Zones</div>
+  <button class="sec-act" onclick="activateAll()">Activate All</button>
+</div>
+
+<div class="domains">
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="moon"></i></div>
+    <div class="dom-name">Recovery</div>
+    <div class="dom-sub">Sleep · HRV · Energy</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="dumbbell"></i></div>
+    <div class="dom-name">Body</div>
+    <div class="dom-sub">Training · Nutrition</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="wallet"></i></div>
+    <div class="dom-name">Wealth</div>
+    <div class="dom-sub">Income · Expenses · Savings</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="brain"></i></div>
+    <div class="dom-name">Mind</div>
+    <div class="dom-sub">Mood · Stress · Focus</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="target"></i></div>
+    <div class="dom-name">Mission</div>
+    <div class="dom-sub">Goals · Progress · Learning</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="sparkles"></i></div>
+    <div class="dom-name">Soul</div>
+    <div class="dom-sub">Prayer · Reflection</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom on" onclick="toggleDom(this)">
+    <div class="dom-tog"></div>
+    <div class="dom-ico"><i data-lucide="check-square"></i></div>
+    <div class="dom-name">Discipline</div>
+    <div class="dom-sub">Habits · Streaks</div>
+    <div class="dom-tag">Active</div>
+  </div>
+  <div class="dom soon">
+    <div class="dom-ico"><i data-lucide="activity"></i></div>
+    <div class="dom-name">Health Sync</div>
+    <div class="dom-sub">Watch · Whoop · Garmin</div>
+    <div class="dom-tag">Coming Soon</div>
+  </div>
+</div>
+
+<!-- COMMUNITY -->
+<div class="sec-hd" style="margin-top:20px;">
+  <div class="sec-lbl">Community</div>
+  <a href="/grow" class="sec-act">See All</a>
+</div>
+
+<div class="feed-card">
+  <div class="fc-top">
+    <div class="fc-av" style="background:linear-gradient(135deg,#1A1A1A,#333);">A</div>
+    <div>
+      <div class="fc-name">Abdullah K.</div>
+      <div class="fc-meta">2h ago · 🔥 14 day streak</div>
+    </div>
+    <span class="fc-tag">DISCIPLINE</span>
+  </div>
+  <div class="fc-body">Woke up at 5am, gym done, cold shower, 20 pages read — all before 8am. Consistency is compounding. 💪</div>
+  <div class="fc-actions">
+    <button class="fc-btn" onclick="like(this)"><i data-lucide="heart"></i> 47</button>
+    <button class="fc-btn"><i data-lucide="message-circle"></i> 12</button>
+    <button class="fc-btn"><i data-lucide="share-2"></i> Share</button>
+  </div>
+</div>
+
+<div class="feed-card">
+  <div class="fc-top">
+    <div class="fc-av" style="background:linear-gradient(135deg,#0D1F0D,#1A3A1A);">S</div>
+    <div>
+      <div class="fc-name">Sara M.</div>
+      <div class="fc-meta">5h ago · ✨ 7 day streak</div>
+    </div>
+    <span class="fc-tag">MINDSET</span>
+  </div>
+  <div class="fc-body">Journaled for the first time in months. By the end I had clarity on 3 things I'd been avoiding. Try it. ✍️</div>
+  <div class="fc-actions">
+    <button class="fc-btn" onclick="like(this)"><i data-lucide="heart"></i> 31</button>
+    <button class="fc-btn"><i data-lucide="message-circle"></i> 8</button>
+    <button class="fc-btn"><i data-lucide="share-2"></i> Share</button>
+  </div>
+</div>
+
+<div class="powered"><span>TWIN — Powered by <b>EPHAS</b></span></div>
+<div class="spacer"></div>
+
+<div class="nav-bar">
+  <a href="/home" class="nav-item active">
+    <div class="nav-ico"><i data-lucide="home"></i></div>
+    <div class="nav-lbl">Home</div>
+  </a>
+  <a href="/analytics" class="nav-item">
+    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
+    <div class="nav-lbl">Analytics</div>
+  </a>
+  <a href="/checkin" class="nav-ctr">
+    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
+    <div class="nav-lbl" id="navCtrLbl">Check In</div>
+  </a>
+  <a href="/grow" class="nav-item">
+    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
+    <div class="nav-lbl">Grow</div>
+  </a>
+  <a href="/profile" class="nav-item">
+    <div class="nav-ico"><i data-lucide="user"></i></div>
+    <div class="nav-lbl">Profile</div>
+  </a>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="pt" class="pt">
+  <div class="pt-inner">
+    <div class="pt-twin">TWIN</div>
+    <img src="/static/ephas_logo2.png" class="pt-logo" alt="">
+  </div>
+</div>
+
+<script>
+lucide.createIcons();
+
+const h = new Date().getHours();
+const lbl = document.getElementById('ccLabel');
+const ttl = document.getElementById('ccTitle');
+const btn = document.getElementById('ccBtn');
+const nav = document.getElementById('navCtrLbl');
+if(h>=5&&h<12){lbl.textContent='GOOD MORNING';ttl.innerHTML='How are you<br>showing up today?';btn.textContent='CHECK IN';}
+else if(h>=12&&h<18){lbl.textContent='GOOD AFTERNOON';ttl.innerHTML='Midday check-in —<br>stay on track.';btn.textContent='CHECK IN';}
+else{lbl.textContent='GOOD EVENING';ttl.innerHTML='Reflect on today.<br>End with intention.';btn.textContent='CHECK OUT';}
+if(nav) nav.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
+
+function toggleDom(d){if(d.classList.contains('soon'))return;const on=d.classList.toggle('on');d.querySelector('.dom-tag').textContent=on?'Active':'Off';}
+function activateAll(){document.querySelectorAll('.dom:not(.soon)').forEach(d=>{d.classList.add('on');d.querySelector('.dom-tag').textContent='Active';});}
+function like(btn){
+  btn.classList.toggle('on');
+  const n=parseInt(btn.textContent.trim().split(' ').pop());
+  btn.innerHTML=`<i data-lucide="heart"></i> ${btn.classList.contains('on')?n+1:n-1}`;
+  lucide.createIcons();
+}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
+document.querySelectorAll('a[href^="/"]').forEach(a=>{
+  a.addEventListener('click',function(e){
+    const href=this.getAttribute('href');
+    if(!href||href==='#'||href===window.location.pathname)return;
+    e.preventDefault();
+    document.getElementById('pt').classList.add('on');
+    setTimeout(()=>{window.location.href=href;},240);
+  });
+});
+</script>
+</body>
+</html>
