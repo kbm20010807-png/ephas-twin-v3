@@ -28,6 +28,9 @@
 .ai-elogo{height:7px;width:auto;margin:0 auto;display:block;opacity:.2;}
 [data-theme="dark"] .ai-elogo{filter:invert(1);opacity:.15;}
 .about-ephas{margin:0 20px 0;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:12px;}
+.ptype-row{display:flex;gap:6px;}
+.ptype-btn{padding:7px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:10px;font-weight:700;color:var(--sub);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;transition:all .15s;}
+.ptype-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
 .ae-ico{width:40px;height:40px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ae-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
 .ae-txt b{color:var(--black);}
@@ -39,7 +42,6 @@
   <a href="/profile" class="tb-btn"><i data-lucide="arrow-left"></i></a>
   <div class="tb-brand">
     <div class="tb-twin">Settings</div>
-    <div class="tb-tag">by EPHAS</div>
   </div>
   <div style="width:36px;"></div>
 </div>
@@ -112,6 +114,27 @@
   </div>
 </div>
 
+<!-- PROFILE TYPE -->
+<div class="block-label">Profile</div>
+<div class="settings-block">
+  <div class="s-row">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="user-check"></i></div>
+      <div>
+        <div class="s-title">Account Type</div>
+        <div class="s-sub" id="profTypeSub">TWIN Profile</div>
+      </div>
+    </div>
+    <div class="ptype-row">
+      <button class="ptype-btn on" id="ptBtnTwin" onclick="setProfType('twin')">TWIN</button>
+      <button class="ptype-btn" id="ptBtnPro" onclick="setProfType('pro')">PRO</button>
+    </div>
+  </div>
+  <div class="s-row" style="border-bottom:none;padding:10px 0 12px;">
+    <div style="font-size:11px;color:var(--sub);line-height:1.5;" id="profTypeDesc">TWIN Profile: Stats + Posts. Switch to Pro to unlock Courses and coaching on your profile.</div>
+  </div>
+</div>
+
 <!-- TWIN -->
 <div class="block-label">TWIN</div>
 <div class="settings-block">
@@ -174,8 +197,24 @@
 </a>
 
 <div class="app-info">
-  <div class="ai-twin">TWIN by EPHAS</div>
+  <div class="ai-twin">TWIN</div>
   <div class="ai-ver">VERSION 3.0.0</div>
   <img src="/static/ephas_logo2.png" class="ai-elogo elogo" alt="">
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const savedType = localStorage.getItem('twinAcctType') || 'twin';
+setProfType(savedType, true);
+function setProfType(type, silent) {
+  localStorage.setItem('twinAcctType', type);
+  document.getElementById('ptBtnTwin').classList.toggle('on', type === 'twin');
+  document.getElementById('ptBtnPro').classList.toggle('on', type === 'pro');
+  document.getElementById('profTypeSub').textContent = type === 'pro' ? 'Professional Profile' : 'TWIN Profile';
+  document.getElementById('profTypeDesc').textContent = type === 'pro'
+    ? 'Professional Profile: Posts + Stats + Courses. Your profile shows a Courses tab for teaching.'
+    : 'TWIN Profile: Stats + Posts. Switch to Pro to unlock Courses and coaching on your profile.';
+}
+</script>
 {% endblock %}

@@ -3,12 +3,9 @@
 
 {% block head %}
 <style>
-.cover{height:200px;background:linear-gradient(160deg,#000 0%,#0F0A00 50%,#000 100%);position:relative;overflow:hidden;}
+.cover{height:180px;background:linear-gradient(160deg,#000 0%,#0F0A00 50%,#000 100%);position:relative;overflow:hidden;}
 .cover-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:32px 32px;opacity:.07;}
-.cover-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.18),transparent 70%);top:30%;left:50%;transform:translate(-50%,-50%);}
-.cov-top{position:absolute;top:0;left:0;right:0;padding:54px 20px 0;display:flex;justify-content:space-between;}
-.cov-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
-.cov-btn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.75;}
+.cover-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.18),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);}
 .prof-zone{padding:0 20px;margin-top:-44px;display:flex;align-items:flex-end;justify-content:space-between;}
 .prof-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:30px;font-weight:900;color:var(--gold);position:relative;box-shadow:var(--sh-md);flex-shrink:0;}
 .prof-av-lv{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);font-size:9px;font-weight:900;color:#000;display:flex;align-items:center;justify-content:center;}
@@ -20,11 +17,20 @@
 .prof-meta{display:flex;gap:14px;flex-wrap:wrap;}
 .pm-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);}
 .pm-item svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.acct-switch{display:flex;gap:8px;padding:14px 20px 0;}
+.acct-btn{flex:1;padding:10px 8px;border-radius:var(--r-lg);border:1.5px solid var(--border);background:var(--bg-2);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;text-align:center;transition:all .15s;line-height:1;}
+.acct-btn span{font-size:9px;font-weight:500;display:block;margin-top:3px;opacity:.7;}
+.acct-btn.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
 .stats-row{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:16px 0;}
 .stat-c{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
 .stat-c:last-child{border-right:none;}
 .stat-v{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1.5px;color:var(--black);}
 .stat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;font-family:'Arpubes',sans-serif;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin:0 20px;}
+.tab-btn{flex:1;padding:12px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px;transition:all .15s;font-family:'Arpubes',sans-serif;}
+.tab-btn.on{color:var(--black);border-bottom-color:var(--gold);}
+.tab-pane{display:none;}
+.tab-pane.on{display:block;}
 .xp-zone{padding:0 20px;}
 .xp-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .domain-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;}
@@ -42,32 +48,39 @@
 .badge-c.earned .badge-ico{background:var(--gold-dim);border-color:var(--gold-b);}
 .badge-c.earned .badge-ico svg{stroke:var(--gold);}
 .badge-c.earned .badge-nm{color:var(--gold);}
-.share-btn{margin:18px 20px 0;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--black);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;}
-.share-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+.prof-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
+.pp-meta{font-size:10px;color:var(--sub);margin-bottom:8px;}
+.pp-body{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;}
+.pp-ft{display:flex;gap:14px;}
+.pp-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);}
+.pp-act svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.course-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
+.cc-tag{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.cc-title{font-size:14px;font-weight:700;color:var(--black);margin-bottom:4px;}
+.cc-meta{font-size:11px;color:var(--sub);}
+.empty-card{background:var(--card);border:1px dashed var(--border);border-radius:var(--r-lg);padding:28px;margin:0 20px 10px;text-align:center;}
+.share-fab{position:fixed;bottom:100px;right:20px;width:48px;height:48px;border-radius:50%;background:#09090B;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);cursor:pointer;z-index:99;border:none;}
+[data-theme="dark"] .share-fab{background:var(--gold);}
+.share-fab svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
+[data-theme="dark"] .share-fab svg{stroke:#000;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- COVER -->
+<div class="topbar">
+  <div style="width:36px;"></div>
+  <div class="tb-brand"><div class="tb-twin">TWIN</div></div>
+  <a href="/settings" class="tb-btn"><i data-lucide="settings"></i></a>
+</div>
+
 <div class="cover">
   <div class="cover-grid"></div>
   <div class="cover-glow"></div>
-  <div class="cov-top">
-    <a href="/settings" class="cov-btn"><i data-lucide="settings"></i></a>
-    <div class="tb-brand" style="position:absolute;left:50%;transform:translateX(-50%);">
-      <div class="tb-twin" style="color:#fff;">TWIN</div>
-      <div class="tb-tag">by EPHAS</div>
-    </div>
-    <a href="#" class="cov-btn" onclick="shareProfile();return false;"><i data-lucide="share-2"></i></a>
-  </div>
 </div>
 
 <div class="prof-zone">
-  <div class="prof-av">
-    {{ u.name[0]|upper }}
-    <div class="prof-av-lv">{{ u.level }}</div>
-  </div>
+  <div class="prof-av">{{ u.name[0]|upper }}<div class="prof-av-lv">{{ u.level }}</div></div>
   <div class="edit-prof-btn"><i data-lucide="edit-2"></i> Edit Profile</div>
 </div>
 
@@ -81,94 +94,183 @@
   </div>
 </div>
 
-<div class="stats-row" style="margin:16px 0;">
-  <div class="stat-c">
-    <div class="stat-v">{{ u.total_checkins }}</div>
-    <div class="stat-l">Check-Ins</div>
-  </div>
-  <div class="stat-c">
-    <div class="stat-v" style="color:var(--gold);">{{ u.streak }}</div>
-    <div class="stat-l">Streak</div>
-  </div>
-  <div class="stat-c">
-    <div class="stat-v">{{ u.xp }}</div>
-    <div class="stat-l">Total XP</div>
-  </div>
-  <div class="stat-c">
-    <div class="stat-v" style="color:var(--gold);">{{ u.level }}</div>
-    <div class="stat-l">Level</div>
-  </div>
+<div class="acct-switch">
+  <div class="acct-btn on" id="btnTwin" onclick="switchAcct('twin')">TWIN Profile<span>Stats + Posts</span></div>
+  <div class="acct-btn" id="btnPro" onclick="switchAcct('pro')">Professional<span>Posts + Stats + Courses</span></div>
 </div>
 
-<div class="xp-zone">
-  <div class="xp-hd">
-    <div class="t-label">Level {{ u.level }} → {{ u.level + 1 }}</div>
-    <div style="font-size:11px;color:var(--sub);">{{ u.xp }} / {{ u.xp_needed }} XP · {{ u.progress_pct }}%</div>
-  </div>
-  <div class="prog-bar"><div class="prog-fill" style="width:{{ u.progress_pct }}%"></div></div>
+<div class="stats-row">
+  <div class="stat-c"><div class="stat-v">{{ u.total_checkins }}</div><div class="stat-l">Check-Ins</div></div>
+  <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.streak }}</div><div class="stat-l">Streak</div></div>
+  <div class="stat-c"><div class="stat-v">{{ u.xp }}</div><div class="stat-l">XP</div></div>
+  <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.level }}</div><div class="stat-l">Level</div></div>
 </div>
 
-<div class="sect-lbl">Life Domains</div>
-<div class="domain-g">
-  {% for d in stats.domains %}
-  <div class="dom-c">
-    <div class="dom-top">
-      <div class="dom-name">{{ d.name }}</div>
-      <div class="dom-pct">{{ d.pct }}%</div>
+<!-- TWIN TABS -->
+<div class="tab-bar" id="twinTabs">
+  <div class="tab-btn on" onclick="switchTab('twin','stats',this)">STATS</div>
+  <div class="tab-btn" onclick="switchTab('twin','posts',this)">POSTS</div>
+</div>
+
+<!-- PRO TABS -->
+<div class="tab-bar" id="proTabs" style="display:none;">
+  <div class="tab-btn on" onclick="switchTab('pro','posts',this)">POSTS</div>
+  <div class="tab-btn" onclick="switchTab('pro','stats',this)">STATS</div>
+  <div class="tab-btn" onclick="switchTab('pro','courses',this)">COURSES</div>
+</div>
+
+<!-- TWIN: STATS -->
+<div class="tab-pane on" id="pane-twin-stats">
+  <div class="xp-zone" style="padding-top:16px;">
+    <div class="xp-hd">
+      <div class="t-label">Level {{ u.level }} → {{ u.level + 1 }}</div>
+      <div style="font-size:11px;color:var(--sub);">{{ u.xp }} / {{ u.xp_needed }} XP</div>
     </div>
-    <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
-    <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
+    <div class="prog-bar"><div class="prog-fill" style="width:{{ u.progress_pct }}%"></div></div>
   </div>
-  {% endfor %}
+  <div class="sect-lbl">Life Domains</div>
+  <div class="domain-g">
+    {% for d in stats.domains %}
+    <div class="dom-c">
+      <div class="dom-top"><div class="dom-name">{{ d.name }}</div><div class="dom-pct">{{ d.pct }}%</div></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
+      <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="sect-lbl">Achievements</div>
+  <div class="badges-row">
+    <div class="badge-c earned"><div class="badge-ico"><i data-lucide="flame"></i></div><div class="badge-nm">7-Day Streak</div></div>
+    <div class="badge-c earned"><div class="badge-ico"><i data-lucide="sunrise"></i></div><div class="badge-nm">Early Riser</div></div>
+    <div class="badge-c earned"><div class="badge-ico"><i data-lucide="book-open"></i></div><div class="badge-nm">Reader</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="star"></i></div><div class="badge-nm">100 Check-Ins</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="layers"></i></div><div class="badge-nm">All Domains</div></div>
+  </div>
+  <div style="height:16px;"></div>
 </div>
 
-<div class="sect-lbl">Achievements</div>
-<div class="badges-row">
-  <div class="badge-c earned">
-    <div class="badge-ico"><i data-lucide="flame"></i></div>
-    <div class="badge-nm">7-Day Streak</div>
+<!-- TWIN: POSTS -->
+<div class="tab-pane" id="pane-twin-posts">
+  <div style="height:16px;"></div>
+  <div class="prof-post">
+    <div class="pp-meta">2h ago · Mindset</div>
+    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think.</div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 47</div><div class="pp-act"><i data-lucide="message-circle"></i> 12</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
   </div>
-  <div class="badge-c earned">
-    <div class="badge-ico"><i data-lucide="sunrise"></i></div>
-    <div class="badge-nm">Early Riser</div>
+  <div class="prof-post">
+    <div class="pp-meta">Yesterday · Fitness</div>
+    <div class="pp-body">Cold shower at 5AM. Body domain jumped 8% this week. Cold exposure + consistent sleep = different game.</div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 93</div><div class="pp-act"><i data-lucide="message-circle"></i> 8</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
   </div>
-  <div class="badge-c earned">
-    <div class="badge-ico"><i data-lucide="book-open"></i></div>
-    <div class="badge-nm">Reader</div>
-  </div>
-  <div class="badge-c">
-    <div class="badge-ico"><i data-lucide="trophy"></i></div>
-    <div class="badge-nm">30-Day Streak</div>
-  </div>
-  <div class="badge-c">
-    <div class="badge-ico"><i data-lucide="star"></i></div>
-    <div class="badge-nm">100 Check-Ins</div>
-  </div>
-  <div class="badge-c">
-    <div class="badge-ico"><i data-lucide="layers"></i></div>
-    <div class="badge-nm">All Domains</div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share your journey</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create Post</a>
   </div>
 </div>
 
-<button class="share-btn" onclick="shareProfile()">
-  <i data-lucide="share-2"></i>
-  SHARE MY PROGRESS
-</button>
+<!-- PRO: POSTS -->
+<div class="tab-pane" id="pane-pro-posts">
+  <div style="height:16px;"></div>
+  <div class="prof-post">
+    <div class="pp-meta">2h ago · Mindset</div>
+    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think.</div>
+    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 47</div><div class="pp-act"><i data-lucide="message-circle"></i> 12</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+  </div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share your journey</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create Post</a>
+  </div>
+</div>
+
+<!-- PRO: STATS -->
+<div class="tab-pane" id="pane-pro-stats">
+  <div class="xp-zone" style="padding-top:16px;">
+    <div class="xp-hd">
+      <div class="t-label">Level {{ u.level }} → {{ u.level + 1 }}</div>
+      <div style="font-size:11px;color:var(--sub);">{{ u.xp }} / {{ u.xp_needed }} XP</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:{{ u.progress_pct }}%"></div></div>
+  </div>
+  <div class="sect-lbl">Life Domains</div>
+  <div class="domain-g">
+    {% for d in stats.domains %}
+    <div class="dom-c">
+      <div class="dom-top"><div class="dom-name">{{ d.name }}</div><div class="dom-pct">{{ d.pct }}%</div></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
+      <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="height:16px;"></div>
+</div>
+
+<!-- PRO: COURSES -->
+<div class="tab-pane" id="pane-pro-courses">
+  <div style="height:16px;"></div>
+  <div class="course-card">
+    <div class="cc-tag">Fitness</div>
+    <div class="cc-title">The Discipline Operating System</div>
+    <div class="cc-meta">Free · 6 modules · 2,847 enrolled</div>
+  </div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Create your first course</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="graduation-cap"></i> Create Course</a>
+  </div>
+</div>
 
 <div class="tw-foot">
-  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
+
+<button class="share-fab" onclick="shareProfile()"><i data-lucide="share-2"></i></button>
 {% endblock %}
 
 {% block scripts %}
 <script>
-function shareProfile(){
-  if(navigator.share){
-    navigator.share({title:'TWIN — My Progress',text:'Level {{ u.level }} · {{ u.streak }}-day streak · Powered by EPHAS',url:window.location.href});
+let acctType = localStorage.getItem('twinAcctType') || 'twin';
+
+function applyAcct(type) {
+  document.getElementById('btnTwin').classList.toggle('on', type === 'twin');
+  document.getElementById('btnPro').classList.toggle('on', type === 'pro');
+  document.getElementById('twinTabs').style.display = type === 'twin' ? 'flex' : 'none';
+  document.getElementById('proTabs').style.display = type === 'pro' ? 'flex' : 'none';
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  if(type === 'twin') {
+    document.getElementById('pane-twin-stats').classList.add('on');
+    document.querySelector('#twinTabs .tab-btn').classList.add('on');
   } else {
-    navigator.clipboard.writeText(window.location.href).then(()=>{alert('Profile link copied!');});
+    document.getElementById('pane-pro-posts').classList.add('on');
+    document.querySelector('#proTabs .tab-btn').classList.add('on');
   }
 }
+
+function switchAcct(type) {
+  acctType = type;
+  localStorage.setItem('twinAcctType', type);
+  applyAcct(type);
+}
+
+function switchTab(mode, tab, el) {
+  el.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  const panes = mode === 'twin'
+    ? ['pane-twin-stats','pane-twin-posts']
+    : ['pane-pro-posts','pane-pro-stats','pane-pro-courses'];
+  panes.forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById('pane-' + mode + '-' + tab).classList.add('on');
+}
+
+function shareProfile() {
+  if(navigator.share) {
+    navigator.share({title:'TWIN — My Progress',text:'Level {{ u.level }} · {{ u.streak }}-day streak',url:window.location.href});
+  } else {
+    navigator.clipboard.writeText(window.location.href).then(() => { alert('Profile link copied!'); });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => applyAcct(acctType));
 </script>
 {% endblock %}

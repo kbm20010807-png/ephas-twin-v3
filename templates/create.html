@@ -40,10 +40,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 {% block content %}
 <div class="cr-wrap">
   <div class="cr-top">
-    <a href="/grow" class="cr-close"><i data-lucide="x"></i></a>
+    <a href="#" class="cr-close" onclick="goBack();return false;"><i data-lucide="x"></i></a>
     <div class="tb-brand">
       <div class="tb-twin">Create</div>
-      <div class="tb-tag">by EPHAS</div>
     </div>
     <div style="width:34px;"></div>
   </div>
@@ -211,6 +210,17 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 {% block scripts %}
 <script>
 let currentType = '';
+function goBack() {
+  if(document.getElementById('typeStep').style.display === 'none') {
+    document.getElementById('typeStep').style.display = '';
+    document.getElementById('composerStep').classList.remove('active');
+    document.getElementById('courseStep').classList.remove('active');
+    currentType = '';
+  } else {
+    document.getElementById('pt').classList.add('on');
+    setTimeout(() => { window.location.href = '/grow'; }, 180);
+  }
+}
 function selectType(type, el) {
   if(type === 'reel') return;
   currentType = type;

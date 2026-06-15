@@ -9,12 +9,26 @@
 .search-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px 12px 44px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;}
 .search-inp:focus{border-color:var(--gold);}
 .search-inp::placeholder{color:var(--muted);}
-.filter-row{display:flex;gap:7px;padding:12px 20px 0;overflow-x:auto;scrollbar-width:none;}
-.filter-row::-webkit-scrollbar{display:none;}
-.filter-btn{padding:7px 16px;border-radius:var(--r-full);font-size:11px;font-weight:700;white-space:nowrap;border:1.5px solid var(--border);background:var(--bg-2);color:var(--sub);cursor:pointer;transition:all .15s;letter-spacing:.3px;}
-.filter-btn.on{background:#09090B;border-color:#09090B;color:#fff;}
-[data-theme="dark"] .filter-btn.on{background:var(--gold);border-color:var(--gold);color:#000;}
-.featured-card{margin:18px 20px 0;border-radius:var(--r-xl);overflow:hidden;background:#09090B;position:relative;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;}
+.main-tabs{display:flex;border-bottom:1.5px solid var(--border);margin:14px 20px 0;}
+.mt-btn{flex:1;padding:12px 8px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Arpubes',sans-serif;text-transform:uppercase;}
+.mt-btn.on{color:var(--black);border-bottom-color:var(--gold);}
+.tab-pane{display:none;}
+.tab-pane.on{display:block;}
+.chip-row{display:flex;gap:7px;padding:10px 20px 0;overflow-x:auto;scrollbar-width:none;}
+.chip-row::-webkit-scrollbar{display:none;}
+.chip{padding:6px 14px;border-radius:var(--r-full);font-size:11px;font-weight:700;white-space:nowrap;border:1.5px solid var(--border);background:var(--bg-2);color:var(--sub);cursor:pointer;transition:all .15s;}
+.chip.on{background:#09090B;border-color:#09090B;color:#fff;}
+[data-theme="dark"] .chip.on{background:var(--gold);border-color:var(--gold);color:#000;}
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);}
+.pc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.pc-user{font-size:12px;font-weight:700;color:var(--black);}
+.pc-time{font-size:10px;color:var(--sub);}
+.pc-cat{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-left:auto;background:var(--gold-dim);border:1px solid var(--gold-b);padding:3px 8px;border-radius:var(--r-full);}
+.pc-body{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:14px;}
+.pc-foot{display:flex;gap:12px;align-items:center;}
+.pc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;padding:5px 0;}
+.pc-action svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.featured-card{margin:16px 20px 0;border-radius:var(--r-xl);overflow:hidden;background:#09090B;position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;}
 .fc-bg{position:absolute;inset:0;background:linear-gradient(160deg,#0A0A0A 0%,#1A1200 60%,#0D0D0D 100%);}
 .fc-glow{position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.12),transparent 70%);}
 .fc-content{position:relative;padding:20px;}
@@ -22,15 +36,20 @@
 .fc-tag svg{width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:2;}
 .fc-title{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:#fff;line-height:1.2;margin-bottom:6px;}
 .fc-meta{font-size:11px;color:#666;}
-.post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:10px 20px 0;box-shadow:var(--sh);}
-.pc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.pc-av{font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);}
-.pc-user{font-size:12px;font-weight:700;color:var(--black);}
-.pc-time{font-size:10px;color:var(--sub);}
-.pc-body{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:14px;}
-.pc-foot{display:flex;gap:12px;align-items:center;}
-.pc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;padding:5px 0;}
-.pc-action svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.course-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0;}
+.cg-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh);cursor:pointer;}
+.cg-top{height:80px;background:linear-gradient(135deg,#09090B,#1A1200);display:flex;align-items:center;justify-content:center;}
+.cg-top svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:1.5;opacity:.6;}
+.cg-body{padding:12px;}
+.cg-cat{font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
+.cg-title{font-size:12px;font-weight:700;color:var(--black);line-height:1.3;margin-bottom:4px;}
+.cg-meta{font-size:10px;color:var(--sub);}
+.cg-price{display:inline-flex;padding:3px 8px;border-radius:var(--r-full);font-size:9px;font-weight:700;margin-top:6px;}
+.price-free{background:var(--green-dim);color:var(--green);border:1px solid var(--green-b);}
+.price-paid{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-b);}
+.reels-soon{margin:40px 20px;text-align:center;padding:40px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);}
+.rs-ico{width:64px;height:64px;border-radius:20px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.rs-ico svg{width:28px;height:28px;stroke:var(--sub);fill:none;stroke-width:1.5;}
 .coaches-cta{margin:14px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;display:flex;align-items:center;gap:14px;}
 .cta-ico{width:44px;height:44px;border-radius:var(--r);background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .cta-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
@@ -45,74 +64,153 @@
   <div style="width:36px;"></div>
   <div class="tb-brand">
     <div class="tb-twin">Grow</div>
-    <div class="tb-tag">by EPHAS</div>
   </div>
   <a href="/create" class="tb-btn" style="background:var(--gold-dim);border-color:var(--gold-b);"><i data-lucide="plus" style="stroke:var(--gold);"></i></a>
 </div>
 
 <div class="search-wrap">
   <div class="search-ico"><i data-lucide="search"></i></div>
-  <input type="text" class="search-inp" placeholder="Search posts, people, courses...">
+  <input type="text" class="search-inp" placeholder="Search posts, courses, people...">
 </div>
 
-<div class="filter-row">
-  <button class="filter-btn on" onclick="filterSet(this)">All</button>
-  <button class="filter-btn" onclick="filterSet(this)">Posts</button>
-  <button class="filter-btn" onclick="filterSet(this)">Courses</button>
-  <button class="filter-btn" onclick="filterSet(this)">Coaches</button>
-  <button class="filter-btn" onclick="filterSet(this)">People</button>
-  <button class="filter-btn" onclick="filterSet(this)">Mindset</button>
-  <button class="filter-btn" onclick="filterSet(this)">Fitness</button>
-  <button class="filter-btn" onclick="filterSet(this)">Wealth</button>
-</div>
-
-<!-- FEATURED -->
-<div class="featured-card">
-  <div class="fc-bg"></div>
-  <div class="fc-glow"></div>
-  <div class="fc-content">
-    <div class="fc-tag"><i data-lucide="award"></i> FEATURED COURSE</div>
-    <div class="fc-title">The Discipline Operating System</div>
-    <div class="fc-meta">Free · 6 modules · 2,847 enrolled</div>
-  </div>
+<div class="main-tabs">
+  <div class="mt-btn on" onclick="switchTab('posts',this)">Posts</div>
+  <div class="mt-btn" onclick="switchTab('reels',this)">Reels</div>
+  <div class="mt-btn" onclick="switchTab('courses',this)">Courses</div>
 </div>
 
 <!-- POSTS -->
-<div class="sect-lbl">Community</div>
-{% for p in feed %}
-<div class="post-card">
-  <div class="pc-head">
-    <div class="av av-40 pc-av">{{ p.init }}</div>
-    <div>
-      <div class="pc-user">{{ p.user }}</div>
-      <div class="pc-time">{{ p.time }}</div>
+<div class="tab-pane on" id="pane-posts">
+  <div class="chip-row">
+    <div class="chip on" onclick="chipSet(this)">All</div>
+    <div class="chip" onclick="chipSet(this)">Mindset</div>
+    <div class="chip" onclick="chipSet(this)">Fitness</div>
+    <div class="chip" onclick="chipSet(this)">Wealth</div>
+    <div class="chip" onclick="chipSet(this)">Nutrition</div>
+    <div class="chip" onclick="chipSet(this)">Business</div>
+    <div class="chip" onclick="chipSet(this)">Running</div>
+  </div>
+  <div style="height:10px;"></div>
+  {% for p in feed %}
+  <div class="post-card">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div>
+        <div class="pc-user">{{ p.user }}</div>
+        <div class="pc-time">{{ p.time }}</div>
+      </div>
+      <div class="pc-cat">Mindset</div>
+    </div>
+    <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
     </div>
   </div>
-  <div class="pc-body">{{ p.text }}</div>
-  <div class="pc-foot">
-    <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
-    <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-    <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
-    <div class="pc-action"><i data-lucide="share-2"></i></div>
+  {% endfor %}
+  <div class="coaches-cta">
+    <div class="cta-ico"><i data-lucide="users"></i></div>
+    <div class="cta-txt"><b>Coaches & Mentors</b> — Connect with vetted coaches across mindset, fitness, and wealth. Coming soon.</div>
+    <div class="pill pill-muted" style="font-size:8px;">SOON</div>
+  </div>
+  <div style="height:16px;"></div>
+</div>
+
+<!-- REELS -->
+<div class="tab-pane" id="pane-reels">
+  <div class="reels-soon">
+    <div class="rs-ico"><i data-lucide="video"></i></div>
+    <div class="t-lg mb-2">Reels</div>
+    <div style="font-size:13px;color:var(--sub);line-height:1.6;max-width:240px;margin:0 auto;">Short-form self-improvement videos are coming. Share your journey in 60 seconds.</div>
+    <div class="pill pill-muted" style="margin:16px auto 0;display:inline-flex;">COMING SOON</div>
   </div>
 </div>
-{% endfor %}
 
-<!-- COACHES CTA -->
-<div class="coaches-cta">
-  <div class="cta-ico"><i data-lucide="users"></i></div>
-  <div class="cta-txt"><b>Coaches & Mentors</b> — Connect with vetted coaches across mindset, fitness, and wealth. Coming soon.</div>
-  <div class="pill pill-gold">SOON</div>
+<!-- COURSES -->
+<div class="tab-pane" id="pane-courses">
+  <div class="chip-row">
+    <div class="chip on" onclick="chipSet(this)">All</div>
+    <div class="chip" onclick="chipSet(this)">Fitness</div>
+    <div class="chip" onclick="chipSet(this)">Business</div>
+    <div class="chip" onclick="chipSet(this)">Finance</div>
+    <div class="chip" onclick="chipSet(this)">Mindset</div>
+    <div class="chip" onclick="chipSet(this)">Marathon</div>
+    <div class="chip" onclick="chipSet(this)">Coaching</div>
+  </div>
+  <div class="featured-card">
+    <div class="fc-bg"></div>
+    <div class="fc-glow"></div>
+    <div class="fc-content">
+      <div class="fc-tag"><i data-lucide="award"></i> FEATURED</div>
+      <div class="fc-title">The Discipline Operating System</div>
+      <div class="fc-meta">Free · 6 modules · 2,847 enrolled</div>
+    </div>
+  </div>
+  <div class="course-grid">
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="trending-up"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">Sales</div>
+        <div class="cg-title">Cold Outreach Mastery</div>
+        <div class="cg-meta">8 modules · 1,204 enrolled</div>
+        <div class="cg-price price-paid">$49</div>
+      </div>
+    </div>
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="dumbbell"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">Fitness</div>
+        <div class="cg-title">Marathon in 16 Weeks</div>
+        <div class="cg-meta">12 modules · 891 enrolled</div>
+        <div class="cg-price price-free">Free</div>
+      </div>
+    </div>
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="brain"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">Mindset</div>
+        <div class="cg-title">Deep Work Protocol</div>
+        <div class="cg-meta">5 modules · 3,102 enrolled</div>
+        <div class="cg-price price-free">Free</div>
+      </div>
+    </div>
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="dollar-sign"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">Finance</div>
+        <div class="cg-title">Savings Framework</div>
+        <div class="cg-meta">7 modules · 2,018 enrolled</div>
+        <div class="cg-price price-paid">$29</div>
+      </div>
+    </div>
+  </div>
+  <div class="coaches-cta" style="margin-top:16px;">
+    <div class="cta-ico"><i data-lucide="graduation-cap"></i></div>
+    <div class="cta-txt"><b>Become an instructor</b> — Share your expertise and monetize your knowledge. Professional profile required.</div>
+    <a href="/create" class="pill pill-gold" style="font-size:8px;text-decoration:none;white-space:nowrap;">START</a>
+  </div>
+  <div style="height:16px;"></div>
 </div>
 
 <div class="tw-foot">
-  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-function filterSet(el){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+function switchTab(tab, el) {
+  document.querySelectorAll('.mt-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('pane-' + tab).classList.add('on');
+}
+function chipSet(el) {
+  el.closest('.chip-row').querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
 </script>
 {% endblock %}
