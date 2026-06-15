@@ -28,9 +28,16 @@
 .ai-elogo{height:7px;width:auto;margin:0 auto;display:block;opacity:.2;}
 [data-theme="dark"] .ai-elogo{filter:invert(1);opacity:.15;}
 .about-ephas{margin:0 20px 0;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:12px;}
-.ptype-row{display:flex;gap:6px;}
-.ptype-btn{padding:7px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:10px;font-weight:700;color:var(--sub);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;transition:all .15s;}
-.ptype-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.pro-apply-card{margin:0 20px;background:linear-gradient(135deg,#09090B,#0F0A00);border:1px solid rgba(212,170,53,.15);border-radius:var(--r-lg);padding:18px;position:relative;overflow:hidden;}
+.pac-glow{position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.08),transparent 70%);}
+.pac-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(212,170,53,.1);border:1px solid rgba(212,170,53,.2);border-radius:var(--r-full);padding:3px 10px;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;text-transform:uppercase;}
+.pac-tag svg{width:10px;height:10px;stroke:var(--gold);fill:none;stroke-width:2;}
+.pac-title{font-family:'Arpubes',sans-serif;font-size:16px;letter-spacing:-0.5px;color:#fff;margin-bottom:6px;}
+.pac-desc{font-size:11px;color:#888;line-height:1.6;margin-bottom:14px;}
+.pac-steps{display:flex;gap:8px;margin-bottom:16px;}
+.pac-step{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:8px;text-align:center;}
+.pac-step-ico{font-size:14px;margin-bottom:3px;}
+.pac-step-lbl{font-size:8px;color:#666;font-weight:600;letter-spacing:.5px;}
 .ae-ico{width:40px;height:40px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ae-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
 .ae-txt b{color:var(--black);}
@@ -114,24 +121,23 @@
   </div>
 </div>
 
-<!-- PROFILE TYPE -->
-<div class="block-label">Profile</div>
-<div class="settings-block">
-  <div class="s-row">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="user-check"></i></div>
-      <div>
-        <div class="s-title">Account Type</div>
-        <div class="s-sub" id="profTypeSub">TWIN Profile</div>
-      </div>
+<!-- PROFESSIONAL -->
+<div class="block-label">Professional</div>
+<div class="pro-apply-card">
+  <div class="pac-glow"></div>
+  <div style="position:relative;">
+    <div class="pac-tag"><i data-lucide="shield-check"></i> HAND-SELECTED</div>
+    <div class="pac-title">TWIN Professional</div>
+    <div class="pac-desc">Sell courses, coach members, and build your brand on TWIN. Applications are reviewed by the EPHAS team.</div>
+    <div class="pac-steps">
+      <div class="pac-step"><div class="pac-step-lbl">Submit docs</div></div>
+      <div class="pac-step"><div class="pac-step-lbl">EPHAS review</div></div>
+      <div class="pac-step"><div class="pac-step-lbl">Get approved</div></div>
+      <div class="pac-step"><div class="pac-step-lbl">Start selling</div></div>
     </div>
-    <div class="ptype-row">
-      <button class="ptype-btn on" id="ptBtnTwin" onclick="setProfType('twin')">TWIN</button>
-      <button class="ptype-btn" id="ptBtnPro" onclick="setProfType('pro')">PRO</button>
-    </div>
-  </div>
-  <div class="s-row" style="border-bottom:none;padding:10px 0 12px;">
-    <div style="font-size:11px;color:var(--sub);line-height:1.5;" id="profTypeDesc">TWIN Profile: Stats + Posts. Switch to Pro to unlock Courses and coaching on your profile.</div>
+    <a href="/apply-pro" class="btn btn-gold btn-full" style="font-size:12px;border-radius:var(--r-xl);">
+      <i data-lucide="send"></i> APPLY FOR PROFESSIONAL
+    </a>
   </div>
 </div>
 
@@ -203,18 +209,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script>
-const savedType = localStorage.getItem('twinAcctType') || 'twin';
-setProfType(savedType, true);
-function setProfType(type, silent) {
-  localStorage.setItem('twinAcctType', type);
-  document.getElementById('ptBtnTwin').classList.toggle('on', type === 'twin');
-  document.getElementById('ptBtnPro').classList.toggle('on', type === 'pro');
-  document.getElementById('profTypeSub').textContent = type === 'pro' ? 'Professional Profile' : 'TWIN Profile';
-  document.getElementById('profTypeDesc').textContent = type === 'pro'
-    ? 'Professional Profile: Posts + Stats + Courses. Your profile shows a Courses tab for teaching.'
-    : 'TWIN Profile: Stats + Posts. Switch to Pro to unlock Courses and coaching on your profile.';
-}
-</script>
 {% endblock %}

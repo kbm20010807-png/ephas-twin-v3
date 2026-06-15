@@ -147,5 +147,10 @@ def axon_settings():
     if not auth(): return redirect('/login')
     return render_template('axon_settings.html', u=DEMO_USER, active='settings')
 
+@app.route('/apply-pro')
+def apply_pro():
+    if not auth(): return redirect('/login')
+    return render_template('apply_pro.html', u=DEMO_USER, active='settings')
+
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
