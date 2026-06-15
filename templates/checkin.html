@@ -1,274 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>TWIN — Daily Check-In</title>
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+{% extends 'base.html' %}
+{% block title %}Check-In{% endblock %}
+
+{% block head %}
 <style>
-@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
-:root{--gold:#D4AA35;--gold-2:#C4961E;--gold-dim:rgba(212,170,53,0.12);--bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;--black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;--r-sm:12px;--r-md:18px;--r-lg:24px;--shadow:0 2px 12px rgba(0,0,0,0.06);}
-[data-theme="dark"]{--bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;--black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;}
-[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
-[data-theme="dark"] .eph-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-body{animation:fadeUp .25s ease;}
-
-/* TOPBAR */
-.topbar{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(250,250,250,.92);backdrop-filter:blur(20px);}
-[data-theme="dark"] .topbar{background:rgba(10,10,10,.92);}
-.tb-back{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
-.tb-back svg{width:18px;height:18px;stroke:var(--black);fill:none;stroke-width:2;}
-.tb-brand{text-align:center;}
-.tb-twin{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:var(--black);}
-.tb-ephas{display:flex;justify-content:center;margin-top:3px;}
-.eph-logo{height:7px;width:auto;mix-blend-mode:multiply;}
-.streak-pill{background:var(--gold-dim);border:1px solid rgba(212,170,53,.3);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.5px;}
-
-/* HERO */
-.ci-hero{padding:20px 20px 0;text-align:center;}
-.ci-day{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Arpubes',sans-serif;margin-bottom:4px;}
-.ci-title{font-family:'Arpubes',sans-serif;font-size:28px;font-weight:900;letter-spacing:-1.5px;color:var(--black);margin-bottom:6px;}
-.ci-sub{font-size:12px;color:var(--sub);line-height:1.5;}
-
-/* SECTION */
-.sect{margin:20px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow);}
-.sect-head{font-family:'Arpubes',sans-serif;font-size:13px;font-weight:900;color:var(--black);letter-spacing:-.3px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.sect-ico{font-size:16px;}
-
-/* SLIDER ROW */
-.slider-row{margin-bottom:18px;}
-.slider-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.sl-name{font-size:12px;font-weight:600;color:var(--text);}
-.sl-val{font-family:'Arpubes',sans-serif;font-size:18px;font-weight:900;color:var(--gold);}
-.slider{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:var(--surface);outline:none;cursor:pointer;}
-.slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(212,170,53,.4);}
-.slider-emoji{display:flex;justify-content:space-between;font-size:14px;margin-top:6px;}
-.slider-row:last-child{margin-bottom:0;}
-
-/* HABITS */
-.habit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.habit-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s;}
-.habit-btn.on{background:var(--gold-dim);border-color:rgba(212,170,53,.4);}
-.habit-ico{font-size:20px;flex-shrink:0;}
-.habit-name{font-size:11px;font-weight:700;color:var(--sub);line-height:1.3;}
-.habit-btn.on .habit-name{color:var(--gold);}
-.habit-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);margin-left:auto;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.habit-btn.on .habit-check{background:var(--gold);border-color:var(--gold);}
-.habit-btn.on .habit-check::after{content:'✓';font-size:10px;font-weight:900;color:#000;}
-
-/* TEXTAREA */
-.txt-area{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:14px;font-family:'Josefin Sans',sans-serif;font-size:12px;color:var(--black);resize:none;outline:none;transition:border-color .2s;line-height:1.6;}
-.txt-area:focus{border-color:var(--gold);}
-.txt-area::placeholder{color:var(--muted);}
-.char-ct{text-align:right;font-size:10px;color:var(--muted);margin-top:5px;}
-
-/* SUBMIT */
-.submit-zone{padding:20px;}
-.submit-btn{width:100%;background:var(--black);color:#fff;font-family:'Arpubes',sans-serif;font-size:15px;font-weight:900;letter-spacing:1px;border:none;border-radius:var(--r-lg);padding:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s;}
-[data-theme="dark"] .submit-btn{background:var(--gold);color:#000;}
-.submit-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;}
-.submit-btn:active{opacity:.85;}
-.xp-reward{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;}
-.xp-reward b{color:var(--gold);}
-
-/* SUCCESS OVERLAY */
-.success-ov{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+body{min-height:100vh;display:flex;flex-direction:column;}
+.ci-wrap{flex:1;display:flex;flex-direction:column;}
+.ci-top{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.ci-close{width:34px;height:34px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;}
+.ci-close svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
+.step-view{flex:1;display:none;flex-direction:column;padding:28px 24px;}
+.step-view.active{display:flex;}
+.step-q{font-family:'Arpubes',sans-serif;font-size:26px;letter-spacing:-1.5px;color:var(--black);line-height:1.2;margin-bottom:8px;}
+.step-hint{font-size:13px;color:var(--sub);margin-bottom:36px;line-height:1.5;}
+.step-big-val{font-family:'Arpubes',sans-serif;font-size:72px;letter-spacing:-5px;color:var(--black);text-align:center;margin-bottom:8px;line-height:1;}
+.step-range-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:10px;letter-spacing:.5px;}
+.step-footer{margin-top:auto;padding:20px 0 0;}
+.habit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:auto;}
+.h-btn{border:1.5px solid var(--border);border-radius:var(--r);padding:14px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s,background .15s;background:var(--bg-2);}
+.h-btn.on{border-color:var(--gold);background:var(--gold-dim);}
+.h-btn svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:1.75;flex-shrink:0;transition:stroke .15s;}
+.h-btn.on svg{stroke:var(--gold);}
+.h-name{font-size:11px;font-weight:700;color:var(--sub);transition:color .15s;}
+.h-btn.on .h-name{color:var(--black);}
+.h-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);margin-left:auto;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
+.h-btn.on .h-check{background:var(--gold);border-color:var(--gold);}
+.h-btn.on .h-check::after{content:'';display:block;width:5px;height:9px;border-right:2px solid #000;border-bottom:2px solid #000;transform:rotate(45deg);margin-top:-2px;}
+.success-ov{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .3s;}
 .success-ov.show{opacity:1;pointer-events:all;}
-.success-ov .s-ico{font-size:72px;margin-bottom:20px;animation:pop .4s .1s both;}
-.success-ov .s-ttl{font-family:'Arpubes',sans-serif;font-size:28px;color:var(--black);letter-spacing:-1.5px;margin-bottom:8px;text-align:center;}
-.success-ov .s-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.5;max-width:260px;}
-.success-ov .s-xp{font-family:'Arpubes',sans-serif;font-size:32px;color:var(--gold);margin-top:16px;}
-@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-.s-back{margin-top:28px;background:var(--black);color:#fff;font-family:'Arpubes',sans-serif;font-size:13px;font-weight:900;letter-spacing:1px;border:none;border-radius:var(--r-lg);padding:16px 36px;cursor:pointer;}
-[data-theme="dark"] .s-back{background:var(--gold);color:#000;}
-
-/* NAV */
-.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
-.pt.on{opacity:1;pointer-events:all;}
-.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;text-align:center;}
-.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
-[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
-.spacer{height:110px;}
-.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
-.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
-.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;}
-.nav-item.active .nav-ico{background:var(--gold-dim);}
-.nav-item.active .nav-ico svg{stroke:var(--gold);}
-.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
-.nav-item.active .nav-lbl{color:var(--gold);}
-.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
-.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
-.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+.so-check{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:pop .4s ease;}
+.so-check svg{width:36px;height:36px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.so-xp{font-family:'Arpubes',sans-serif;font-size:42px;letter-spacing:-3px;color:var(--gold);margin:12px 0 6px;}
 </style>
-</head>
-<body>
+{% endblock %}
 
-<div class="topbar">
-  <a href="/home" class="tb-back"><i data-lucide="arrow-left"></i></a>
-  <div class="tb-brand">
-    <div class="tb-twin">Check-In</div>
-    <div class="tb-ephas"><img src="/static/ephas_logo2.png" class="eph-logo" alt="EPHAS"></div>
+{% block content %}
+<div class="ci-wrap">
+  <div class="ci-top">
+    <a href="/home" class="ci-close"><i data-lucide="x"></i></a>
+    <div class="tb-brand">
+      <div class="tb-twin">Check-In</div>
+      <div class="tb-tag">by EPHAS</div>
+    </div>
+    <div style="width:34px;"></div>
   </div>
-  <div class="streak-pill">🔥 {{ profile.streak }}d</div>
-</div>
 
-<div class="ci-hero">
-  <div class="ci-day" id="ciDay">Loading...</div>
-  <div class="ci-title">How was your day?</div>
-  <div class="ci-sub">Rate yourself honestly. Your data, your growth.</div>
-</div>
+  <div class="step-bar" style="padding:14px 24px 0;"></div>
+  <div id="stepProg" style="display:flex;gap:5px;padding:14px 24px 0;">
+    <div class="step-seg" id="p1"></div>
+    <div class="step-seg" id="p2"></div>
+    <div class="step-seg" id="p3"></div>
+    <div class="step-seg" id="p4"></div>
+    <div class="step-seg" id="p5"></div>
+    <div class="step-seg" id="p6"></div>
+  </div>
 
-<!-- VITALS -->
-<div class="sect">
-  <div class="sect-head"><span class="sect-ico">📊</span> Daily Vitals</div>
-  <div class="slider-row">
-    <div class="slider-lbl">
-      <span class="sl-name">Sleep Quality</span>
-      <span class="sl-val" id="sleepVal">7</span>
-    </div>
-    <input type="range" class="slider" min="1" max="10" value="7" id="sleepSlider">
-    <div class="slider-emoji"><span>😴</span><span>💤</span><span>⚡</span></div>
-  </div>
-  <div class="slider-row">
-    <div class="slider-lbl">
-      <span class="sl-name">Energy Level</span>
-      <span class="sl-val" id="energyVal">7</span>
-    </div>
-    <input type="range" class="slider" min="1" max="10" value="7" id="energySlider">
-    <div class="slider-emoji"><span>🪫</span><span>⚡</span><span>🚀</span></div>
-  </div>
-  <div class="slider-row">
-    <div class="slider-lbl">
-      <span class="sl-name">Mood</span>
-      <span class="sl-val" id="moodVal">7</span>
-    </div>
-    <input type="range" class="slider" min="1" max="10" value="7" id="moodSlider">
-    <div class="slider-emoji"><span>😞</span><span>😌</span><span>😁</span></div>
-  </div>
-  <div class="slider-row">
-    <div class="slider-lbl">
-      <span class="sl-name">Productivity</span>
-      <span class="sl-val" id="prodVal">7</span>
-    </div>
-    <input type="range" class="slider" min="1" max="10" value="7" id="prodSlider">
-    <div class="slider-emoji"><span>📉</span><span>📊</span><span>📈</span></div>
-  </div>
-</div>
-
-<!-- HABITS -->
-<div class="sect">
-  <div class="sect-head"><span class="sect-ico">✅</span> Habits Completed</div>
-  <div class="habit-grid">
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">🕌</div><div class="habit-name">Morning Prayer</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">🚿</div><div class="habit-name">Cold Shower</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">📖</div><div class="habit-name">Reading</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">💪</div><div class="habit-name">Gym / Exercise</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">✍️</div><div class="habit-name">Journaling</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">🚫</div><div class="habit-name">No Social Media</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">💧</div><div class="habit-name">2L Water</div><div class="habit-check"></div>
-    </div>
-    <div class="habit-btn" onclick="toggleHabit(this)">
-      <div class="habit-ico">🍽️</div><div class="habit-name">Clean Eating</div><div class="habit-check"></div>
+  <!-- STEP 1: Sleep -->
+  <div class="step-view active" id="s1">
+    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 1 of 6</div>
+    <div class="step-q">How many hours did you sleep?</div>
+    <div class="step-hint">Quality rest is the foundation of everything else.</div>
+    <div class="step-big-val" id="sleepDisp">7</div>
+    <input type="range" class="range-input" min="3" max="12" step="0.5" value="7" id="sleepR" oninput="document.getElementById('sleepDisp').textContent=this.value">
+    <div class="step-range-lbl"><span>3h</span><span>12h</span></div>
+    <div class="step-footer">
+      <button class="btn btn-primary btn-full" onclick="next(1)" style="border-radius:var(--r-xl);">
+        <i data-lucide="arrow-right"></i> CONTINUE
+      </button>
     </div>
   </div>
+
+  <!-- STEP 2: Energy -->
+  <div class="step-view" id="s2">
+    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 2 of 6</div>
+    <div class="step-q">How's your energy level today?</div>
+    <div class="step-hint">Rate from 1 (drained) to 10 (fully charged).</div>
+    <div class="step-big-val" style="color:#22C55E" id="energyDisp">7</div>
+    <input type="range" class="range-input" min="1" max="10" value="7" id="energyR" oninput="document.getElementById('energyDisp').textContent=this.value">
+    <div class="step-range-lbl"><span>Drained</span><span>Charged</span></div>
+    <div class="step-footer">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(2)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <button class="btn btn-primary btn-full" onclick="next(2)" style="border-radius:var(--r-xl);">
+          <i data-lucide="arrow-right"></i> CONTINUE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Mood -->
+  <div class="step-view" id="s3">
+    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 3 of 6</div>
+    <div class="step-q">How's your mood right now?</div>
+    <div class="step-hint">Be honest with yourself — this is your data.</div>
+    <div class="step-big-val" style="color:#8B5CF6" id="moodDisp">7</div>
+    <input type="range" class="range-input" min="1" max="10" value="7" id="moodR" oninput="document.getElementById('moodDisp').textContent=this.value">
+    <div class="step-range-lbl"><span>Low</span><span>Excellent</span></div>
+    <div class="step-footer">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(3)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <button class="btn btn-primary btn-full" onclick="next(3)" style="border-radius:var(--r-xl);">
+          <i data-lucide="arrow-right"></i> CONTINUE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Habits -->
+  <div class="step-view" id="s4">
+    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 4 of 6</div>
+    <div class="step-q">What did you complete today?</div>
+    <div class="step-hint" style="margin-bottom:20px;">Tap everything you did.</div>
+    <div class="habit-grid">
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="dumbbell"></i><div class="h-name">Workout</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="wind"></i><div class="h-name">Cold Shower</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="book-open"></i><div class="h-name">Reading</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="laptop"></i><div class="h-name">Deep Work</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="pen-tool"></i><div class="h-name">Journaling</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="droplets"></i><div class="h-name">Hydration</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="brain"></i><div class="h-name">Meditation</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="smartphone-off"></i><div class="h-name">No Screens</div><div class="h-check"></div></div>
+    </div>
+    <div class="step-footer" style="padding-top:16px;">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(4)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
+        <button class="btn btn-primary btn-full" onclick="next(4)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Win -->
+  <div class="step-view" id="s5">
+    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 5 of 6</div>
+    <div class="step-q">What was your win today?</div>
+    <div class="step-hint">Even a small win counts. Write it down.</div>
+    <textarea class="form-input form-textarea" id="winTxt" placeholder="My biggest win today was..." style="flex:1;min-height:120px;"></textarea>
+    <div style="text-align:right;font-size:10px;color:var(--sub);margin-top:5px;" id="winCt">0/200</div>
+    <div class="step-footer">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(5)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
+        <button class="btn btn-primary btn-full" onclick="next(5)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6: Reflection -->
+  <div class="step-view" id="s6">
+    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 6 of 6</div>
+    <div class="step-q">Tomorrow's one priority?</div>
+    <div class="step-hint">One clear intention is more powerful than ten vague goals.</div>
+    <textarea class="form-input form-textarea" id="refTxt" placeholder="Tomorrow I will focus on..." style="flex:1;min-height:120px;"></textarea>
+    <div class="step-footer">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(6)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
+        <button class="btn btn-gold btn-full" onclick="submit()" style="border-radius:var(--r-xl);"><i data-lucide="check"></i> COMPLETE CHECK-IN</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- WIN OF THE DAY -->
-<div class="sect">
-  <div class="sect-head"><span class="sect-ico">🏆</span> Win of the Day</div>
-  <textarea class="txt-area" id="winTxt" rows="3" maxlength="200" placeholder="What was your biggest win today?" oninput="document.getElementById('winCt').textContent=this.value.length+'/200'"></textarea>
-  <div class="char-ct" id="winCt">0/200</div>
-</div>
-
-<!-- REFLECTION -->
-<div class="sect">
-  <div class="sect-head"><span class="sect-ico">💭</span> Evening Reflection</div>
-  <textarea class="txt-area" id="refTxt" rows="4" maxlength="400" placeholder="What will you do differently tomorrow? What are you grateful for?" oninput="document.getElementById('refCt').textContent=this.value.length+'/400'"></textarea>
-  <div class="char-ct" id="refCt">0/400</div>
-</div>
-
-<div class="submit-zone">
-  <button class="submit-btn" onclick="submitCheckin()">
-    <i data-lucide="check-circle"></i>
-    COMPLETE CHECK-IN
-  </button>
-  <div class="xp-reward">You'll earn <b>+50 XP</b> for completing today's check-in</div>
-</div>
-
-<div class="spacer"></div>
-<div class="nav-bar">
-  <a href="/home" class="nav-item">
-    <div class="nav-ico"><i data-lucide="home"></i></div>
-    <div class="nav-lbl">Home</div>
-  </a>
-  <a href="/analytics" class="nav-item">
-    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
-    <div class="nav-lbl">Analytics</div>
-  </a>
-  <a href="/checkin" class="nav-ctr active">
-    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
-    <div class="nav-lbl" id="navCtrLbl">Check In</div>
-  </a>
-  <a href="/grow" class="nav-item">
-    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
-    <div class="nav-lbl">Grow</div>
-  </a>
-  <a href="/profile" class="nav-item">
-    <div class="nav-ico"><i data-lucide="user"></i></div>
-    <div class="nav-lbl">Profile</div>
-  </a>
-</div>
-
-<!-- SUCCESS OVERLAY -->
+<!-- SUCCESS -->
 <div class="success-ov" id="successOv">
-  <div class="s-ico">🏆</div>
-  <div class="s-ttl">Check-In Complete!</div>
-  <div class="s-sub">Another day of growth locked in. AXON is analyzing your data...</div>
-  <div class="s-xp">+50 XP</div>
-  <button class="s-back" onclick="window.location='/home'">BACK TO HOME</button>
+  <div class="so-check"><i data-lucide="check"></i></div>
+  <div class="t-label mb-2">Check-in complete</div>
+  <div class="so-xp">+50 XP</div>
+  <div style="font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:260px;margin-bottom:28px;">Logged. AXON is analyzing your patterns and will have insights ready tomorrow morning.</div>
+  <button class="btn btn-primary btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);">
+    <i data-lucide="home"></i> BACK TO HOME
+  </button>
 </div>
+{% endblock %}
 
-<div id="pt" class="pt">
-  <div><div class="pt-twin">TWIN</div><img src="/static/ephas_logo2.png" class="pt-logo" alt=""></div>
-</div>
+{% block scripts %}
 <script>
-lucide.createIcons();
-const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const now=new Date();
-document.getElementById('ciDay').textContent=days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate();
-const h=now.getHours();
-const n=document.getElementById('navCtrLbl');
-if(n)n.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
-['sleep','energy','mood','prod'].forEach(k=>{
-  const s=document.getElementById(k+'Slider');
-  const v=document.getElementById(k+'Val');
-  s.addEventListener('input',()=>{v.textContent=s.value;});
-});
-function toggleHabit(el){el.classList.toggle('on');}
-function submitCheckin(){
-  document.getElementById('successOv').classList.add('show');
-}
-document.querySelectorAll('a[href^="/"]').forEach(a=>{a.addEventListener('click',function(e){const href=this.getAttribute('href');if(!href||href==='#'||href===window.location.pathname)return;e.preventDefault();document.getElementById('pt').classList.add('on');setTimeout(()=>{window.location.href=href;},240);});});
+let step=1;
+function updateProg(){for(let i=1;i<=6;i++){const s=document.getElementById('p'+i);s.classList.remove('done');if(i<step)s.style.background='var(--gold)';else if(i===step)s.style.background='rgba(212,170,53,.35)';else s.style.background='var(--border)';}}
+function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.remove('active'));document.getElementById('s'+n).classList.add('active');step=n;updateProg();}
+function next(n){show(n+1);}
+function prev(n){show(n-1);}
+function tog(el){el.classList.toggle('on');}
+function submit(){document.getElementById('successOv').classList.add('show');}
+const wt=document.getElementById('winTxt');
+if(wt)wt.addEventListener('input',()=>{document.getElementById('winCt').textContent=wt.value.length+'/200';});
+updateProg();
 </script>
-</body>
-</html>
+{% endblock %}

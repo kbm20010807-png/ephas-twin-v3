@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme:dark)">
+<title>{% block title %}TWIN{% endblock %} — Powered by EPHAS</title>
+<link rel="stylesheet" href="/static/twin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+{% block head %}{% endblock %}
+</head>
+<body class="pg">
+
+{% block content %}{% endblock %}
+
+{% if not auth_page %}
+<div class="spacer-nav"></div>
+<nav class="nav-bar">
+  <a href="/home" class="nav-i {% if active=='home' %}on{% endif %}">
+    <div class="nav-ico"><i data-lucide="home"></i></div>
+    <div class="nav-lbl">Home</div>
+  </a>
+  <a href="/analytics" class="nav-i {% if active=='analytics' %}on{% endif %}">
+    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
+    <div class="nav-lbl">Stats</div>
+  </a>
+  <a href="/checkin" class="nav-ctr" id="navCtrLink">
+    <div class="nav-ctr-btn"><i data-lucide="plus"></i></div>
+    <div class="nav-lbl" id="navCtrLbl" style="font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:4px;">Log</div>
+  </a>
+  <a href="/grow" class="nav-i {% if active=='grow' %}on{% endif %}">
+    <div class="nav-ico"><i data-lucide="compass"></i></div>
+    <div class="nav-lbl">Grow</div>
+  </a>
+  <a href="/profile" class="nav-i {% if active=='profile' %}on{% endif %}">
+    <div class="nav-ico"><i data-lucide="user"></i></div>
+    <div class="nav-lbl">Profile</div>
+  </a>
+</nav>
+{% endif %}
+
+<div id="pt" class="pt">
+  <div class="pt-word">TWIN</div>
+  <img src="/static/ephas_logo2.png" class="pt-elogo" alt="">
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if(typeof lucide !== 'undefined') lucide.createIcons();
+
+  // Nav center: check-in vs check-out
+  const h = new Date().getHours();
+  const isEvening = h >= 18 || h < 5;
+  const lbl = document.getElementById('navCtrLbl');
+  const lnk = document.getElementById('navCtrLink');
+  if(lbl) lbl.textContent = isEvening ? 'CHECK OUT' : 'CHECK IN';
+  if(lnk) lnk.setAttribute('href', isEvening ? '/checkout' : '/checkin');
+
+  // Page transitions
+  document.querySelectorAll('a[href^="/"]').forEach(a => {
+    a.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if(!href || href === '#' || href === window.location.pathname) return;
+      e.preventDefault();
+      document.getElementById('pt').classList.add('on');
+      setTimeout(() => { window.location.href = href; }, 180);
+    });
+  });
+
+  // Dark mode toggle (if present)
+  const dm = document.getElementById('darkModeToggle');
+  if(dm) {
+    dm.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+    dm.addEventListener('change', function() {
+      const t = this.checked ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    });
+  }
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

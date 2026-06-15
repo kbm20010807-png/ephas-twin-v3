@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+
+{% block head %}
+<style>
+.prof-banner{padding:24px 20px 0;display:flex;align-items:center;gap:14px;}
+.pb-info{flex:1;}
+.pb-name{font-family:'Arpubes',sans-serif;font-size:18px;letter-spacing:-1px;color:var(--black);}
+.pb-meta{font-size:11px;color:var(--sub);margin-top:2px;}
+.pb-lv{display:inline-flex;align-items:center;gap:4px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:4px 10px;font-size:10px;font-weight:700;color:var(--gold);margin-top:6px;}
+.pb-lv svg{width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:2;}
+.settings-block{margin:20px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:0 16px;box-shadow:var(--sh);}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.s-row:last-child{border-bottom:none;}
+.s-left{display:flex;align-items:center;gap:12px;}
+.s-ico-wrap{width:32px;height:32px;border-radius:9px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.s-ico-wrap svg{width:15px;height:15px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.s-title{font-size:13px;font-weight:600;color:var(--black);}
+.s-sub{font-size:10px;color:var(--sub);margin-top:1px;}
+.s-arrow{display:flex;align-items:center;}
+.s-arrow svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:1.75;}
+.block-label{padding:20px 20px 8px;font-family:'Arpubes',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--sub);text-transform:uppercase;}
+.sign-out-btn{margin:20px 20px 0;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;}
+.sign-out-btn svg{width:16px;height:16px;stroke:var(--red);fill:none;stroke-width:2;}
+.app-info{padding:24px 20px;text-align:center;}
+.ai-twin{font-family:'Arpubes',sans-serif;font-size:14px;letter-spacing:-1px;color:var(--muted);margin-bottom:4px;}
+.ai-ver{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;}
+.ai-elogo{height:7px;width:auto;margin:0 auto;display:block;opacity:.2;}
+[data-theme="dark"] .ai-elogo{filter:invert(1);opacity:.15;}
+.about-ephas{margin:0 20px 0;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:12px;}
+.ae-ico{width:40px;height:40px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ae-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
+.ae-txt b{color:var(--black);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/profile" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand">
+    <div class="tb-twin">Settings</div>
+    <div class="tb-tag">by EPHAS</div>
+  </div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="prof-banner">
+  <div class="av av-52">{{ u.name[0]|upper }}</div>
+  <div class="pb-info">
+    <div class="pb-name">{{ u.name }}</div>
+    <div class="pb-meta">{{ u.email }}</div>
+    <div class="pb-lv"><i data-lucide="award"></i> Level {{ u.level }} · {{ u.level_title }}</div>
+  </div>
+</div>
+
+<!-- APPEARANCE -->
+<div class="block-label">Appearance</div>
+<div class="settings-block">
+  <div class="s-row">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="moon"></i></div>
+      <div>
+        <div class="s-title">Dark Mode</div>
+        <div class="s-sub">Switch between light and dark</div>
+      </div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="darkModeToggle">
+      <div class="toggle-track"></div>
+      <div class="toggle-thumb"></div>
+    </label>
+  </div>
+</div>
+
+<!-- ACCOUNT -->
+<div class="block-label">Account</div>
+<div class="settings-block">
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="user"></i></div>
+      <div><div class="s-title">Edit Profile</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="bell"></i></div>
+      <div>
+        <div class="s-title">Notifications</div>
+        <div class="s-sub">Check-in reminders, AXON insights</div>
+      </div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" checked>
+      <div class="toggle-track"></div>
+      <div class="toggle-thumb"></div>
+    </label>
+  </div>
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="lock"></i></div>
+      <div><div class="s-title">Privacy & Security</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="shield"></i></div>
+      <div><div class="s-title">Data & Backup</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
+<!-- TWIN -->
+<div class="block-label">TWIN</div>
+<div class="settings-block">
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="zap"></i></div>
+      <div>
+        <div class="s-title">AXON AI Coach</div>
+        <div class="s-sub">Manage AI insights and coaching</div>
+      </div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="target"></i></div>
+      <div>
+        <div class="s-title">Goals & Habits</div>
+        <div class="s-sub">Customize your tracking domains</div>
+      </div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="share-2"></i></div>
+      <div><div class="s-title">Share TWIN</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
+<!-- SUPPORT -->
+<div class="block-label">Support</div>
+<div class="settings-block">
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="help-circle"></i></div>
+      <div><div class="s-title">Help & FAQ</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+  <div class="s-row" style="cursor:pointer;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="flag"></i></div>
+      <div><div class="s-title">Report a Problem</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
+<div class="about-ephas" style="margin-top:16px;">
+  <div class="ae-ico"><img src="/static/ephas_logo2.png" style="height:22px;width:auto;" class="elogo" alt="EPHAS"></div>
+  <div class="ae-txt"><b>EPHAS</b> is a free community for human excellence. TWIN is the personal growth platform built on EPHAS values.</div>
+</div>
+
+<a href="/logout" class="sign-out-btn">
+  <i data-lucide="log-out"></i>
+  SIGN OUT
+</a>
+
+<div class="app-info">
+  <div class="ai-twin">TWIN by EPHAS</div>
+  <div class="ai-ver">VERSION 3.0.0</div>
+  <img src="/static/ephas_logo2.png" class="ai-elogo elogo" alt="">
+</div>
+{% endblock %}

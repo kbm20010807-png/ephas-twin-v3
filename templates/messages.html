@@ -1,212 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>TWIN — Messages</title>
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+{% extends 'base.html' %}
+{% block title %}Messages{% endblock %}
+
+{% block head %}
 <style>
-@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
-:root{--gold:#D4AA35;--gold-2:#C4961E;--gold-dim:rgba(212,170,53,0.12);--bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;--black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;--r-sm:12px;--r-md:18px;--r-lg:24px;--shadow:0 2px 12px rgba(0,0,0,0.06);}
-[data-theme="dark"]{--bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;--black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;}
-[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
-[data-theme="dark"] .eph-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-body{animation:fadeUp .25s ease;}
-
-/* TOPBAR */
-.topbar{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(250,250,250,.92);backdrop-filter:blur(20px);}
-[data-theme="dark"] .topbar{background:rgba(10,10,10,.92);}
-.tb-brand{text-align:center;}
-.tb-twin{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);}
-.tb-ephas{display:flex;justify-content:center;margin-top:3px;}
-.eph-logo{height:7px;width:auto;mix-blend-mode:multiply;}
-.tb-edit{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
-.tb-edit svg{width:18px;height:18px;stroke:var(--black);fill:none;stroke-width:1.75;}
-.tb-new{width:36px;height:36px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(212,170,53,.3);display:flex;align-items:center;justify-content:center;}
-.tb-new svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.75;}
-
-/* SEARCH */
-.search-wrap{position:relative;padding:0 20px 14px;}
-.search-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-md);padding:13px 16px 13px 44px;font-family:'Josefin Sans',sans-serif;font-size:13px;color:var(--black);outline:none;transition:border-color .2s;box-shadow:var(--shadow);}
-.search-input:focus{border-color:var(--gold);}
+.search-wrap{padding:14px 20px 0;position:relative;}
 .search-ico{position:absolute;left:34px;top:50%;transform:translateY(-50%);}
-.search-ico svg{width:18px;height:18px;stroke:var(--sub);stroke-width:1.75;fill:none;}
-
-/* AXON PINNED CARD */
-.axon-card{margin:0 20px 16px;background:#0A0A0A;border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;position:relative;overflow:hidden;}
-.axon-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.2),transparent 70%);}
-.axon-av{width:46px;height:46px;border-radius:var(--r-sm);background:linear-gradient(135deg,#1A1200,#2A2000);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(212,170,53,.2);}
-.axon-av img{height:24px;width:auto;filter:invert(1);}
-.axon-info{flex:1;min-width:0;}
-.axon-name{font-family:'Arpubes',sans-serif;font-size:14px;color:#fff;letter-spacing:-.3px;}
-.axon-preview{font-size:11px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-.axon-badge{background:var(--gold);border-radius:20px;padding:3px 9px;font-size:9px;font-weight:800;color:#000;letter-spacing:1px;white-space:nowrap;}
-
-/* CONVO THREADS */
-.threads-lbl{padding:0 20px 8px;font-size:9px;font-weight:800;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Arpubes',sans-serif;}
-.thread{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
-.thread:active{background:var(--surface);}
-.th-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0;position:relative;}
-.th-online{position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:#22C55E;border:2px solid var(--bg);}
+.search-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.search-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px 12px 44px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;}
+.search-inp:focus{border-color:var(--gold);}
+.search-inp::placeholder{color:var(--muted);}
+.axon-thread{margin:14px 20px 0;background:#09090B;border:1px solid #1C1C1C;border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;}
+[data-theme="dark"] .axon-thread{background:#0F0F0F;}
+.at-glow{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.1),transparent 70%);}
+.at-ico{width:44px;height:44px;border-radius:var(--r);background:rgba(212,170,53,.08);border:1px solid rgba(212,170,53,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.at-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.at-info{flex:1;min-width:0;}
+.at-name{font-family:'Arpubes',sans-serif;font-size:13px;color:#e0e0e0;letter-spacing:-.3px;}
+.at-prev{font-size:11px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.at-live{background:#22C55E;border-radius:var(--r-full);padding:2px 9px;font-size:8px;font-weight:700;color:#000;letter-spacing:1px;flex-shrink:0;}
+.thread{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.thread:active{background:var(--bg-2);}
+.th-av{position:relative;}
+.th-online{position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;background:#22C55E;border:2px solid var(--bg);}
 .th-body{flex:1;min-width:0;}
-.th-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.th-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
 .th-name{font-size:13px;font-weight:700;color:var(--black);}
 .th-time{font-size:10px;color:var(--muted);}
-.th-preview{font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.th-unread{width:18px;height:18px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;flex-shrink:0;margin-left:8px;}
-
-/* DISCOVER CTA */
-.disc-cta{margin:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;text-align:center;}
-.disc-cta-ico{font-size:36px;margin-bottom:10px;}
-.disc-cta-title{font-family:'Arpubes',sans-serif;font-size:15px;color:var(--black);letter-spacing:-.5px;margin-bottom:6px;}
-.disc-cta-sub{font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:14px;}
-.disc-cta-btn{background:var(--black);color:#fff;font-family:'Arpubes',sans-serif;font-size:11px;font-weight:900;letter-spacing:1px;border:none;border-radius:var(--r-md);padding:12px 24px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
-[data-theme="dark"] .disc-cta-btn{background:var(--gold);color:#000;}
-.disc-cta-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;}
-.coming-badge{display:inline-block;background:var(--gold-dim);border:1px solid rgba(212,170,53,.3);border-radius:20px;padding:3px 10px;font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--gold);margin-bottom:12px;}
-
-/* NAV */
-.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
-.pt.on{opacity:1;pointer-events:all;}
-.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;text-align:center;}
-.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
-[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
-.spacer{height:100px;}
-.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
-.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
-.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;}
-.nav-item.active .nav-ico{background:var(--gold-dim);}
-.nav-item.active .nav-ico svg{stroke:var(--gold);}
-.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
-.nav-item.active .nav-lbl{color:var(--gold);}
-.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
-.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
-.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+.th-prev{font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.th-badge{width:18px;height:18px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;flex-shrink:0;margin-left:8px;}
+.requests-cta{margin:16px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:12px;}
+.rc-ico{width:42px;height:42px;border-radius:var(--r);background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rc-ico svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.rc-body{flex:1;}
+.rc-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:2px;}
+.rc-sub{font-size:11px;color:var(--sub);line-height:1.4;}
+.tw-foot{padding:28px 20px 16px;text-align:center;}
 </style>
-</head>
-<body>
+{% endblock %}
 
+{% block content %}
 <div class="topbar">
-  <div class="tb-edit"><i data-lucide="edit-3"></i></div>
+  <div style="width:36px;"></div>
   <div class="tb-brand">
     <div class="tb-twin">Messages</div>
-    <div class="tb-ephas"><img src="/static/ephas_logo2.png" class="eph-logo" alt="EPHAS"></div>
+    <div class="tb-tag">by EPHAS</div>
   </div>
-  <div class="tb-new"><i data-lucide="plus"></i></div>
+  <button class="tb-btn"><i data-lucide="edit-3"></i></button>
 </div>
 
 <div class="search-wrap">
   <div class="search-ico"><i data-lucide="search"></i></div>
-  <input type="text" class="search-input" placeholder="Search messages...">
+  <input class="search-inp" type="text" placeholder="Search messages...">
 </div>
 
 <!-- AXON PINNED -->
-<div class="axon-card" onclick="window.location='/home'">
-  <div class="axon-av"><img src="/static/axon_logo.png" alt="AXON"></div>
-  <div class="axon-info">
-    <div class="axon-name">AXON — AI Coach</div>
-    <div class="axon-preview">Your streak is building. Let's talk about your goals this week...</div>
+<div class="axon-thread" onclick="window.location='/home'">
+  <div class="at-glow"></div>
+  <div class="at-ico"><i data-lucide="zap"></i></div>
+  <div class="at-info">
+    <div class="at-name">AXON AI Coach</div>
+    <div class="at-prev">Your patterns from this week are ready to review...</div>
   </div>
-  <div class="axon-badge">LIVE</div>
+  <div class="at-live">LIVE</div>
 </div>
 
-<div class="threads-lbl">Conversations</div>
+<div class="sect-lbl">Direct Messages</div>
 
-<!-- DEMO THREADS -->
+{% for t in threads %}
 <div class="thread">
-  <div class="th-av" style="background:linear-gradient(135deg,#0A0A0A,#1A1200);">A
-    <div class="th-online"></div>
+  <div class="th-av">
+    <div class="av av-44 {% if loop.index == 1 %}th-av{% endif %}">{{ t.init }}</div>
+    {% if loop.index == 1 %}<div class="th-online"></div>{% endif %}
   </div>
   <div class="th-body">
     <div class="th-row">
-      <div class="th-name">Abdullah K.</div>
-      <div class="th-time">2m ago</div>
+      <div class="th-name">{{ t.user }}</div>
+      <div class="th-time">{{ t.time }}</div>
     </div>
     <div style="display:flex;align-items:center;">
-      <div class="th-preview">Bro that routine you shared really hit different 🔥</div>
-      <div class="th-unread">2</div>
+      <div class="th-prev">{{ t.preview }}</div>
+      {% if t.unread > 0 %}<div class="th-badge">{{ t.unread }}</div>{% endif %}
     </div>
   </div>
 </div>
+{% endfor %}
 
-<div class="thread">
-  <div class="th-av" style="background:linear-gradient(135deg,#0D1A0D,#1A3A1A);">S</div>
-  <div class="th-body">
-    <div class="th-row">
-      <div class="th-name">Sara M.</div>
-      <div class="th-time">1h ago</div>
-    </div>
-    <div class="th-preview">Just finished the mindset course, thank you!</div>
+<div class="requests-cta">
+  <div class="rc-ico"><i data-lucide="user-plus"></i></div>
+  <div class="rc-body">
+    <div class="rc-title">Find Your Circle</div>
+    <div class="rc-sub">Connect with accountability partners, coaches, and builders on the same path.</div>
   </div>
+  <a href="/grow" class="btn btn-sm btn-primary" style="border-radius:var(--r-full);flex-shrink:0;padding:9px 14px;font-size:10px;white-space:nowrap;">
+    <i data-lucide="compass"></i> Discover
+  </a>
 </div>
 
-<div class="thread">
-  <div class="th-av" style="background:linear-gradient(135deg,#1A001A,#2A0A2A);">M</div>
-  <div class="th-body">
-    <div class="th-row">
-      <div class="th-name">Mohammed R.</div>
-      <div class="th-time">Yesterday</div>
-    </div>
-    <div class="th-preview">What's your morning prayer schedule? Trying to be more consistent</div>
-  </div>
+<div class="tw-foot">
+  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
-
-<div class="thread">
-  <div class="th-av" style="background:linear-gradient(135deg,#001A1A,#002A2A);">F</div>
-  <div class="th-body">
-    <div class="th-row">
-      <div class="th-name">Fatima H.</div>
-      <div class="th-time">2d ago</div>
-    </div>
-    <div class="th-preview">The accountability partner feature would be amazing 👏</div>
-  </div>
-</div>
-
-<!-- DISCOVER CTA -->
-<div class="disc-cta">
-  <div class="coming-badge">COMING SOON</div>
-  <div class="disc-cta-ico">🤝</div>
-  <div class="disc-cta-title">Find Your Circle</div>
-  <div class="disc-cta-sub">Connect with builders, coaches, and accountability partners who are on the same path as you.</div>
-  <button class="disc-cta-btn" onclick="window.location='/grow'"><i data-lucide="compass"></i> DISCOVER PEOPLE</button>
-</div>
-
-<div class="spacer"></div>
-<div class="nav-bar">
-  <a href="/home" class="nav-item">
-    <div class="nav-ico"><i data-lucide="home"></i></div>
-    <div class="nav-lbl">Home</div>
-  </a>
-  <a href="/analytics" class="nav-item">
-    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
-    <div class="nav-lbl">Analytics</div>
-  </a>
-  <a href="/checkin" class="nav-ctr">
-    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
-    <div class="nav-lbl" id="navCtrLbl">Check In</div>
-  </a>
-  <a href="/grow" class="nav-item">
-    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
-    <div class="nav-lbl">Grow</div>
-  </a>
-  <a href="/profile" class="nav-item">
-    <div class="nav-ico"><i data-lucide="user"></i></div>
-    <div class="nav-lbl">Profile</div>
-  </a>
-</div>
-<div id="pt" class="pt">
-  <div><div class="pt-twin">TWIN</div><img src="/static/ephas_logo2.png" class="pt-logo" alt=""></div>
-</div>
-<script>
-lucide.createIcons();
-const h=new Date().getHours();const n=document.getElementById('navCtrLbl');if(n)n.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
-document.querySelectorAll('a[href^="/"]').forEach(a=>{a.addEventListener('click',function(e){const href=this.getAttribute('href');if(!href||href==='#'||href===window.location.pathname)return;e.preventDefault();document.getElementById('pt').classList.add('on');setTimeout(()=>{window.location.href=href;},240);});});
-</script>
-</body>
-</html>
+{% endblock %}

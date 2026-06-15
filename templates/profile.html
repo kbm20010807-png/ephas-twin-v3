@@ -1,276 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>TWIN — Profile</title>
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block head %}
 <style>
-@font-face{font-family:'Arpubes';src:url('/static/Arpubes.otf') format('opentype');}
-:root{--gold:#D4AA35;--gold-2:#C4961E;--gold-dim:rgba(212,170,53,0.12);--bg:#FAFAFA;--card:#FFFFFF;--surface:#F3F3F3;--border:#EBEBEB;--black:#0A0A0A;--text:#1C1C1C;--sub:#6B6B6B;--muted:#AAAAAA;--r-sm:12px;--r-md:18px;--r-lg:24px;--r-xl:32px;--shadow:0 2px 12px rgba(0,0,0,0.06);}
-[data-theme="dark"]{--bg:#0A0A0A;--card:#141414;--surface:#1A1A1A;--border:#252525;--black:#F0F0F0;--text:#E0E0E0;--sub:#888;--muted:#444;}
-[data-theme="dark"] .nav-bar{background:rgba(10,10,10,0.95);}
-[data-theme="dark"] .eph-logo-cov{filter:invert(1) brightness(10);}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--black);font-family:'Josefin Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-body{animation:fadeUp .25s ease;}
-
-/* COVER */
-.cover{height:220px;background:linear-gradient(160deg,#0A0A0A 0%,#1A1200 50%,#2A1F00 100%);position:relative;overflow:hidden;}
-.cover-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,0.25) 0%,transparent 70%);top:40%;left:50%;transform:translate(-50%,-50%);}
-.cover-stars{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(212,170,53,.4) 1px,transparent 1px);background-size:30px 30px;opacity:0.15;}
-.cov-topbar{position:absolute;top:0;left:0;right:0;padding:54px 20px 0;display:flex;align-items:center;justify-content:space-between;}
-.cov-brand{text-align:center;}
-.cov-twin{font-family:'Arpubes',sans-serif;font-size:18px;letter-spacing:-1px;color:#fff;}
-.eph-logo-cov{height:6px;width:auto;display:block;margin:3px auto 0;opacity:.7;}
-.cov-settings{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.cov-settings svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.75;}
-.cov-share{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.cov-share svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.75;}
-
-/* AVATAR ZONE */
-.avatar-zone{position:relative;padding:0 20px;margin-top:-52px;display:flex;align-items:flex-end;justify-content:space-between;}
-.avatar{width:96px;height:96px;border-radius:50%;border:4px solid var(--bg);background:linear-gradient(135deg,#0A0A0A,#2A1F00);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:var(--gold);font-family:'Arpubes',sans-serif;box-shadow:0 4px 24px rgba(0,0,0,0.2);position:relative;z-index:2;}
-.av-lv{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;}
-.edit-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:9px 18px;font-size:11px;font-weight:700;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:6px;letter-spacing:.5px;}
-.edit-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
-
-/* PROFILE INFO */
-.prof-info{padding:14px 20px 4px;}
-.prof-name{font-family:'Arpubes',sans-serif;font-size:22px;font-weight:900;letter-spacing:-1px;color:var(--black);}
-.prof-title{font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin:3px 0 6px;}
-.prof-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.prof-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);}
-.prof-meta-item svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.75;}
-.prof-bio{padding:12px 20px 0;font-size:12px;color:var(--sub);line-height:1.6;max-width:320px;}
-
-/* STATS ROW */
-.stats-row{display:flex;padding:16px 20px;gap:0;border-bottom:1px solid var(--border);}
-.s-item{flex:1;text-align:center;border-right:1px solid var(--border);}
-.s-item:last-child{border-right:none;}
-.s-val{font-family:'Arpubes',sans-serif;font-size:22px;font-weight:900;color:var(--black);}
-.s-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;}
-
-/* XP BAR */
-.xp-zone{padding:16px 20px;border-bottom:1px solid var(--border);}
-.xp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.xp-title{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:1px;text-transform:uppercase;}
-.xp-lv{font-family:'Arpubes',sans-serif;font-size:13px;color:var(--black);}
-.xp-bar{height:6px;background:var(--surface);border-radius:6px;overflow:hidden;}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--gold-2),var(--gold));border-radius:6px;width:{{ profile.progress_pct }}%;}
-.xp-sub{font-size:10px;color:var(--sub);text-align:right;margin-top:5px;}
-
-/* SECTION */
-.sect-lbl{padding:18px 20px 10px;font-size:9px;font-weight:800;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Arpubes',sans-serif;}
-
-/* DOMAINS */
-.domains{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;}
-.dm{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--shadow);}
-.dm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.dm-ico{font-size:20px;}
-.dm-pct{font-size:11px;font-weight:700;color:var(--gold);}
-.dm-name{font-size:12px;font-weight:700;color:var(--black);margin-bottom:6px;}
-.dm-bar{height:4px;background:var(--surface);border-radius:4px;overflow:hidden;}
-.dm-fill{height:100%;background:linear-gradient(90deg,var(--gold-2),var(--gold));border-radius:4px;}
-
-/* ACHIEVEMENTS */
-.badges{display:flex;gap:10px;padding:0 20px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
-.badges::-webkit-scrollbar{display:none;}
-.badge{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;box-shadow:var(--shadow);}
-.badge-ico{font-size:26px;}
-.badge-name{font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--sub);text-align:center;}
-.badge.earned{border-color:rgba(212,170,53,.3);background:var(--gold-dim);}
-.badge.earned .badge-name{color:var(--gold);}
-
-/* FOOTER */
-.twin-footer{padding:28px 20px 20px;text-align:center;}
-.tf-twin{font-family:'Arpubes',sans-serif;font-size:14px;letter-spacing:-1px;color:var(--muted);}
-.tf-ephas{height:7px;width:auto;margin:3px auto 0;display:block;opacity:.4;mix-blend-mode:multiply;}
-[data-theme="dark"] .tf-ephas{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;opacity:.3;}
-
-/* NAV */
-.pt{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
-.pt.on{opacity:1;pointer-events:all;}
-.pt-twin{font-family:'Arpubes',sans-serif;font-size:36px;color:var(--black);letter-spacing:-3px;margin-bottom:6px;text-align:center;}
-.pt-logo{height:14px;width:auto;display:block;margin:0 auto;mix-blend-mode:multiply;}
-[data-theme="dark"] .pt-logo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:normal;}
-.spacer{height:100px;}
-.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,250,250,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 6px;}
-.nav-ico{display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:20px;transition:background .2s;}
-.nav-ico svg{width:20px;height:20px;stroke:var(--sub);stroke-width:1.75;fill:none;}
-.nav-item.active .nav-ico{background:var(--gold-dim);}
-.nav-item.active .nav-ico svg{stroke:var(--gold);}
-.nav-lbl{font-family:'Arpubes',sans-serif;font-size:7px;letter-spacing:1px;color:var(--sub);font-weight:600;text-transform:uppercase;}
-.nav-item.active .nav-lbl{color:var(--gold);}
-.nav-ctr{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;margin-top:-16px;}
-.nav-ctr-ico{width:54px;height:54px;border-radius:20px;background:#0A0A0A;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
-.nav-ctr-ico svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;}
+.cover{height:200px;background:linear-gradient(160deg,#000 0%,#0F0A00 50%,#000 100%);position:relative;overflow:hidden;}
+.cover-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:32px 32px;opacity:.07;}
+.cover-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.18),transparent 70%);top:30%;left:50%;transform:translate(-50%,-50%);}
+.cov-top{position:absolute;top:0;left:0;right:0;padding:54px 20px 0;display:flex;justify-content:space-between;}
+.cov-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
+.cov-btn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.75;}
+.prof-zone{padding:0 20px;margin-top:-44px;display:flex;align-items:flex-end;justify-content:space-between;}
+.prof-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:30px;font-weight:900;color:var(--gold);position:relative;box-shadow:var(--sh-md);flex-shrink:0;}
+.prof-av-lv{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);font-size:9px;font-weight:900;color:#000;display:flex;align-items:center;justify-content:center;}
+.edit-prof-btn{background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 18px;font-size:11px;font-weight:700;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.edit-prof-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+.prof-info{padding:12px 20px 0;}
+.prof-name{font-family:'Arpubes',sans-serif;font-size:24px;letter-spacing:-1.5px;color:var(--black);margin-bottom:2px;}
+.prof-title{font-size:12px;color:var(--gold);font-weight:700;letter-spacing:.5px;margin-bottom:6px;}
+.prof-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.pm-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);}
+.pm-item svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.stats-row{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:16px 0;}
+.stat-c{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
+.stat-c:last-child{border-right:none;}
+.stat-v{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1.5px;color:var(--black);}
+.stat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;font-family:'Arpubes',sans-serif;}
+.xp-zone{padding:0 20px;}
+.xp-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.domain-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;}
+.dom-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;box-shadow:var(--sh);}
+.dom-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.dom-name{font-size:12px;font-weight:700;color:var(--black);}
+.dom-pct{font-family:'Arpubes',sans-serif;font-size:18px;color:var(--gold);}
+.dom-trend{font-size:9px;font-weight:700;margin-top:6px;}
+.badges-row{display:flex;gap:8px;padding:0 20px;overflow-x:auto;scrollbar-width:none;}
+.badges-row::-webkit-scrollbar{display:none;}
+.badge-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;align-items:center;gap:7px;min-width:80px;box-shadow:var(--sh);}
+.badge-ico{width:36px;height:36px;border-radius:10px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
+.badge-ico svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.badge-nm{font-size:8px;font-weight:700;color:var(--sub);letter-spacing:.5px;text-align:center;line-height:1.3;}
+.badge-c.earned .badge-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.badge-c.earned .badge-ico svg{stroke:var(--gold);}
+.badge-c.earned .badge-nm{color:var(--gold);}
+.share-btn{margin:18px 20px 0;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--black);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;}
+.share-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+.tw-foot{padding:28px 20px 16px;text-align:center;}
 </style>
-</head>
-<body>
+{% endblock %}
 
+{% block content %}
+<!-- COVER -->
 <div class="cover">
-  <div class="cover-stars"></div>
+  <div class="cover-grid"></div>
   <div class="cover-glow"></div>
-  <div class="cov-topbar">
-    <div class="cov-share" onclick="window.location='/settings'"><i data-lucide="settings"></i></div>
-    <div class="cov-brand">
-      <div class="cov-twin">TWIN</div>
-      <img src="/static/ephas_logo2.png" class="eph-logo-cov" alt="EPHAS">
+  <div class="cov-top">
+    <a href="/settings" class="cov-btn"><i data-lucide="settings"></i></a>
+    <div class="tb-brand" style="position:absolute;left:50%;transform:translateX(-50%);">
+      <div class="tb-twin" style="color:#fff;">TWIN</div>
+      <div class="tb-tag">by EPHAS</div>
     </div>
-    <div class="cov-settings"><i data-lucide="share-2"></i></div>
+    <a href="#" class="cov-btn" onclick="shareProfile();return false;"><i data-lucide="share-2"></i></a>
   </div>
 </div>
 
-<div class="avatar-zone">
-  <div class="avatar" style="position:relative;">
-    {{ (profile.name or 'K')[0]|upper }}
-    <div class="av-lv">{{ profile.level }}</div>
+<div class="prof-zone">
+  <div class="prof-av">
+    {{ u.name[0]|upper }}
+    <div class="prof-av-lv">{{ u.level }}</div>
   </div>
-  <div class="edit-btn"><i data-lucide="edit-2"></i> Edit</div>
+  <div class="edit-prof-btn"><i data-lucide="edit-2"></i> Edit Profile</div>
 </div>
 
 <div class="prof-info">
-  <div class="prof-name">{{ profile.name }}</div>
-  <div class="prof-title">{{ profile.level_title }}</div>
+  <div class="prof-name">{{ u.name }}</div>
+  <div class="prof-title">{{ u.level_title }}</div>
   <div class="prof-meta">
-    <div class="prof-meta-item"><i data-lucide="map-pin"></i> {{ profile.city }}</div>
-    <div class="prof-meta-item"><i data-lucide="briefcase"></i> {{ profile.job }}</div>
-    <div class="prof-meta-item"><i data-lucide="calendar"></i> Since 2024</div>
+    <div class="pm-item"><i data-lucide="map-pin"></i> {{ u.city }}</div>
+    <div class="pm-item"><i data-lucide="briefcase"></i> {{ u.job }}</div>
+    <div class="pm-item"><i data-lucide="calendar"></i> Since {{ u.member_since }}</div>
   </div>
 </div>
-<div class="prof-bio">Building EPHAS — a free community for human excellence. Discipline, faith, and growth every single day.</div>
 
-<div class="stats-row">
-  <div class="s-item">
-    <div class="s-val">{{ profile.total_checkins }}</div>
-    <div class="s-lbl">Check-Ins</div>
+<div class="stats-row" style="margin:16px 0;">
+  <div class="stat-c">
+    <div class="stat-v">{{ u.total_checkins }}</div>
+    <div class="stat-l">Check-Ins</div>
   </div>
-  <div class="s-item">
-    <div class="s-val">{{ profile.streak }}</div>
-    <div class="s-lbl">Day Streak</div>
+  <div class="stat-c">
+    <div class="stat-v" style="color:var(--gold);">{{ u.streak }}</div>
+    <div class="stat-l">Streak</div>
   </div>
-  <div class="s-item">
-    <div class="s-val">{{ profile.xp }}</div>
-    <div class="s-lbl">Total XP</div>
+  <div class="stat-c">
+    <div class="stat-v">{{ u.xp }}</div>
+    <div class="stat-l">Total XP</div>
   </div>
-  <div class="s-item">
-    <div class="s-val">7</div>
-    <div class="s-lbl">Domains</div>
+  <div class="stat-c">
+    <div class="stat-v" style="color:var(--gold);">{{ u.level }}</div>
+    <div class="stat-l">Level</div>
   </div>
 </div>
 
 <div class="xp-zone">
-  <div class="xp-header">
-    <div class="xp-title">Level Progress</div>
-    <div class="xp-lv">LV {{ profile.level }} → LV {{ profile.level + 1 }}</div>
+  <div class="xp-hd">
+    <div class="t-label">Level {{ u.level }} → {{ u.level + 1 }}</div>
+    <div style="font-size:11px;color:var(--sub);">{{ u.xp }} / {{ u.xp_needed }} XP · {{ u.progress_pct }}%</div>
   </div>
-  <div class="xp-bar"><div class="xp-fill"></div></div>
-  <div class="xp-sub">{{ profile.xp }} / {{ profile.xp_needed }} XP — {{ profile.progress_pct }}%</div>
+  <div class="prog-bar"><div class="prog-fill" style="width:{{ u.progress_pct }}%"></div></div>
 </div>
 
 <div class="sect-lbl">Life Domains</div>
-<div class="domains">
-  <div class="dm">
-    <div class="dm-top"><span class="dm-ico">🧠</span><span class="dm-pct">82%</span></div>
-    <div class="dm-name">Mindset</div>
-    <div class="dm-bar"><div class="dm-fill" style="width:82%"></div></div>
+<div class="domain-g">
+  {% for d in stats.domains %}
+  <div class="dom-c">
+    <div class="dom-top">
+      <div class="dom-name">{{ d.name }}</div>
+      <div class="dom-pct">{{ d.pct }}%</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
+    <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
   </div>
-  <div class="dm">
-    <div class="dm-top"><span class="dm-ico">💪</span><span class="dm-pct">68%</span></div>
-    <div class="dm-name">Body</div>
-    <div class="dm-bar"><div class="dm-fill" style="width:68%"></div></div>
-  </div>
-  <div class="dm">
-    <div class="dm-top"><span class="dm-ico">🕌</span><span class="dm-pct">91%</span></div>
-    <div class="dm-name">Faith</div>
-    <div class="dm-bar"><div class="dm-fill" style="width:91%"></div></div>
-  </div>
-  <div class="dm">
-    <div class="dm-top"><span class="dm-ico">💰</span><span class="dm-pct">55%</span></div>
-    <div class="dm-name">Wealth</div>
-    <div class="dm-bar"><div class="dm-fill" style="width:55%"></div></div>
-  </div>
-  <div class="dm">
-    <div class="dm-top"><span class="dm-ico">🤝</span><span class="dm-pct">73%</span></div>
-    <div class="dm-name">Relationships</div>
-    <div class="dm-bar"><div class="dm-fill" style="width:73%"></div></div>
-  </div>
-  <div class="dm">
-    <div class="dm-top"><span class="dm-ico">📚</span><span class="dm-pct">79%</span></div>
-    <div class="dm-name">Knowledge</div>
-    <div class="dm-bar"><div class="dm-fill" style="width:79%"></div></div>
-  </div>
+  {% endfor %}
 </div>
 
 <div class="sect-lbl">Achievements</div>
-<div class="badges">
-  <div class="badge earned">
-    <div class="badge-ico">🔥</div>
-    <div class="badge-name">7-Day Streak</div>
+<div class="badges-row">
+  <div class="badge-c earned">
+    <div class="badge-ico"><i data-lucide="flame"></i></div>
+    <div class="badge-nm">7-Day Streak</div>
   </div>
-  <div class="badge earned">
-    <div class="badge-ico">⚡</div>
-    <div class="badge-name">Early Bird</div>
+  <div class="badge-c earned">
+    <div class="badge-ico"><i data-lucide="sunrise"></i></div>
+    <div class="badge-nm">Early Riser</div>
   </div>
-  <div class="badge earned">
-    <div class="badge-ico">📖</div>
-    <div class="badge-name">Reader</div>
+  <div class="badge-c earned">
+    <div class="badge-ico"><i data-lucide="book-open"></i></div>
+    <div class="badge-nm">Reader</div>
   </div>
-  <div class="badge">
-    <div class="badge-ico">🏆</div>
-    <div class="badge-name">30-Day Streak</div>
+  <div class="badge-c">
+    <div class="badge-ico"><i data-lucide="trophy"></i></div>
+    <div class="badge-nm">30-Day Streak</div>
   </div>
-  <div class="badge">
-    <div class="badge-ico">💎</div>
-    <div class="badge-name">100 Check-Ins</div>
+  <div class="badge-c">
+    <div class="badge-ico"><i data-lucide="star"></i></div>
+    <div class="badge-nm">100 Check-Ins</div>
   </div>
-  <div class="badge">
-    <div class="badge-ico">🌟</div>
-    <div class="badge-name">All Domains</div>
+  <div class="badge-c">
+    <div class="badge-ico"><i data-lucide="layers"></i></div>
+    <div class="badge-nm">All Domains</div>
   </div>
 </div>
 
-<div class="twin-footer">
-  <div class="tf-twin">TWIN</div>
-  <img src="/static/ephas_logo2.png" class="tf-ephas" alt="EPHAS">
-  <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:5px;text-transform:uppercase;">Powered by EPHAS</div>
-</div>
+<button class="share-btn" onclick="shareProfile()">
+  <i data-lucide="share-2"></i>
+  SHARE MY PROGRESS
+</button>
 
-<div class="spacer"></div>
-<div class="nav-bar">
-  <a href="/home" class="nav-item">
-    <div class="nav-ico"><i data-lucide="home"></i></div>
-    <div class="nav-lbl">Home</div>
-  </a>
-  <a href="/analytics" class="nav-item">
-    <div class="nav-ico"><i data-lucide="bar-chart-2"></i></div>
-    <div class="nav-lbl">Analytics</div>
-  </a>
-  <a href="/checkin" class="nav-ctr">
-    <div class="nav-ctr-ico"><i data-lucide="plus"></i></div>
-    <div class="nav-lbl" id="navCtrLbl">Check In</div>
-  </a>
-  <a href="/grow" class="nav-item">
-    <div class="nav-ico"><i data-lucide="trending-up"></i></div>
-    <div class="nav-lbl">Grow</div>
-  </a>
-  <a href="/profile" class="nav-item active">
-    <div class="nav-ico"><i data-lucide="user"></i></div>
-    <div class="nav-lbl">Profile</div>
-  </a>
+<div class="tw-foot">
+  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
-<div id="pt" class="pt">
-  <div><div class="pt-twin">TWIN</div><img src="/static/ephas_logo2.png" class="pt-logo" alt=""></div>
-</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
-lucide.createIcons();
-const h=new Date().getHours();const n=document.getElementById('navCtrLbl');if(n)n.textContent=(h>=18||h<5)?'CHECK OUT':'CHECK IN';
-document.querySelectorAll('a[href^="/"]').forEach(a=>{a.addEventListener('click',function(e){const href=this.getAttribute('href');if(!href||href==='#'||href===window.location.pathname)return;e.preventDefault();document.getElementById('pt').classList.add('on');setTimeout(()=>{window.location.href=href;},240);});});
+function shareProfile(){
+  if(navigator.share){
+    navigator.share({title:'TWIN — My Progress',text:'Level {{ u.level }} · {{ u.streak }}-day streak · Powered by EPHAS',url:window.location.href});
+  } else {
+    navigator.clipboard.writeText(window.location.href).then(()=>{alert('Profile link copied!');});
+  }
+}
 </script>
-</body>
-</html>
+{% endblock %}

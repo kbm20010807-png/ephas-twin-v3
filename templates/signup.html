@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Create Account{% endblock %}
+
+{% block head %}
+<style>
+body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 20%,rgba(212,170,53,.06) 0%,transparent 60%);pointer-events:none;}
+.auth-wrap{flex:1;display:flex;flex-direction:column;padding:60px 28px 40px;}
+.auth-head{text-align:center;margin-bottom:36px;}
+.auth-logo{font-family:'Arpubes',sans-serif;font-size:40px;letter-spacing:-3px;color:#fff;line-height:1;}
+.auth-title{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:#fff;margin-top:24px;}
+.auth-desc{font-size:12px;color:#555;margin-top:6px;line-height:1.5;}
+.step-bar-auth{display:flex;gap:5px;margin-bottom:28px;}
+.sba{flex:1;height:3px;border-radius:3px;background:#1A1A1A;transition:background .3s;}
+.sba.done{background:var(--gold);}
+.form-input{background:#111;border-color:#222;color:#fff;}
+.form-input:focus{background:#161616;border-color:var(--gold);}
+.form-input::placeholder{color:#444;}
+.form-label{color:#555;}
+.goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.goal-btn{background:#111;border:1.5px solid #1C1C1C;border-radius:var(--r);padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s,background .15s;}
+.goal-btn.sel{border-color:var(--gold);background:rgba(212,170,53,.07);}
+.goal-btn svg{width:22px;height:22px;stroke:#555;fill:none;stroke-width:1.75;transition:stroke .15s;}
+.goal-btn.sel svg{stroke:var(--gold);}
+.goal-name{font-size:11px;font-weight:700;color:#555;letter-spacing:.5px;transition:color .15s;}
+.goal-btn.sel .goal-name{color:var(--gold);}
+.auth-foot{text-align:center;padding-top:20px;}
+.auth-foot-txt{font-size:12px;color:#555;}
+.auth-foot-lnk{color:var(--gold);font-weight:700;text-decoration:none;}
+.step-view{display:none;}.step-view.active{display:block;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-bg"></div>
+<div class="auth-wrap">
+  <div class="auth-head">
+    <div class="auth-logo">TWIN</div>
+    <div class="auth-title" id="stepTitle">Create your account</div>
+    <div class="auth-desc" id="stepDesc">Start your journey with TWIN — powered by EPHAS</div>
+  </div>
+
+  <div class="step-bar-auth">
+    <div class="sba done" id="seg1"></div>
+    <div class="sba" id="seg2"></div>
+    <div class="sba" id="seg3"></div>
+  </div>
+
+  <!-- STEP 1: Account -->
+  <div class="step-view active" id="step1">
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input type="text" class="form-input" id="inp-name" placeholder="Your name" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="inp-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="inp-pwd" placeholder="Min 8 characters" autocomplete="new-password">
+    </div>
+    <button class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);margin-top:4px;">
+      <i data-lucide="arrow-right"></i> CONTINUE
+    </button>
+  </div>
+
+  <!-- STEP 2: Goals -->
+  <div class="step-view" id="step2">
+    <div class="goals-grid">
+      <div class="goal-btn" onclick="toggleGoal(this)">
+        <i data-lucide="brain"></i>
+        <div class="goal-name">MINDSET</div>
+      </div>
+      <div class="goal-btn" onclick="toggleGoal(this)">
+        <i data-lucide="dumbbell"></i>
+        <div class="goal-name">FITNESS</div>
+      </div>
+      <div class="goal-btn" onclick="toggleGoal(this)">
+        <i data-lucide="trending-up"></i>
+        <div class="goal-name">WEALTH</div>
+      </div>
+      <div class="goal-btn" onclick="toggleGoal(this)">
+        <i data-lucide="target"></i>
+        <div class="goal-name">PURPOSE</div>
+      </div>
+      <div class="goal-btn" onclick="toggleGoal(this)">
+        <i data-lucide="heart"></i>
+        <div class="goal-name">WELLBEING</div>
+      </div>
+      <div class="goal-btn" onclick="toggleGoal(this)">
+        <i data-lucide="users"></i>
+        <div class="goal-name">SOCIAL</div>
+      </div>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);">
+      <i data-lucide="arrow-right"></i> CONTINUE
+    </button>
+  </div>
+
+  <!-- STEP 3: Done -->
+  <div class="step-view" id="step3">
+    <div style="text-align:center;padding:20px 0 32px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold-b);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+        <i data-lucide="check-circle" style="width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
+      </div>
+      <div style="font-family:'Arpubes',sans-serif;font-size:24px;letter-spacing:-1px;color:#fff;margin-bottom:10px;">You're all set</div>
+      <div style="font-size:13px;color:#555;line-height:1.6;max-width:260px;margin:0 auto;">TWIN is ready. Start with your first check-in and let AXON learn your patterns.</div>
+    </div>
+    <form method="POST" action="/signup">
+      <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);">
+        <i data-lucide="arrow-right"></i> ENTER TWIN
+      </button>
+    </form>
+  </div>
+
+  <div class="auth-foot" id="authFoot">
+    <span class="auth-foot-txt">Already have an account? </span>
+    <a href="/login" class="auth-foot-lnk">Sign in</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let curStep = 1;
+function nextStep() {
+  document.getElementById('step' + curStep).classList.remove('active');
+  curStep++;
+  document.getElementById('step' + curStep).classList.add('active');
+  document.getElementById('seg' + curStep).classList.add('done');
+  const titles = ['', 'Create your account', 'What are you here to work on?', 'Ready to begin'];
+  const descs = ['', 'Start your journey with TWIN — powered by EPHAS', 'Pick your focus areas (select all that apply)', 'Your TWIN profile is ready'];
+  document.getElementById('stepTitle').textContent = titles[curStep];
+  document.getElementById('stepDesc').textContent = descs[curStep];
+  if(curStep === 3) document.getElementById('authFoot').style.display = 'none';
+}
+function toggleGoal(el) { el.classList.toggle('sel'); }
+</script>
+{% endblock %}
