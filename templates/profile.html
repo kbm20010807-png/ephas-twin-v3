@@ -59,17 +59,13 @@
 .cc-title{font-size:14px;font-weight:700;color:var(--black);margin-bottom:4px;}
 .cc-meta{font-size:11px;color:var(--sub);}
 .empty-card{background:var(--card);border:1px dashed var(--border);border-radius:var(--r-lg);padding:28px;margin:0 20px 10px;text-align:center;}
-.share-fab{position:fixed;bottom:100px;right:max(16px,calc((100vw - 430px) / 2 + 16px));width:48px;height:48px;border-radius:50%;background:#09090B;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);cursor:pointer;z-index:9999;border:none;}
-[data-theme="dark"] .share-fab{background:var(--gold);}
-.share-fab svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
-[data-theme="dark"] .share-fab svg{stroke:#000;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="topbar">
-  <div style="width:36px;"></div>
+  <button class="tb-btn" onclick="shareProfile()" style="border:none;background:var(--bg-2);cursor:pointer;"><i data-lucide="share-2"></i></button>
   <div class="tb-brand"><div class="tb-twin">TWIN</div></div>
   <a href="/settings" class="tb-btn"><i data-lucide="settings"></i></a>
 </div>
@@ -335,7 +331,6 @@
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
 
-<button class="share-fab" onclick="shareProfile()"><i data-lucide="share-2"></i></button>
 {% endblock %}
 
 {% block scripts %}
