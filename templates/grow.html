@@ -6,28 +6,69 @@
 .search-wrap{padding:14px 20px 0;position:relative;}
 .search-ico{position:absolute;left:34px;top:50%;transform:translateY(-50%);}
 .search-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
-.search-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px 12px 44px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;}
+.search-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px 12px 44px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;box-sizing:border-box;}
 .search-inp:focus{border-color:var(--gold);}
 .search-inp::placeholder{color:var(--muted);}
-.main-tabs{display:flex;border-bottom:1.5px solid var(--border);margin:14px 20px 0;}
-.mt-btn{flex:1;padding:12px 8px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Arpubes',sans-serif;text-transform:uppercase;}
+
+/* TABS */
+.main-tabs{display:flex;border-bottom:1.5px solid var(--border);margin:14px 0 0;overflow-x:auto;scrollbar-width:none;padding:0 20px;gap:0;}
+.main-tabs::-webkit-scrollbar{display:none;}
+.mt-btn{flex:0 0 auto;padding:12px 14px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Arpubes',sans-serif;text-transform:uppercase;white-space:nowrap;}
 .mt-btn.on{color:var(--black);border-bottom-color:var(--gold);}
 .tab-pane{display:none;}
 .tab-pane.on{display:block;}
+
+/* CHIPS */
 .chip-row{display:flex;gap:7px;padding:10px 20px 0;overflow-x:auto;scrollbar-width:none;}
 .chip-row::-webkit-scrollbar{display:none;}
 .chip{padding:6px 14px;border-radius:var(--r-full);font-size:11px;font-weight:700;white-space:nowrap;border:1.5px solid var(--border);background:var(--bg-2);color:var(--sub);cursor:pointer;transition:all .15s;}
 .chip.on{background:#09090B;border-color:#09090B;color:#fff;}
 [data-theme="dark"] .chip.on{background:var(--gold);border-color:var(--gold);color:#000;}
+
+/* POSTS */
 .post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);}
 .pc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .pc-user{font-size:12px;font-weight:700;color:var(--black);}
 .pc-time{font-size:10px;color:var(--sub);}
 .pc-cat{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-left:auto;background:var(--gold-dim);border:1px solid var(--gold-b);padding:3px 8px;border-radius:var(--r-full);}
-.pc-body{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:14px;}
+.pc-body{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:10px;}
+.pc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.pc-tag{font-size:10px;font-weight:600;color:var(--sub);}
 .pc-foot{display:flex;gap:12px;align-items:center;}
-.pc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;padding:5px 0;}
-.pc-action svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.pc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;padding:5px 0;transition:color .15s;}
+.pc-action svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;transition:all .15s;}
+.pc-action.bm-btn.saved{color:var(--gold);}
+.pc-action.bm-btn.saved svg{stroke:var(--gold);}
+
+/* REELS */
+.reel-card{margin:0 20px 10px;border-radius:var(--r-lg);overflow:hidden;background:#09090B;position:relative;min-height:220px;cursor:pointer;box-shadow:var(--sh);}
+.rc-bg{position:absolute;inset:0;background:linear-gradient(160deg,#111 0%,#0D0800 60%,#111 100%);}
+.rc-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-70%);width:52px;height:52px;border-radius:50%;background:rgba(212,170,53,.15);border:1.5px solid rgba(212,170,53,.3);display:flex;align-items:center;justify-content:center;}
+.rc-play svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;margin-left:3px;}
+.rc-info{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);}
+.rc-user{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:4px;}
+.rc-caption{font-size:12px;color:#fff;font-weight:600;line-height:1.4;margin-bottom:10px;}
+.rc-stats{display:flex;gap:14px;}
+.rc-stat{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:rgba(255,255,255,.5);}
+.rc-stat svg{width:11px;height:11px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:1.75;}
+.rc-badge{position:absolute;top:12px;right:12px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.3);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;}
+
+/* THREADS */
+.thread-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);cursor:pointer;}
+.tc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.tc-meta{font-size:10px;color:var(--sub);}
+.tc-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:8px;line-height:1.4;}
+.tc-body{font-size:12px;color:var(--text);line-height:1.65;margin-bottom:12px;}
+.tc-reply{display:flex;align-items:flex-start;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.tc-reply-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
+.tc-foot{display:flex;gap:14px;align-items:center;margin-top:10px;}
+.tc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
+.tc-action svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.tc-action.bm-btn.saved{color:var(--gold);}
+.tc-action.bm-btn.saved svg{stroke:var(--gold);}
+.tc-replies-count{margin-left:auto;font-size:10px;color:var(--muted);font-weight:600;}
+
+/* COURSES */
 .featured-card{margin:16px 20px 0;border-radius:var(--r-xl);overflow:hidden;background:#09090B;position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;}
 .fc-bg{position:absolute;inset:0;background:linear-gradient(160deg,#0A0A0A 0%,#1A1200 60%,#0D0D0D 100%);}
 .fc-glow{position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.12),transparent 70%);}
@@ -47,63 +88,142 @@
 .cg-price{display:inline-flex;padding:3px 8px;border-radius:var(--r-full);font-size:9px;font-weight:700;margin-top:6px;}
 .price-free{background:var(--green-dim);color:var(--green);border:1px solid var(--green-b);}
 .price-paid{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-b);}
-.reels-soon{margin:40px 20px;text-align:center;padding:40px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);}
-.rs-ico{width:64px;height:64px;border-radius:20px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
-.rs-ico svg{width:28px;height:28px;stroke:var(--sub);fill:none;stroke-width:1.5;}
+
+/* ZONES */
+.zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0;}
+.zone-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh);cursor:pointer;transition:border-color .15s;}
+.zone-card.joined{border-color:var(--gold-b);background:var(--gold-dim);}
+.zone-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid rgba(255,255,255,.06);}
+.zone-ico svg{width:20px;height:20px;fill:none;stroke-width:1.75;}
+.zone-name{font-size:13px;font-weight:800;color:var(--black);margin-bottom:2px;}
+.zone-meta{font-size:10px;color:var(--sub);}
+.zone-joined-tag{display:inline-flex;align-items:center;gap:4px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:.5px;margin-top:6px;text-transform:uppercase;}
+.zone-joined-tag svg{width:10px;height:10px;stroke:var(--gold);fill:none;stroke-width:2.5;}
+
+/* EXPLORE */
+.explore-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:4px 10px;font-size:9px;font-weight:700;color:var(--gold);margin:10px 20px 0;letter-spacing:1px;text-transform:uppercase;}
+.explore-badge svg{width:10px;height:10px;stroke:var(--gold);fill:none;stroke-width:2;}
+.explore-zone-pill{display:inline-flex;align-items:center;gap:5px;border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,.08);}
+
+/* CTA */
 .coaches-cta{margin:14px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;display:flex;align-items:center;gap:14px;}
 .cta-ico{width:44px;height:44px;border-radius:var(--r);background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .cta-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .cta-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
 .cta-txt b{color:var(--black);}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
-.reel-card{margin:0 20px 10px;border-radius:var(--r-lg);overflow:hidden;background:#09090B;position:relative;min-height:220px;cursor:pointer;box-shadow:var(--sh);}
-.rc-bg{position:absolute;inset:0;background:linear-gradient(160deg,#111 0%,#0D0800 60%,#111 100%);}
-.rc-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-70%);width:52px;height:52px;border-radius:50%;background:rgba(212,170,53,.15);border:1.5px solid rgba(212,170,53,.3);display:flex;align-items:center;justify-content:center;}
-.rc-play svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;margin-left:3px;}
-.rc-info{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);}
-.rc-user{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:4px;}
-.rc-caption{font-size:12px;color:#fff;font-weight:600;line-height:1.4;margin-bottom:10px;}
-.rc-stats{display:flex;gap:14px;}
-.rc-stat{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:rgba(255,255,255,.5);}
-.rc-stat svg{width:11px;height:11px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:1.75;}
-.rc-badge{position:absolute;top:12px;right:12px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.3);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;}
-.thread-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);cursor:pointer;}
-.tc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.tc-meta{font-size:10px;color:var(--sub);}
-.tc-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:8px;line-height:1.4;}
-.tc-body{font-size:12px;color:var(--text);line-height:1.65;margin-bottom:12px;}
-.tc-thread-line{width:2px;background:var(--border);height:24px;margin-left:19px;margin-bottom:-4px;}
-.tc-reply{display:flex;align-items:flex-start;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
-.tc-reply-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
-.tc-foot{display:flex;gap:14px;align-items:center;margin-top:10px;}
-.tc-action{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
-.tc-action svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
-.tc-replies-count{margin-left:auto;font-size:10px;color:var(--muted);font-weight:600;}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="topbar">
   <div style="width:36px;"></div>
-  <div class="tb-brand">
-    <div class="tb-twin">Grow</div>
-  </div>
+  <div class="tb-brand"><div class="tb-twin">Grow</div></div>
   <a href="/create" class="tb-btn" style="background:var(--gold-dim);border-color:var(--gold-b);"><i data-lucide="plus" style="stroke:var(--gold);"></i></a>
 </div>
 
 <div class="search-wrap">
   <div class="search-ico"><i data-lucide="search"></i></div>
-  <input type="text" class="search-inp" placeholder="Search posts, courses, people...">
+  <input type="text" class="search-inp" placeholder="Search posts, zones, people, courses...">
 </div>
 
 <div class="main-tabs">
-  <div class="mt-btn on" onclick="switchTab('posts',this)">Posts & Reels</div>
+  <div class="mt-btn on" onclick="switchTab('explore',this)">Explore</div>
+  <div class="mt-btn" onclick="switchTab('posts',this)">Posts & Reels</div>
   <div class="mt-btn" onclick="switchTab('threads',this)">Threads</div>
+  <div class="mt-btn" onclick="switchTab('zones',this)">Zones</div>
   <div class="mt-btn" onclick="switchTab('courses',this)">Courses</div>
 </div>
 
-<!-- POSTS & REELS -->
-<div class="tab-pane on" id="pane-posts">
+<!-- ====== EXPLORE ====== -->
+<div class="tab-pane on" id="pane-explore">
+  <div style="height:10px;"></div>
+  <div class="explore-badge"><i data-lucide="trending-up"></i> TRENDING NOW</div>
+
+  <!-- Explore post 1 -->
+  <div class="post-card" style="margin-top:10px;">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">M</div>
+      <div><div class="pc-user">Marcus R.</div><div class="pc-time">2h ago</div></div>
+      <div class="explore-zone-pill" style="background:rgba(108,99,255,.1);border-color:rgba(108,99,255,.2);color:#6C63FF;">Mindset</div>
+    </div>
+    <div class="pc-body">Why 99% of people fail their goals in February: They start with motivation. Motivation is a feeling. Feelings fade. Build systems, not goals.</div>
+    <div class="pc-tags"><span class="pc-tag">#mindset</span><span class="pc-tag">#discipline</span><span class="pc-tag">#habits</span></div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> 184</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> 43</div>
+      <div class="pc-action" style="margin-left:auto;" onclick="toggleBookmark(this)" class="bm-btn"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+
+  <!-- Explore reel -->
+  <div class="reel-card">
+    <div class="rc-bg"></div>
+    <div class="rc-badge">REEL</div>
+    <div class="rc-play"><i data-lucide="play"></i></div>
+    <div class="rc-info">
+      <div class="rc-user">Priya K. · <span style="color:rgba(255,255,255,.4);">#fitness</span></div>
+      <div class="rc-caption">Day 30 cold shower check-in. My body is different. My mind is different.</div>
+      <div class="rc-stats">
+        <div class="rc-stat"><i data-lucide="eye"></i> 8.7K</div>
+        <div class="rc-stat"><i data-lucide="heart"></i> 621</div>
+        <div class="rc-stat"><i data-lucide="message-circle"></i> 74</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explore post 2 -->
+  <div class="post-card">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">P</div>
+      <div><div class="pc-user">Priya K.</div><div class="pc-time">Yesterday</div></div>
+      <div class="explore-zone-pill" style="background:rgba(212,170,53,.1);border-color:rgba(212,170,53,.2);color:var(--gold);">Wealth</div>
+    </div>
+    <div class="pc-body">Reading 30 min daily for 3 weeks straight. The compounding is real. Mind domain at 82%. Small habits → massive change.</div>
+    <div class="pc-tags"><span class="pc-tag">#wealth</span><span class="pc-tag">#reading</span><span class="pc-tag">#growth</span></div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> 124</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> 19</div>
+      <div class="pc-action" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+
+  <!-- Zone spotlight -->
+  <div style="padding:4px 20px 0;">
+    <div class="t-label mb-2">Zone Spotlight</div>
+    <div style="background:linear-gradient(135deg,#09090B,#0F0800);border:1px solid rgba(34,197,94,.1);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="switchTab('zones', document.querySelectorAll('.mt-btn')[3])">
+      <div style="width:48px;height:48px;border-radius:14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="dumbbell" style="width:20px;height:20px;stroke:#22C55E;fill:none;stroke-width:1.75;"></i></div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:800;color:var(--black);">Fitness Zone</div>
+        <div style="font-size:10px;color:var(--sub);margin-top:2px;">18.2K members · 1,204 posts this week</div>
+      </div>
+      <div style="font-size:8px;font-weight:700;color:#22C55E;letter-spacing:1px;">JOIN →</div>
+    </div>
+  </div>
+
+  <!-- Explore post 3 -->
+  <div class="post-card" style="margin-top:14px;">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">S</div>
+      <div><div class="pc-user">Sam T.</div><div class="pc-time">2d ago</div></div>
+      <div class="explore-zone-pill" style="background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.2);color:#F97316;">Sales</div>
+    </div>
+    <div class="pc-body">Cold showers every day for 30 days. Not easy. Worth it. Discipline in one area spills into everything else.</div>
+    <div class="pc-tags"><span class="pc-tag">#fitness</span><span class="pc-tag">#discipline</span></div>
+    <div class="pc-foot">
+      <div class="pc-action"><i data-lucide="heart"></i> 211</div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> 31</div>
+      <div class="pc-action" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  <div style="height:16px;"></div>
+</div>
+
+<!-- ====== POSTS & REELS ====== -->
+<div class="tab-pane" id="pane-posts">
   <div class="chip-row">
     <div class="chip on" onclick="chipSet(this)">All</div>
     <div class="chip" onclick="chipSet(this)">Mindset</div>
@@ -115,7 +235,6 @@
   </div>
   <div style="height:10px;"></div>
 
-  <!-- post 1 -->
   {% set p = feed[0] %}
   <div class="post-card">
     <div class="pc-head">
@@ -124,15 +243,15 @@
       <div class="pc-cat">Mindset</div>
     </div>
     <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-tags"><span class="pc-tag">#mindset</span><span class="pc-tag">#discipline</span></div>
     <div class="pc-foot">
       <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
       <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
       <div class="pc-action"><i data-lucide="share-2"></i></div>
     </div>
   </div>
 
-  <!-- post 2 -->
   {% set p = feed[1] %}
   <div class="post-card">
     <div class="pc-head">
@@ -141,18 +260,18 @@
       <div class="pc-cat">Mindset</div>
     </div>
     <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-tags"><span class="pc-tag">#productivity</span><span class="pc-tag">#focus</span></div>
     <div class="pc-foot">
       <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
       <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
       <div class="pc-action"><i data-lucide="share-2"></i></div>
     </div>
   </div>
 
-  <!-- reel card 1 -->
   <div class="reel-card">
     <div class="rc-bg"></div>
-    <div class="rc-badge"><i data-lucide="video" style="width:9px;height:9px;stroke:var(--gold);fill:none;stroke-width:2;vertical-align:middle;margin-right:3px;"></i>REEL</div>
+    <div class="rc-badge">REEL</div>
     <div class="rc-play"><i data-lucide="play"></i></div>
     <div class="rc-info">
       <div class="rc-user">Jordan L.</div>
@@ -165,7 +284,6 @@
     </div>
   </div>
 
-  <!-- post 3 -->
   {% set p = feed[2] %}
   <div class="post-card">
     <div class="pc-head">
@@ -174,18 +292,18 @@
       <div class="pc-cat">Mind</div>
     </div>
     <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-tags"><span class="pc-tag">#reading</span><span class="pc-tag">#mindset</span></div>
     <div class="pc-foot">
       <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
       <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
       <div class="pc-action"><i data-lucide="share-2"></i></div>
     </div>
   </div>
 
-  <!-- reel card 2 -->
   <div class="reel-card">
     <div class="rc-bg"></div>
-    <div class="rc-badge"><i data-lucide="video" style="width:9px;height:9px;stroke:var(--gold);fill:none;stroke-width:2;vertical-align:middle;margin-right:3px;"></i>REEL</div>
+    <div class="rc-badge">REEL</div>
     <div class="rc-play"><i data-lucide="play"></i></div>
     <div class="rc-info">
       <div class="rc-user">Priya K.</div>
@@ -198,7 +316,6 @@
     </div>
   </div>
 
-  <!-- post 4 -->
   {% set p = feed[3] %}
   <div class="post-card">
     <div class="pc-head">
@@ -207,10 +324,11 @@
       <div class="pc-cat">Body</div>
     </div>
     <div class="pc-body">{{ p.text }}</div>
+    <div class="pc-tags"><span class="pc-tag">#fitness</span><span class="pc-tag">#coldshower</span></div>
     <div class="pc-foot">
       <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
       <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
       <div class="pc-action"><i data-lucide="share-2"></i></div>
     </div>
   </div>
@@ -223,14 +341,13 @@
   <div style="height:16px;"></div>
 </div>
 
-<!-- THREADS -->
+<!-- ====== THREADS ====== -->
 <div class="tab-pane" id="pane-threads">
   <div style="height:10px;"></div>
-
   <div class="thread-card">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">M</div>
-      <div><div class="pc-user">Marcus R.</div><div class="tc-meta">3h ago · Mindset</div></div>
+      <div><div class="pc-user">Marcus R.</div><div class="tc-meta">3h ago · #mindset</div></div>
     </div>
     <div class="tc-title">Why 99% of people fail their goals in February</div>
     <div class="tc-body">They start with motivation. Motivation is a feeling. Feelings fade.<br><br>The people who actually change their lives build systems — not goals. Systems run even when you don't feel like it. That's the difference.</div>
@@ -242,17 +359,17 @@
       <div class="tc-action"><i data-lucide="heart"></i> 184</div>
       <div class="tc-action"><i data-lucide="message-circle"></i> 43</div>
       <div class="tc-action"><i data-lucide="repeat-2"></i> 29</div>
-      <div class="tc-replies-count">View 43 replies</div>
+      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="tc-replies-count">43 replies</div>
     </div>
   </div>
-
   <div class="thread-card">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">P</div>
-      <div><div class="pc-user">Priya K.</div><div class="tc-meta">Yesterday · Finance</div></div>
+      <div><div class="pc-user">Priya K.</div><div class="tc-meta">Yesterday · #finance</div></div>
     </div>
     <div class="tc-title">I went from 0 savings to 3 months emergency fund in 11 months. Here's the framework:</div>
-    <div class="tc-body">1. Pay yourself first — automatically, day 1 of salary.<br>2. Make saving boring. No investment apps, no tracking obsession.<br>3. Cut one thing per month. Not everything at once.<br><br>The trick is making it invisible until it isn't.</div>
+    <div class="tc-body">1. Pay yourself first — automatically, day 1 of salary.<br>2. Make saving boring.<br>3. Cut one thing per month. Not everything at once.<br><br>The trick is making it invisible until it isn't.</div>
     <div class="tc-reply">
       <div class="av av-28" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:10px;flex-shrink:0;">S</div>
       <div class="tc-reply-txt">Step 1 alone changed my life. Automate the hard part.</div>
@@ -261,29 +378,29 @@
       <div class="tc-action"><i data-lucide="heart"></i> 267</div>
       <div class="tc-action"><i data-lucide="message-circle"></i> 61</div>
       <div class="tc-action"><i data-lucide="repeat-2"></i> 88</div>
-      <div class="tc-replies-count">View 61 replies</div>
+      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="tc-replies-count">61 replies</div>
     </div>
   </div>
-
   <div class="thread-card">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">J</div>
-      <div><div class="pc-user">Jordan L.</div><div class="tc-meta">2d ago · Fitness</div></div>
+      <div><div class="pc-user">Jordan L.</div><div class="tc-meta">2d ago · #fitness</div></div>
     </div>
     <div class="tc-title">The real reason you're not getting results in the gym</div>
-    <div class="tc-body">You're not undertrained. You're under-recovered.<br><br>Sleep, food, and stress are doing more damage than your workouts are doing good. Fix the basics before adding volume. Most people don't want to hear this — it's not as exciting as a new program.</div>
+    <div class="tc-body">You're not undertrained. You're under-recovered.<br><br>Sleep, food, and stress are doing more damage than your workouts are doing good. Fix the basics before adding volume.</div>
     <div class="tc-foot">
       <div class="tc-action"><i data-lucide="heart"></i> 312</div>
       <div class="tc-action"><i data-lucide="message-circle"></i> 57</div>
       <div class="tc-action"><i data-lucide="repeat-2"></i> 41</div>
-      <div class="tc-replies-count">View 57 replies</div>
+      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="tc-replies-count">57 replies</div>
     </div>
   </div>
-
   <div class="thread-card">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">S</div>
-      <div><div class="pc-user">Sam T.</div><div class="tc-meta">3d ago · Sales</div></div>
+      <div><div class="pc-user">Sam T.</div><div class="tc-meta">3d ago · #sales</div></div>
     </div>
     <div class="tc-title">Closed my first $10K deal. Here's what nobody tells you about B2B sales:</div>
     <div class="tc-body">The close happens in the first 5 minutes, not the last 5.<br><br>If you haven't built trust by then, no technique saves you. Stop trying to be clever. Ask real questions. Listen twice as much as you talk.</div>
@@ -291,14 +408,35 @@
       <div class="tc-action"><i data-lucide="heart"></i> 198</div>
       <div class="tc-action"><i data-lucide="message-circle"></i> 39</div>
       <div class="tc-action"><i data-lucide="repeat-2"></i> 53</div>
-      <div class="tc-replies-count">View 39 replies</div>
+      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="tc-replies-count">39 replies</div>
     </div>
   </div>
-
   <div style="height:16px;"></div>
 </div>
 
-<!-- COURSES -->
+<!-- ====== ZONES ====== -->
+<div class="tab-pane" id="pane-zones">
+  <div style="height:10px;"></div>
+  <div style="padding:0 20px;"><div class="t-label mb-1">Your Zones</div><div style="font-size:11px;color:var(--sub);margin-bottom:2px;">Joined 2 zones</div></div>
+  <div class="zone-grid">
+    {% for z in zones %}
+    <div class="zone-card {% if loop.index <= 2 %}joined{% endif %}" onclick="toggleZone(this)">
+      <div class="zone-ico" style="background:{{ z.color }}1A;border-color:{{ z.color }}30;">
+        <i data-lucide="{{ z.icon }}" style="stroke:{{ z.color }};"></i>
+      </div>
+      <div class="zone-name">{{ z.name }}</div>
+      <div class="zone-meta">{{ z.members }} members · {{ z.posts }} posts</div>
+      {% if loop.index <= 2 %}
+      <div class="zone-joined-tag"><i data-lucide="check"></i> JOINED</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div style="height:16px;"></div>
+</div>
+
+<!-- ====== COURSES ====== -->
 <div class="tab-pane" id="pane-courses">
   <div class="chip-row">
     <div class="chip on" onclick="chipSet(this)">All</div>
@@ -355,6 +493,24 @@
         <div class="cg-price price-paid">$29</div>
       </div>
     </div>
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="briefcase"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">Business</div>
+        <div class="cg-title">First $10K Online</div>
+        <div class="cg-meta">10 modules · 654 enrolled</div>
+        <div class="cg-price price-paid">$79</div>
+      </div>
+    </div>
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="users"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">Coaching</div>
+        <div class="cg-title">High-Performance Coaching</div>
+        <div class="cg-meta">9 modules · 437 enrolled</div>
+        <div class="cg-price price-free">Free</div>
+      </div>
+    </div>
   </div>
   <div style="height:16px;"></div>
 </div>
@@ -376,6 +532,27 @@ function switchTab(tab, el) {
 function chipSet(el) {
   el.closest('.chip-row').querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
+}
+function toggleBookmark(btn) {
+  btn.classList.toggle('saved');
+}
+function toggleZone(card) {
+  const isJoined = card.classList.contains('joined');
+  card.classList.toggle('joined');
+  let tag = card.querySelector('.zone-joined-tag');
+  if (!isJoined) {
+    if (!tag) {
+      tag = document.createElement('div');
+      tag.className = 'zone-joined-tag';
+      tag.innerHTML = '<i data-lucide="check"></i> JOINED';
+      card.appendChild(tag);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    } else {
+      tag.style.display = 'inline-flex';
+    }
+  } else {
+    if (tag) tag.style.display = 'none';
+  }
 }
 </script>
 {% endblock %}

@@ -19,6 +19,9 @@ DEMO_USER = {
     "total_checkins": 38,
     "email": "alex@ephas.com",
     "member_since": "Jan 2024",
+    "followers": 284,
+    "following": 67,
+    "subscribed": 3,
 }
 
 DEMO_STATS = {
@@ -47,6 +50,53 @@ DEMO_STATS = {
     "days":   ["M","T","W","T","F","S","S"],
     "checked": [True, True, True, True, True, False, False],
 }
+
+DEMO_ZONES = [
+    {"name":"Mindset",        "icon":"brain",       "members":"12.4K","posts":847,  "color":"#6C63FF","tag":"mindset"},
+    {"name":"Fitness",        "icon":"dumbbell",    "members":"18.2K","posts":1204, "color":"#22C55E","tag":"fitness"},
+    {"name":"Wealth",         "icon":"trending-up", "members":"9.8K", "posts":623,  "color":"#D4AA35","tag":"wealth"},
+    {"name":"Sales",          "icon":"bar-chart-2", "members":"5.3K", "posts":412,  "color":"#F97316","tag":"sales"},
+    {"name":"Entrepreneurship","icon":"briefcase",  "members":"8.1K", "posts":534,  "color":"#EC4899","tag":"business"},
+    {"name":"Nutrition",      "icon":"apple",       "members":"7.4K", "posts":389,  "color":"#14B8A6","tag":"nutrition"},
+    {"name":"Marathon",       "icon":"activity",    "members":"3.9K", "posts":267,  "color":"#EF4444","tag":"marathon"},
+    {"name":"Coaching",       "icon":"users",       "members":"4.2K", "posts":198,  "color":"#8B5CF6","tag":"coaching"},
+    {"name":"Spirituality",   "icon":"sun",         "members":"6.1K", "posts":445,  "color":"#F59E0B","tag":"spirituality"},
+    {"name":"Productivity",   "icon":"zap",         "members":"11.3K","posts":789,  "color":"#3B82F6","tag":"productivity"},
+]
+
+DEMO_QUESTS = {
+    "daily": [
+        {"id":"d1","title":"Check In Today","desc":"Complete your daily morning check-in","xp":50,"icon":"check-circle","progress":100,"done":True,"cat":"Habit"},
+        {"id":"d2","title":"Post to Your Zone","desc":"Share a thought, update, or reflection","xp":30,"icon":"edit-3","progress":0,"done":False,"cat":"Social"},
+        {"id":"d3","title":"Read One Thread","desc":"Open and read a full thread in Grow","xp":20,"icon":"book-open","progress":0,"done":False,"cat":"Growth"},
+    ],
+    "weekly": [
+        {"id":"w1","title":"7-Day Streak","desc":"Check in every day this week","xp":200,"icon":"flame","progress":72,"done":False,"cat":"Streak"},
+        {"id":"w2","title":"Engage 5 Posts","desc":"Like or comment on 5 community posts","xp":80,"icon":"heart","progress":60,"done":False,"cat":"Social"},
+        {"id":"w3","title":"Join a New Zone","desc":"Explore and join one new Zone","xp":100,"icon":"compass","progress":0,"done":False,"cat":"Community"},
+        {"id":"w4","title":"Raise a Domain +5%","desc":"Improve any life domain by 5% this week","xp":150,"icon":"trending-up","progress":40,"done":False,"cat":"Growth"},
+        {"id":"w5","title":"Complete a Course Module","desc":"Finish at least one module in any course","xp":120,"icon":"graduation-cap","progress":0,"done":False,"cat":"Learning"},
+    ],
+    "monthly": [
+        {"id":"m1","title":"30-Day Streak","desc":"Check in every day for a full month","xp":1000,"icon":"calendar","progress":40,"done":False,"cat":"Streak"},
+        {"id":"m2","title":"Publish a Course","desc":"Create and publish your first course as a Professional","xp":500,"icon":"graduation-cap","progress":0,"done":False,"cat":"Creator"},
+        {"id":"m3","title":"Hit Level 10","desc":"Reach Level 10 through XP and check-ins","xp":750,"icon":"star","progress":70,"done":False,"cat":"Growth"},
+    ],
+    "seasonal": [
+        {"id":"s1","title":"90-Day Discipline Challenge","desc":"Check in daily for 90 consecutive days. No breaks. No excuses. This is where legends are made.","xp":5000,"icon":"award","progress":13,"done":False,"cat":"Legendary","days":90,"current":12},
+    ],
+}
+
+DEMO_NOTIFICATIONS = [
+    {"type":"follow",    "icon":"user-plus",       "text":"Marcus R. started following you",                   "time":"2m",       "unread":True},
+    {"type":"quest",     "icon":"check-circle",    "text":"Quest complete: Check In Today (+50 XP)",           "time":"1h",       "unread":True},
+    {"type":"like",      "icon":"heart",           "text":"Jordan L. liked your post",                         "time":"3h",       "unread":True},
+    {"type":"streak",    "icon":"flame",           "text":"Day 12 streak! 2 more days to beat your record.",   "time":"5h",       "unread":False},
+    {"type":"course",    "icon":"graduation-cap",  "text":"New course in Mindset Zone: Deep Work Protocol",    "time":"Yesterday","unread":False},
+    {"type":"follow",    "icon":"user-plus",       "text":"Priya K. started following you",                    "time":"Yesterday","unread":False},
+    {"type":"comment",   "icon":"message-circle",  "text":"Sam T. replied to your thread",                     "time":"2d",       "unread":False},
+    {"type":"milestone", "icon":"award",           "text":"You've hit 38 total check-ins!",                    "time":"3d",       "unread":False},
+]
 
 DEMO_FEED = [
     {"user":"Marcus R.","init":"M","time":"2h ago",
@@ -115,7 +165,7 @@ def analytics():
 @app.route('/grow')
 def grow():
     if not auth(): return redirect('/login')
-    return render_template('grow.html', u=DEMO_USER, feed=DEMO_FEED, active='grow')
+    return render_template('grow.html', u=DEMO_USER, feed=DEMO_FEED, zones=DEMO_ZONES, active='grow')
 
 @app.route('/profile')
 def profile():
@@ -156,6 +206,16 @@ def apply_pro():
 def edit_profile():
     if not auth(): return redirect('/login')
     return render_template('edit_profile.html', u=DEMO_USER, active='profile')
+
+@app.route('/quests')
+def quests():
+    if not auth(): return redirect('/login')
+    return render_template('quests.html', u=DEMO_USER, quests=DEMO_QUESTS, active='home')
+
+@app.route('/notifications')
+def notifications():
+    if not auth(): return redirect('/login')
+    return render_template('notifications.html', u=DEMO_USER, notifs=DEMO_NOTIFICATIONS, active='home')
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

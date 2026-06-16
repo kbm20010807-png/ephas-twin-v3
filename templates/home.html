@@ -3,7 +3,7 @@
 
 {% block head %}
 <style>
-.greet{padding:20px 20px 0;}
+.greet{padding:16px 20px 0;}
 .greet-time{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;font-family:'Arpubes',sans-serif;}
 .greet-name{font-family:'Arpubes',sans-serif;font-size:30px;letter-spacing:-1.5px;color:var(--black);margin-bottom:2px;}
 .greet-date{font-size:12px;color:var(--sub);}
@@ -21,7 +21,7 @@
 .streak-dots{display:flex;gap:5px;margin:5px 0;}
 .sd{width:8px;height:8px;border-radius:50%;background:var(--border);}
 .sd.on{background:var(--gold);}
-.axon-card{margin:14px 20px 0;background:#09090B;border:1px solid #1C1C1C;border-radius:var(--r-lg);padding:18px;position:relative;overflow:hidden;cursor:pointer;}
+.axon-card{margin:14px 20px 0;background:#09090B;border:1px solid #1C1C1C;border-radius:var(--r-lg);padding:18px;position:relative;overflow:hidden;cursor:pointer;display:block;text-decoration:none;}
 [data-theme="dark"] .axon-card{background:#0F0F0F;}
 .axon-glow{position:absolute;top:-50px;right:-50px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.1),transparent 70%);}
 .axon-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -54,16 +54,102 @@
 .tw-foot-w{font-family:'Arpubes',sans-serif;font-size:12px;letter-spacing:-1px;color:var(--muted);}
 .tw-foot-img{height:7px;margin:4px auto 0;display:block;opacity:.2;}
 [data-theme="dark"] .tw-foot-img{filter:invert(1);opacity:.15;}
+
+/* STORIES */
+.stories-strip{display:flex;gap:14px;padding:10px 20px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.stories-strip::-webkit-scrollbar{display:none;}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.story-ring{width:58px;height:58px;border-radius:50%;padding:2.5px;display:flex;align-items:center;justify-content:center;}
+.story-ring.active{background:conic-gradient(var(--gold) 0%,#F59E0B 100%);}
+.story-ring.yours{background:transparent;border:2px dashed var(--gold);padding:0;width:58px;height:58px;}
+.story-ring.seen{background:var(--border);}
+.story-inner{width:100%;height:100%;border-radius:50%;border:2px solid var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-2);font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);}
+.story-ring.yours .story-inner{font-size:20px;}
+.story-ring.active .story-inner{font-size:18px;}
+.story-lbl{font-size:9px;font-weight:600;color:var(--sub);white-space:nowrap;max-width:62px;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+/* Story overlay */
+.story-ov{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.story-ov.on{display:flex;}
+.story-ov-close{position:absolute;top:52px;right:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.story-ov-close svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
+.story-bar{width:100%;max-width:360px;height:3px;background:rgba(255,255,255,.15);border-radius:3px;margin-bottom:20px;}
+.story-bar-fill{height:100%;background:var(--gold);border-radius:3px;animation:storyProgress 5s linear forwards;}
+@keyframes storyProgress{from{width:0}to{width:100%}}
+.story-card{width:100%;max-width:360px;background:#0A0A0A;border:1px solid rgba(212,170,53,.15);border-radius:20px;padding:24px;text-align:center;}
+.story-av{width:60px;height:60px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:22px;font-weight:900;color:var(--gold);background:#09090B;}
+.story-username{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
+.story-subtitle{font-size:10px;color:#666;letter-spacing:1px;margin-bottom:20px;}
+.story-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.sm-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 8px;}
+.sm-val{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:#fff;margin-bottom:2px;}
+.sm-lbl{font-size:8px;letter-spacing:1.5px;color:#555;text-transform:uppercase;}
+.story-streak{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:12px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;}
+.story-streak svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;}
+.story-streak-txt{font-size:12px;font-weight:700;color:var(--gold);}
+
+/* QUESTS SHORTCUT CARD */
+.quests-card{margin:14px 20px 0;background:linear-gradient(135deg,#0A0A0A,#0F0800);border:1px solid rgba(212,170,53,.12);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer;}
+.qc-ico{width:44px;height:44px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qc-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.qc-body{flex:1;}
+.qc-title{font-size:13px;font-weight:800;color:var(--black);margin-bottom:3px;}
+.qc-sub{font-size:11px;color:var(--sub);}
+.qc-tag{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);white-space:nowrap;}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="topbar">
-  <div style="width:36px;"></div>
-  <div class="tb-brand">
-    <div class="tb-twin">TWIN</div>
-  </div>
+  <a href="/notifications" class="tb-btn" style="position:relative;">
+    <i data-lucide="bell"></i>
+    <span style="position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#EF4444;border:1.5px solid var(--bg);"></span>
+  </a>
+  <div class="tb-brand"><div class="tb-twin">TWIN</div></div>
   <a href="/messages" class="tb-btn"><i data-lucide="message-circle"></i></a>
+</div>
+
+<!-- STORIES STRIP -->
+<div class="stories-strip">
+  <div class="story-item" onclick="openStory('you','A','Alex','7.2','7.8','8.1','12')">
+    <div class="story-ring yours"><div class="story-inner" style="font-size:20px;">A</div></div>
+    <div class="story-lbl">Your story</div>
+  </div>
+  <div class="story-item" onclick="openStory('marcus','M','Marcus R.','6.8','8.2','7.5','9')">
+    <div class="story-ring active"><div class="story-inner" style="font-size:18px;">M</div></div>
+    <div class="story-lbl">Marcus R.</div>
+  </div>
+  <div class="story-item" onclick="openStory('jordan','J','Jordan L.','7.5','9.1','8.8','21')">
+    <div class="story-ring active"><div class="story-inner" style="font-size:18px;">J</div></div>
+    <div class="story-lbl">Jordan L.</div>
+  </div>
+  <div class="story-item" onclick="openStory('priya','P','Priya K.','8.0','7.6','9.0','14')">
+    <div class="story-ring active"><div class="story-inner" style="font-size:18px;">P</div></div>
+    <div class="story-lbl">Priya K.</div>
+  </div>
+  <div class="story-item" onclick="openStory('sam','S','Sam T.','6.5','7.0','7.2','5')">
+    <div class="story-ring seen"><div class="story-inner" style="font-size:18px;">S</div></div>
+    <div class="story-lbl">Sam T.</div>
+  </div>
+</div>
+
+<!-- STORY OVERLAY -->
+<div class="story-ov" id="storyOv" onclick="closeStory()">
+  <button class="story-ov-close" onclick="closeStory();event.stopPropagation();"><i data-lucide="x"></i></button>
+  <div class="story-bar" style="width:100%;max-width:360px;"><div class="story-bar-fill" id="storyBarFill"></div></div>
+  <div class="story-card" onclick="event.stopPropagation()">
+    <div class="story-av" id="storyAv"></div>
+    <div class="story-username" id="storyName"></div>
+    <div class="story-subtitle">CHECK-IN STORY · TODAY</div>
+    <div class="story-metrics">
+      <div class="sm-item"><div class="sm-val" id="storySleep"></div><div class="sm-lbl">Sleep</div></div>
+      <div class="sm-item"><div class="sm-val" id="storyEnergy"></div><div class="sm-lbl">Energy</div></div>
+      <div class="sm-item"><div class="sm-val" id="storyMood"></div><div class="sm-lbl">Mood</div></div>
+    </div>
+    <div class="story-streak">
+      <i data-lucide="flame"></i>
+      <div class="story-streak-txt" id="storyStreak"></div>
+    </div>
+  </div>
 </div>
 
 <div class="greet">
@@ -116,7 +202,17 @@
   </div>
 </div>
 
-<a href="#" class="axon-card" style="display:block;text-decoration:none;">
+<!-- QUESTS CARD -->
+<a href="/quests" class="quests-card">
+  <div class="qc-ico"><i data-lucide="shield"></i></div>
+  <div class="qc-body">
+    <div class="qc-title">Daily Quests</div>
+    <div class="qc-sub">1 of 3 complete today · 50 XP earned</div>
+  </div>
+  <div class="qc-tag">VIEW ALL</div>
+</a>
+
+<a href="#" class="axon-card">
   <div class="axon-glow"></div>
   <div class="axon-top">
     <div class="axon-ico"><i data-lucide="zap"></i></div>
@@ -175,6 +271,7 @@
   <div class="fc-ft">
     <div class="fc-act"><i data-lucide="heart"></i> {{ p.likes }}</div>
     <div class="fc-act"><i data-lucide="message-circle"></i> Reply</div>
+    <div class="fc-act" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
     <div class="fc-act"><i data-lucide="share-2"></i></div>
   </div>
 </div>
@@ -195,5 +292,23 @@ const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+
+function openStory(id, init, name, sleep, energy, mood, streak) {
+  document.getElementById('storyAv').textContent = init;
+  document.getElementById('storyName').textContent = name;
+  document.getElementById('storySleep').textContent = sleep;
+  document.getElementById('storyEnergy').textContent = energy;
+  document.getElementById('storyMood').textContent = mood;
+  document.getElementById('storyStreak').textContent = streak + '-Day Streak';
+  const fill = document.getElementById('storyBarFill');
+  fill.style.animation = 'none';
+  fill.offsetHeight;
+  fill.style.animation = '';
+  document.getElementById('storyOv').classList.add('on');
+  if(typeof lucide !== 'undefined') lucide.createIcons();
+}
+function closeStory() {
+  document.getElementById('storyOv').classList.remove('on');
+}
 </script>
 {% endblock %}
