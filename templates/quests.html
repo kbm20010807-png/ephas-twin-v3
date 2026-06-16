@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block title %}Quests{% endblock %}
+
+{% block head %}
+<style>
+.q-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.q-tabs::-webkit-scrollbar{display:none;}
+.q-tab{flex:none;padding:14px 20px;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px;font-family:'Arpubes',sans-serif;white-space:nowrap;}
+.q-tab.on{color:var(--black);border-bottom-color:var(--gold);}
+.q-pane{display:none;}
+.q-pane.on{display:block;}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);display:flex;gap:14px;align-items:flex-start;}
+.q-card.done{opacity:.65;}
+.q-ico-wrap{width:40px;height:40px;border-radius:12px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.q-ico-wrap svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.q-card.done .q-ico-wrap{background:var(--green-dim);border-color:var(--green-b);}
+.q-card.done .q-ico-wrap svg{stroke:var(--green);}
+.q-card.active .q-ico-wrap{background:var(--gold-dim);border-color:var(--gold-b);}
+.q-card.active .q-ico-wrap svg{stroke:var(--gold);}
+.q-body{flex:1;min-width:0;}
+.q-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.q-title{font-size:13px;font-weight:700;color:var(--black);}
+.q-xp{font-family:'Arpubes',sans-serif;font-size:12px;color:var(--gold);letter-spacing:.5px;}
+.q-desc{font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:10px;}
+.q-bar-row{display:flex;align-items:center;gap:8px;}
+.q-prog{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.q-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .4s;}
+.q-fill.green{background:var(--green);}
+.q-pct{font-size:9px;font-weight:700;color:var(--sub);width:26px;text-align:right;}
+.q-cat{display:inline-flex;align-items:center;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:2px 8px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;}
+.q-done-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green-dim);border:1px solid var(--green-b);border-radius:var(--r-full);padding:3px 10px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--green);text-transform:uppercase;}
+.q-done-badge svg{width:9px;height:9px;stroke:var(--green);fill:none;stroke-width:2.5;}
+
+/* Seasonal */
+.seasonal-card{background:linear-gradient(135deg,#09090B,#0F0A00);border:1px solid rgba(212,170,53,.2);border-radius:var(--r-xl);padding:22px;margin:0 20px 10px;box-shadow:0 4px 24px rgba(0,0,0,.3);position:relative;overflow:hidden;}
+.sc-glow{position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.12),transparent 70%);}
+.sc-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(212,170,53,.1);border:1px solid rgba(212,170,53,.2);border-radius:var(--r-full);padding:3px 10px;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-bottom:12px;text-transform:uppercase;}
+.sc-tag svg{width:10px;height:10px;stroke:var(--gold);fill:none;stroke-width:2;}
+.sc-title{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:#fff;margin-bottom:6px;}
+.sc-desc{font-size:11px;color:#888;line-height:1.6;margin-bottom:18px;}
+.sc-xp{font-family:'Arpubes',sans-serif;font-size:28px;letter-spacing:-2px;color:var(--gold);margin-bottom:2px;}
+.sc-xp-lbl{font-size:9px;font-weight:700;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:14px;}
+.sc-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.sc-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),#F5D982);}
+.sc-days{display:flex;justify-content:space-between;font-size:9px;color:#555;font-weight:600;}
+
+.q-summary{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 16px;display:flex;gap:12px;}
+.qs-num{font-family:'Arpubes',sans-serif;font-size:28px;letter-spacing:-2px;color:var(--gold);}
+.qs-info{flex:1;}
+.qs-lbl{font-size:10px;color:var(--sub);font-weight:600;letter-spacing:.5px;}
+.qs-xp{font-size:12px;font-weight:700;color:var(--black);margin-top:4px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/home" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Quests</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="q-tabs">
+  <div class="q-tab on" onclick="switchQ('daily',this)">Daily</div>
+  <div class="q-tab" onclick="switchQ('weekly',this)">Weekly</div>
+  <div class="q-tab" onclick="switchQ('monthly',this)">Monthly</div>
+  <div class="q-tab" onclick="switchQ('seasonal',this)">Seasonal</div>
+</div>
+
+<!-- ===== DAILY ===== -->
+<div class="q-pane on" id="qpane-daily">
+  <div style="height:14px;"></div>
+  <div class="q-summary">
+    <div class="qs-num">1<span style="font-size:18px;color:var(--sub);">/{{ quests.daily|length }}</span></div>
+    <div class="qs-info">
+      <div class="qs-lbl">Daily Quests Complete</div>
+      <div class="qs-xp">50 XP earned · Resets at midnight</div>
+    </div>
+  </div>
+  {% for q in quests.daily %}
+  <div class="q-card {% if q.done %}done{% elif q.progress > 0 %}active{% endif %}">
+    <div class="q-ico-wrap"><i data-lucide="{{ q.icon }}"></i></div>
+    <div class="q-body">
+      <div class="q-top">
+        <div class="q-title">{{ q.title }}</div>
+        <div class="q-xp">+{{ q.xp }} XP</div>
+      </div>
+      <div class="q-desc">{{ q.desc }}</div>
+      {% if q.done %}
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="q-done-badge"><i data-lucide="check"></i> COMPLETE</div>
+          <div class="q-cat">{{ q.cat }}</div>
+        </div>
+      {% else %}
+        <div class="q-bar-row">
+          <div class="q-prog"><div class="q-fill" style="width:{{ q.progress }}%"></div></div>
+          <div class="q-pct">{{ q.progress }}%</div>
+        </div>
+        <div style="margin-top:6px;"><div class="q-cat">{{ q.cat }}</div></div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ===== WEEKLY ===== -->
+<div class="q-pane" id="qpane-weekly">
+  <div style="height:14px;"></div>
+  <div class="q-summary">
+    <div class="qs-num">0<span style="font-size:18px;color:var(--sub);">/{{ quests.weekly|length }}</span></div>
+    <div class="qs-info">
+      <div class="qs-lbl">Weekly Quests Complete</div>
+      <div class="qs-xp">0 XP earned · Resets Monday</div>
+    </div>
+  </div>
+  {% for q in quests.weekly %}
+  <div class="q-card {% if q.done %}done{% elif q.progress > 0 %}active{% endif %}">
+    <div class="q-ico-wrap"><i data-lucide="{{ q.icon }}"></i></div>
+    <div class="q-body">
+      <div class="q-top">
+        <div class="q-title">{{ q.title }}</div>
+        <div class="q-xp">+{{ q.xp }} XP</div>
+      </div>
+      <div class="q-desc">{{ q.desc }}</div>
+      {% if q.done %}
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="q-done-badge"><i data-lucide="check"></i> COMPLETE</div>
+          <div class="q-cat">{{ q.cat }}</div>
+        </div>
+      {% else %}
+        <div class="q-bar-row">
+          <div class="q-prog"><div class="q-fill {% if q.progress >= 100 %}green{% endif %}" style="width:{{ q.progress }}%"></div></div>
+          <div class="q-pct">{{ q.progress }}%</div>
+        </div>
+        <div style="margin-top:6px;"><div class="q-cat">{{ q.cat }}</div></div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ===== MONTHLY ===== -->
+<div class="q-pane" id="qpane-monthly">
+  <div style="height:14px;"></div>
+  <div class="q-summary">
+    <div class="qs-num">0<span style="font-size:18px;color:var(--sub);">/{{ quests.monthly|length }}</span></div>
+    <div class="qs-info">
+      <div class="qs-lbl">Monthly Milestones</div>
+      <div class="qs-xp">0 XP earned this month</div>
+    </div>
+  </div>
+  {% for q in quests.monthly %}
+  <div class="q-card {% if q.done %}done{% elif q.progress > 0 %}active{% endif %}">
+    <div class="q-ico-wrap"><i data-lucide="{{ q.icon }}"></i></div>
+    <div class="q-body">
+      <div class="q-top">
+        <div class="q-title">{{ q.title }}</div>
+        <div class="q-xp">+{{ q.xp }} XP</div>
+      </div>
+      <div class="q-desc">{{ q.desc }}</div>
+      <div class="q-bar-row">
+        <div class="q-prog"><div class="q-fill {% if q.progress >= 100 %}green{% endif %}" style="width:{{ q.progress }}%"></div></div>
+        <div class="q-pct">{{ q.progress }}%</div>
+      </div>
+      <div style="margin-top:6px;"><div class="q-cat">{{ q.cat }}</div></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ===== SEASONAL ===== -->
+<div class="q-pane" id="qpane-seasonal">
+  <div style="height:14px;"></div>
+  {% for q in quests.seasonal %}
+  <div class="seasonal-card">
+    <div class="sc-glow"></div>
+    <div style="position:relative;">
+      <div class="sc-tag"><i data-lucide="{{ q.icon }}"></i> LEGENDARY</div>
+      <div class="sc-title">{{ q.title }}</div>
+      <div class="sc-desc">{{ q.desc }}</div>
+      <div class="sc-xp">{{ "{:,}".format(q.xp) }}</div>
+      <div class="sc-xp-lbl">XP Reward</div>
+      <div class="sc-bar"><div class="sc-fill" style="width:{{ q.progress }}%"></div></div>
+      <div class="sc-days">
+        <span>Day {{ q.current }} of {{ q.days }}</span>
+        <span>{{ q.progress }}% complete</span>
+        <span>{{ q.days - q.current }} days left</span>
+      </div>
+      <div style="margin-top:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-lg);padding:12px;font-size:11px;color:#777;line-height:1.6;">
+        Check in daily to advance this challenge. Miss a day and the streak breaks — but the quest resets so you can try again.
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchQ(tab, el) {
+  document.querySelectorAll('.q-tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.q-pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('qpane-' + tab).classList.add('on');
+}
+</script>
+{% endblock %}

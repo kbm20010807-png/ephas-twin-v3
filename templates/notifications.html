@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block head %}
+<style>
+.notif-list{padding:0 20px;}
+.notif-sep{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--sub);text-transform:uppercase;padding:16px 0 8px;font-family:'Arpubes',sans-serif;}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);position:relative;cursor:pointer;}
+.notif-item:last-child{border-bottom:none;}
+.notif-ico{width:40px;height:40px;border-radius:12px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notif-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.notif-item.unread .notif-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.notif-item.unread .notif-ico svg{stroke:var(--gold);}
+.notif-body{flex:1;min-width:0;}
+.notif-text{font-size:13px;color:var(--black);line-height:1.5;}
+.notif-time{font-size:10px;color:var(--sub);margin-top:3px;}
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px;}
+
+/* Type-specific icon colors */
+.notif-item[data-type="follow"] .notif-ico{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);}
+.notif-item[data-type="follow"] .notif-ico svg{stroke:var(--green);}
+.notif-item[data-type="quest"] .notif-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.notif-item[data-type="quest"] .notif-ico svg{stroke:var(--gold);}
+.notif-item[data-type="like"] .notif-ico{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);}
+.notif-item[data-type="like"] .notif-ico svg{stroke:#EF4444;}
+.notif-item[data-type="streak"] .notif-ico{background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.2);}
+.notif-item[data-type="streak"] .notif-ico svg{stroke:#F97316;}
+.notif-item[data-type="milestone"] .notif-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.notif-item[data-type="milestone"] .notif-ico svg{stroke:var(--gold);}
+
+.empty-notif{text-align:center;padding:40px 20px;}
+.mark-read-btn{display:block;text-align:right;padding:12px 20px 0;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;background:none;border:none;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/home" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Notifications</div></div>
+  <button class="mark-read-btn" style="width:36px;padding:0;font-size:10px;" onclick="markAllRead()">
+    <i data-lucide="check-check" style="width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:1.75;"></i>
+  </button>
+</div>
+
+<div class="notif-list">
+  <!-- TODAY -->
+  <div class="notif-sep">Today</div>
+  {% for n in notifs %}
+    {% if n.time in ['2m','1h','3h','5h'] %}
+    <div class="notif-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" onclick="readNotif(this)">
+      <div class="notif-ico"><i data-lucide="{{ n.icon }}"></i></div>
+      <div class="notif-body">
+        <div class="notif-text">{{ n.text }}</div>
+        <div class="notif-time">{{ n.time }} ago</div>
+      </div>
+      {% if n.unread %}<div class="notif-dot"></div>{% endif %}
+    </div>
+    {% endif %}
+  {% endfor %}
+
+  <!-- EARLIER -->
+  <div class="notif-sep">Earlier</div>
+  {% for n in notifs %}
+    {% if n.time not in ['2m','1h','3h','5h'] %}
+    <div class="notif-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" onclick="readNotif(this)">
+      <div class="notif-ico"><i data-lucide="{{ n.icon }}"></i></div>
+      <div class="notif-body">
+        <div class="notif-text">{{ n.text }}</div>
+        <div class="notif-time">{{ n.time }}</div>
+      </div>
+      {% if n.unread %}<div class="notif-dot"></div>{% endif %}
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function readNotif(el) {
+  el.classList.remove('unread');
+  const dot = el.querySelector('.notif-dot');
+  if (dot) dot.remove();
+}
+function markAllRead() {
+  document.querySelectorAll('.notif-item.unread').forEach(el => readNotif(el));
+}
+</script>
+{% endblock %}

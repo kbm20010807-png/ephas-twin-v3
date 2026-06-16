@@ -9,7 +9,7 @@
 .prof-zone{padding:0 20px;margin-top:-44px;display:flex;align-items:flex-end;justify-content:space-between;}
 .prof-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:30px;font-weight:900;color:var(--gold);position:relative;box-shadow:var(--sh-md);flex-shrink:0;}
 .prof-av-lv{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);font-size:9px;font-weight:900;color:#000;display:flex;align-items:center;justify-content:center;}
-.edit-prof-btn{background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 18px;font-size:11px;font-weight:700;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.edit-prof-btn{background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 18px;font-size:11px;font-weight:700;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:4px;text-decoration:none;}
 .edit-prof-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
 .prof-info{padding:12px 20px 0;}
 .prof-name{font-family:'Arpubes',sans-serif;font-size:24px;letter-spacing:-1.5px;color:var(--black);margin-bottom:2px;}
@@ -17,20 +17,31 @@
 .prof-meta{display:flex;gap:14px;flex-wrap:wrap;}
 .pm-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);}
 .pm-item svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+
+/* SOCIAL STATS */
+.social-stats{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:14px 0 0;}
+.ss-item{flex:1;text-align:center;padding:12px 8px;border-right:1px solid var(--border);cursor:pointer;}
+.ss-item:last-child{border-right:none;}
+.ss-val{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:var(--black);}
+.ss-lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-top:2px;}
+
 .acct-switch{display:flex;gap:8px;padding:14px 20px 0;}
 .acct-btn{flex:1;padding:10px 8px;border-radius:var(--r-lg);border:1.5px solid var(--border);background:var(--bg-2);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;text-align:center;transition:all .15s;line-height:1;}
 .acct-btn span{font-size:9px;font-weight:500;display:block;margin-top:3px;opacity:.7;}
 .acct-btn.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
-.stats-row{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:16px 0;}
+
+.stats-row{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:14px 0;}
 .stat-c{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
 .stat-c:last-child{border-right:none;}
 .stat-v{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1.5px;color:var(--black);}
 .stat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;font-family:'Arpubes',sans-serif;}
+
 .tab-bar{display:flex;border-bottom:1px solid var(--border);margin:0 20px;}
 .tab-btn{flex:1;padding:12px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px;transition:all .15s;font-family:'Arpubes',sans-serif;}
 .tab-btn.on{color:var(--black);border-bottom-color:var(--gold);}
 .tab-pane{display:none;}
 .tab-pane.on{display:block;}
+
 .xp-zone{padding:0 20px;}
 .xp-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .domain-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;}
@@ -48,18 +59,43 @@
 .badge-c.earned .badge-ico{background:var(--gold-dim);border-color:var(--gold-b);}
 .badge-c.earned .badge-ico svg{stroke:var(--gold);}
 .badge-c.earned .badge-nm{color:var(--gold);}
+
 .prof-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
 .pp-meta{font-size:10px;color:var(--sub);margin-bottom:8px;}
 .pp-body{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;}
-.pp-ft{display:flex;gap:14px;}
-.pp-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);}
+.pp-ft{display:flex;gap:14px;align-items:center;}
+.pp-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
 .pp-act svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.pp-act.bm-btn.saved{color:var(--gold);}
+.pp-act.bm-btn.saved svg{stroke:var(--gold);}
+
 .course-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
 .cc-tag{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);margin-bottom:8px;}
 .cc-title{font-size:14px;font-weight:700;color:var(--black);margin-bottom:4px;}
 .cc-meta{font-size:11px;color:var(--sub);}
+.cc-foot{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.cc-enrolled{font-size:10px;color:var(--sub);flex:1;}
 .empty-card{background:var(--card);border:1px dashed var(--border);border-radius:var(--r-lg);padding:28px;margin:0 20px 10px;text-align:center;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
+
+/* SUBSCRIBE BUTTON */
+.sub-btn{border-radius:var(--r-full);padding:9px 20px;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:'Arpubes',sans-serif;letter-spacing:.5px;transition:all .2s;border:none;}
+.sub-btn.free{background:var(--card);border:1.5px solid var(--border);color:var(--black);}
+.sub-btn.paid{background:var(--gold);color:#000;}
+.sub-btn.subscribed{background:var(--green-dim);border:1.5px solid var(--green-b);color:var(--green);}
+.sub-btn svg{width:12px;height:12px;fill:none;stroke-width:2;}
+
+/* GO LIVE */
+.live-btn{background:linear-gradient(135deg,#EF4444,#DC2626);border:none;border-radius:var(--r-full);padding:9px 20px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:'Arpubes',sans-serif;letter-spacing:.5px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#fff;animation:livePulse 1.4s infinite;}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+
+/* LIVE MODAL */
+.live-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;align-items:center;justify-content:center;padding:32px;}
+.live-modal.on{display:flex;}
+.live-modal-box{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;width:100%;max-width:320px;}
+.live-modal-ico{width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.live-modal-ico svg{width:28px;height:28px;stroke:#EF4444;fill:none;stroke-width:1.75;}
 </style>
 {% endblock %}
 
@@ -90,9 +126,16 @@
   </div>
 </div>
 
+<!-- SOCIAL STATS -->
+<div class="social-stats">
+  <div class="ss-item"><div class="ss-val">{{ u.followers }}</div><div class="ss-lbl">Followers</div></div>
+  <div class="ss-item"><div class="ss-val">{{ u.following }}</div><div class="ss-lbl">Following</div></div>
+  <div class="ss-item"><div class="ss-val">{{ u.subscribed }}</div><div class="ss-lbl">Subscribed</div></div>
+</div>
+
 <div class="acct-switch">
   <div class="acct-btn on" id="btnTwin" onclick="switchAcct('twin')">TWIN Profile<span>Stats + Posts</span></div>
-  <div class="acct-btn" id="btnPro" onclick="switchAcct('pro')">Professional<span>Posts + Stats + Courses</span></div>
+  <div class="acct-btn" id="btnPro" onclick="switchAcct('pro')">Professional<span>Posts + Courses + Stats</span></div>
 </div>
 
 <div class="stats-row">
@@ -110,14 +153,53 @@
 
 <!-- PRO TABS -->
 <div class="tab-bar" id="proTabs" style="display:none;overflow-x:auto;scrollbar-width:none;">
-  <div class="tab-btn on" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','posts',this)">POSTS</div>
-  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','threads',this)">THREADS</div>
-  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','courses',this)">COURSES</div>
-  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','achievements',this)">AWARDS</div>
-  <div class="tab-btn" style="flex:none;padding:12px 16px;white-space:nowrap;" onclick="switchTab('pro','stats',this)">STATS</div>
+  <div class="tab-btn on" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','posts',this)">POSTS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','threads',this)">THREADS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','courses',this)">COURSES</div>
+  <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','achievements',this)">AWARDS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','stats',this)">STATS</div>
 </div>
 
-<!-- TWIN: STATS -->
+<!-- PRO ACTION BAR (Subscribe + Go Live) -->
+<div id="proActions" style="display:none;padding:12px 20px;display:none;gap:10px;align-items:center;">
+  <button class="sub-btn paid" id="subBtn" onclick="toggleSubscribe()">
+    <i data-lucide="star" style="stroke:currentColor;"></i> Subscribe — Free
+  </button>
+  <button class="live-btn" onclick="openLiveModal()">
+    <div class="live-dot"></div> GO LIVE
+  </button>
+</div>
+
+<!-- ===== TWIN: POSTS ===== -->
+<div class="tab-pane on" id="pane-twin-posts">
+  <div style="height:16px;"></div>
+  <div class="prof-post">
+    <div class="pp-meta">2h ago · Mindset</div>
+    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think.</div>
+    <div class="pp-ft">
+      <div class="pp-act"><i data-lucide="heart"></i> 47</div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> 12</div>
+      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  <div class="prof-post">
+    <div class="pp-meta">Yesterday · Fitness</div>
+    <div class="pp-body">Cold shower at 5AM. Body domain jumped 8% this week. Cold exposure + consistent sleep = different game.</div>
+    <div class="pp-ft">
+      <div class="pp-act"><i data-lucide="heart"></i> 93</div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> 8</div>
+      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share your journey</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create Post</a>
+  </div>
+</div>
+
+<!-- ===== TWIN: STATS ===== -->
 <div class="tab-pane" id="pane-twin-stats">
   <div class="xp-zone" style="padding-top:16px;">
     <div class="xp-hd">
@@ -148,53 +230,36 @@
   <div style="height:16px;"></div>
 </div>
 
-<!-- TWIN: POSTS -->
-<div class="tab-pane on" id="pane-twin-posts">
-  <div style="height:16px;"></div>
-  <div class="prof-post">
-    <div class="pp-meta">2h ago · Mindset</div>
-    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think.</div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 47</div><div class="pp-act"><i data-lucide="message-circle"></i> 12</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
-  </div>
-  <div class="prof-post">
-    <div class="pp-meta">Yesterday · Fitness</div>
-    <div class="pp-body">Cold shower at 5AM. Body domain jumped 8% this week. Cold exposure + consistent sleep = different game.</div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 93</div><div class="pp-act"><i data-lucide="message-circle"></i> 8</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share your journey</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create Post</a>
-  </div>
-</div>
-
-<!-- PRO: POSTS & REELS -->
+<!-- ===== PRO: POSTS ===== -->
 <div class="tab-pane" id="pane-pro-posts">
   <div style="height:16px;"></div>
-  <!-- Photo post -->
   <div class="prof-post">
     <div class="pp-meta">2h ago · Mindset</div>
     <div style="height:180px;background:var(--bg-2);border-radius:var(--r);margin-bottom:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);overflow:hidden;">
       <i data-lucide="image" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     </div>
     <div class="pp-body">Cold shower at 5AM. Body domain jumped 8% this week. Cold exposure + consistent sleep = a different game.</div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 93</div><div class="pp-act"><i data-lucide="message-circle"></i> 8</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+    <div class="pp-ft">
+      <div class="pp-act"><i data-lucide="heart"></i> 93</div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> 8</div>
+      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
+    </div>
   </div>
-  <!-- Reel post -->
   <div class="prof-post">
     <div class="pp-meta">Yesterday · Fitness</div>
-    <div style="height:220px;background:#09090B;border-radius:var(--r);margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #1C1C1C;position:relative;overflow:hidden;cursor:pointer;">
+    <div style="height:220px;background:#09090B;border-radius:var(--r);margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #1C1C1C;position:relative;cursor:pointer;">
       <i data-lucide="play-circle" style="width:48px;height:48px;stroke:var(--gold);fill:none;stroke-width:1.25;"></i>
       <div style="font-size:10px;color:#666;margin-top:8px;letter-spacing:1px;">0:43</div>
       <div style="position:absolute;bottom:12px;left:12px;right:48px;font-size:11px;color:#fff;font-weight:600;line-height:1.4;">My morning routine — 43 sec</div>
       <div style="position:absolute;top:10px;right:10px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.25);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:1px;">REEL</div>
     </div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 214</div><div class="pp-act"><i data-lucide="message-circle"></i> 31</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
-  </div>
-  <!-- Text post -->
-  <div class="prof-post">
-    <div class="pp-meta">3d ago · Wealth</div>
-    <div class="pp-body">12-day streak and still going. The key isn't motivation — it's removing the choice. Check-in every morning before you think about it.</div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 47</div><div class="pp-act"><i data-lucide="message-circle"></i> 12</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
+    <div class="pp-ft">
+      <div class="pp-act"><i data-lucide="heart"></i> 214</div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> 31</div>
+      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
+    </div>
   </div>
   <div class="empty-card">
     <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share a post or reel</div>
@@ -202,7 +267,7 @@
   </div>
 </div>
 
-<!-- PRO: THREADS -->
+<!-- ===== PRO: THREADS ===== -->
 <div class="tab-pane" id="pane-pro-threads">
   <div style="height:16px;"></div>
   <div class="prof-post">
@@ -210,18 +275,14 @@
       <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;">THREAD</div>
       <div style="font-size:9px;color:var(--sub);">5 parts · 3d ago</div>
     </div>
-    <div class="pp-body" style="margin-bottom:10px;">How I went from 0 to a 12-day streak when nothing else worked. [1/5]<br><br>The first 3 days are the hardest. Not because of willpower — because you haven't built the environmental cue yet. Here's exactly what changed...</div>
+    <div class="pp-body" style="margin-bottom:10px;">How I went from 0 to a 12-day streak when nothing else worked. [1/5]<br><br>The first 3 days are the hardest. Not because of willpower — because you haven't built the environmental cue yet.</div>
     <div style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;margin-bottom:12px;">Read full thread →</div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 187</div><div class="pp-act"><i data-lucide="message-circle"></i> 43</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
-  </div>
-  <div class="prof-post">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;">THREAD</div>
-      <div style="font-size:9px;color:var(--sub);">3 parts · 1w ago</div>
+    <div class="pp-ft">
+      <div class="pp-act"><i data-lucide="heart"></i> 187</div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> 43</div>
+      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
     </div>
-    <div class="pp-body" style="margin-bottom:10px;">The Wealth domain was at 12% when I started. Here's the exact system I used to get it to 55% in 6 weeks. [1/3]<br><br>Step 1: track your spending daily. Not to judge it — just to see it. Awareness before action...</div>
-    <div style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;margin-bottom:12px;">Read full thread →</div>
-    <div class="pp-ft"><div class="pp-act"><i data-lucide="heart"></i> 92</div><div class="pp-act"><i data-lucide="message-circle"></i> 19</div><div class="pp-act" style="margin-left:auto;"><i data-lucide="share-2"></i></div></div>
   </div>
   <div class="empty-card">
     <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Start a thread</div>
@@ -229,47 +290,54 @@
   </div>
 </div>
 
-<!-- PRO: ACHIEVEMENTS -->
+<!-- ===== PRO: COURSES ===== -->
+<div class="tab-pane" id="pane-pro-courses">
+  <div style="height:16px;"></div>
+  <div class="course-card">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+      <div class="cc-tag">Fitness · FREE</div>
+    </div>
+    <div class="cc-title">The Discipline Operating System</div>
+    <div class="cc-meta">6 modules · 2,847 enrolled</div>
+    <div class="cc-foot">
+      <div class="cc-enrolled"><i data-lucide="users" style="width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>2,847 enrolled</div>
+      <button class="btn btn-secondary btn-sm" style="font-size:10px;">Enroll Free</button>
+    </div>
+  </div>
+  <div class="course-card">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+      <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Sales · PAID</div>
+    </div>
+    <div class="cc-title">Cold Outreach Mastery</div>
+    <div class="cc-meta">8 modules · 1,204 enrolled</div>
+    <div class="cc-foot">
+      <div class="cc-enrolled"><i data-lucide="users" style="width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>1,204 enrolled</div>
+      <button class="btn btn-primary btn-sm" style="font-size:10px;background:var(--gold);color:#000;border:none;">$49</button>
+    </div>
+  </div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Create your next course</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="graduation-cap"></i> Create Course</a>
+  </div>
+</div>
+
+<!-- ===== PRO: AWARDS ===== -->
 <div class="tab-pane" id="pane-pro-achievements">
   <div style="height:16px;"></div>
-  <!-- Milestone cards -->
   <div class="prof-post">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i data-lucide="flame" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--black);">12-Day Streak</div>
-        <div style="font-size:11px;color:var(--sub);">Active now · Best: 14 days</div>
-      </div>
+      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="flame" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--black);">12-Day Streak</div><div style="font-size:11px;color:var(--sub);">Active now · Best: 14 days</div></div>
       <div class="pill pill-green" style="margin-left:auto;font-size:8px;">ACTIVE</div>
     </div>
   </div>
   <div class="prof-post">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i data-lucide="sunrise" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--black);">Early Riser</div>
-        <div style="font-size:11px;color:var(--sub);">Checked in before 7AM for 7 days</div>
-      </div>
+      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="sunrise" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--black);">Early Riser</div><div style="font-size:11px;color:var(--sub);">Checked in before 7AM for 7 days</div></div>
       <div class="pill pill-gold" style="font-size:8px;">EARNED</div>
     </div>
   </div>
-  <div class="prof-post">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i data-lucide="book-open" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--black);">Reader</div>
-        <div style="font-size:11px;color:var(--sub);">30 min reading logged 10+ days</div>
-      </div>
-      <div class="pill pill-gold" style="font-size:8px;">EARNED</div>
-    </div>
-  </div>
-  <!-- Locked achievements -->
   <div class="sect-lbl">Next to unlock</div>
   <div class="badges-row" style="margin-bottom:16px;">
     <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
@@ -279,21 +347,7 @@
   </div>
 </div>
 
-<!-- PRO: COURSES -->
-<div class="tab-pane" id="pane-pro-courses">
-  <div style="height:16px;"></div>
-  <div class="course-card">
-    <div class="cc-tag">Fitness</div>
-    <div class="cc-title">The Discipline Operating System</div>
-    <div class="cc-meta">Free · 6 modules · 2,847 enrolled</div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Create your first course</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="graduation-cap"></i> Create Course</a>
-  </div>
-</div>
-
-<!-- PRO: STATS (so viewers can verify the instructor walks the talk) -->
+<!-- ===== PRO: STATS ===== -->
 <div class="tab-pane" id="pane-pro-stats">
   <div style="padding:16px 20px 0;">
     <div style="font-size:11px;color:var(--sub);line-height:1.5;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:12px 14px;">
@@ -326,25 +380,40 @@
   <div style="height:16px;"></div>
 </div>
 
+<!-- GO LIVE MODAL -->
+<div class="live-modal" id="liveModal" onclick="closeLiveModal()">
+  <div class="live-modal-box" onclick="event.stopPropagation()">
+    <div class="live-modal-ico"><i data-lucide="video"></i></div>
+    <div class="t-lg mb-2">Start a Live Session</div>
+    <div style="font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:20px;">Go live to your followers and community. Live sessions for Professionals are coming soon — you'll be the first to know.</div>
+    <div style="background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:12px;margin-bottom:20px;font-size:11px;color:var(--black);line-height:1.5;">
+      <b>Coming soon:</b> Ticketed lives, Q&amp;A sessions, and live coaching — all visible to your subscribers.
+    </div>
+    <button class="btn btn-secondary btn-full" style="border-radius:var(--r-xl);" onclick="closeLiveModal()">Got it</button>
+  </div>
+</div>
+
 <div class="tw-foot">
   <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
 let acctType = localStorage.getItem('twinAcctType') || 'twin';
+let isSubscribed = false;
 
 function applyAcct(type) {
   document.getElementById('btnTwin').classList.toggle('on', type === 'twin');
   document.getElementById('btnPro').classList.toggle('on', type === 'pro');
   document.getElementById('twinTabs').style.display = type === 'twin' ? 'flex' : 'none';
   document.getElementById('proTabs').style.display = type === 'pro' ? 'flex' : 'none';
+  const pa = document.getElementById('proActions');
+  pa.style.display = type === 'pro' ? 'flex' : 'none';
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
-  if(type === 'twin') {
+  if (type === 'twin') {
     document.getElementById('pane-twin-posts').classList.add('on');
     document.querySelector('#twinTabs .tab-btn').classList.add('on');
   } else {
@@ -369,8 +438,29 @@ function switchTab(mode, tab, el) {
   document.getElementById('pane-' + mode + '-' + tab).classList.add('on');
 }
 
+function toggleBookmark(btn) { btn.classList.toggle('saved'); }
+
+function toggleSubscribe() {
+  isSubscribed = !isSubscribed;
+  const btn = document.getElementById('subBtn');
+  if (isSubscribed) {
+    btn.className = 'sub-btn subscribed';
+    btn.innerHTML = '<i data-lucide="check" style="stroke:currentColor;width:12px;height:12px;fill:none;stroke-width:2.5;"></i> Subscribed';
+  } else {
+    btn.className = 'sub-btn paid';
+    btn.innerHTML = '<i data-lucide="star" style="stroke:currentColor;width:12px;height:12px;fill:none;stroke-width:2;"></i> Subscribe — Free';
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openLiveModal() {
+  document.getElementById('liveModal').classList.add('on');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+function closeLiveModal() { document.getElementById('liveModal').classList.remove('on'); }
+
 function shareProfile() {
-  if(navigator.share) {
+  if (navigator.share) {
     navigator.share({title:'TWIN — My Progress',text:'Level {{ u.level }} · {{ u.streak }}-day streak',url:window.location.href});
   } else {
     navigator.clipboard.writeText(window.location.href).then(() => { alert('Profile link copied!'); });
