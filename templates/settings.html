@@ -41,6 +41,14 @@
 .ae-ico{width:40px;height:40px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ae-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
 .ae-txt b{color:var(--black);}
+.twin-pro-card{margin:20px 20px 0;background:linear-gradient(135deg,#0A0A0A,#140E02);border:1px solid rgba(212,170,53,.25);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;text-decoration:none;position:relative;overflow:hidden;}
+.tpc-glow{position:absolute;top:-40px;right:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.14),transparent 70%);}
+.tpc-ico{width:44px;height:44px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.tpc-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.tpc-body{flex:1;position:relative;}
+.tpc-title{font-family:'Arpubes',sans-serif;font-size:15px;letter-spacing:-.5px;color:#fff;margin-bottom:2px;}
+.tpc-sub{font-size:11px;color:#999;line-height:1.4;}
+.tpc-arrow{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;position:relative;flex-shrink:0;}
 </style>
 {% endblock %}
 
@@ -80,6 +88,17 @@
     </label>
   </div>
 </div>
+
+<!-- TWIN PRO -->
+<a href="/twin-pro" class="twin-pro-card">
+  <div class="tpc-glow"></div>
+  <div class="tpc-ico"><i data-lucide="zap"></i></div>
+  <div class="tpc-body">
+    <div class="tpc-title">TWIN Pro</div>
+    <div class="tpc-sub">See everything TWIN does — and unlock the full twin</div>
+  </div>
+  <i data-lucide="chevron-right" class="tpc-arrow"></i>
+</a>
 
 <!-- ACCOUNT -->
 <div class="block-label">Account</div>

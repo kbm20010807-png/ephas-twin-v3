@@ -207,6 +207,11 @@ def edit_profile():
     if not auth(): return redirect('/login')
     return render_template('edit_profile.html', u=DEMO_USER, active='profile')
 
+@app.route('/twin-pro')
+def twin_pro():
+    if not auth(): return redirect('/login')
+    return render_template('twin_pro.html', u=DEMO_USER, active='settings')
+
 @app.route('/quests')
 def quests():
     if not auth(): return redirect('/login')

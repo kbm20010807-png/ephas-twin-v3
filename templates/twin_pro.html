@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% block title %}TWIN Pro{% endblock %}
+
+{% block head %}
+<style>
+.tp-hero{padding:28px 24px 24px;text-align:center;background:linear-gradient(180deg,#0F0A00,var(--bg));position:relative;overflow:hidden;}
+[data-theme="dark"] .tp-hero{background:linear-gradient(180deg,#140E02,var(--bg));}
+.tp-hero-glow{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.16),transparent 70%);}
+.tp-badge{position:relative;display:inline-flex;align-items:center;gap:6px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:5px 14px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;}
+.tp-badge svg{width:12px;height:12px;stroke:var(--gold);fill:none;stroke-width:2;}
+.tp-title{position:relative;font-family:'Arpubes',sans-serif;font-size:34px;letter-spacing:-2px;color:var(--black);line-height:1;margin-bottom:10px;}
+.tp-title .gold{color:var(--gold);}
+.tp-sub{position:relative;font-size:13px;color:var(--sub);line-height:1.6;max-width:300px;margin:0 auto;}
+
+.tp-sect-lbl{padding:24px 24px 4px;display:flex;align-items:center;gap:10px;}
+.tp-sect-lbl .l{font-family:'Arpubes',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--black);text-transform:uppercase;}
+.tp-sect-lbl .tag{font-size:8px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:var(--r-full);text-transform:uppercase;}
+.tag-free{background:var(--green-dim);border:1px solid var(--green-b);color:var(--green);}
+.tag-pro{background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);}
+.tp-sect-note{padding:0 24px 8px;font-size:11px;color:var(--sub);}
+
+.feat-list{padding:6px 20px 0;}
+.feat{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:8px;box-shadow:var(--sh);}
+.feat-ico{width:36px;height:36px;border-radius:10px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.feat-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.feat.pro .feat-ico{background:var(--gold-dim);border-color:var(--gold-b);}
+.feat.pro .feat-ico svg{stroke:var(--gold);}
+.feat-body{flex:1;min-width:0;}
+.feat-name{font-size:13px;font-weight:700;color:var(--black);display:flex;align-items:center;gap:7px;}
+.feat-soon{font-size:7px;font-weight:700;letter-spacing:1px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:1px 6px;text-transform:uppercase;}
+.feat-desc{font-size:11px;color:var(--sub);line-height:1.5;margin-top:2px;}
+.feat-check{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin-top:6px;}
+.feat-check svg{width:11px;height:11px;stroke:var(--green);fill:none;stroke-width:3;}
+.feat.pro .feat-check{background:var(--gold-dim);}
+.feat.pro .feat-check svg{stroke:var(--gold);}
+
+/* Pricing */
+.tp-pricing{padding:24px 20px 0;}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;box-shadow:var(--sh);}
+.price-card.pro{background:linear-gradient(160deg,#0A0A0A,#140E02);border:1px solid rgba(212,170,53,.25);position:relative;overflow:hidden;}
+.pc-glow{position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.12),transparent 70%);}
+.pc-name{font-family:'Arpubes',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.price-card.pro .pc-name{color:var(--gold);}
+.pc-price{font-family:'Inter',sans-serif;font-weight:800;font-size:30px;letter-spacing:-1.5px;color:var(--black);}
+.price-card.pro .pc-price{color:#fff;}
+.pc-price small{font-size:13px;font-weight:600;color:var(--sub);letter-spacing:0;}
+.pc-line{font-size:12px;line-height:1.7;margin-top:10px;}
+.price-card.pro .pc-line{color:#aaa;}
+.price-card:not(.pro) .pc-line{color:var(--sub);}
+.tp-cta{padding:16px 20px 8px;}
+.tp-foot{padding:8px 24px 24px;text-align:center;font-size:10px;color:var(--muted);line-height:1.6;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">TWIN Pro</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="tp-hero">
+  <div class="tp-hero-glow"></div>
+  <div class="tp-badge"><i data-lucide="zap"></i> Everything TWIN does</div>
+  <div class="tp-title">Build the version<br>of you they <span class="gold">fear.</span></div>
+  <div class="tp-sub">TWIN tracks your whole life, learns who you are, and pushes you to grow. Here's everything it can do.</div>
+</div>
+
+<!-- ===== FREE — the whole app ===== -->
+<div class="tp-sect-lbl"><span class="l">Core</span><span class="tag tag-free">Free for everyone</span></div>
+<div class="tp-sect-note">Everything below is included free — the complete TWIN experience.</div>
+<div class="feat-list">
+
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="sunrise"></i></div>
+    <div class="feat-body"><div class="feat-name">Daily Check-In & Check-Out</div><div class="feat-desc">Morning intention and evening reflection — log sleep, energy, mood, habits, goals & gratitude.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="bar-chart-2"></i></div>
+    <div class="feat-body"><div class="feat-name">Life Analytics & 6 Domains</div><div class="feat-desc">Track Mind, Body, Wealth, Purpose, Social & Wellbeing with real trends from your check-ins.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="flame"></i></div>
+    <div class="feat-body"><div class="feat-name">Streaks, XP & Levels</div><div class="feat-desc">Build streaks, earn XP, and level up — discipline turned into a game you want to win.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="calendar"></i></div>
+    <div class="feat-body"><div class="feat-name">Calendar & History</div><div class="feat-desc">See every check-in, your streak map, and your day-by-day score over time.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="zap"></i></div>
+    <div class="feat-body"><div class="feat-name">AXON AI Coach</div><div class="feat-desc">Your AI coach reads your patterns, gives daily insights, and answers anything about your growth.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="compass"></i></div>
+    <div class="feat-body"><div class="feat-name">Grow — Posts, Reels, Threads & Courses</div><div class="feat-desc">A growth feed: explore content, watch reels, read threads, and take free courses.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="play-circle"></i></div>
+    <div class="feat-body"><div class="feat-name">Full-Screen Reels</div><div class="feat-desc">Scroll growth reels non-stop, full screen — like, comment, save & follow.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="shield"></i></div>
+    <div class="feat-body"><div class="feat-name">Quests & Challenges</div><div class="feat-desc">Daily, weekly, monthly and seasonal challenges to keep you moving and earning XP.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="users"></i></div>
+    <div class="feat-body"><div class="feat-name">Community & Profiles</div><div class="feat-desc">Follow people, share progress, bookmark anything, and build a profile with real stats.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat">
+    <div class="feat-ico"><i data-lucide="bell"></i></div>
+    <div class="feat-body"><div class="feat-name">Stories, Notifications & Messages</div><div class="feat-desc">Check-in stories, activity notifications, and direct messages with the community.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+
+</div>
+
+<!-- ===== PRO ===== -->
+<div class="tp-sect-lbl"><span class="l">TWIN Pro adds</span><span class="tag tag-pro">Pro</span></div>
+<div class="tp-sect-note">Everything above, plus the full power of your digital twin.</div>
+<div class="feat-list">
+
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="mic"></i></div>
+    <div class="feat-body"><div class="feat-name">AXON Voiced Motivation <span class="feat-soon">Soon</span></div><div class="feat-desc">After every check-in, AXON speaks a personalized speech built from your real day — in your chosen voice, with music, hands-free.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="watch"></i></div>
+    <div class="feat-body"><div class="feat-name">Wearable Sync & Fusion <span class="feat-soon">Soon</span></div><div class="feat-desc">Connect Apple Watch, Garmin, Whoop, Oura & Fitbit — TWIN fuses them into one true picture.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="utensils"></i></div>
+    <div class="feat-body"><div class="feat-name">Photo Nutrition Scan <span class="feat-soon">Soon</span></div><div class="feat-desc">Snap a photo of your food — AXON estimates calories & macros toward your goal.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="video"></i></div>
+    <div class="feat-body"><div class="feat-name">AI Workout Coach <span class="feat-soon">Soon</span></div><div class="feat-desc">Turn on your camera — AXON counts your reps and checks your form, live, on-device.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="trending-up"></i></div>
+    <div class="feat-body"><div class="feat-name">Spending Insights <span class="feat-soon">Soon</span></div><div class="feat-desc">Link your bank — TWIN tracks spending behaviour and financial stress as part of your twin.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="activity"></i></div>
+    <div class="feat-body"><div class="feat-name">Voice Mood Analysis <span class="feat-soon">Soon</span></div><div class="feat-desc">Speak your check-in — AXON reads stress, anxiety and energy from your voice.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+  <div class="feat pro">
+    <div class="feat-ico"><i data-lucide="sparkles"></i></div>
+    <div class="feat-body"><div class="feat-name">Advanced AXON</div><div class="feat-desc">Deeper analysis that connects body, money & psychology into one intelligence no app else has.</div></div>
+    <div class="feat-check"><i data-lucide="check"></i></div>
+  </div>
+
+</div>
+
+<!-- ===== Professional note ===== -->
+<div class="tp-sect-lbl"><span class="l">Professional</span><span class="tag tag-pro">By application</span></div>
+<div class="tp-sect-note">Want to teach & earn? Professionals can go live, sell courses, and build a brand — <a href="/apply-pro" style="color:var(--gold);font-weight:700;">apply here</a>. Hand-selected by the EPHAS team.</div>
+
+<!-- ===== Pricing ===== -->
+<div class="tp-pricing">
+  <div class="price-card pro">
+    <div class="pc-glow"></div>
+    <div style="position:relative;">
+      <div class="pc-name">TWIN Pro</div>
+      <div class="pc-price">$12<small> / month</small></div>
+      <div class="pc-line">Everything in Free, plus voiced motivation, wearable fusion, nutrition & workout AI, spending & voice insights, and Advanced AXON.</div>
+    </div>
+  </div>
+  <div style="height:10px;"></div>
+  <div class="price-card">
+    <div class="pc-name" style="color:var(--sub);">Free</div>
+    <div class="pc-price">$0</div>
+    <div class="pc-line">The complete daily system, analytics, AXON coach, Grow feed, community, quests & courses.</div>
+  </div>
+</div>
+
+<div class="tp-cta">
+  <button class="btn btn-gold btn-full" onclick="proSoon()" style="border-radius:var(--r-xl);">
+    <i data-lucide="zap"></i> START TWIN PRO
+  </button>
+</div>
+<div class="tp-foot">
+  Pro features roll out through Phases 2–3 as the data engine comes online.<br>Cancel anytime · Your data stays yours.
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function proSoon(){
+  let t=document.getElementById('proToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='proToast';
+    t.textContent='TWIN Pro launches with the data engine in Phase 2–3. You\'ll be first to know.';
+    t.style.cssText='position:fixed;left:50%;bottom:30px;transform:translateX(-50%);max-width:340px;width:88%;background:#0F0F0F;border:1px solid var(--gold-b);color:#E8E8E8;font-size:12px;line-height:1.5;padding:14px 16px;border-radius:14px;z-index:9999;text-align:center;box-shadow:0 8px 28px rgba(0,0,0,.5);transition:opacity .3s;';
+    document.body.appendChild(t);
+  }
+  t.style.opacity='1';
+  clearTimeout(window._proT);
+  window._proT=setTimeout(()=>{t.style.opacity='0';},3200);
+}
+</script>
+{% endblock %}
