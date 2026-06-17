@@ -57,6 +57,35 @@
 .rc-stat svg{width:11px;height:11px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:1.75;}
 .rc-badge{position:absolute;top:12px;right:12px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.3);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;}
 
+/* REEL VIEWER (TikTok-style full-screen vertical scroll) */
+.reel-viewer{position:fixed;inset:0;background:#000;z-index:10000;display:none;}
+.reel-viewer.on{display:block;}
+.rv-scroll{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.rv-scroll::-webkit-scrollbar{display:none;}
+.rv-screen{height:100%;width:100%;scroll-snap-align:start;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.rv-media{position:absolute;inset:0;}
+.rv-playicon{position:relative;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;z-index:1;}
+.rv-playicon svg{width:26px;height:26px;stroke:#fff;fill:#fff;stroke-width:1;margin-left:3px;}
+.rv-close{position:fixed;top:50px;left:16px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.4);border:none;display:flex;align-items:center;justify-content:center;z-index:3;cursor:pointer;}
+.rv-close svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
+.rv-top{position:fixed;top:52px;left:50%;transform:translateX(-50%);font-family:'Arpubes',sans-serif;font-size:13px;letter-spacing:1px;color:#fff;z-index:3;}
+.rv-rail{position:absolute;right:12px;bottom:96px;display:flex;flex-direction:column;gap:20px;align-items:center;z-index:2;}
+.rv-act{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.rv-act-ico{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;}
+.rv-act-ico svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.75;}
+.rv-act.liked .rv-act-ico svg{stroke:#EF4444;fill:#EF4444;}
+.rv-act.saved .rv-act-ico svg{stroke:var(--gold);fill:var(--gold);}
+.rv-act-num{font-size:11px;font-weight:700;color:#fff;}
+.rv-avatar{width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-weight:900;font-size:18px;color:var(--gold);}
+.rv-info{position:absolute;left:16px;right:80px;bottom:96px;z-index:2;}
+.rv-user{font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.rv-follow{font-size:10px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:var(--r-full);padding:3px 12px;cursor:pointer;}
+.rv-cap{font-size:13px;color:#fff;line-height:1.45;margin-bottom:8px;}
+.rv-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.85);font-weight:600;}
+.rv-tag svg{width:12px;height:12px;stroke:rgba(255,255,255,.85);fill:none;stroke-width:2;}
+.rv-progress{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.2);z-index:3;}
+.rv-progress-fill{height:100%;background:#fff;width:0;}
+
 /* THREADS */
 .thread-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);cursor:pointer;}
 .tc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -161,7 +190,7 @@
   </div>
 
   <!-- Explore reel -->
-  <div class="reel-card">
+  <div class="reel-card" onclick="openReels()">
     <div class="rc-bg"></div>
     <div class="rc-badge">REEL</div>
     <div class="rc-play"><i data-lucide="play"></i></div>
@@ -274,7 +303,7 @@
     </div>
   </div>
 
-  <div class="reel-card">
+  <div class="reel-card" onclick="openReels()">
     <div class="rc-bg"></div>
     <div class="rc-badge">REEL</div>
     <div class="rc-play"><i data-lucide="play"></i></div>
@@ -307,7 +336,7 @@
     </div>
   </div>
 
-  <div class="reel-card">
+  <div class="reel-card" onclick="openReels()">
     <div class="rc-bg"></div>
     <div class="rc-badge">REEL</div>
     <div class="rc-play"><i data-lucide="play"></i></div>
@@ -505,6 +534,96 @@
   <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
+
+<!-- ===== REEL VIEWER (TikTok-style) ===== -->
+<div class="reel-viewer" id="reelViewer">
+  <button class="rv-close" onclick="closeReels()"><i data-lucide="x"></i></button>
+  <div class="rv-top">Reels</div>
+  <div class="rv-scroll" id="rvScroll">
+
+    <div class="rv-screen" style="background:linear-gradient(165deg,#1a1206,#000 70%);">
+      <div class="rv-progress"><div class="rv-progress-fill"></div></div>
+      <div class="rv-playicon"><i data-lucide="play"></i></div>
+      <div class="rv-rail">
+        <div class="rv-avatar">J</div>
+        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">312</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">28</div></div>
+        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
+      </div>
+      <div class="rv-info">
+        <div class="rv-user">Jordan L. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
+        <div class="rv-cap">How I built a 5AM routine in 14 days — no alarm needed anymore.</div>
+        <div class="rv-tag"><i data-lucide="hash"></i> discipline · morningroutine</div>
+      </div>
+    </div>
+
+    <div class="rv-screen" style="background:linear-gradient(165deg,#06121a,#000 70%);">
+      <div class="rv-playicon"><i data-lucide="play"></i></div>
+      <div class="rv-rail">
+        <div class="rv-avatar">P</div>
+        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">621</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">74</div></div>
+        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
+      </div>
+      <div class="rv-info">
+        <div class="rv-user">Priya K. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
+        <div class="rv-cap">Day 30 cold shower check-in. My body is different. My mind is different.</div>
+        <div class="rv-tag"><i data-lucide="hash"></i> coldshower · 30daychallenge</div>
+      </div>
+    </div>
+
+    <div class="rv-screen" style="background:linear-gradient(165deg,#1a0606,#000 70%);">
+      <div class="rv-playicon"><i data-lucide="play"></i></div>
+      <div class="rv-rail">
+        <div class="rv-avatar">M</div>
+        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">1.2K</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">96</div></div>
+        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
+      </div>
+      <div class="rv-info">
+        <div class="rv-user">Marcus R. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
+        <div class="rv-cap">Motivation is a feeling. Discipline is a decision. Choose the decision every single day.</div>
+        <div class="rv-tag"><i data-lucide="hash"></i> mindset · discipline</div>
+      </div>
+    </div>
+
+    <div class="rv-screen" style="background:linear-gradient(165deg,#0a1a0a,#000 70%);">
+      <div class="rv-playicon"><i data-lucide="play"></i></div>
+      <div class="rv-rail">
+        <div class="rv-avatar">S</div>
+        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">844</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">52</div></div>
+        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
+      </div>
+      <div class="rv-info">
+        <div class="rv-user">Sam T. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
+        <div class="rv-cap">Closed my first $10K deal today. Here's the 30 seconds that changed everything.</div>
+        <div class="rv-tag"><i data-lucide="hash"></i> sales · entrepreneurship</div>
+      </div>
+    </div>
+
+    <div class="rv-screen" style="background:linear-gradient(165deg,#12061a,#000 70%);">
+      <div class="rv-playicon"><i data-lucide="play"></i></div>
+      <div class="rv-rail">
+        <div class="rv-avatar">A</div>
+        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">409</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">37</div></div>
+        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
+        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
+      </div>
+      <div class="rv-info">
+        <div class="rv-user">Alex M. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
+        <div class="rv-cap">4 hours of deep work, zero distractions. This is what locked-in actually looks like.</div>
+        <div class="rv-tag"><i data-lucide="hash"></i> deepwork · focus</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -539,6 +658,30 @@ function toggleZone(card) {
   } else {
     if (tag) tag.style.display = 'none';
   }
+}
+
+/* ===== REEL VIEWER ===== */
+function openReels() {
+  const v = document.getElementById('reelViewer');
+  v.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('rvScroll').scrollTop = 0;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+function closeReels() {
+  document.getElementById('reelViewer').classList.remove('on');
+  document.body.style.overflow = '';
+}
+function rvLike(el) {
+  el.classList.toggle('liked');
+  const n = el.querySelector('.rv-act-num');
+  if (!n.dataset.base) n.dataset.base = n.textContent;
+}
+function rvSave(el) { el.classList.toggle('saved'); }
+function rvFollow(el) {
+  const on = el.textContent.trim() === 'Following';
+  el.textContent = on ? 'Follow' : 'Following';
+  el.style.background = on ? 'transparent' : 'rgba(255,255,255,.18)';
 }
 </script>
 {% endblock %}
