@@ -32,7 +32,14 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .success-ov{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .3s;}
 .success-ov.show{opacity:1;pointer-events:all;}
 .so-word{font-family:'Arpubes',sans-serif;font-size:42px;letter-spacing:-3px;color:#fff;text-align:center;margin-bottom:10px;}
-.so-sub{font-size:13px;color:#555;text-align:center;line-height:1.6;max-width:260px;margin-bottom:28px;}
+.so-sub{font-size:13px;color:#555;text-align:center;line-height:1.6;max-width:260px;margin-bottom:24px;}
+.motiv-player{display:none;width:100%;max-width:320px;background:#0F0F0F;border:1px solid rgba(212,170,53,.2);border-radius:18px;padding:18px;margin-bottom:14px;}
+.motiv-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:18px;}
+.motiv-wave span{width:3px;border-radius:2px;background:var(--gold);opacity:.7;animation:motivWave 1.1s ease-in-out infinite;}
+.motiv-wave span:nth-child(odd){animation-delay:.2s;}
+.motiv-wave span:nth-child(3n){animation-delay:.4s;}
+.motiv-wave span:nth-child(4n){animation-delay:.15s;}
+@keyframes motivWave{0%,100%{height:4px;}50%{height:18px;}}
 </style>
 {% endblock %}
 
@@ -149,8 +156,21 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="success-ov" id="sOv">
   <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:16px;">Day closed</div>
   <div class="so-word">Rest well,<br>{{ u.first }}.</div>
-  <div class="so-sub">Another day of intentional living. AXON will have your evening analysis ready tomorrow.</div>
-  <img src="/static/ephas_logo2.png" style="height:10px;opacity:.2;filter:invert(1);margin-bottom:28px;">
+  <div class="so-sub">Another day of intentional living. AXON has read your day and is ready to close it with you.</div>
+
+  <div class="motiv-player" id="motivPlayer">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(212,170,53,.12);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="mic" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div style="text-align:left;flex:1;"><div style="font-size:12px;font-weight:700;color:#fff;">Your Evening Reflection</div><div style="font-size:10px;color:#666;">Warrior voice · 3 min</div></div>
+      <div class="pill pill-gold" style="font-size:8px;">PRO · SOON</div>
+    </div>
+    <div class="motiv-wave" style="margin-bottom:12px;"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div style="font-size:11px;color:#888;line-height:1.5;text-align:left;">AXON will speak a reflection built from everything you did today — your wins, your data, and tomorrow's one thing. Coming in Pro.</div>
+  </div>
+
+  <button class="btn btn-gold btn-full" onclick="playMotivation()" id="motivBtn" style="border-radius:var(--r-xl);margin-bottom:10px;">
+    <i data-lucide="play"></i> PLAY YOUR REFLECTION
+  </button>
   <button class="btn btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);background:#111;color:#fff;padding:17px;font-family:'Arpubes',sans-serif;font-size:13px;letter-spacing:1px;">
     <i data-lucide="home"></i> HOME
   </button>
@@ -166,6 +186,13 @@ function next(n){show(n+1);}
 function prev(n){show(n-1);}
 function selectYN(v){document.getElementById('ynY').classList.remove('sel-y');document.getElementById('ynN').classList.remove('sel-n');if(v==='y')document.getElementById('ynY').classList.add('sel-y');else document.getElementById('ynN').classList.add('sel-n');}
 function submit(){document.getElementById('sOv').classList.add('show');}
+function playMotivation(){
+  document.getElementById('motivPlayer').style.display='block';
+  const b=document.getElementById('motivBtn');
+  b.innerHTML='<i data-lucide="loader"></i> PREPARING YOUR REFLECTION…';
+  b.disabled=true;b.style.opacity='.7';
+  if(typeof lucide!=='undefined')lucide.createIcons();
+}
 updateProg();
 </script>
 {% endblock %}

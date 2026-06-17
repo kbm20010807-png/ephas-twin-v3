@@ -30,6 +30,13 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .so-check{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:pop .4s ease;}
 .so-check svg{width:36px;height:36px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .so-xp{font-family:'Inter',sans-serif;font-weight:800;font-size:42px;letter-spacing:-2px;color:var(--gold);margin:12px 0 6px;}
+.motiv-player{display:none;width:100%;max-width:320px;background:#0F0F0F;border:1px solid rgba(212,170,53,.2);border-radius:18px;padding:18px;margin-bottom:14px;}
+.motiv-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:18px;}
+.motiv-wave span{width:3px;border-radius:2px;background:var(--gold);opacity:.7;animation:motivWave 1.1s ease-in-out infinite;}
+.motiv-wave span:nth-child(odd){animation-delay:.2s;}
+.motiv-wave span:nth-child(3n){animation-delay:.4s;}
+.motiv-wave span:nth-child(4n){animation-delay:.15s;}
+@keyframes motivWave{0%,100%{height:4px;}50%{height:18px;}}
 </style>
 {% endblock %}
 
@@ -167,8 +174,22 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <div class="so-check"><i data-lucide="check"></i></div>
   <div class="t-label mb-2">Check-in complete</div>
   <div class="so-xp">+50 XP</div>
-  <div style="font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:260px;margin-bottom:28px;">Logged. AXON is analyzing your patterns and will have insights ready tomorrow morning.</div>
-  <button class="btn btn-primary btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);">
+  <div style="font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:260px;margin-bottom:24px;">Logged. AXON is analyzing your patterns and is ready to fire you up for the day.</div>
+
+  <div class="motiv-player" id="motivPlayer">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(212,170,53,.12);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="mic" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div style="text-align:left;flex:1;"><div style="font-size:12px;font-weight:700;color:#fff;">Your Morning Speech</div><div style="font-size:10px;color:#666;">Warrior voice · 3 min</div></div>
+      <div class="pill pill-gold" style="font-size:8px;">PRO · SOON</div>
+    </div>
+    <div class="motiv-wave" style="margin-bottom:12px;"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div style="font-size:11px;color:#888;line-height:1.5;text-align:left;">AXON will build a speech from today's check-in, your watch, and your goals — spoken in your chosen voice. Coming in Pro.</div>
+  </div>
+
+  <button class="btn btn-gold btn-full" onclick="playMotivation()" id="motivBtn" style="border-radius:var(--r-xl);margin-bottom:10px;">
+    <i data-lucide="play"></i> PLAY YOUR MOTIVATION
+  </button>
+  <button class="btn btn-secondary btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);">
     <i data-lucide="home"></i> BACK TO HOME
   </button>
 </div>
@@ -183,6 +204,13 @@ function next(n){show(n+1);}
 function prev(n){show(n-1);}
 function tog(el){el.classList.toggle('on');}
 function submit(){document.getElementById('successOv').classList.add('show');}
+function playMotivation(){
+  document.getElementById('motivPlayer').style.display='block';
+  const b=document.getElementById('motivBtn');
+  b.innerHTML='<i data-lucide="loader"></i> PREPARING YOUR SPEECH…';
+  b.disabled=true;b.style.opacity='.7';
+  if(typeof lucide!=='undefined')lucide.createIcons();
+}
 const wt=document.getElementById('winTxt');
 if(wt)wt.addEventListener('input',()=>{document.getElementById('winCt').textContent=wt.value.length+'/200';});
 updateProg();
