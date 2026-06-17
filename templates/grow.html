@@ -187,8 +187,29 @@
   <div class="mt-btn" onclick="switchTab('courses',this)">Courses</div>
 </div>
 
+<!-- ====== FEED SKELETON (shows while loading) ====== -->
+<div id="feedSkeleton">
+  <div style="height:10px;"></div>
+  <div class="sk-card">
+    <div class="sk-row"><div class="sk sk-circle" style="width:40px;height:40px;"></div><div style="flex:1;"><div class="sk" style="width:45%;height:10px;margin-bottom:6px;"></div><div class="sk" style="width:25%;height:8px;"></div></div></div>
+    <div class="sk" style="width:100%;height:200px;border-radius:12px;margin-bottom:12px;"></div>
+    <div class="sk" style="width:90%;height:10px;margin-bottom:6px;"></div>
+    <div class="sk" style="width:60%;height:10px;"></div>
+  </div>
+  <div class="sk-card">
+    <div class="sk-row"><div class="sk sk-circle" style="width:40px;height:40px;"></div><div style="flex:1;"><div class="sk" style="width:40%;height:10px;margin-bottom:6px;"></div><div class="sk" style="width:30%;height:8px;"></div></div></div>
+    <div class="sk" style="width:100%;height:200px;border-radius:12px;margin-bottom:12px;"></div>
+    <div class="sk" style="width:80%;height:10px;"></div>
+  </div>
+  <div class="sk-card">
+    <div class="sk-row"><div class="sk sk-circle" style="width:40px;height:40px;"></div><div style="flex:1;"><div class="sk" style="width:50%;height:10px;margin-bottom:6px;"></div><div class="sk" style="width:20%;height:8px;"></div></div></div>
+    <div class="sk" style="width:95%;height:10px;margin-bottom:6px;"></div>
+    <div class="sk" style="width:70%;height:10px;"></div>
+  </div>
+</div>
+
 <!-- ====== EXPLORE ====== -->
-<div class="tab-pane on" id="pane-explore">
+<div class="tab-pane on" id="pane-explore" style="display:none;">
   <div style="height:10px;"></div>
   <div class="explore-badge"><i data-lucide="trending-up"></i> TRENDING NOW</div>
 
@@ -778,5 +799,15 @@ function pdSend() {
   document.getElementById('pdComments').prepend(c);
   inp.value = '';
 }
+
+/* ===== FEED SKELETON (brief load shimmer; ready for real async fetch in Phase 2) ===== */
+document.addEventListener('DOMContentLoaded', function () {
+  var sk = document.getElementById('feedSkeleton');
+  var ex = document.getElementById('pane-explore');
+  setTimeout(function () {
+    if (sk) sk.style.display = 'none';
+    if (ex) ex.style.display = '';
+  }, 650);
+});
 </script>
 {% endblock %}

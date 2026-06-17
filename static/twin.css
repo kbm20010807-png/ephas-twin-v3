@@ -72,6 +72,13 @@ input,textarea,select{font-family:inherit;}
 .elogo{opacity:.85;mix-blend-mode:multiply;}
 [data-theme="dark"] .elogo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:screen;}
 
+/* SKELETON LOADING */
+@keyframes skShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.sk{background:linear-gradient(90deg,var(--bg-2) 25%,var(--surface) 50%,var(--bg-2) 75%);background-size:800px 100%;animation:skShimmer 1.3s infinite linear;border-radius:8px;}
+.sk-circle{border-radius:50%;}
+.sk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);}
+.sk-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+
 /* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;box-shadow:var(--sh);}
 .card-dark{background:#09090B;border:1px solid #1A1A1A;border-radius:var(--r-lg);padding:18px;}
