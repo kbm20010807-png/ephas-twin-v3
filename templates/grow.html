@@ -128,14 +128,13 @@
 
 <div class="search-wrap">
   <div class="search-ico"><i data-lucide="search"></i></div>
-  <input type="text" class="search-inp" placeholder="Search posts, zones, people, courses...">
+  <input type="text" class="search-inp" placeholder="Search posts, people, courses...">
 </div>
 
 <div class="main-tabs">
   <div class="mt-btn on" onclick="switchTab('explore',this)">Explore</div>
   <div class="mt-btn" onclick="switchTab('posts',this)">Posts & Reels</div>
   <div class="mt-btn" onclick="switchTab('threads',this)">Threads</div>
-  <div class="mt-btn" onclick="switchTab('zones',this)">Zones</div>
   <div class="mt-btn" onclick="switchTab('courses',this)">Courses</div>
 </div>
 
@@ -419,27 +418,6 @@
       <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
       <div class="tc-replies-count">39 replies</div>
     </div>
-  </div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- ====== ZONES ====== -->
-<div class="tab-pane" id="pane-zones">
-  <div style="height:10px;"></div>
-  <div style="padding:0 20px;"><div class="t-label mb-1">Your Zones</div><div style="font-size:11px;color:var(--sub);margin-bottom:2px;">Joined 2 zones</div></div>
-  <div class="zone-grid">
-    {% for z in zones %}
-    <div class="zone-card {% if loop.index <= 2 %}joined{% endif %}" onclick="toggleZone(this)">
-      <div class="zone-ico" style="background:{{ z.color }}1A;border-color:{{ z.color }}30;">
-        <i data-lucide="{{ z.icon }}" style="stroke:{{ z.color }};"></i>
-      </div>
-      <div class="zone-name">{{ z.name }}</div>
-      <div class="zone-meta">{{ z.members }} members · {{ z.posts }} posts</div>
-      {% if loop.index <= 2 %}
-      <div class="zone-joined-tag"><i data-lucide="check"></i> JOINED</div>
-      {% endif %}
-    </div>
-    {% endfor %}
   </div>
   <div style="height:16px;"></div>
 </div>
