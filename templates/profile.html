@@ -71,6 +71,21 @@
 .pp-img{height:280px;border-radius:var(--r);margin-bottom:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);}
 .pp-img svg{width:28px;height:28px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:1.5;}
 .pp-caption{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:10px;}
+/* SAVED */
+.saved-filter{display:flex;gap:7px;padding:16px 20px 6px;overflow-x:auto;scrollbar-width:none;}
+.saved-filter::-webkit-scrollbar{display:none;}
+.sf-chip{padding:6px 14px;border-radius:var(--r-full);font-size:11px;font-weight:700;white-space:nowrap;border:1.5px solid var(--border);background:var(--bg-2);color:var(--sub);cursor:pointer;transition:all .15s;}
+.sf-chip.on{background:#09090B;border-color:#09090B;color:#fff;}
+[data-theme="dark"] .sf-chip.on{background:var(--gold);border-color:var(--gold);color:#000;}
+.saved-item{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;margin:0 20px 10px;box-shadow:var(--sh);}
+.si-thumb{width:58px;height:58px;border-radius:var(--r);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border);}
+.si-thumb svg{width:20px;height:20px;fill:none;stroke-width:1.5;stroke:rgba(255,255,255,.4);}
+.si-body{flex:1;min-width:0;}
+.si-type{display:inline-flex;align-items:center;gap:4px;font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:2px 8px;margin-bottom:5px;}
+.si-title{font-size:12px;font-weight:700;color:var(--black);line-height:1.4;margin-bottom:3px;}
+.si-by{font-size:10px;color:var(--sub);}
+.si-bm{flex-shrink:0;cursor:pointer;padding:4px;}
+.si-bm svg{width:17px;height:17px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;}
 
 .course-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
 .cc-tag{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);margin-bottom:8px;}
@@ -152,6 +167,7 @@
 <div class="tab-bar" id="twinTabs">
   <div class="tab-btn on" onclick="switchTab('twin','posts',this)">POSTS</div>
   <div class="tab-btn" onclick="switchTab('twin','stats',this)">STATS</div>
+  <div class="tab-btn" onclick="switchTab('twin','saved',this)" style="display:flex;align-items:center;justify-content:center;gap:5px;"><i data-lucide="bookmark" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;"></i> SAVED</div>
 </div>
 
 <!-- PRO TABS -->
@@ -231,6 +247,82 @@
     <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
     <div class="badge-c"><div class="badge-ico"><i data-lucide="star"></i></div><div class="badge-nm">100 Check-Ins</div></div>
     <div class="badge-c"><div class="badge-ico"><i data-lucide="layers"></i></div><div class="badge-nm">All Domains</div></div>
+  </div>
+  <div style="height:16px;"></div>
+</div>
+
+<!-- ===== TWIN: SAVED ===== -->
+<div class="tab-pane" id="pane-twin-saved">
+  <div class="saved-filter">
+    <div class="sf-chip on" onclick="filterSaved('all',this)">All</div>
+    <div class="sf-chip" onclick="filterSaved('post',this)">Posts</div>
+    <div class="sf-chip" onclick="filterSaved('reel',this)">Reels</div>
+    <div class="sf-chip" onclick="filterSaved('thread',this)">Threads</div>
+    <div class="sf-chip" onclick="filterSaved('course',this)">Courses</div>
+  </div>
+
+  <div class="saved-item" data-type="post">
+    <div class="si-thumb" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>
+    <div class="si-body">
+      <div class="si-type"><i data-lucide="image" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> POST</div>
+      <div class="si-title">12-day streak and still going. The key isn't motivation.</div>
+      <div class="si-by">Marcus R. · Mindset</div>
+    </div>
+    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
+  </div>
+
+  <div class="saved-item" data-type="reel">
+    <div class="si-thumb" style="background:#09090B;"><i data-lucide="play-circle" style="stroke:var(--gold);"></i></div>
+    <div class="si-body">
+      <div class="si-type"><i data-lucide="play" style="width:8px;height:8px;stroke:currentColor;fill:currentColor;stroke-width:2;"></i> REEL</div>
+      <div class="si-title">How I built a 5AM routine in 14 days — no alarm needed</div>
+      <div class="si-by">Jordan L. · 4.2K views</div>
+    </div>
+    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
+  </div>
+
+  <div class="saved-item" data-type="thread">
+    <div class="si-thumb" style="background:var(--bg-2);"><i data-lucide="align-left" style="stroke:var(--sub);"></i></div>
+    <div class="si-body">
+      <div class="si-type"><i data-lucide="align-left" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> THREAD</div>
+      <div class="si-title">Why 99% of people fail their goals in February</div>
+      <div class="si-by">Marcus R. · 184 likes</div>
+    </div>
+    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
+  </div>
+
+  <div class="saved-item" data-type="course">
+    <div class="si-thumb" style="background:linear-gradient(135deg,#09090B,#1A1200);"><i data-lucide="graduation-cap" style="stroke:var(--gold);"></i></div>
+    <div class="si-body">
+      <div class="si-type"><i data-lucide="graduation-cap" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2;"></i> COURSE</div>
+      <div class="si-title">The Discipline Operating System · Free</div>
+      <div class="si-by">6 modules · 2,847 enrolled</div>
+    </div>
+    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
+  </div>
+
+  <div class="saved-item" data-type="thread">
+    <div class="si-thumb" style="background:var(--bg-2);"><i data-lucide="align-left" style="stroke:var(--sub);"></i></div>
+    <div class="si-body">
+      <div class="si-type"><i data-lucide="align-left" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> THREAD</div>
+      <div class="si-title">From 0 savings to 3 months emergency fund in 11 months</div>
+      <div class="si-by">Priya K. · 267 likes</div>
+    </div>
+    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
+  </div>
+
+  <div class="saved-item" data-type="post">
+    <div class="si-thumb" style="background:linear-gradient(150deg,#1a0606,#0d0d0d 60%,#1a0606);"><i data-lucide="image"></i></div>
+    <div class="si-body">
+      <div class="si-type"><i data-lucide="image" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> POST</div>
+      <div class="si-title">Cold shower at 5AM. Body domain jumped 8% this week.</div>
+      <div class="si-by">Sam T. · Fitness</div>
+    </div>
+    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
+  </div>
+
+  <div id="savedEmpty" style="display:none;text-align:center;padding:40px 20px;">
+    <div style="font-size:12px;color:var(--sub);">Nothing saved here yet</div>
   </div>
   <div style="height:16px;"></div>
 </div>
@@ -438,13 +530,34 @@ function switchTab(mode, tab, el) {
   el.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   const panes = mode === 'twin'
-    ? ['pane-twin-posts','pane-twin-stats']
+    ? ['pane-twin-posts','pane-twin-stats','pane-twin-saved']
     : ['pane-pro-posts','pane-pro-threads','pane-pro-courses','pane-pro-achievements','pane-pro-stats'];
   panes.forEach(id => document.getElementById(id).classList.remove('on'));
   document.getElementById('pane-' + mode + '-' + tab).classList.add('on');
 }
 
 function toggleBookmark(btn) { btn.classList.toggle('saved'); }
+
+function filterSaved(type, el) {
+  el.closest('.saved-filter').querySelectorAll('.sf-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  let shown = 0;
+  document.querySelectorAll('#pane-twin-saved .saved-item').forEach(it => {
+    const match = (type === 'all' || it.dataset.type === type);
+    it.style.display = match ? 'flex' : 'none';
+    if (match) shown++;
+  });
+  document.getElementById('savedEmpty').style.display = shown === 0 ? 'block' : 'none';
+}
+
+function unsave(btn) {
+  btn.closest('.saved-item').remove();
+  let shown = 0;
+  document.querySelectorAll('#pane-twin-saved .saved-item').forEach(it => {
+    if (it.style.display !== 'none') shown++;
+  });
+  document.getElementById('savedEmpty').style.display = shown === 0 ? 'block' : 'none';
+}
 
 function toggleSubscribe() {
   isSubscribed = !isSubscribed;
