@@ -14,9 +14,9 @@
   --sh-md:0 4px 16px rgba(0,0,0,0.07);
 }
 [data-theme="dark"]{
-  --bg:#000000;--bg-2:#0A0A0A;--card:#0D0D0D;--surface:#111111;
-  --border:#1C1C1C;--black:#FAFAFA;--text:#E4E4E7;--sub:#71717A;--muted:#27272A;
-  --sh:0 1px 3px rgba(0,0,0,0.4);--sh-md:0 4px 16px rgba(0,0,0,0.5);
+  --bg:#0A0A0C;--bg-2:#131316;--card:#161619;--surface:#1B1B1F;
+  --border:#292930;--black:#FAFAFA;--text:#E4E4E7;--sub:#8A8A93;--muted:#3A3A42;
+  --sh:0 1px 3px rgba(0,0,0,0.5);--sh-md:0 4px 16px rgba(0,0,0,0.6);
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
@@ -36,7 +36,7 @@ input,textarea,select{font-family:inherit;}
 
 /* TOPBAR */
 .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:52px 20px 14px;background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
-[data-theme="dark"] .topbar{background:rgba(0,0,0,0.88);}
+[data-theme="dark"] .topbar{background:rgba(10,10,12,0.85);}
 .tb-brand{display:flex;flex-direction:column;align-items:center;line-height:1;}
 .tb-twin{font-family:'Arpubes',sans-serif;font-size:18px;letter-spacing:-1px;color:var(--black);}
 .tb-tag{font-size:8px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-top:3px;}
@@ -46,7 +46,7 @@ input,textarea,select{font-family:inherit;}
 
 /* NAV */
 .nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 6px 28px;display:flex;justify-content:space-around;align-items:flex-end;z-index:100;}
-[data-theme="dark"] .nav-bar{background:rgba(0,0,0,0.95);}
+[data-theme="dark"] .nav-bar{background:rgba(10,10,12,0.92);}
 .nav-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;padding:3px 2px;}
 .nav-ico{width:42px;height:30px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;transition:background .15s;}
 .nav-ico svg{width:19px;height:19px;stroke:var(--sub);fill:none;stroke-width:1.75;transition:stroke .15s;}
