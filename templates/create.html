@@ -52,10 +52,17 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="sect-lbl">What are you creating?</div>
     <div class="type-select">
       <div class="type-btn" onclick="selectType('post',this)">
-        <div class="type-ico"><i data-lucide="file-text"></i></div>
+        <div class="type-ico"><i data-lucide="image"></i></div>
         <div>
           <div class="type-name">Post</div>
-          <div class="type-desc">Share a thought, update, or reflection</div>
+          <div class="type-desc">Share a photo with a caption</div>
+        </div>
+      </div>
+      <div class="type-btn" onclick="selectType('thread',this)">
+        <div class="type-ico"><i data-lucide="align-left"></i></div>
+        <div>
+          <div class="type-name">Thread</div>
+          <div class="type-desc">Write a longer text post or story</div>
         </div>
       </div>
       <div class="type-btn" onclick="selectType('goal',this)">
@@ -230,7 +237,8 @@ function selectType(type, el) {
   } else {
     const ta = document.getElementById('postTxt');
     const placeholders = {
-      post:'What\'s on your mind?',
+      post:'Write a caption for your photo...',
+      thread:'Share your thoughts, a story, or a breakdown...',
       goal:'I am committing to... My deadline is... My why is...',
       achievement:'I just hit a milestone: ...',
       challenge:'Join my challenge: ...'
