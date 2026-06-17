@@ -71,6 +71,10 @@
 .pp-img{height:280px;border-radius:var(--r);margin-bottom:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);}
 .pp-img svg{width:28px;height:28px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:1.5;}
 .pp-caption{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:10px;}
+/* SUB-TABS (pro courses) */
+.sub-tabs{display:flex;gap:8px;padding:16px 20px 4px;}
+.sub-tab{flex:1;text-align:center;padding:9px 8px;border-radius:var(--r-full);font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border:1.5px solid var(--border);background:var(--bg-2);transition:all .15s;}
+.sub-tab.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
 /* SAVED */
 .saved-filter{display:flex;gap:7px;padding:16px 20px 6px;overflow-x:auto;scrollbar-width:none;}
 .saved-filter::-webkit-scrollbar{display:none;}
@@ -166,8 +170,9 @@
 <!-- TWIN TABS -->
 <div class="tab-bar" id="twinTabs">
   <div class="tab-btn on" onclick="switchTab('twin','posts',this)">POSTS</div>
+  <div class="tab-btn" onclick="switchTab('twin','courses',this)">COURSES</div>
   <div class="tab-btn" onclick="switchTab('twin','stats',this)">STATS</div>
-  <div class="tab-btn" onclick="switchTab('twin','saved',this)" style="display:flex;align-items:center;justify-content:center;gap:5px;"><i data-lucide="bookmark" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;"></i> SAVED</div>
+  <div class="tab-btn" onclick="openSaved('twin',this)" style="flex:0 0 46px;display:flex;align-items:center;justify-content:center;"><i data-lucide="bookmark" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"></i></div>
 </div>
 
 <!-- PRO TABS -->
@@ -177,6 +182,7 @@
   <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','courses',this)">COURSES</div>
   <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','achievements',this)">AWARDS</div>
   <div class="tab-btn" style="flex:none;padding:12px 14px;white-space:nowrap;" onclick="switchTab('pro','stats',this)">STATS</div>
+  <div class="tab-btn" style="flex:none;padding:12px 14px;display:flex;align-items:center;justify-content:center;" onclick="openSaved('pro',this)"><i data-lucide="bookmark" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"></i></div>
 </div>
 
 <!-- PRO ACTION BAR (Subscribe + Go Live) -->
@@ -251,8 +257,38 @@
   <div style="height:16px;"></div>
 </div>
 
-<!-- ===== TWIN: SAVED ===== -->
-<div class="tab-pane" id="pane-twin-saved">
+<!-- ===== TWIN: COURSES (subscribed) ===== -->
+<div class="tab-pane" id="pane-twin-courses">
+  <div style="height:16px;"></div>
+  <div style="padding:0 20px 4px;"><div class="t-label">Subscribed Courses</div></div>
+  <div class="course-card">
+    <div class="cc-tag">Fitness · ENROLLED</div>
+    <div class="cc-title">The Discipline Operating System</div>
+    <div class="cc-meta">Module 3 of 6 · By Marcus R.</div>
+    <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:50%"></div></div>
+    <div class="cc-foot">
+      <div class="cc-enrolled">50% complete</div>
+      <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
+    </div>
+  </div>
+  <div class="course-card">
+    <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Finance · ENROLLED</div>
+    <div class="cc-title">Savings Framework</div>
+    <div class="cc-meta">Module 1 of 7 · By Priya K.</div>
+    <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:14%"></div></div>
+    <div class="cc-foot">
+      <div class="cc-enrolled">14% complete</div>
+      <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
+    </div>
+  </div>
+  <div class="empty-card">
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Discover more courses</div>
+    <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="compass"></i> Browse Courses</a>
+  </div>
+</div>
+
+<!-- ===== SAVED (shared TWIN + PRO) ===== -->
+<div class="tab-pane" id="pane-saved">
   <div class="saved-filter">
     <div class="sf-chip on" onclick="filterSaved('all',this)">All</div>
     <div class="sf-chip" onclick="filterSaved('post',this)">Posts</div>
@@ -387,34 +423,69 @@
   </div>
 </div>
 
-<!-- ===== PRO: COURSES ===== -->
+<!-- ===== PRO: COURSES (2 sub-tabs: Teaching / Subscribed) ===== -->
 <div class="tab-pane" id="pane-pro-courses">
-  <div style="height:16px;"></div>
-  <div class="course-card">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-      <div class="cc-tag">Fitness · FREE</div>
+  <div class="sub-tabs">
+    <div class="sub-tab on" onclick="proCourseTab('teaching',this)">Teaching</div>
+    <div class="sub-tab" onclick="proCourseTab('subscribed',this)">Subscribed</div>
+  </div>
+
+  <!-- TEACHING (courses he gives away / sells) -->
+  <div id="pcourse-teaching">
+    <div class="course-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+        <div class="cc-tag">Fitness · FREE</div>
+      </div>
+      <div class="cc-title">The Discipline Operating System</div>
+      <div class="cc-meta">6 modules · 2,847 enrolled</div>
+      <div class="cc-foot">
+        <div class="cc-enrolled"><i data-lucide="users" style="width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>2,847 enrolled</div>
+        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Manage</button>
+      </div>
     </div>
-    <div class="cc-title">The Discipline Operating System</div>
-    <div class="cc-meta">6 modules · 2,847 enrolled</div>
-    <div class="cc-foot">
-      <div class="cc-enrolled"><i data-lucide="users" style="width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>2,847 enrolled</div>
-      <button class="btn btn-secondary btn-sm" style="font-size:10px;">Enroll Free</button>
+    <div class="course-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+        <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Sales · PAID</div>
+      </div>
+      <div class="cc-title">Cold Outreach Mastery</div>
+      <div class="cc-meta">8 modules · 1,204 enrolled · $49</div>
+      <div class="cc-foot">
+        <div class="cc-enrolled"><i data-lucide="dollar-sign" style="width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>$58,996 earned</div>
+        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Manage</button>
+      </div>
+    </div>
+    <div class="empty-card">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Create your next course</div>
+      <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="graduation-cap"></i> Create Course</a>
     </div>
   </div>
-  <div class="course-card">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-      <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Sales · PAID</div>
+
+  <!-- SUBSCRIBED (courses he's learning from) -->
+  <div id="pcourse-subscribed" style="display:none;">
+    <div class="course-card">
+      <div class="cc-tag">Mindset · ENROLLED</div>
+      <div class="cc-title">Deep Work Protocol</div>
+      <div class="cc-meta">Module 2 of 5 · By Jordan L.</div>
+      <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:40%"></div></div>
+      <div class="cc-foot">
+        <div class="cc-enrolled">40% complete</div>
+        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
+      </div>
     </div>
-    <div class="cc-title">Cold Outreach Mastery</div>
-    <div class="cc-meta">8 modules · 1,204 enrolled</div>
-    <div class="cc-foot">
-      <div class="cc-enrolled"><i data-lucide="users" style="width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>1,204 enrolled</div>
-      <button class="btn btn-primary btn-sm" style="font-size:10px;background:var(--gold);color:#000;border:none;">$49</button>
+    <div class="course-card">
+      <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Business · ENROLLED</div>
+      <div class="cc-title">First $10K Online</div>
+      <div class="cc-meta">Module 6 of 10 · By Sam T.</div>
+      <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:60%"></div></div>
+      <div class="cc-foot">
+        <div class="cc-enrolled">60% complete</div>
+        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
+      </div>
     </div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Create your next course</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="graduation-cap"></i> Create Course</a>
+    <div class="empty-card">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Discover more courses</div>
+      <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="compass"></i> Browse Courses</a>
+    </div>
   </div>
 </div>
 
@@ -530,10 +601,25 @@ function switchTab(mode, tab, el) {
   el.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   const panes = mode === 'twin'
-    ? ['pane-twin-posts','pane-twin-stats','pane-twin-saved']
+    ? ['pane-twin-posts','pane-twin-courses','pane-twin-stats']
     : ['pane-pro-posts','pane-pro-threads','pane-pro-courses','pane-pro-achievements','pane-pro-stats'];
   panes.forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById('pane-saved').classList.remove('on');
   document.getElementById('pane-' + mode + '-' + tab).classList.add('on');
+}
+
+function openSaved(mode, el) {
+  el.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('pane-saved').classList.add('on');
+}
+
+function proCourseTab(which, el) {
+  el.closest('.sub-tabs').querySelectorAll('.sub-tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('pcourse-teaching').style.display = which === 'teaching' ? 'block' : 'none';
+  document.getElementById('pcourse-subscribed').style.display = which === 'subscribed' ? 'block' : 'none';
 }
 
 function toggleBookmark(btn) { btn.classList.toggle('saved'); }
@@ -542,7 +628,7 @@ function filterSaved(type, el) {
   el.closest('.saved-filter').querySelectorAll('.sf-chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
   let shown = 0;
-  document.querySelectorAll('#pane-twin-saved .saved-item').forEach(it => {
+  document.querySelectorAll('#pane-saved .saved-item').forEach(it => {
     const match = (type === 'all' || it.dataset.type === type);
     it.style.display = match ? 'flex' : 'none';
     if (match) shown++;
@@ -553,7 +639,7 @@ function filterSaved(type, el) {
 function unsave(btn) {
   btn.closest('.saved-item').remove();
   let shown = 0;
-  document.querySelectorAll('#pane-twin-saved .saved-item').forEach(it => {
+  document.querySelectorAll('#pane-saved .saved-item').forEach(it => {
     if (it.style.display !== 'none') shown++;
   });
   document.getElementById('savedEmpty').style.display = shown === 0 ? 'block' : 'none';
