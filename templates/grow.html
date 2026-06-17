@@ -86,6 +86,26 @@
 .rv-progress{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.2);z-index:3;}
 .rv-progress-fill{height:100%;background:#fff;width:0;}
 
+/* POST/THREAD DETAIL */
+.post-detail{position:fixed;inset:0;background:var(--bg);z-index:9000;display:none;flex-direction:column;}
+.post-detail.on{display:flex;}
+.pd-top{display:flex;align-items:center;gap:12px;padding:52px 20px 14px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+.pd-top .tb-btn{width:36px;height:36px;}
+.pd-title{font-family:'Arpubes',sans-serif;font-size:16px;letter-spacing:-.5px;color:var(--black);}
+.pd-body{flex:1;overflow-y:auto;}
+.pd-comments{padding:0 20px 16px;}
+.pd-comment{display:flex;gap:10px;padding:13px 0;border-top:1px solid var(--border);}
+.pdc-body{flex:1;min-width:0;}
+.pdc-user{font-size:12px;font-weight:700;color:var(--black);}
+.pdc-text{font-size:12px;color:var(--text);line-height:1.5;margin-top:2px;}
+.pdc-meta{font-size:10px;color:var(--sub);margin-top:5px;display:flex;gap:16px;}
+.pdc-meta span{cursor:pointer;}
+.pd-input{display:flex;gap:10px;align-items:center;padding:12px 16px 26px;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+.pd-input input{flex:1;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:11px 16px;font-size:13px;color:var(--black);outline:none;}
+.pd-input input:focus{border-color:var(--gold);}
+.pd-send{width:40px;height:40px;border-radius:50%;background:var(--gold);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.pd-send svg{width:17px;height:17px;stroke:#000;fill:none;stroke-width:2;}
+
 /* THREADS */
 .thread-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin:0 20px 10px;box-shadow:var(--sh);cursor:pointer;}
 .tc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -173,7 +193,7 @@
   <div class="explore-badge"><i data-lucide="trending-up"></i> TRENDING NOW</div>
 
   <!-- Explore post 1 -->
-  <div class="post-card" style="margin-top:10px;">
+  <div class="post-card" onclick="openPost(this,event)" style="margin-top:10px;">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">M</div>
       <div><div class="pc-user">Marcus R.</div><div class="pc-time">2h ago</div></div>
@@ -206,7 +226,7 @@
   </div>
 
   <!-- Explore post 2 -->
-  <div class="post-card">
+  <div class="post-card" onclick="openPost(this,event)">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">P</div>
       <div><div class="pc-user">Priya K.</div><div class="pc-time">Yesterday</div></div>
@@ -236,7 +256,7 @@
   </div>
 
   <!-- Explore post 3 -->
-  <div class="post-card" style="margin-top:14px;">
+  <div class="post-card" onclick="openPost(this,event)" style="margin-top:14px;">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">S</div>
       <div><div class="pc-user">Sam T.</div><div class="pc-time">2d ago</div></div>
@@ -268,7 +288,7 @@
   <div style="height:10px;"></div>
 
   {% set p = feed[0] %}
-  <div class="post-card">
+  <div class="post-card" onclick="openPost(this,event)">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
@@ -286,7 +306,7 @@
   </div>
 
   {% set p = feed[1] %}
-  <div class="post-card">
+  <div class="post-card" onclick="openPost(this,event)">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
@@ -319,7 +339,7 @@
   </div>
 
   {% set p = feed[2] %}
-  <div class="post-card">
+  <div class="post-card" onclick="openPost(this,event)">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
@@ -352,7 +372,7 @@
   </div>
 
   {% set p = feed[3] %}
-  <div class="post-card">
+  <div class="post-card" onclick="openPost(this,event)">
     <div class="pc-head">
       <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
@@ -380,7 +400,7 @@
 <!-- ====== THREADS ====== -->
 <div class="tab-pane" id="pane-threads">
   <div style="height:10px;"></div>
-  <div class="thread-card">
+  <div class="thread-card" onclick="openPost(this,event)">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">M</div>
       <div><div class="pc-user">Marcus R.</div><div class="tc-meta">3h ago · #mindset</div></div>
@@ -399,7 +419,7 @@
       <div class="tc-replies-count">43 replies</div>
     </div>
   </div>
-  <div class="thread-card">
+  <div class="thread-card" onclick="openPost(this,event)">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">P</div>
       <div><div class="pc-user">Priya K.</div><div class="tc-meta">Yesterday · #finance</div></div>
@@ -418,7 +438,7 @@
       <div class="tc-replies-count">61 replies</div>
     </div>
   </div>
-  <div class="thread-card">
+  <div class="thread-card" onclick="openPost(this,event)">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">J</div>
       <div><div class="pc-user">Jordan L.</div><div class="tc-meta">2d ago · #fitness</div></div>
@@ -433,7 +453,7 @@
       <div class="tc-replies-count">57 replies</div>
     </div>
   </div>
-  <div class="thread-card">
+  <div class="thread-card" onclick="openPost(this,event)">
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">S</div>
       <div><div class="pc-user">Sam T.</div><div class="tc-meta">3d ago · #sales</div></div>
@@ -624,6 +644,49 @@
 
   </div>
 </div>
+
+<!-- ===== POST / THREAD DETAIL ===== -->
+<div class="post-detail" id="postDetail">
+  <div class="pd-top">
+    <button class="tb-btn" onclick="closePost()"><i data-lucide="arrow-left"></i></button>
+    <div class="pd-title" id="pdTitle">Post</div>
+  </div>
+  <div class="pd-body">
+    <div id="pdPost" style="padding-top:16px;"></div>
+    <div class="sect-lbl">Comments</div>
+    <div class="pd-comments" id="pdComments">
+      <div class="pd-comment" style="border-top:none;">
+        <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">M</div>
+        <div class="pdc-body">
+          <div class="pdc-user">Marcus R.</div>
+          <div class="pdc-text">This hit different. Saving it and starting tomorrow.</div>
+          <div class="pdc-meta"><span>2h</span><span>12 likes</span><span>Reply</span></div>
+        </div>
+      </div>
+      <div class="pd-comment">
+        <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">P</div>
+        <div class="pdc-body">
+          <div class="pdc-user">Priya K.</div>
+          <div class="pdc-text">The consistency is what does it. Showed up for me too.</div>
+          <div class="pdc-meta"><span>4h</span><span>8 likes</span><span>Reply</span></div>
+        </div>
+      </div>
+      <div class="pd-comment">
+        <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">S</div>
+        <div class="pdc-body">
+          <div class="pdc-user">Sam T.</div>
+          <div class="pdc-text">Needed to read this today. Back to work.</div>
+          <div class="pdc-meta"><span>6h</span><span>3 likes</span><span>Reply</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pd-input">
+    <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ u.name[0]|upper }}</div>
+    <input id="pdInput" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')pdSend()">
+    <button class="pd-send" onclick="pdSend()"><i data-lucide="send"></i></button>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -682,6 +745,38 @@ function rvFollow(el) {
   const on = el.textContent.trim() === 'Following';
   el.textContent = on ? 'Follow' : 'Following';
   el.style.background = on ? 'transparent' : 'rgba(255,255,255,.18)';
+}
+
+/* ===== POST / THREAD DETAIL ===== */
+function openPost(el, ev) {
+  if (ev && ev.target.closest('.pc-action,.tc-action,.pc-foot,.tc-foot')) return;
+  const isThread = el.classList.contains('thread-card');
+  document.getElementById('pdTitle').textContent = isThread ? 'Thread' : 'Post';
+  const clone = el.cloneNode(true);
+  clone.style.cursor = 'default';
+  clone.removeAttribute('onclick');
+  clone.style.margin = '0 20px 6px';
+  const host = document.getElementById('pdPost');
+  host.innerHTML = '';
+  host.appendChild(clone);
+  document.getElementById('postDetail').classList.add('on');
+  document.body.style.overflow = 'hidden';
+  document.querySelector('.pd-body').scrollTop = 0;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+function closePost() {
+  document.getElementById('postDetail').classList.remove('on');
+  document.body.style.overflow = '';
+}
+function pdSend() {
+  const inp = document.getElementById('pdInput');
+  if (!inp.value.trim()) return;
+  const c = document.createElement('div');
+  c.className = 'pd-comment';
+  c.innerHTML = '<div class="av av-32" style="font-family:\'Arpubes\',sans-serif;font-weight:900;color:var(--gold);">{{ u.name[0]|upper }}</div><div class="pdc-body"><div class="pdc-user">{{ u.name }}</div><div class="pdc-text"></div><div class="pdc-meta"><span>now</span></div></div>';
+  c.querySelector('.pdc-text').textContent = inp.value;
+  document.getElementById('pdComments').prepend(c);
+  inp.value = '';
 }
 </script>
 {% endblock %}
