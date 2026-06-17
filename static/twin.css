@@ -69,8 +69,8 @@ input,textarea,select{font-family:inherit;}
 [data-theme="dark"] .pt-elogo{filter:invert(1);opacity:.2;}
 
 /* EPHAS LOGO */
-.elogo{opacity:.85;}
-[data-theme="dark"] .elogo{filter:invert(1) hue-rotate(180deg);}
+.elogo{opacity:.85;mix-blend-mode:multiply;}
+[data-theme="dark"] .elogo{filter:invert(1) hue-rotate(180deg);mix-blend-mode:screen;}
 
 /* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;box-shadow:var(--sh);}
