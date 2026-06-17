@@ -133,7 +133,7 @@
 <div class="social-stats">
   <div class="ss-item"><div class="ss-val">{{ u.followers }}</div><div class="ss-lbl">Followers</div></div>
   <div class="ss-item"><div class="ss-val">{{ u.following }}</div><div class="ss-lbl">Following</div></div>
-  <div class="ss-item"><div class="ss-val">{{ u.subscribed }}</div><div class="ss-lbl">Subscribed</div></div>
+  <div class="ss-item" id="ssSubscribers" style="display:none;"><div class="ss-val">{{ u.subscribed }}</div><div class="ss-lbl">Subscribers</div></div>
 </div>
 
 <div class="acct-switch">
@@ -416,6 +416,7 @@ function applyAcct(type) {
   document.getElementById('proTabs').style.display = type === 'pro' ? 'flex' : 'none';
   const pa = document.getElementById('proActions');
   pa.style.display = type === 'pro' ? 'flex' : 'none';
+  document.getElementById('ssSubscribers').style.display = type === 'pro' ? 'block' : 'none';
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   if (type === 'twin') {
