@@ -103,10 +103,9 @@
     <div style="font-size:11px;color:var(--sub);">{{ stats.total_checkins }} total check-ins</div>
   </div>
   <div class="wc-bars">
-    {% set wvals = [70, 75, 80, 78, 82, 75, 81] %}
     {% for i in range(7) %}
     <div class="wcb">
-      <div class="wcb-bar" style="height:{{ wvals[i] }}%;background:{% if stats.checked[i] %}var(--gold){% else %}var(--border){% endif %};"></div>
+      <div class="wcb-bar" style="height:{% if stats.checked[i] %}{{ (stats.weekly[i]*10) or 20 }}{% else %}8{% endif %}%;background:{% if stats.checked[i] %}var(--gold){% else %}var(--border){% endif %};"></div>
       <div class="wcb-lbl">{{ stats.days[i] }}</div>
     </div>
     {% endfor %}

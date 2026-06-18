@@ -214,10 +214,9 @@
     </div>
   </div>
   <div class="week-bars">
-    {% set h = [70,75,80,78,82,0,0] %}
     {% for i in range(7) %}
     <div class="wb {% if stats.checked[i] %}done{% else %}empty{% endif %}">
-      <div class="wb-bar" style="height:{% if stats.checked[i] %}{{ h[i] }}{% else %}18{% endif %}%"></div>
+      <div class="wb-bar" style="height:{% if stats.checked[i] %}{{ (stats.weekly[i]*10) or 20 }}{% else %}18{% endif %}%"></div>
       <div class="wb-lbl">{{ stats.days[i] }}</div>
     </div>
     {% endfor %}

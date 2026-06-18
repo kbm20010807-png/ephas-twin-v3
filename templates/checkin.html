@@ -203,7 +203,22 @@ function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.
 function next(n){show(n+1);}
 function prev(n){show(n-1);}
 function tog(el){el.classList.toggle('on');}
-function submit(){document.getElementById('successOv').classList.add('show');}
+function submit(){
+  const habits=[...document.querySelectorAll('.h-btn.on .h-name')].map(e=>e.textContent.trim()).join(',');
+  const body=new URLSearchParams({
+    sleep:document.getElementById('sleepR').value,
+    energy:document.getElementById('energyR').value,
+    mood:document.getElementById('moodR').value,
+    habits:habits,
+    win:document.getElementById('winTxt').value,
+    reflection:document.getElementById('refTxt').value
+  });
+  const btn=event&&event.target?event.target.closest('button'):null;
+  if(btn){btn.disabled=true;btn.style.opacity='.7';}
+  fetch('/checkin',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
+    .then(r=>{ if(!r.ok) throw 0; document.getElementById('successOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); })
+    .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not save check-in. Please try again.'); });
+}
 function playMotivation(){
   document.getElementById('motivPlayer').style.display='block';
   const b=document.getElementById('motivBtn');

@@ -68,7 +68,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="step-q">Overall, how was today?</div>
     <div class="step-hint">Be honest. Growth starts with clarity.</div>
     <div class="step-big-val" id="dayDisp" style="color:var(--gold);">7</div>
-    <input type="range" class="range-input" min="1" max="10" value="7" oninput="document.getElementById('dayDisp').textContent=this.value">
+    <input type="range" class="range-input" min="1" max="10" value="7" id="dayR" oninput="document.getElementById('dayDisp').textContent=this.value">
     <div class="step-range-lbl"><span>Rough</span><span>Perfect</span></div>
     <div class="step-footer">
       <button class="btn btn-primary btn-full" onclick="next(1)" style="border-radius:var(--r-xl);">
@@ -105,7 +105,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="t-label mb-3">Step 3 of 5</div>
     <div class="step-q">What got in the way today?</div>
     <div class="step-hint">Identifying blockers is how you eliminate them.</div>
-    <textarea class="form-input form-textarea" placeholder="What slowed me down was..." style="flex:1;min-height:100px;"></textarea>
+    <textarea class="form-input form-textarea" id="blockTxt" placeholder="What slowed me down was..." style="flex:1;min-height:100px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(3)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
@@ -119,7 +119,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="t-label mb-3">Step 4 of 5</div>
     <div class="step-q">Tomorrow's one non-negotiable.</div>
     <div class="step-hint">Set it tonight so your morning is clear.</div>
-    <textarea class="form-input form-textarea" placeholder="Tomorrow I must..." style="flex:1;min-height:100px;"></textarea>
+    <textarea class="form-input form-textarea" id="tmrTxt" placeholder="Tomorrow I must..." style="flex:1;min-height:100px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(4)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
@@ -136,15 +136,15 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="gratitude-list">
       <div class="gratitude-item">
         <div class="grat-ico"><i data-lucide="1"></i></div>
-        <input class="form-input" placeholder="I'm grateful for..." style="flex:1;">
+        <input class="form-input grat-inp" placeholder="I'm grateful for..." style="flex:1;">
       </div>
       <div class="gratitude-item">
         <div class="grat-ico"><i data-lucide="2"></i></div>
-        <input class="form-input" placeholder="I'm grateful for..." style="flex:1;">
+        <input class="form-input grat-inp" placeholder="I'm grateful for..." style="flex:1;">
       </div>
       <div class="gratitude-item">
         <div class="grat-ico"><i data-lucide="3"></i></div>
-        <input class="form-input" placeholder="I'm grateful for..." style="flex:1;">
+        <input class="form-input grat-inp" placeholder="I'm grateful for..." style="flex:1;">
       </div>
     </div>
     <div class="step-footer">
@@ -185,7 +185,22 @@ function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.
 function next(n){show(n+1);}
 function prev(n){show(n-1);}
 function selectYN(v){document.getElementById('ynY').classList.remove('sel-y');document.getElementById('ynN').classList.remove('sel-n');if(v==='y')document.getElementById('ynY').classList.add('sel-y');else document.getElementById('ynN').classList.add('sel-n');}
-function submit(){document.getElementById('sOv').classList.add('show');}
+function submit(){
+  const goal = document.getElementById('ynY').classList.contains('sel-y') ? 'yes'
+             : (document.getElementById('ynN').classList.contains('sel-n') ? 'no' : '');
+  const grats = [...document.querySelectorAll('.grat-inp')].map(e=>e.value.trim()).filter(Boolean);
+  const note = [
+    document.getElementById('blockTxt').value.trim() ? 'Blocker: '+document.getElementById('blockTxt').value.trim() : '',
+    document.getElementById('tmrTxt').value.trim() ? 'Tomorrow: '+document.getElementById('tmrTxt').value.trim() : '',
+    grats.length ? 'Grateful: '+grats.join('; ') : ''
+  ].filter(Boolean).join(' | ');
+  const body=new URLSearchParams({day_rating:document.getElementById('dayR').value, goal_hit:goal, note:note});
+  const btn=event&&event.target?event.target.closest('button'):null;
+  if(btn){btn.disabled=true;btn.style.opacity='.7';}
+  fetch('/checkout',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
+    .then(r=>{ if(!r.ok) throw 0; document.getElementById('sOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); })
+    .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not save check-out. Please try again.'); });
+}
 function playMotivation(){
   document.getElementById('motivPlayer').style.display='block';
   const b=document.getElementById('motivBtn');

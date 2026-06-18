@@ -1,5 +1,6 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+from collections import Counter
 from flask import Flask, render_template, redirect, session, request
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -36,6 +37,45 @@ class User(db.Model):
 
     def check_password(self, pw):
         return check_password_hash(self.password_hash, pw)
+
+
+class CheckIn(db.Model):
+    __tablename__ = 'checkins'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    kind = db.Column(db.String(10), default='morning')  # morning | evening
+    date = db.Column(db.Date, default=lambda: datetime.utcnow().date(), index=True)
+    sleep = db.Column(db.Float)
+    energy = db.Column(db.Integer)
+    mood = db.Column(db.Integer)
+    day_rating = db.Column(db.Integer)
+    goal_hit = db.Column(db.Boolean)
+    habits = db.Column(db.String(400), default='')
+    win = db.Column(db.String(400), default='')
+    reflection = db.Column(db.String(400), default='')
+    note = db.Column(db.String(800), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+LEVEL_TITLES = [
+    (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
+    (12, 'Warrior'), (20, 'Champion'), (35, 'Master'), (50, 'Legend'),
+]
+
+def level_title_for(level):
+    title = 'Newcomer'
+    for lv, name in LEVEL_TITLES:
+        if level >= lv:
+            title = name
+    return title
+
+def _i(v):
+    try: return int(float(v))
+    except (TypeError, ValueError): return None
+
+def _f(v):
+    try: return float(v)
+    except (TypeError, ValueError): return None
 
 
 with app.app_context():
@@ -132,23 +172,119 @@ def current_user():
 def auth():
     return current_user() is not None
 
+def _checkin_dates(user):
+    rows = db.session.query(CheckIn.date).filter_by(user_id=user.id).distinct().all()
+    return sorted({r[0] for r in rows if r[0]})
+
+def _streaks(dates):
+    """Return (current_streak, best_streak) from a sorted list of distinct dates."""
+    if not dates:
+        return 0, 0
+    s = set(dates)
+    today = datetime.utcnow().date()
+    cur = 0
+    d = today if today in s else (today - timedelta(days=1) if (today - timedelta(days=1)) in s else None)
+    while d in s:
+        cur += 1
+        d -= timedelta(days=1)
+    best = run = 0
+    prev = None
+    for d in dates:
+        run = run + 1 if (prev is not None and (d - prev).days == 1) else 1
+        best = max(best, run)
+        prev = d
+    return cur, max(best, cur)
+
 def user_ctx():
-    """Template context: real logged-in user merged over demo defaults so pages never break."""
+    """Template context: real logged-in user (account + check-in-derived progression) over demo defaults."""
     u = dict(DEMO_USER)
     cu = current_user()
-    if cu:
-        full = cu.name or cu.username
-        u.update({
-            'name': full,
-            'first': full.split(' ')[0],
-            'username': cu.username,
-            'email': cu.email,
-            'bio': cu.bio or u['bio'],
-            'city': cu.city or u['city'],
-            'job': cu.job or u['job'],
-            'member_since': cu.created_at.strftime('%b %Y') if cu.created_at else u['member_since'],
-        })
+    if not cu:
+        return u
+    full = cu.name or cu.username
+    dates = _checkin_dates(cu)
+    total = len(dates)
+    streak, best = _streaks(dates)
+    xp = total * 50
+    level = xp // 200 + 1
+    u.update({
+        'name': full,
+        'first': full.split(' ')[0],
+        'username': cu.username,
+        'email': cu.email,
+        'bio': cu.bio or '',
+        'city': cu.city or '',
+        'job': cu.job or '',
+        'member_since': cu.created_at.strftime('%b %Y') if cu.created_at else 'Just now',
+        'level': level,
+        'level_title': level_title_for(level),
+        'xp': xp,
+        'xp_needed': level * 200,
+        'progress_pct': round((xp % 200) / 2),
+        'streak': streak,
+        'best_streak': best,
+        'total_checkins': total,
+    })
     return u
+
+def stats_ctx():
+    """Per-user analytics derived from real check-ins."""
+    s = {k: (list(v) if isinstance(v, list) else v) for k, v in DEMO_STATS.items()}
+    cu = current_user()
+    if not cu:
+        return s
+    rows = CheckIn.query.filter_by(user_id=cu.id).order_by(CheckIn.date).all()
+    if not rows:
+        return s
+    morn = [r for r in rows if r.kind == 'morning']
+    eve = [r for r in rows if r.kind == 'evening']
+
+    def avg(lst, attr):
+        vals = [getattr(x, attr) for x in lst if getattr(x, attr) is not None]
+        return round(sum(vals) / len(vals), 1) if vals else 0
+
+    s['avg_sleep'] = avg(morn, 'sleep')
+    s['avg_energy'] = avg(morn, 'energy')
+    s['avg_mood'] = avg(morn, 'mood')
+    s['avg_productivity'] = avg(eve, 'day_rating')
+    dates = sorted({r.date for r in rows})
+    s['total_checkins'] = len(dates)
+    _, s['best_streak'] = _streaks(dates)
+
+    hc = Counter()
+    for r in morn:
+        for h in (r.habits or '').split(','):
+            h = h.strip()
+            if h:
+                hc[h] += 1
+    n = len(morn) or 1
+    s['habits'] = [{'name': name, 'count': cnt, 'pct': round(cnt / n * 100)} for name, cnt in hc.most_common(5)]
+
+    rate = lambda name: round(hc.get(name, 0) / n * 100)
+    e10, m10, sl = s['avg_energy'], s['avg_mood'], s['avg_sleep']
+    sleep_pct = round(min(sl, 8) / 8 * 100) if sl else 0
+    body = round((e10 * 10 + sleep_pct + rate('Workout')) / 3)
+    mind = round((m10 * 10 + rate('Reading') + rate('Meditation') + rate('Deep Work')) / 4)
+    wealth = rate('Deep Work')
+    purpose = round(sum(1 for r in morn if (r.win or '').strip()) / n * 100)
+    wellbeing = round((m10 * 10 + e10 * 10 + sleep_pct) / 3)
+    s['domains'] = [
+        {'name': 'Mind', 'pct': mind, 'trend': '+0'},
+        {'name': 'Body', 'pct': body, 'trend': '+0'},
+        {'name': 'Wealth', 'pct': wealth, 'trend': '+0'},
+        {'name': 'Purpose', 'pct': purpose, 'trend': '+0'},
+        {'name': 'Social', 'pct': 0, 'trend': '+0'},
+        {'name': 'Wellbeing', 'pct': wellbeing, 'trend': '+0'},
+    ]
+
+    today = datetime.utcnow().date()
+    last7 = [today - timedelta(days=6 - i) for i in range(7)]
+    mood_by_date = {r.date: r.mood for r in morn if r.mood is not None}
+    checked_dates = {r.date for r in rows}
+    s['days'] = [d.strftime('%a')[0] for d in last7]
+    s['checked'] = [d in checked_dates for d in last7]
+    s['weekly'] = [mood_by_date.get(d, 0) for d in last7]
+    return s
 
 @app.route('/')
 def index():
@@ -210,22 +346,50 @@ def logout():
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
-    return render_template('home.html', u=user_ctx(), stats=DEMO_STATS, active='home')
+    return render_template('home.html', u=user_ctx(), stats=stats_ctx(), active='home')
 
-@app.route('/checkin')
+@app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
     if not auth(): return redirect('/login')
+    cu = current_user()
+    if request.method == 'POST':
+        today = datetime.utcnow().date()
+        ci = CheckIn.query.filter_by(user_id=cu.id, kind='morning', date=today).first()
+        if not ci:
+            ci = CheckIn(user_id=cu.id, kind='morning', date=today)
+            db.session.add(ci)
+        ci.sleep = _f(request.form.get('sleep'))
+        ci.energy = _i(request.form.get('energy'))
+        ci.mood = _i(request.form.get('mood'))
+        ci.habits = (request.form.get('habits') or '')[:400]
+        ci.win = (request.form.get('win') or '')[:400]
+        ci.reflection = (request.form.get('reflection') or '')[:400]
+        db.session.commit()
+        return ('', 204)
     return render_template('checkin.html', u=user_ctx(), active='checkin')
 
-@app.route('/checkout')
+@app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     if not auth(): return redirect('/login')
+    cu = current_user()
+    if request.method == 'POST':
+        today = datetime.utcnow().date()
+        ci = CheckIn.query.filter_by(user_id=cu.id, kind='evening', date=today).first()
+        if not ci:
+            ci = CheckIn(user_id=cu.id, kind='evening', date=today)
+            db.session.add(ci)
+        ci.day_rating = _i(request.form.get('day_rating'))
+        gh = request.form.get('goal_hit')
+        ci.goal_hit = (gh == 'yes') if gh else None
+        ci.note = (request.form.get('note') or '')[:800]
+        db.session.commit()
+        return ('', 204)
     return render_template('checkout.html', u=user_ctx(), active='checkout')
 
 @app.route('/analytics')
 def analytics():
     if not auth(): return redirect('/login')
-    return render_template('analytics.html', u=user_ctx(), stats=DEMO_STATS, active='analytics')
+    return render_template('analytics.html', u=user_ctx(), stats=stats_ctx(), active='analytics')
 
 @app.route('/grow')
 def grow():
@@ -235,7 +399,7 @@ def grow():
 @app.route('/profile')
 def profile():
     if not auth(): return redirect('/login')
-    return render_template('profile.html', u=user_ctx(), stats=DEMO_STATS, active='profile')
+    return render_template('profile.html', u=user_ctx(), stats=stats_ctx(), active='profile')
 
 @app.route('/messages')
 def messages():
@@ -250,7 +414,7 @@ def settings():
 @app.route('/calendar')
 def calendar():
     if not auth(): return redirect('/login')
-    return render_template('calendar.html', u=user_ctx(), stats=DEMO_STATS, active='analytics')
+    return render_template('calendar.html', u=user_ctx(), stats=stats_ctx(), active='analytics')
 
 @app.route('/create')
 def create():
