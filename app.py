@@ -635,20 +635,6 @@ def notifications():
     if not auth(): return redirect('/login')
     return render_template('notifications.html', u=user_ctx(), notifs=notifications_ctx(current_user()), active='home')
 
-@app.route('/admin/reset-all')
-def admin_reset_all():
-    # One-time wipe. Set env var ADMIN_KEY on Railway, then visit /admin/reset-all?key=THAT_VALUE
-    admin_key = os.environ.get('ADMIN_KEY', '')
-    if not admin_key or request.args.get('key', '') != admin_key:
-        return ('Forbidden', 403)
-    counts = {}
-    for name, model in [('likes', Like), ('comments', Comment), ('bookmarks', Bookmark),
-                        ('follows', Follow), ('posts', Post), ('checkins', CheckIn), ('users', User)]:
-        counts[name] = model.query.delete()
-    db.session.commit()
-    session.clear()
-    return f'Wiped all data — {counts}. Every account is deleted.'
-
 @app.route('/api/like/<int:post_id>', methods=['POST'])
 def api_like(post_id):
     if not auth(): return ('', 401)
