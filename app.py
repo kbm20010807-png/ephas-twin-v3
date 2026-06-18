@@ -17,6 +17,15 @@ if not db_url:
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Session cookie hardening
+_is_prod = bool(os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_PUBLIC_URL'))
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,        # JS can't read the session cookie (blocks cookie theft via XSS)
+    SESSION_COOKIE_SAMESITE='Lax',       # blocks most cross-site request forgery
+    SESSION_COOKIE_SECURE=_is_prod,      # only send cookie over HTTPS in production
+    MAX_CONTENT_LENGTH=8 * 1024 * 1024,  # cap request size (8MB) to limit abuse
+)
+
 db = SQLAlchemy(app)
 
 
