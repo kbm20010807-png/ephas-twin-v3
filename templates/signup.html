@@ -46,21 +46,24 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
     <div class="sba" id="seg3"></div>
   </div>
 
+  <form method="POST" action="/signup" id="signupForm">
   <!-- STEP 1: Account -->
   <div class="step-view active" id="step1">
+    {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
     <div class="form-group">
       <label class="form-label">Full Name</label>
-      <input type="text" class="form-input" id="inp-name" placeholder="Your name" autocomplete="name">
+      <input type="text" class="form-input" id="inp-name" name="name" placeholder="Your name" autocomplete="name">
     </div>
     <div class="form-group">
       <label class="form-label">Email Address</label>
-      <input type="email" class="form-input" id="inp-email" placeholder="you@example.com" autocomplete="email">
+      <input type="email" class="form-input" id="inp-email" name="email" placeholder="you@example.com" autocomplete="email">
     </div>
     <div class="form-group">
       <label class="form-label">Password</label>
-      <input type="password" class="form-input" id="inp-pwd" placeholder="Min 8 characters" autocomplete="new-password">
+      <input type="password" class="form-input" id="inp-pwd" name="password" placeholder="Min 8 characters" autocomplete="new-password">
     </div>
-    <button class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);margin-top:4px;">
+    <div class="form-error" id="step1err" style="margin-bottom:10px;"></div>
+    <button type="button" class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);margin-top:4px;">
       <i data-lucide="arrow-right"></i> CONTINUE
     </button>
   </div>
@@ -93,7 +96,7 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
         <div class="goal-name">SOCIAL</div>
       </div>
     </div>
-    <button class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);">
+    <button type="button" class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);">
       <i data-lucide="arrow-right"></i> CONTINUE
     </button>
   </div>
@@ -107,12 +110,11 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
       <div style="font-family:'Arpubes',sans-serif;font-size:24px;letter-spacing:-1px;color:#fff;margin-bottom:10px;">You're all set</div>
       <div style="font-size:13px;color:#555;line-height:1.6;max-width:260px;margin:0 auto;">TWIN is ready. Start with your first check-in and let AXON learn your patterns.</div>
     </div>
-    <form method="POST" action="/signup">
-      <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);">
-        <i data-lucide="arrow-right"></i> ENTER TWIN
-      </button>
-    </form>
+    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);">
+      <i data-lucide="arrow-right"></i> ENTER TWIN
+    </button>
   </div>
+  </form>
 
   <div class="auth-foot" id="authFoot">
     <span class="auth-foot-txt">Already have an account? </span>
@@ -125,6 +127,16 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 <script>
 let curStep = 1;
 function nextStep() {
+  if (curStep === 1) {
+    const name = document.getElementById('inp-name').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    const pwd = document.getElementById('inp-pwd').value;
+    const err = document.getElementById('step1err');
+    if (!name) { err.textContent = 'Please enter your name.'; err.classList.add('show'); return; }
+    if (!email || email.indexOf('@') === -1) { err.textContent = 'Please enter a valid email.'; err.classList.add('show'); return; }
+    if (pwd.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.classList.add('show'); return; }
+    err.classList.remove('show');
+  }
   document.getElementById('step' + curStep).classList.remove('active');
   curStep++;
   document.getElementById('step' + curStep).classList.add('active');

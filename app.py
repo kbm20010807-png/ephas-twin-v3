@@ -1,7 +1,45 @@
+import os
+from datetime import datetime
 from flask import Flask, render_template, redirect, session, request
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'TWIN-EPHAS-V3-PROD'
+app.secret_key = os.environ.get('SECRET_KEY', 'TWIN-EPHAS-V3-DEV-ONLY')
+
+# --- Database: Railway Postgres in production, local SQLite for dev ---
+db_url = os.environ.get('DATABASE_URL', '')
+if db_url.startswith('postgres://'):
+    db_url = db_url.replace('postgres://', 'postgresql://', 1)  # SQLAlchemy needs postgresql://
+if not db_url:
+    db_url = 'sqlite:///twin_local.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    username = db.Column(db.String(60), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(120), nullable=False, default='')
+    bio = db.Column(db.String(300), default='')
+    city = db.Column(db.String(120), default='')
+    job = db.Column(db.String(120), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, pw):
+        self.password_hash = generate_password_hash(pw)
+
+    def check_password(self, pw):
+        return check_password_hash(self.password_hash, pw)
+
+
+with app.app_context():
+    db.create_all()
 
 DEMO_USER = {
     "name": "Alex",
@@ -116,8 +154,30 @@ DEMO_THREADS = [
     {"user":"Sam T.","init":"S","preview":"What's your morning routine looking like?","time":"2d","unread":0},
 ]
 
+def current_user():
+    uid = session.get('user_id')
+    return db.session.get(User, uid) if uid else None
+
 def auth():
-    return session.get('logged_in', False)
+    return current_user() is not None
+
+def user_ctx():
+    """Template context: real logged-in user merged over demo defaults so pages never break."""
+    u = dict(DEMO_USER)
+    cu = current_user()
+    if cu:
+        full = cu.name or cu.username
+        u.update({
+            'name': full,
+            'first': full.split(' ')[0],
+            'username': cu.username,
+            'email': cu.email,
+            'bio': cu.bio or u['bio'],
+            'city': cu.city or u['city'],
+            'job': cu.job or u['job'],
+            'member_since': cu.created_at.strftime('%b %Y') if cu.created_at else u['member_since'],
+        })
+    return u
 
 @app.route('/')
 def index():
@@ -126,14 +186,48 @@ def index():
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        session['logged_in'] = True
+        identifier = (request.form.get('email') or '').strip().lower()
+        pw = request.form.get('password') or ''
+        user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
+        if user and user.check_password(pw):
+            session.clear()
+            session['user_id'] = user.id
+            return redirect('/home')
+        return render_template('login.html', auth_page=True, error='Invalid email or password.')
+    if auth():
         return redirect('/home')
     return render_template('login.html', auth_page=True)
 
 @app.route('/signup', methods=['GET','POST'])
 def signup():
     if request.method == 'POST':
-        session['logged_in'] = True
+        name = (request.form.get('name') or '').strip()
+        email = (request.form.get('email') or '').strip().lower()
+        pw = request.form.get('password') or ''
+        username = (request.form.get('username') or email.split('@')[0]).strip().lower()
+        err = None
+        if not email or '@' not in email:
+            err = 'Enter a valid email address.'
+        elif len(pw) < 8:
+            err = 'Password must be at least 8 characters.'
+        elif User.query.filter_by(email=email).first():
+            err = 'An account with this email already exists.'
+        if err:
+            return render_template('signup.html', auth_page=True, error=err)
+        base = ''.join(c for c in (username or 'user') if c.isalnum() or c in '_.') or 'user'
+        username = base
+        i = 1
+        while User.query.filter_by(username=username).first():
+            i += 1
+            username = f"{base}{i}"
+        user = User(email=email, username=username, name=name or base)
+        user.set_password(pw)
+        db.session.add(user)
+        db.session.commit()
+        session.clear()
+        session['user_id'] = user.id
+        return redirect('/home')
+    if auth():
         return redirect('/home')
     return render_template('signup.html', auth_page=True)
 
@@ -145,82 +239,82 @@ def logout():
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
-    return render_template('home.html', u=DEMO_USER, stats=DEMO_STATS, active='home')
+    return render_template('home.html', u=user_ctx(), stats=DEMO_STATS, active='home')
 
 @app.route('/checkin')
 def checkin():
     if not auth(): return redirect('/login')
-    return render_template('checkin.html', u=DEMO_USER, active='checkin')
+    return render_template('checkin.html', u=user_ctx(), active='checkin')
 
 @app.route('/checkout')
 def checkout():
     if not auth(): return redirect('/login')
-    return render_template('checkout.html', u=DEMO_USER, active='checkout')
+    return render_template('checkout.html', u=user_ctx(), active='checkout')
 
 @app.route('/analytics')
 def analytics():
     if not auth(): return redirect('/login')
-    return render_template('analytics.html', u=DEMO_USER, stats=DEMO_STATS, active='analytics')
+    return render_template('analytics.html', u=user_ctx(), stats=DEMO_STATS, active='analytics')
 
 @app.route('/grow')
 def grow():
     if not auth(): return redirect('/login')
-    return render_template('grow.html', u=DEMO_USER, feed=DEMO_FEED, zones=DEMO_ZONES, active='grow')
+    return render_template('grow.html', u=user_ctx(), feed=DEMO_FEED, zones=DEMO_ZONES, active='grow')
 
 @app.route('/profile')
 def profile():
     if not auth(): return redirect('/login')
-    return render_template('profile.html', u=DEMO_USER, stats=DEMO_STATS, active='profile')
+    return render_template('profile.html', u=user_ctx(), stats=DEMO_STATS, active='profile')
 
 @app.route('/messages')
 def messages():
     if not auth(): return redirect('/login')
-    return render_template('messages.html', u=DEMO_USER, threads=DEMO_THREADS, active='messages')
+    return render_template('messages.html', u=user_ctx(), threads=DEMO_THREADS, active='messages')
 
 @app.route('/settings')
 def settings():
     if not auth(): return redirect('/login')
-    return render_template('settings.html', u=DEMO_USER, active='settings')
+    return render_template('settings.html', u=user_ctx(), active='settings')
 
 @app.route('/calendar')
 def calendar():
     if not auth(): return redirect('/login')
-    return render_template('calendar.html', u=DEMO_USER, stats=DEMO_STATS, active='analytics')
+    return render_template('calendar.html', u=user_ctx(), stats=DEMO_STATS, active='analytics')
 
 @app.route('/create')
 def create():
     if not auth(): return redirect('/login')
-    return render_template('create.html', u=DEMO_USER, active='grow')
+    return render_template('create.html', u=user_ctx(), active='grow')
 
 @app.route('/axon-settings')
 def axon_settings():
     if not auth(): return redirect('/login')
-    return render_template('axon_settings.html', u=DEMO_USER, active='settings')
+    return render_template('axon_settings.html', u=user_ctx(), active='settings')
 
 @app.route('/apply-pro')
 def apply_pro():
     if not auth(): return redirect('/login')
-    return render_template('apply_pro.html', u=DEMO_USER, active='settings')
+    return render_template('apply_pro.html', u=user_ctx(), active='settings')
 
 @app.route('/edit-profile')
 def edit_profile():
     if not auth(): return redirect('/login')
-    return render_template('edit_profile.html', u=DEMO_USER, active='profile')
+    return render_template('edit_profile.html', u=user_ctx(), active='profile')
 
 @app.route('/twin-pro')
 def twin_pro():
     if not auth(): return redirect('/login')
-    return render_template('twin_pro.html', u=DEMO_USER, active='settings')
+    return render_template('twin_pro.html', u=user_ctx(), active='settings')
 
 @app.route('/quests')
 def quests():
     if not auth(): return redirect('/login')
-    return render_template('quests.html', u=DEMO_USER, quests=DEMO_QUESTS, active='home')
+    return render_template('quests.html', u=user_ctx(), quests=DEMO_QUESTS, active='home')
 
 @app.route('/notifications')
 def notifications():
     if not auth(): return redirect('/login')
-    return render_template('notifications.html', u=DEMO_USER, notifs=DEMO_NOTIFICATIONS, active='home')
+    return render_template('notifications.html', u=user_ctx(), notifs=DEMO_NOTIFICATIONS, active='home')
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
