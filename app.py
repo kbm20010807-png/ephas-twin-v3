@@ -637,8 +637,9 @@ def notifications():
 
 @app.route('/admin/reset-all')
 def admin_reset_all():
-    # One-time wipe, gated by the secret key. Visit /admin/reset-all?key=YOUR_SECRET_KEY
-    if request.args.get('key', '') != app.secret_key:
+    # One-time wipe. Set env var ADMIN_KEY on Railway, then visit /admin/reset-all?key=THAT_VALUE
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if not admin_key or request.args.get('key', '') != admin_key:
         return ('Forbidden', 403)
     counts = {}
     for name, model in [('likes', Like), ('comments', Comment), ('bookmarks', Bookmark),
