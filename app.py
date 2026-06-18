@@ -457,8 +457,8 @@ def signup():
         err = None
         if not email or '@' not in email:
             err = 'Enter a valid email address.'
-        elif len(pw) < 8:
-            err = 'Password must be at least 8 characters.'
+        elif len(pw) < 8 or not any(c.isupper() for c in pw) or not any(not c.isalnum() for c in pw):
+            err = 'Password needs 8+ characters, a capital letter, and a symbol.'
         elif User.query.filter_by(email=email).first():
             err = 'An account with this email already exists.'
         if err:
