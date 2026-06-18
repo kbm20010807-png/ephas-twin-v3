@@ -3,28 +3,21 @@
 
 {% block head %}
 <style>
-body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
-.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 20%,rgba(212,170,53,.06) 0%,transparent 60%);pointer-events:none;}
-.auth-wrap{flex:1;display:flex;flex-direction:column;padding:60px 28px 40px;}
-.auth-head{text-align:center;margin-bottom:48px;}
-.auth-logo{font-family:'Arpubes',sans-serif;font-size:52px;letter-spacing:-4px;color:#fff;line-height:1;}
-.auth-elogo{height:11px;width:auto;margin:10px auto 0;display:block;filter:invert(1);opacity:.35;}
-.auth-sub{font-size:12px;color:#555;margin-top:14px;letter-spacing:.5px;}
+body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 20%,rgba(212,170,53,.07) 0%,transparent 60%);pointer-events:none;}
+.auth-wrap{flex:1;display:flex;flex-direction:column;padding:72px 28px 40px;}
+.auth-head{text-align:center;margin-bottom:44px;}
+.auth-logo{font-family:'Arpubes',sans-serif;font-size:52px;letter-spacing:-4px;color:var(--black);line-height:1;}
+.auth-tag{font-size:12px;color:var(--sub);margin-top:12px;letter-spacing:.5px;}
 .auth-form{flex:1;}
 .auth-foot{text-align:center;padding-top:24px;}
-.auth-foot-txt{font-size:12px;color:#555;}
+.auth-foot-txt{font-size:12px;color:var(--sub);}
 .auth-foot-lnk{color:var(--gold);font-weight:700;text-decoration:none;}
-.form-input{background:#111;border-color:#222;color:#fff;}
-.form-input:focus{background:#161616;border-color:var(--gold);}
-.form-input::placeholder{color:#444;}
-.form-label{color:#555;}
-.divider-lbl{color:#333;}
-.divider-lbl::before,.divider-lbl::after{background:#1A1A1A;}
-.social-btn{width:100%;background:#111;border:1.5px solid #1C1C1C;border-radius:var(--r-xl);padding:15px 20px;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;transition:border-color .15s;}
-.social-btn:hover{border-color:#333;}
+.social-btn{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:15px 20px;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--black);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;transition:border-color .15s;}
+.social-btn:hover{border-color:var(--gold-b);}
 .social-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;}
 .forgot{text-align:right;margin-top:-8px;margin-bottom:16px;}
-.forgot a{font-size:11px;color:#555;text-decoration:none;}
+.forgot a{font-size:11px;color:var(--sub);text-decoration:none;}
 </style>
 {% endblock %}
 
@@ -33,22 +26,21 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 <div class="auth-wrap">
   <div class="auth-head">
     <div class="auth-logo">TWIN</div>
-    <img src="/static/ephas_logo2.png" class="auth-elogo" alt="EPHAS">
-    <div class="auth-sub">Powered by EPHAS</div>
+    <div class="auth-tag">Your digital twin</div>
   </div>
 
   <div class="auth-form">
     {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
     <form method="POST" action="/login" novalidate>
       <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input type="text" class="form-input" name="email" placeholder="you@example.com" autocomplete="email">
+        <label class="form-label">Email or Username</label>
+        <input type="text" class="form-input" name="email" placeholder="Email or username" autocomplete="username">
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
         <input type="password" class="form-input" name="password" placeholder="Enter your password" autocomplete="current-password">
       </div>
-      <div class="forgot"><a href="#">Forgot password?</a></div>
+      <div class="forgot"><a href="#" onclick="authSoon('Password reset');return false;">Forgot password?</a></div>
       <button type="submit" class="btn btn-gold btn-full mb-3" style="border-radius:var(--r-xl);">
         <i data-lucide="arrow-right"></i>
         SIGN IN
@@ -57,11 +49,11 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 
     <div class="divider-lbl mb-3" style="margin:0 0 12px;">or continue with</div>
 
-    <button class="social-btn">
+    <button class="social-btn" onclick="authSoon('Google sign-in')">
       <svg viewBox="0 0 24 24"><path d="M20.283 10.356h-8.327v3.451h4.792c-.446 2.193-2.313 3.453-4.792 3.453a5.27 5.27 0 0 1-5.279-5.28 5.27 5.27 0 0 1 5.279-5.279c1.259 0 2.397.447 3.29 1.178l2.6-2.599c-1.584-1.381-3.615-2.233-5.89-2.233a8.908 8.908 0 0 0-8.934 8.934 8.908 8.908 0 0 0 8.934 8.934c4.467 0 8.529-3.249 8.529-8.934 0-.528-.081-1.097-.202-1.625z" fill="currentColor" stroke="none"/></svg>
       Continue with Google
     </button>
-    <button class="social-btn">
+    <button class="social-btn" onclick="authSoon('Phone sign-in')">
       <i data-lucide="smartphone"></i>
       Continue with Phone
     </button>
@@ -72,4 +64,22 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
     <a href="/signup" class="auth-foot-lnk">Create account</a>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function authSoon(name){
+  let t=document.getElementById('authToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='authToast';
+    t.style.cssText='position:fixed;left:50%;bottom:32px;transform:translateX(-50%);max-width:330px;width:86%;background:var(--card);border:1px solid var(--gold-b);color:var(--black);font-size:12px;line-height:1.5;padding:13px 16px;border-radius:14px;z-index:9999;text-align:center;box-shadow:var(--sh-md);transition:opacity .3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = name + ' is coming soon — use email & password for now.';
+  t.style.opacity='1';
+  clearTimeout(window._authT);
+  window._authT=setTimeout(()=>{t.style.opacity='0';},3200);
+}
+</script>
 {% endblock %}
