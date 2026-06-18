@@ -50,6 +50,8 @@
 .fc-ft{display:flex;gap:14px;}
 .fc-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
 .fc-act svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.fc-act.liked{color:#EF4444;}
+.fc-act.liked svg{stroke:#EF4444;fill:#EF4444;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
 .tw-foot-w{font-family:'Arpubes',sans-serif;font-size:12px;letter-spacing:-1px;color:var(--muted);}
 .tw-foot-img{height:7px;margin:4px auto 0;display:block;opacity:.2;}
@@ -236,11 +238,32 @@
 </div>
 
 <div class="sect-lbl">Community</div>
+{% if community %}
+{% for p in community %}
+<div class="feed-c">
+  <div class="fc-hd">
+    <div class="av av-32">{{ p.init }}</div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div>
+      <div style="font-size:10px;color:var(--sub);">{{ p.time }}</div>
+    </div>
+  </div>
+  <div class="fc-bdy">{% if p.title %}<b>{{ p.title }}</b><br>{% endif %}{{ p.text }}</div>
+  <div class="fc-ft">
+    <div class="fc-act like-btn {% if p.liked %}liked{% endif %}" onclick="hLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+    <div class="fc-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+    <a href="/grow" class="fc-act" style="margin-left:auto;text-decoration:none;color:var(--sub);"><i data-lucide="arrow-right"></i></a>
+  </div>
+</div>
+{% endfor %}
+<a href="/grow" style="display:block;text-align:center;font-size:11px;color:var(--gold);font-weight:700;padding:6px 0 4px;">See all in Grow →</a>
+{% else %}
 <div class="feed-c" style="text-align:center;padding:28px 18px;">
   <i data-lucide="users" style="width:26px;height:26px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
   <div style="font-size:12px;color:var(--sub);margin-top:10px;line-height:1.5;">The community feed is empty.<br>Be the first to share your journey.</div>
   <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:14px;"><i data-lucide="compass"></i> Explore Grow</a>
 </div>
+{% endif %}
 
 <div class="tw-foot">
   <div class="tw-foot-w">TWIN</div>
@@ -274,6 +297,13 @@ function openStory(id, init, name, sleep, energy, mood, streak) {
 }
 function closeStory() {
   document.getElementById('storyOv').classList.remove('on');
+}
+function hLike(btn, id) {
+  const n = btn.querySelector('.like-n');
+  fetch('/api/like/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('liked', d.liked);
+    if (n) n.textContent = d.count;
+  }).catch(()=>{});
 }
 </script>
 {% endblock %}

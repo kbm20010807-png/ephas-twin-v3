@@ -68,6 +68,8 @@
 .pp-act svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;}
 .pp-act.bm-btn.saved{color:var(--gold);}
 .pp-act.bm-btn.saved svg{stroke:var(--gold);}
+.pp-act.like-btn.liked{color:#EF4444;}
+.pp-act.like-btn.liked svg{stroke:#EF4444;fill:#EF4444;}
 .pp-img{height:280px;border-radius:var(--r);margin-bottom:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);}
 .pp-img svg{width:28px;height:28px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:1.5;}
 .pp-caption{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:10px;}
@@ -197,12 +199,29 @@
 
 <!-- ===== TWIN: POSTS ===== -->
 <div class="tab-pane on" id="pane-twin-posts">
+  <div style="height:16px;"></div>
+  {% if my_posts %}
+  {% for p in my_posts %}
+  <div class="prof-post" data-id="{{ p.id }}">
+    <div class="pp-meta">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div>
+    {% if p.kind != 'thread' %}<div class="pp-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
+    <div class="pp-caption">{{ p.text }}</div>
+    <div class="pp-ft">
+      <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pp-act bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="image" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No posts yet</div>
     <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Share a photo or thought to start<br>building your profile.</div>
     <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create a post</a>
   </div>
+  {% endif %}
 </div>
 
 <!-- ===== TWIN: STATS ===== -->
@@ -238,42 +257,101 @@
 
 <!-- ===== TWIN: COURSES (subscribed) ===== -->
 <div class="tab-pane" id="pane-twin-courses">
+  <div style="height:16px;"></div>
+  {% if my_courses %}
+  {% for p in my_courses %}
+  <div class="course-card">
+    <div class="cc-tag">{{ p.category or 'Course' }}</div>
+    <div class="cc-title">{{ p.title }}</div>
+    <div class="cc-meta">{{ p.text[:90] }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="graduation-cap" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No courses yet</div>
     <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Courses you enroll in will<br>show up here.</div>
     <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="compass"></i> Browse courses</a>
   </div>
+  {% endif %}
 </div>
 
 <!-- ===== SAVED (shared TWIN + PRO) ===== -->
 <div class="tab-pane" id="pane-saved">
+  <div style="height:8px;"></div>
+  {% if saved %}
+  {% for p in saved %}
+  <div class="saved-item" data-id="{{ p.id }}">
+    <div class="si-thumb" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="{% if p.kind=='thread' %}align-left{% elif p.kind=='course' %}graduation-cap{% elif p.kind=='reel' %}play-circle{% else %}image{% endif %}"></i></div>
+    <div class="si-body">
+      <div class="si-type">{{ p.kind }}</div>
+      <div class="si-title">{{ p.title or p.text[:60] }}</div>
+      <div class="si-by">{{ p.user }}</div>
+    </div>
+    <div class="si-bm" onclick="toggleBookmark(this.querySelector('i')?this:this,{{ p.id }});this.closest('.saved-item').remove()"><i data-lucide="bookmark"></i></div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="bookmark" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">Nothing saved yet</div>
     <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Tap the bookmark on any post, reel,<br>thread or course to save it here.</div>
     <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="compass"></i> Explore Grow</a>
   </div>
+  {% endif %}
 </div>
 
 <!-- ===== PRO: POSTS ===== -->
 <div class="tab-pane" id="pane-pro-posts">
+  <div style="height:16px;"></div>
+  {% if my_posts %}
+  {% for p in my_posts %}
+  <div class="prof-post" data-id="{{ p.id }}">
+    <div class="pp-meta">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div>
+    {% if p.kind != 'thread' %}<div class="pp-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
+    <div class="pp-caption">{{ p.text }}</div>
+    <div class="pp-ft">
+      <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pp-act bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+      <div class="pp-act"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="image" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No posts yet</div>
     <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Share a post or reel with<br>your audience.</div>
     <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create</a>
   </div>
+  {% endif %}
 </div>
 
 <!-- ===== PRO: THREADS ===== -->
 <div class="tab-pane" id="pane-pro-threads">
+  <div style="height:16px;"></div>
+  {% if my_threads %}
+  {% for p in my_threads %}
+  <div class="prof-post" data-id="{{ p.id }}">
+    <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">THREAD · {{ p.time }}</div>
+    {% if p.title %}<div style="font-size:13px;font-weight:700;color:var(--black);margin-bottom:6px;">{{ p.title }}</div>{% endif %}
+    <div class="pp-body">{{ p.text }}</div>
+    <div class="pp-ft">
+      <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+      <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pp-act bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="align-left" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No threads yet</div>
     <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Write a thread to share<br>what you know.</div>
     <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="align-left"></i> New thread</a>
   </div>
+  {% endif %}
 </div>
 
 <!-- ===== PRO: COURSES (2 sub-tabs: Teaching / Subscribed) ===== -->
@@ -283,12 +361,22 @@
     <div class="sub-tab" onclick="proCourseTab('subscribed',this)">Subscribed</div>
   </div>
   <div id="pcourse-teaching">
+  {% if my_courses %}
+  {% for p in my_courses %}
+  <div class="course-card">
+    <div class="cc-tag">{{ p.category or 'Course' }}</div>
+    <div class="cc-title">{{ p.title }}</div>
+    <div class="cc-meta">{{ p.text[:90] }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="graduation-cap" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No courses created yet</div>
     <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Publish your first course to<br>start teaching and earning.</div>
     <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="graduation-cap"></i> Create a course</a>
   </div>
+  {% endif %}
   </div>
   <div id="pcourse-subscribed" style="display:none;">
   <div style="text-align:center;padding:48px 24px;">
@@ -417,7 +505,17 @@ function proCourseTab(which, el) {
   document.getElementById('pcourse-subscribed').style.display = which === 'subscribed' ? 'block' : 'none';
 }
 
-function toggleBookmark(btn) { btn.classList.toggle('saved'); }
+function toggleBookmark(btn, id) {
+  btn.classList.toggle('saved');
+  if (id) fetch('/api/bookmark/' + id, {method:'POST'}).catch(()=>{});
+}
+function toggleLike(btn, id) {
+  const n = btn.querySelector('.like-n');
+  fetch('/api/like/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('liked', d.liked);
+    if (n) n.textContent = d.count;
+  }).catch(()=>{});
+}
 
 function filterSaved(type, el) {
   el.closest('.saved-filter').querySelectorAll('.sf-chip').forEach(c => c.classList.remove('on'));

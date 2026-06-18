@@ -43,6 +43,8 @@
 .pc-action svg{width:13px;height:13px;stroke:var(--sub);fill:none;stroke-width:1.75;transition:all .15s;}
 .pc-action.bm-btn.saved{color:var(--gold);}
 .pc-action.bm-btn.saved svg{stroke:var(--gold);}
+.like-btn.liked{color:#EF4444;}
+.like-btn.liked svg{stroke:#EF4444;fill:#EF4444;}
 
 /* REELS */
 .reel-card{margin:0 20px 10px;border-radius:var(--r-lg);overflow:hidden;background:#09090B;position:relative;min-height:220px;cursor:pointer;box-shadow:var(--sh);}
@@ -210,42 +212,122 @@
 
 <!-- ====== EXPLORE ====== -->
 <div class="tab-pane on" id="pane-explore" style="display:none;">
+  {% if gexplore %}
+  {% for p in gexplore %}
+  <div class="post-card" data-id="{{ p.id }}" data-kind="{{ p.kind }}" onclick="openPost(this,event)">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
+      <div class="pc-cat">{{ p.category }}</div>
+    </div>
+    {% if p.kind != 'thread' %}<div class="pc-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
+    <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text }}</div>
+    <div class="pc-foot">
+      <div class="pc-action like-btn {% if p.liked %}liked{% endif %}" onclick="event.stopPropagation();toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pc-action bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="event.stopPropagation();toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:54px 24px;">
     <i data-lucide="compass" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">Nothing trending yet</div>
-    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">When people start posting, the best<br>content will surface here.</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">When people post, the best content<br>surfaces here.</div>
     <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create the first post</a>
   </div>
+  {% endif %}
+  <div style="height:16px;"></div>
 </div>
 
 <!-- ====== POSTS & REELS ====== -->
 <div class="tab-pane" id="pane-posts">
+  {% if gposts %}
+  <div style="height:10px;"></div>
+  {% for p in gposts %}
+  <div class="post-card" data-id="{{ p.id }}" data-kind="{{ p.kind }}" onclick="openPost(this,event)">
+    <div class="pc-head">
+      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
+      <div class="pc-cat">{{ p.category }}</div>
+    </div>
+    {% if p.kind != 'thread' %}<div class="pc-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
+    <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text }}</div>
+    <div class="pc-foot">
+      <div class="pc-action like-btn {% if p.liked %}liked{% endif %}" onclick="event.stopPropagation();toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="pc-action bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="event.stopPropagation();toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+      <div class="pc-action"><i data-lucide="share-2"></i></div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:54px 24px;">
     <i data-lucide="image" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No posts or reels yet</div>
-    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Share a photo or a reel to get<br>your community started.</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Share a photo or reel to get<br>your community started.</div>
     <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create a post</a>
   </div>
+  {% endif %}
+  <div style="height:16px;"></div>
 </div>
 
 <!-- ====== THREADS ====== -->
 <div class="tab-pane" id="pane-threads">
+  {% if gthreads %}
+  <div style="height:10px;"></div>
+  {% for p in gthreads %}
+  <div class="thread-card" data-id="{{ p.id }}" data-kind="thread" onclick="openPost(this,event)">
+    <div class="tc-head">
+      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{{ p.init }}</div>
+      <div><div class="pc-user">{{ p.user }}</div><div class="tc-meta">{{ p.time }}{% if p.category %} · #{{ p.category|lower }}{% endif %}</div></div>
+    </div>
+    {% if p.title %}<div class="tc-title">{{ p.title }}</div>{% endif %}
+    <div class="tc-body">{{ p.text }}</div>
+    <div class="tc-foot">
+      <div class="tc-action like-btn {% if p.liked %}liked{% endif %}" onclick="event.stopPropagation();toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+      <div class="tc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+      <div class="tc-action bm-btn {% if p.bookmarked %}saved{% endif %}" onclick="event.stopPropagation();toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+      <div class="tc-replies-count">{{ p.comments }} replies</div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
   <div style="text-align:center;padding:54px 24px;">
     <i data-lucide="align-left" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No threads yet</div>
-    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Start a conversation — write a<br>thread and share what you know.</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="align-left"></i> Start a thread</a>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Write a thread and share<br>what you know.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Start a thread</a>
   </div>
+  {% endif %}
+  <div style="height:16px;"></div>
 </div>
 
 <!-- ====== COURSES ====== -->
 <div class="tab-pane" id="pane-courses">
+  {% if gcourses %}
+  <div class="course-grid">
+  {% for p in gcourses %}
+    <div class="cg-card">
+      <div class="cg-top"><i data-lucide="graduation-cap"></i></div>
+      <div class="cg-body">
+        <div class="cg-cat">{{ p.category or 'Course' }}</div>
+        <div class="cg-title">{{ p.title }}</div>
+        <div class="cg-meta">By {{ p.user }}</div>
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+  {% else %}
   <div style="text-align:center;padding:54px 24px;">
     <i data-lucide="graduation-cap" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
     <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No courses yet</div>
-    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Courses from Professionals will<br>appear here once they publish.</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="graduation-cap"></i> Create a course</a>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Courses from Professionals<br>appear here once published.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create a course</a>
   </div>
+  {% endif %}
+  <div style="height:16px;"></div>
 </div>
 
 <div class="tw-foot">
@@ -301,8 +383,18 @@ function chipSet(el) {
   el.closest('.chip-row').querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
 }
-function toggleBookmark(btn) {
+function toggleBookmark(btn, id) {
   btn.classList.toggle('saved');
+  if (id) fetch('/api/bookmark/' + id, {method:'POST'}).catch(()=>{});
+}
+function toggleLike(btn, id) {
+  const n = btn.querySelector('.like-n');
+  btn.classList.toggle('liked');
+  if (n) n.textContent = Math.max(0, (parseInt(n.textContent)||0) + (btn.classList.contains('liked')?1:-1));
+  if (id) fetch('/api/like/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('liked', d.liked);
+    if (n) n.textContent = d.count;
+  }).catch(()=>{});
 }
 function toggleZone(card) {
   const isJoined = card.classList.contains('joined');
@@ -351,7 +443,9 @@ function rvFollow(el) {
 function openPost(el, ev) {
   if (ev && ev.target.closest('.pc-action,.tc-action,.pc-foot,.tc-foot')) return;
   const isThread = el.classList.contains('thread-card');
+  window.currentPostId = el.dataset.id || null;
   document.getElementById('pdTitle').textContent = isThread ? 'Thread' : 'Post';
+  loadComments(window.currentPostId);
   const clone = el.cloneNode(true);
   clone.style.cursor = 'default';
   clone.removeAttribute('onclick');
@@ -368,15 +462,38 @@ function closePost() {
   document.getElementById('postDetail').classList.remove('on');
   document.body.style.overflow = '';
 }
+function commentRow(user, text) {
+  const c = document.createElement('div');
+  c.className = 'pd-comment';
+  c.innerHTML = '<div class="av av-32" style="font-family:\'Arpubes\',sans-serif;font-weight:900;color:var(--gold);"></div><div class="pdc-body"><div class="pdc-user"></div><div class="pdc-text"></div><div class="pdc-meta"><span>now</span></div></div>';
+  c.querySelector('.av').textContent = (user||'U')[0].toUpperCase();
+  c.querySelector('.pdc-user').textContent = user||'User';
+  c.querySelector('.pdc-text').textContent = text;
+  return c;
+}
+function loadComments(id) {
+  const box = document.getElementById('pdComments');
+  if (!id) { box.innerHTML = '<div style="text-align:center;padding:24px;color:var(--sub);font-size:12px;">No comments yet. Be the first.</div>'; return; }
+  fetch('/api/comments/' + id).then(r=>r.json()).then(list=>{
+    box.innerHTML = '';
+    if (!list.length) { box.innerHTML = '<div style="text-align:center;padding:24px;color:var(--sub);font-size:12px;">No comments yet. Be the first.</div>'; return; }
+    list.forEach(c => box.appendChild(commentRow(c.user, c.text)));
+  }).catch(()=>{});
+}
 function pdSend() {
   const inp = document.getElementById('pdInput');
   if (!inp.value.trim()) return;
-  const c = document.createElement('div');
-  c.className = 'pd-comment';
-  c.innerHTML = '<div class="av av-32" style="font-family:\'Arpubes\',sans-serif;font-weight:900;color:var(--gold);">{{ u.name[0]|upper }}</div><div class="pdc-body"><div class="pdc-user">{{ u.name }}</div><div class="pdc-text"></div><div class="pdc-meta"><span>now</span></div></div>';
-  c.querySelector('.pdc-text').textContent = inp.value;
-  document.getElementById('pdComments').prepend(c);
+  const id = window.currentPostId;
+  const text = inp.value.trim();
+  const box = document.getElementById('pdComments');
+  const empty = box.querySelector('div[style*="text-align:center"]');
+  if (empty) box.innerHTML = '';
+  box.prepend(commentRow('{{ u.name }}', text));
   inp.value = '';
+  if (id) {
+    const b = new URLSearchParams({text});
+    fetch('/api/comment/' + id, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:b}).catch(()=>{});
+  }
 }
 
 /* ===== FEED SKELETON (brief load shimmer; ready for real async fetch in Phase 2) ===== */

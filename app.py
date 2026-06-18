@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from collections import Counter
-from flask import Flask, render_template, redirect, session, request
+from flask import Flask, render_template, redirect, session, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -57,6 +57,44 @@ class CheckIn(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    kind = db.Column(db.String(20), default='post', index=True)  # post | thread | reel | course
+    title = db.Column(db.String(200), default='')
+    text = db.Column(db.Text, default='')
+    category = db.Column(db.String(40), default='')
+    image = db.Column(db.String(300), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+class Like(db.Model):
+    __tablename__ = 'likes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), index=True, nullable=False)
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), index=True, nullable=False)
+    text = db.Column(db.String(600), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Bookmark(db.Model):
+    __tablename__ = 'bookmarks'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), index=True, nullable=False)
+
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    following_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+
+
 LEVEL_TITLES = [
     (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
     (12, 'Warrior'), (20, 'Champion'), (35, 'Master'), (50, 'Legend'),
@@ -76,6 +114,41 @@ def _i(v):
 def _f(v):
     try: return float(v)
     except (TypeError, ValueError): return None
+
+def time_ago(dt):
+    if not dt:
+        return ''
+    s = (datetime.utcnow() - dt).total_seconds()
+    if s < 60: return 'now'
+    if s < 3600: return f'{int(s // 60)}m ago'
+    if s < 86400: return f'{int(s // 3600)}h ago'
+    if s < 604800: return f'{int(s // 86400)}d ago'
+    return dt.strftime('%b %d')
+
+def serialize_posts(posts, viewer=None):
+    posts = list(posts)
+    if not posts:
+        return []
+    pids = [p.id for p in posts]
+    liked = set()
+    booked = set()
+    if viewer:
+        liked = {l.post_id for l in Like.query.filter(Like.user_id == viewer.id, Like.post_id.in_(pids)).all()}
+        booked = {b.post_id for b in Bookmark.query.filter(Bookmark.user_id == viewer.id, Bookmark.post_id.in_(pids)).all()}
+    authors = {u.id: u for u in User.query.filter(User.id.in_([p.user_id for p in posts])).all()}
+    out = []
+    for p in posts:
+        a = authors.get(p.user_id)
+        name = (a.name or a.username) if a else 'User'
+        out.append({
+            'id': p.id, 'kind': p.kind, 'user': name, 'init': (name[0].upper() if name else 'U'),
+            'title': p.title or '', 'text': p.text or '', 'category': p.category or 'Growth',
+            'image': p.image or '', 'time': time_ago(p.created_at),
+            'likes': Like.query.filter_by(post_id=p.id).count(),
+            'comments': Comment.query.filter_by(post_id=p.id).count(),
+            'liked': p.id in liked, 'bookmarked': p.id in booked,
+        })
+    return out
 
 
 with app.app_context():
@@ -224,6 +297,8 @@ def user_ctx():
         'streak': streak,
         'best_streak': best,
         'total_checkins': total,
+        'followers': Follow.query.filter_by(following_id=cu.id).count(),
+        'following': Follow.query.filter_by(follower_id=cu.id).count(),
     })
     return u
 
@@ -346,7 +421,9 @@ def logout():
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
-    return render_template('home.html', u=user_ctx(), stats=stats_ctx(), active='home')
+    cu = current_user()
+    community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
+    return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community, active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
@@ -394,12 +471,26 @@ def analytics():
 @app.route('/grow')
 def grow():
     if not auth(): return redirect('/login')
-    return render_template('grow.html', u=user_ctx(), feed=DEMO_FEED, zones=DEMO_ZONES, active='grow')
+    cu = current_user()
+    posts = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'reel'])).order_by(Post.created_at.desc()).limit(50).all(), cu)
+    threads = serialize_posts(Post.query.filter_by(kind='thread').order_by(Post.created_at.desc()).limit(50).all(), cu)
+    courses = serialize_posts(Post.query.filter_by(kind='course').order_by(Post.created_at.desc()).limit(50).all(), cu)
+    explore = serialize_posts(Post.query.order_by(Post.created_at.desc()).limit(30).all(), cu)
+    return render_template('grow.html', u=user_ctx(), gposts=posts, gthreads=threads,
+                           gcourses=courses, gexplore=explore, active='grow')
 
 @app.route('/profile')
 def profile():
     if not auth(): return redirect('/login')
-    return render_template('profile.html', u=user_ctx(), stats=stats_ctx(), active='profile')
+    cu = current_user()
+    my_posts = serialize_posts(Post.query.filter(Post.user_id == cu.id, Post.kind.in_(['post', 'reel'])).order_by(Post.created_at.desc()).all(), cu)
+    my_threads = serialize_posts(Post.query.filter_by(user_id=cu.id, kind='thread').order_by(Post.created_at.desc()).all(), cu)
+    my_courses = serialize_posts(Post.query.filter_by(user_id=cu.id, kind='course').order_by(Post.created_at.desc()).all(), cu)
+    saved = serialize_posts(
+        Post.query.join(Bookmark, Bookmark.post_id == Post.id).filter(Bookmark.user_id == cu.id).order_by(Post.created_at.desc()).all(), cu)
+    return render_template('profile.html', u=user_ctx(), stats=stats_ctx(),
+                           my_posts=my_posts, my_threads=my_threads, my_courses=my_courses,
+                           saved=saved, active='profile')
 
 @app.route('/messages')
 def messages():
@@ -416,9 +507,23 @@ def calendar():
     if not auth(): return redirect('/login')
     return render_template('calendar.html', u=user_ctx(), stats=stats_ctx(), active='analytics')
 
-@app.route('/create')
+@app.route('/create', methods=['GET', 'POST'])
 def create():
     if not auth(): return redirect('/login')
+    cu = current_user()
+    if request.method == 'POST':
+        kind = (request.form.get('kind') or 'post')[:20]
+        if kind not in ('post', 'thread', 'course', 'reel'):
+            kind = 'post'
+        text = (request.form.get('text') or '').strip()[:2000]
+        title = (request.form.get('title') or '').strip()[:200]
+        if not text and not title:
+            return ('Empty', 400)
+        p = Post(user_id=cu.id, kind=kind, title=title, text=text,
+                 category=(request.form.get('category') or '').strip()[:40])
+        db.session.add(p)
+        db.session.commit()
+        return ('', 204)
     return render_template('create.html', u=user_ctx(), active='grow')
 
 @app.route('/axon-settings')
@@ -450,6 +555,63 @@ def quests():
 def notifications():
     if not auth(): return redirect('/login')
     return render_template('notifications.html', u=user_ctx(), notifs=DEMO_NOTIFICATIONS, active='home')
+
+@app.route('/api/like/<int:post_id>', methods=['POST'])
+def api_like(post_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    ex = Like.query.filter_by(user_id=cu.id, post_id=post_id).first()
+    if ex:
+        db.session.delete(ex); liked = False
+    else:
+        db.session.add(Like(user_id=cu.id, post_id=post_id)); liked = True
+    db.session.commit()
+    return {'liked': liked, 'count': Like.query.filter_by(post_id=post_id).count()}
+
+@app.route('/api/bookmark/<int:post_id>', methods=['POST'])
+def api_bookmark(post_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    ex = Bookmark.query.filter_by(user_id=cu.id, post_id=post_id).first()
+    if ex:
+        db.session.delete(ex); saved = False
+    else:
+        db.session.add(Bookmark(user_id=cu.id, post_id=post_id)); saved = True
+    db.session.commit()
+    return {'saved': saved}
+
+@app.route('/api/comments/<int:post_id>')
+def api_comments(post_id):
+    if not auth(): return ('', 401)
+    rows = Comment.query.filter_by(post_id=post_id).order_by(Comment.created_at.desc()).limit(100).all()
+    ids = [c.user_id for c in rows] or [0]
+    authors = {u.id: (u.name or u.username) for u in User.query.filter(User.id.in_(ids)).all()}
+    return jsonify([{'user': authors.get(c.user_id, 'User'), 'text': c.text} for c in rows])
+
+@app.route('/api/comment/<int:post_id>', methods=['POST'])
+def api_comment(post_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    txt = (request.form.get('text') or '').strip()[:600]
+    if not txt: return ('', 400)
+    db.session.add(Comment(user_id=cu.id, post_id=post_id, text=txt))
+    db.session.commit()
+    return {'ok': True, 'count': Comment.query.filter_by(post_id=post_id).count(),
+            'user': cu.name or cu.username}
+
+@app.route('/api/follow/<int:target_id>', methods=['POST'])
+def api_follow(target_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    if target_id == cu.id: return ('', 400)
+    ex = Follow.query.filter_by(follower_id=cu.id, following_id=target_id).first()
+    if ex:
+        db.session.delete(ex); following = False
+    else:
+        db.session.add(Follow(follower_id=cu.id, following_id=target_id)); following = True
+    db.session.commit()
+    return {'following': following}
+
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

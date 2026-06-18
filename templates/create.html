@@ -157,11 +157,11 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="course-fields">
       <div class="form-group" style="margin-bottom:0;">
         <label class="form-label">Course Title</label>
-        <input class="form-input" placeholder="e.g. My 90-Day Discipline System">
+        <input class="form-input" id="courseTitle" placeholder="e.g. My 90-Day Discipline System">
       </div>
       <div class="form-group" style="margin-bottom:0;">
         <label class="form-label">Description</label>
-        <textarea class="form-input form-textarea" placeholder="What will members learn?" style="min-height:80px;"></textarea>
+        <textarea class="form-input form-textarea" id="courseDesc" placeholder="What will members learn?" style="min-height:80px;"></textarea>
       </div>
       <div class="form-group" style="margin-bottom:0;">
         <label class="form-label">Category</label>
@@ -250,9 +250,27 @@ function selectType(type, el) {
 function togCat(el){el.classList.toggle('on');}
 function setVis(v,el){el.closest('.vis-row').querySelectorAll('.vis-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
 function submitPost(){
-  const ov=document.getElementById('successOv');
-  ov.style.display='flex';
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  let kind='post', payload={};
+  if(currentType==='course'){
+    kind='course';
+    payload.title=document.getElementById('courseTitle').value.trim();
+    payload.text=document.getElementById('courseDesc').value.trim();
+    const cc=document.querySelector('#courseStep .cat-chip.on');
+    payload.category=cc?cc.textContent.trim():'';
+    if(!payload.title){alert('Give your course a title.');return;}
+  } else {
+    kind=(currentType==='thread')?'thread':'post';
+    payload.text=document.getElementById('postTxt').value.trim();
+    const cc=document.querySelector('#composerStep .cat-chip.on');
+    payload.category=cc?cc.textContent.trim():'';
+    if(!payload.text){alert('Write something first.');return;}
+  }
+  payload.kind=kind;
+  const btn=event&&event.target?event.target.closest('button'):null;
+  if(btn){btn.disabled=true;btn.style.opacity='.7';}
+  fetch('/create',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(payload)})
+    .then(r=>{ if(!r.ok) throw 0; document.getElementById('successOv').style.display='flex'; if(typeof lucide!=='undefined')lucide.createIcons(); })
+    .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not publish. Please try again.'); });
 }
 </script>
 {% endblock %}
