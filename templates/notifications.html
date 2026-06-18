@@ -43,6 +43,13 @@
 </div>
 
 <div class="notif-list">
+  {% if not notifs %}
+  <div style="text-align:center;padding:70px 28px;">
+    <i data-lucide="bell" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No notifications yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Follows, likes, quests and milestones<br>will show up here.</div>
+  </div>
+  {% else %}
   <!-- TODAY -->
   <div class="notif-sep">Today</div>
   {% for n in notifs %}
@@ -72,6 +79,7 @@
     </div>
     {% endif %}
   {% endfor %}
+  {% endif %}
 </div>
 {% endblock %}
 

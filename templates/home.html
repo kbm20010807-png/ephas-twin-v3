@@ -100,36 +100,17 @@
 
 {% block content %}
 <div class="topbar">
-  <a href="/notifications" class="tb-btn" style="position:relative;">
-    <i data-lucide="bell"></i>
-    <span style="position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#EF4444;border:1.5px solid var(--bg);"></span>
-  </a>
+  <a href="/notifications" class="tb-btn"><i data-lucide="bell"></i></a>
   <div class="tb-brand"><div class="tb-twin">TWIN</div></div>
   <a href="/messages" class="tb-btn"><i data-lucide="message-circle"></i></a>
 </div>
 
 <!-- STORIES STRIP -->
 <div class="stories-strip">
-  <div class="story-item" onclick="openStory('you','A','Alex','7.2','7.8','8.1','12')">
-    <div class="story-ring yours"><div class="story-inner" style="font-size:20px;">A</div></div>
+  <a href="/checkin" class="story-item" style="text-decoration:none;">
+    <div class="story-ring yours"><div class="story-inner" style="font-size:20px;">{{ u.first[0]|upper }}</div></div>
     <div class="story-lbl">Your story</div>
-  </div>
-  <div class="story-item" onclick="openStory('marcus','M','Marcus R.','6.8','8.2','7.5','9')">
-    <div class="story-ring active"><div class="story-inner" style="font-size:18px;">M</div></div>
-    <div class="story-lbl">Marcus R.</div>
-  </div>
-  <div class="story-item" onclick="openStory('jordan','J','Jordan L.','7.5','9.1','8.8','21')">
-    <div class="story-ring active"><div class="story-inner" style="font-size:18px;">J</div></div>
-    <div class="story-lbl">Jordan L.</div>
-  </div>
-  <div class="story-item" onclick="openStory('priya','P','Priya K.','8.0','7.6','9.0','14')">
-    <div class="story-ring active"><div class="story-inner" style="font-size:18px;">P</div></div>
-    <div class="story-lbl">Priya K.</div>
-  </div>
-  <div class="story-item" onclick="openStory('sam','S','Sam T.','6.5','7.0','7.2','5')">
-    <div class="story-ring seen"><div class="story-inner" style="font-size:18px;">S</div></div>
-    <div class="story-lbl">Sam T.</div>
-  </div>
+  </a>
 </div>
 
 <!-- STORY OVERLAY -->
@@ -164,31 +145,29 @@
     <div class="ring-item">
       <svg class="ring-svg" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        <circle cx="50" cy="50" r="42" class="ring-p" stroke="#D4AA35" stroke-dasharray="264" stroke-dashoffset="74"/>
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--black)">7.2</text>
+        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--muted)">—</text>
         <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">SLEEP</text>
       </svg>
-      <div class="ring-name" style="color:var(--gold)">7.2 hrs</div>
+      <div class="ring-name" style="color:var(--sub)">No data</div>
     </div>
     <div class="ring-item">
       <svg class="ring-svg" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        <circle cx="50" cy="50" r="42" class="ring-p" stroke="#22C55E" stroke-dasharray="264" stroke-dashoffset="58"/>
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--black)">7.8</text>
+        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--muted)">—</text>
         <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">ENERGY</text>
       </svg>
-      <div class="ring-name" style="color:#22C55E">8 / 10</div>
+      <div class="ring-name" style="color:var(--sub)">No data</div>
     </div>
     <div class="ring-item">
       <svg class="ring-svg" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        <circle cx="50" cy="50" r="42" class="ring-p" stroke="#8B5CF6" stroke-dasharray="264" stroke-dashoffset="50"/>
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--black)">8.1</text>
+        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--muted)">—</text>
         <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">MOOD</text>
       </svg>
-      <div class="ring-name" style="color:#8B5CF6">Great</div>
+      <div class="ring-name" style="color:var(--sub)">No data</div>
     </div>
   </div>
+  <a href="/checkin" style="display:block;text-align:center;margin-top:14px;font-size:12px;font-weight:700;color:var(--gold);">Check in to see your day →</a>
 </div>
 
 <div class="streak-card">
@@ -198,7 +177,7 @@
     <div class="streak-dots">
       {% for d in stats.checked %}<div class="sd {% if d %}on{% endif %}"></div>{% endfor %}
     </div>
-    <div style="font-size:10px;color:var(--sub);margin-top:5px;">{{ u.best_streak - u.streak }}d to beat your record · {{ u.best_streak }}d best</div>
+    <div style="font-size:10px;color:var(--sub);margin-top:5px;">{% if u.streak == 0 %}Check in today to start your streak{% else %}{{ u.best_streak - u.streak }}d to beat your record · {{ u.best_streak }}d best{% endif %}</div>
   </div>
 </div>
 
@@ -207,7 +186,7 @@
   <div class="qc-ico"><i data-lucide="shield"></i></div>
   <div class="qc-body">
     <div class="qc-title">Daily Quests</div>
-    <div class="qc-sub">1 of 3 complete today · 50 XP earned</div>
+    <div class="qc-sub">0 of 3 complete · Start earning XP today</div>
   </div>
   <div class="qc-tag">VIEW ALL</div>
 </a>
@@ -219,7 +198,7 @@
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:1px;color:#666;">AXON AI COACH</div>
     <div class="axon-dot"></div>
   </div>
-  <div class="axon-txt">Energy is <b>23% higher</b> on workout days. You've missed 2 this week — tomorrow is the one that counts.</div>
+  <div class="axon-txt">Welcome to TWIN. Complete your first <b>check-in</b> and I'll start learning your patterns and coaching you.</div>
   <div class="axon-link">
     <div style="font-family:'Arpubes',sans-serif;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;">Ask AXON</div>
     <i data-lucide="arrow-right" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;"></i>
@@ -230,7 +209,7 @@
   <div class="flex justify-b items-c mb-3">
     <div class="t-label">This week</div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="font-size:11px;color:var(--sub);">avg <span style="color:var(--gold);font-weight:700;">{{ stats.avg_mood }}</span></div>
+      <div style="font-size:11px;color:var(--sub);">avg <span style="color:var(--gold);font-weight:700;">{% if stats.avg_mood %}{{ stats.avg_mood }}{% else %}—{% endif %}</span></div>
       <a href="/calendar" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);font-weight:600;"><i data-lucide="calendar" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.75;"></i></a>
     </div>
   </div>
@@ -258,24 +237,11 @@
 </div>
 
 <div class="sect-lbl">Community</div>
-{% for p in [{"user":"Marcus R.","init":"M","text":"12-day streak broken. No excuses. Back at 5AM tomorrow.","time":"2h","likes":47},{"user":"Jordan L.","init":"J","text":"4-hour deep work session. Phone off, zero notifications. This is what locked-in feels like.","time":"5h","likes":93}] %}
-<div class="feed-c">
-  <div class="fc-hd">
-    <div class="av av-32">{{ p.init }}</div>
-    <div>
-      <div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div>
-      <div style="font-size:10px;color:var(--sub);">{{ p.time }} ago</div>
-    </div>
-  </div>
-  <div class="fc-bdy">{{ p.text }}</div>
-  <div class="fc-ft">
-    <div class="fc-act"><i data-lucide="heart"></i> {{ p.likes }}</div>
-    <div class="fc-act"><i data-lucide="message-circle"></i> Reply</div>
-    <div class="fc-act" style="margin-left:auto;"><i data-lucide="bookmark"></i></div>
-    <div class="fc-act"><i data-lucide="share-2"></i></div>
-  </div>
+<div class="feed-c" style="text-align:center;padding:28px 18px;">
+  <i data-lucide="users" style="width:26px;height:26px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="font-size:12px;color:var(--sub);margin-top:10px;line-height:1.5;">The community feed is empty.<br>Be the first to share your journey.</div>
+  <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:14px;"><i data-lucide="compass"></i> Explore Grow</a>
 </div>
-{% endfor %}
 
 <div class="tw-foot">
   <div class="tw-foot-w">TWIN</div>

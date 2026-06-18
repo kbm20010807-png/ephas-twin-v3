@@ -42,51 +42,45 @@ with app.app_context():
     db.create_all()
 
 DEMO_USER = {
-    "name": "Alex",
-    "first": "Alex",
-    "job": "Product Builder",
-    "city": "Dubai, UAE",
-    "bio": "Building things that actually matter. Focused on discipline, depth, and long-term growth.",
-    "level": 7,
-    "level_title": "Discipline Seeker",
-    "xp": 2450,
-    "xp_needed": 3000,
-    "progress_pct": 72,
-    "streak": 12,
-    "best_streak": 14,
-    "total_checkins": 38,
-    "email": "alex@ephas.com",
-    "member_since": "Jan 2024",
-    "followers": 284,
-    "following": 67,
-    "subscribed": 3,
+    "name": "You",
+    "first": "You",
+    "job": "",
+    "city": "",
+    "bio": "",
+    "level": 1,
+    "level_title": "Newcomer",
+    "xp": 0,
+    "xp_needed": 100,
+    "progress_pct": 0,
+    "streak": 0,
+    "best_streak": 0,
+    "total_checkins": 0,
+    "email": "",
+    "member_since": "Just now",
+    "followers": 0,
+    "following": 0,
+    "subscribed": 0,
 }
 
 DEMO_STATS = {
-    "avg_sleep": 7.2,
-    "avg_energy": 7.8,
-    "avg_mood": 8.1,
-    "avg_productivity": 7.5,
-    "total_checkins": 38,
-    "best_streak": 14,
-    "habits": [
-        {"name": "Morning Workout", "count": 30, "pct": 79},
-        {"name": "Cold Shower",     "count": 24, "pct": 63},
-        {"name": "Deep Reading",    "count": 19, "pct": 50},
-        {"name": "Journaling",      "count": 16, "pct": 42},
-        {"name": "Meditation",      "count": 12, "pct": 32},
-    ],
+    "avg_sleep": 0,
+    "avg_energy": 0,
+    "avg_mood": 0,
+    "avg_productivity": 0,
+    "total_checkins": 0,
+    "best_streak": 0,
+    "habits": [],
     "domains": [
-        {"name": "Mind",      "pct": 82, "trend": "+4"},
-        {"name": "Body",      "pct": 68, "trend": "+2"},
-        {"name": "Wealth",    "pct": 55, "trend": "+8"},
-        {"name": "Purpose",   "pct": 79, "trend": "+1"},
-        {"name": "Social",    "pct": 61, "trend": "-2"},
-        {"name": "Wellbeing", "pct": 73, "trend": "+5"},
+        {"name": "Mind",      "pct": 0, "trend": "+0"},
+        {"name": "Body",      "pct": 0, "trend": "+0"},
+        {"name": "Wealth",    "pct": 0, "trend": "+0"},
+        {"name": "Purpose",   "pct": 0, "trend": "+0"},
+        {"name": "Social",    "pct": 0, "trend": "+0"},
+        {"name": "Wellbeing", "pct": 0, "trend": "+0"},
     ],
-    "weekly": [7.0, 7.5, 8.0, 7.8, 8.2, 7.5, 8.1],
+    "weekly": [0, 0, 0, 0, 0, 0, 0],
     "days":   ["M","T","W","T","F","S","S"],
-    "checked": [True, True, True, True, True, False, False],
+    "checked": [False, False, False, False, False, False, False],
 }
 
 DEMO_ZONES = [
@@ -104,55 +98,32 @@ DEMO_ZONES = [
 
 DEMO_QUESTS = {
     "daily": [
-        {"id":"d1","title":"Check In Today","desc":"Complete your daily morning check-in","xp":50,"icon":"check-circle","progress":100,"done":True,"cat":"Habit"},
-        {"id":"d2","title":"Post to Your Zone","desc":"Share a thought, update, or reflection","xp":30,"icon":"edit-3","progress":0,"done":False,"cat":"Social"},
+        {"id":"d1","title":"Check In Today","desc":"Complete your daily morning check-in","xp":50,"icon":"check-circle","progress":0,"done":False,"cat":"Habit"},
+        {"id":"d2","title":"Post to the Community","desc":"Share a thought, update, or reflection","xp":30,"icon":"edit-3","progress":0,"done":False,"cat":"Social"},
         {"id":"d3","title":"Read One Thread","desc":"Open and read a full thread in Grow","xp":20,"icon":"book-open","progress":0,"done":False,"cat":"Growth"},
     ],
     "weekly": [
-        {"id":"w1","title":"7-Day Streak","desc":"Check in every day this week","xp":200,"icon":"flame","progress":72,"done":False,"cat":"Streak"},
-        {"id":"w2","title":"Engage 5 Posts","desc":"Like or comment on 5 community posts","xp":80,"icon":"heart","progress":60,"done":False,"cat":"Social"},
-        {"id":"w3","title":"Join a New Zone","desc":"Explore and join one new Zone","xp":100,"icon":"compass","progress":0,"done":False,"cat":"Community"},
-        {"id":"w4","title":"Raise a Domain +5%","desc":"Improve any life domain by 5% this week","xp":150,"icon":"trending-up","progress":40,"done":False,"cat":"Growth"},
+        {"id":"w1","title":"7-Day Streak","desc":"Check in every day this week","xp":200,"icon":"flame","progress":0,"done":False,"cat":"Streak"},
+        {"id":"w2","title":"Engage 5 Posts","desc":"Like or comment on 5 community posts","xp":80,"icon":"heart","progress":0,"done":False,"cat":"Social"},
+        {"id":"w3","title":"Explore the Community","desc":"Discover and follow someone new","xp":100,"icon":"compass","progress":0,"done":False,"cat":"Community"},
+        {"id":"w4","title":"Raise a Domain +5%","desc":"Improve any life domain by 5% this week","xp":150,"icon":"trending-up","progress":0,"done":False,"cat":"Growth"},
         {"id":"w5","title":"Complete a Course Module","desc":"Finish at least one module in any course","xp":120,"icon":"graduation-cap","progress":0,"done":False,"cat":"Learning"},
     ],
     "monthly": [
-        {"id":"m1","title":"30-Day Streak","desc":"Check in every day for a full month","xp":1000,"icon":"calendar","progress":40,"done":False,"cat":"Streak"},
+        {"id":"m1","title":"30-Day Streak","desc":"Check in every day for a full month","xp":1000,"icon":"calendar","progress":0,"done":False,"cat":"Streak"},
         {"id":"m2","title":"Publish a Course","desc":"Create and publish your first course as a Professional","xp":500,"icon":"graduation-cap","progress":0,"done":False,"cat":"Creator"},
-        {"id":"m3","title":"Hit Level 10","desc":"Reach Level 10 through XP and check-ins","xp":750,"icon":"star","progress":70,"done":False,"cat":"Growth"},
+        {"id":"m3","title":"Hit Level 10","desc":"Reach Level 10 through XP and check-ins","xp":750,"icon":"star","progress":0,"done":False,"cat":"Growth"},
     ],
     "seasonal": [
-        {"id":"s1","title":"90-Day Discipline Challenge","desc":"Check in daily for 90 consecutive days. No breaks. No excuses. This is where legends are made.","xp":5000,"icon":"award","progress":13,"done":False,"cat":"Legendary","days":90,"current":12},
+        {"id":"s1","title":"90-Day Discipline Challenge","desc":"Check in daily for 90 consecutive days. No breaks. No excuses. This is where legends are made.","xp":5000,"icon":"award","progress":0,"done":False,"cat":"Legendary","days":90,"current":0},
     ],
 }
 
-DEMO_NOTIFICATIONS = [
-    {"type":"follow",    "icon":"user-plus",       "text":"Marcus R. started following you",                   "time":"2m",       "unread":True},
-    {"type":"quest",     "icon":"check-circle",    "text":"Quest complete: Check In Today (+50 XP)",           "time":"1h",       "unread":True},
-    {"type":"like",      "icon":"heart",           "text":"Jordan L. liked your post",                         "time":"3h",       "unread":True},
-    {"type":"streak",    "icon":"flame",           "text":"Day 12 streak! 2 more days to beat your record.",   "time":"5h",       "unread":False},
-    {"type":"course",    "icon":"graduation-cap",  "text":"New course in Mindset Zone: Deep Work Protocol",    "time":"Yesterday","unread":False},
-    {"type":"follow",    "icon":"user-plus",       "text":"Priya K. started following you",                    "time":"Yesterday","unread":False},
-    {"type":"comment",   "icon":"message-circle",  "text":"Sam T. replied to your thread",                     "time":"2d",       "unread":False},
-    {"type":"milestone", "icon":"award",           "text":"You've hit 38 total check-ins!",                    "time":"3d",       "unread":False},
-]
+DEMO_NOTIFICATIONS = []
 
-DEMO_FEED = [
-    {"user":"Marcus R.","init":"M","time":"2h ago",
-     "text":"12-day streak broken. No excuses. Back at 5AM tomorrow.","likes":47,"comments":12},
-    {"user":"Jordan L.","init":"J","time":"5h ago",
-     "text":"4-hour deep work session. Phone off, notifications off. This is what locked-in looks like.","likes":93,"comments":8},
-    {"user":"Priya K.","init":"P","time":"Yesterday",
-     "text":"Reading 30 min daily for 3 weeks straight. The compounding is real. Mind domain at 82%.","likes":124,"comments":19},
-    {"user":"Sam T.","init":"S","time":"2d ago",
-     "text":"Cold showers every day for 30 days. Not easy. Worth it.","likes":211,"comments":31},
-]
+DEMO_FEED = []
 
-DEMO_THREADS = [
-    {"user":"Marcus R.","init":"M","preview":"Bro that discipline post hit different","time":"2m","unread":2},
-    {"user":"Jordan L.","init":"J","preview":"You available for an accountability call?","time":"1h","unread":0},
-    {"user":"Priya K.","init":"P","preview":"Just hit my 30-day reading streak!","time":"Yesterday","unread":0},
-    {"user":"Sam T.","init":"S","preview":"What's your morning routine looking like?","time":"2d","unread":0},
-]
+DEMO_THREADS = []
 
 def current_user():
     uid = session.get('user_id')

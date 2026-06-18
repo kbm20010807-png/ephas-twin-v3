@@ -89,56 +89,11 @@
 
 <div class="history-list">
   <div class="t-label mb-3">Recent check-ins</div>
-
-  <div class="hist-day">
-    <div class="hist-date-box"><div class="hdb-day">14</div><div class="hdb-mon">Jun</div></div>
-    <div class="hist-info">
-      <div class="hist-title">Sleep 7.5h · Energy 8 · Mood 8.5</div>
-      <div class="hist-chips">
-        <div class="hist-chip">Workout</div><div class="hist-chip">Reading</div><div class="hist-chip">Deep Work</div>
-      </div>
-    </div>
-    <div class="hist-score">8.3</div>
-  </div>
-  <div class="hist-day">
-    <div class="hist-date-box"><div class="hdb-day">13</div><div class="hdb-mon">Jun</div></div>
-    <div class="hist-info">
-      <div class="hist-title">Sleep 6.8h · Energy 7 · Mood 7</div>
-      <div class="hist-chips">
-        <div class="hist-chip">Cold Shower</div><div class="hist-chip">Journaling</div>
-      </div>
-    </div>
-    <div class="hist-score">7.0</div>
-  </div>
-  <div class="hist-day">
-    <div class="hist-date-box"><div class="hdb-day">12</div><div class="hdb-mon">Jun</div></div>
-    <div class="hist-info">
-      <div class="hist-title">Sleep 8h · Energy 9 · Mood 9</div>
-      <div class="hist-chips">
-        <div class="hist-chip">Workout</div><div class="hist-chip">Meditation</div><div class="hist-chip">Hydration</div><div class="hist-chip">Deep Work</div>
-      </div>
-    </div>
-    <div class="hist-score">9.0</div>
-  </div>
-  <div class="hist-day">
-    <div class="hist-date-box"><div class="hdb-day">11</div><div class="hdb-mon">Jun</div></div>
-    <div class="hist-info">
-      <div class="hist-title">Sleep 7h · Energy 7.5 · Mood 8</div>
-      <div class="hist-chips">
-        <div class="hist-chip">Reading</div><div class="hist-chip">Cold Shower</div>
-      </div>
-    </div>
-    <div class="hist-score">7.5</div>
-  </div>
-  <div class="hist-day">
-    <div class="hist-date-box"><div class="hdb-day">10</div><div class="hdb-mon">Jun</div></div>
-    <div class="hist-info">
-      <div class="hist-title">Sleep 7.2h · Energy 8 · Mood 8</div>
-      <div class="hist-chips">
-        <div class="hist-chip">Workout</div><div class="hist-chip">Journaling</div><div class="hist-chip">No Screens</div>
-      </div>
-    </div>
-    <div class="hist-score">8.0</div>
+  <div style="text-align:center;padding:36px 24px;">
+    <i data-lucide="calendar" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No check-ins yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Your daily check-ins will appear here<br>and fill your calendar.</div>
+    <a href="/checkin" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Check in now</a>
   </div>
 </div>
 
@@ -150,7 +105,7 @@
 
 {% block scripts %}
 <script>
-const checkedDays = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+const checkedDays = [];
 let viewYear = 2026, viewMonth = 5; // June 2026 (0-indexed)
 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 

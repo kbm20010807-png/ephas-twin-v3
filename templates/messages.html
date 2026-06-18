@@ -59,13 +59,20 @@
   <div class="at-ico"><i data-lucide="zap"></i></div>
   <div class="at-info">
     <div class="at-name">AXON AI Coach</div>
-    <div class="at-prev">Your patterns from this week are ready to review...</div>
+    <div class="at-prev">Welcome to TWIN — tap to chat with me anytime.</div>
   </div>
   <div class="at-live">LIVE</div>
 </div>
 
 <div class="sect-lbl">Direct Messages</div>
 
+{% if not threads %}
+<div style="text-align:center;padding:40px 24px;">
+  <i data-lucide="message-circle" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No messages yet</div>
+  <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Connect with people in the community<br>and your chats will appear here.</div>
+</div>
+{% else %}
 {% for t in threads %}
 <div class="thread">
   <div class="th-av">
@@ -84,6 +91,7 @@
   </div>
 </div>
 {% endfor %}
+{% endif %}
 
 <div class="requests-cta">
   <div class="rc-ico"><i data-lucide="user-plus"></i></div>

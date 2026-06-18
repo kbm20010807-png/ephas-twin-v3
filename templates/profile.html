@@ -142,8 +142,8 @@
   <div class="prof-name">{{ u.name }}</div>
   <div class="prof-title">{{ u.level_title }}</div>
   <div class="prof-meta">
-    <div class="pm-item"><i data-lucide="map-pin"></i> {{ u.city }}</div>
-    <div class="pm-item"><i data-lucide="briefcase"></i> {{ u.job }}</div>
+    {% if u.city %}<div class="pm-item"><i data-lucide="map-pin"></i> {{ u.city }}</div>{% endif %}
+    {% if u.job %}<div class="pm-item"><i data-lucide="briefcase"></i> {{ u.job }}</div>{% endif %}
     <div class="pm-item"><i data-lucide="calendar"></i> Since {{ u.member_since }}</div>
   </div>
 </div>
@@ -197,32 +197,11 @@
 
 <!-- ===== TWIN: POSTS ===== -->
 <div class="tab-pane on" id="pane-twin-posts">
-  <div style="height:16px;"></div>
-  <div class="prof-post">
-    <div class="pp-meta">2h ago · Mindset</div>
-    <div class="pp-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>
-    <div class="pp-caption">12-day streak and still going. The key isn't motivation — it's removing the choice.</div>
-    <div class="pp-ft">
-      <div class="pp-act"><i data-lucide="heart"></i> 47</div>
-      <div class="pp-act"><i data-lucide="message-circle"></i> 12</div>
-      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pp-act"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-  <div class="prof-post">
-    <div class="pp-meta">Yesterday · Fitness</div>
-    <div class="pp-img" style="background:linear-gradient(150deg,#1a0606,#0d0d0d 60%,#1a0606);"><i data-lucide="image"></i></div>
-    <div class="pp-caption">Cold shower at 5AM. Body domain jumped 8% this week. Cold + consistent sleep = different game.</div>
-    <div class="pp-ft">
-      <div class="pp-act"><i data-lucide="heart"></i> 93</div>
-      <div class="pp-act"><i data-lucide="message-circle"></i> 8</div>
-      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pp-act"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share your journey</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create Post</a>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="image" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No posts yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Share a photo or thought to start<br>building your profile.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create a post</a>
   </div>
 </div>
 
@@ -247,9 +226,9 @@
   </div>
   <div class="sect-lbl">Achievements</div>
   <div class="badges-row">
-    <div class="badge-c earned"><div class="badge-ico"><i data-lucide="flame"></i></div><div class="badge-nm">7-Day Streak</div></div>
-    <div class="badge-c earned"><div class="badge-ico"><i data-lucide="sunrise"></i></div><div class="badge-nm">Early Riser</div></div>
-    <div class="badge-c earned"><div class="badge-ico"><i data-lucide="book-open"></i></div><div class="badge-nm">Reader</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="flame"></i></div><div class="badge-nm">7-Day Streak</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="sunrise"></i></div><div class="badge-nm">Early Riser</div></div>
+    <div class="badge-c"><div class="badge-ico"><i data-lucide="book-open"></i></div><div class="badge-nm">Reader</div></div>
     <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
     <div class="badge-c"><div class="badge-ico"><i data-lucide="star"></i></div><div class="badge-nm">100 Check-Ins</div></div>
     <div class="badge-c"><div class="badge-ico"><i data-lucide="layers"></i></div><div class="badge-nm">All Domains</div></div>
@@ -259,167 +238,41 @@
 
 <!-- ===== TWIN: COURSES (subscribed) ===== -->
 <div class="tab-pane" id="pane-twin-courses">
-  <div style="height:16px;"></div>
-  <div style="padding:0 20px 4px;"><div class="t-label">Subscribed Courses</div></div>
-  <div class="course-card">
-    <div class="cc-tag">Fitness · ENROLLED</div>
-    <div class="cc-title">The Discipline Operating System</div>
-    <div class="cc-meta">Module 3 of 6 · By Marcus R.</div>
-    <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:50%"></div></div>
-    <div class="cc-foot">
-      <div class="cc-enrolled">50% complete</div>
-      <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
-    </div>
-  </div>
-  <div class="course-card">
-    <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Finance · ENROLLED</div>
-    <div class="cc-title">Savings Framework</div>
-    <div class="cc-meta">Module 1 of 7 · By Priya K.</div>
-    <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:14%"></div></div>
-    <div class="cc-foot">
-      <div class="cc-enrolled">14% complete</div>
-      <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
-    </div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Discover more courses</div>
-    <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="compass"></i> Browse Courses</a>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="graduation-cap" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No courses yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Courses you enroll in will<br>show up here.</div>
+    <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="compass"></i> Browse courses</a>
   </div>
 </div>
 
 <!-- ===== SAVED (shared TWIN + PRO) ===== -->
 <div class="tab-pane" id="pane-saved">
-  <div class="saved-filter">
-    <div class="sf-chip on" onclick="filterSaved('all',this)">All</div>
-    <div class="sf-chip" onclick="filterSaved('post',this)">Posts</div>
-    <div class="sf-chip" onclick="filterSaved('reel',this)">Reels</div>
-    <div class="sf-chip" onclick="filterSaved('thread',this)">Threads</div>
-    <div class="sf-chip" onclick="filterSaved('course',this)">Courses</div>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="bookmark" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">Nothing saved yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Tap the bookmark on any post, reel,<br>thread or course to save it here.</div>
+    <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="compass"></i> Explore Grow</a>
   </div>
-
-  <div class="saved-item" data-type="post">
-    <div class="si-thumb" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>
-    <div class="si-body">
-      <div class="si-type"><i data-lucide="image" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> POST</div>
-      <div class="si-title">12-day streak and still going. The key isn't motivation.</div>
-      <div class="si-by">Marcus R. · Mindset</div>
-    </div>
-    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
-  </div>
-
-  <div class="saved-item" data-type="reel">
-    <div class="si-thumb" style="background:#09090B;"><i data-lucide="play-circle" style="stroke:var(--gold);"></i></div>
-    <div class="si-body">
-      <div class="si-type"><i data-lucide="play" style="width:8px;height:8px;stroke:currentColor;fill:currentColor;stroke-width:2;"></i> REEL</div>
-      <div class="si-title">How I built a 5AM routine in 14 days — no alarm needed</div>
-      <div class="si-by">Jordan L. · 4.2K views</div>
-    </div>
-    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
-  </div>
-
-  <div class="saved-item" data-type="thread">
-    <div class="si-thumb" style="background:var(--bg-2);"><i data-lucide="align-left" style="stroke:var(--sub);"></i></div>
-    <div class="si-body">
-      <div class="si-type"><i data-lucide="align-left" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> THREAD</div>
-      <div class="si-title">Why 99% of people fail their goals in February</div>
-      <div class="si-by">Marcus R. · 184 likes</div>
-    </div>
-    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
-  </div>
-
-  <div class="saved-item" data-type="course">
-    <div class="si-thumb" style="background:linear-gradient(135deg,#09090B,#1A1200);"><i data-lucide="graduation-cap" style="stroke:var(--gold);"></i></div>
-    <div class="si-body">
-      <div class="si-type"><i data-lucide="graduation-cap" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2;"></i> COURSE</div>
-      <div class="si-title">The Discipline Operating System · Free</div>
-      <div class="si-by">6 modules · 2,847 enrolled</div>
-    </div>
-    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
-  </div>
-
-  <div class="saved-item" data-type="thread">
-    <div class="si-thumb" style="background:var(--bg-2);"><i data-lucide="align-left" style="stroke:var(--sub);"></i></div>
-    <div class="si-body">
-      <div class="si-type"><i data-lucide="align-left" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> THREAD</div>
-      <div class="si-title">From 0 savings to 3 months emergency fund in 11 months</div>
-      <div class="si-by">Priya K. · 267 likes</div>
-    </div>
-    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
-  </div>
-
-  <div class="saved-item" data-type="post">
-    <div class="si-thumb" style="background:linear-gradient(150deg,#1a0606,#0d0d0d 60%,#1a0606);"><i data-lucide="image"></i></div>
-    <div class="si-body">
-      <div class="si-type"><i data-lucide="image" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;"></i> POST</div>
-      <div class="si-title">Cold shower at 5AM. Body domain jumped 8% this week.</div>
-      <div class="si-by">Sam T. · Fitness</div>
-    </div>
-    <div class="si-bm" onclick="unsave(this)"><i data-lucide="bookmark"></i></div>
-  </div>
-
-  <div id="savedEmpty" style="display:none;text-align:center;padding:40px 20px;">
-    <div style="font-size:12px;color:var(--sub);">Nothing saved here yet</div>
-  </div>
-  <div style="height:16px;"></div>
 </div>
 
 <!-- ===== PRO: POSTS ===== -->
 <div class="tab-pane" id="pane-pro-posts">
-  <div style="height:16px;"></div>
-  <div class="prof-post">
-    <div class="pp-meta">2h ago · Mindset</div>
-    <div style="height:180px;background:var(--bg-2);border-radius:var(--r);margin-bottom:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);overflow:hidden;">
-      <i data-lucide="image" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
-    </div>
-    <div class="pp-body">Cold shower at 5AM. Body domain jumped 8% this week. Cold exposure + consistent sleep = a different game.</div>
-    <div class="pp-ft">
-      <div class="pp-act"><i data-lucide="heart"></i> 93</div>
-      <div class="pp-act"><i data-lucide="message-circle"></i> 8</div>
-      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pp-act"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-  <div class="prof-post">
-    <div class="pp-meta">Yesterday · Fitness</div>
-    <div style="height:220px;background:#09090B;border-radius:var(--r);margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #1C1C1C;position:relative;cursor:pointer;">
-      <i data-lucide="play-circle" style="width:48px;height:48px;stroke:var(--gold);fill:none;stroke-width:1.25;"></i>
-      <div style="font-size:10px;color:#666;margin-top:8px;letter-spacing:1px;">0:43</div>
-      <div style="position:absolute;bottom:12px;left:12px;right:48px;font-size:11px;color:#fff;font-weight:600;line-height:1.4;">My morning routine — 43 sec</div>
-      <div style="position:absolute;top:10px;right:10px;background:rgba(212,170,53,.15);border:1px solid rgba(212,170,53,.25);border-radius:var(--r-full);padding:3px 8px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:1px;">REEL</div>
-    </div>
-    <div class="pp-ft">
-      <div class="pp-act"><i data-lucide="heart"></i> 214</div>
-      <div class="pp-act"><i data-lucide="message-circle"></i> 31</div>
-      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pp-act"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Share a post or reel</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="plus"></i> Create</a>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="image" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No posts yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Share a post or reel with<br>your audience.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create</a>
   </div>
 </div>
 
 <!-- ===== PRO: THREADS ===== -->
 <div class="tab-pane" id="pane-pro-threads">
-  <div style="height:16px;"></div>
-  <div class="prof-post">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;">THREAD</div>
-      <div style="font-size:9px;color:var(--sub);">5 parts · 3d ago</div>
-    </div>
-    <div class="pp-body" style="margin-bottom:10px;">How I went from 0 to a 12-day streak when nothing else worked. [1/5]<br><br>The first 3 days are the hardest. Not because of willpower — because you haven't built the environmental cue yet.</div>
-    <div style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;margin-bottom:12px;">Read full thread →</div>
-    <div class="pp-ft">
-      <div class="pp-act"><i data-lucide="heart"></i> 187</div>
-      <div class="pp-act"><i data-lucide="message-circle"></i> 43</div>
-      <div class="pp-act bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pp-act"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-  <div class="empty-card">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Start a thread</div>
-    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="align-left"></i> New Thread</a>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="align-left" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No threads yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Write a thread to share<br>what you know.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="align-left"></i> New thread</a>
   </div>
 </div>
 
@@ -429,89 +282,31 @@
     <div class="sub-tab on" onclick="proCourseTab('teaching',this)">Teaching</div>
     <div class="sub-tab" onclick="proCourseTab('subscribed',this)">Subscribed</div>
   </div>
-
-  <!-- TEACHING (courses he gives away / sells) -->
   <div id="pcourse-teaching">
-    <div class="course-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-        <div class="cc-tag">Fitness · FREE</div>
-      </div>
-      <div class="cc-title">The Discipline Operating System</div>
-      <div class="cc-meta">6 modules · 2,847 enrolled</div>
-      <div class="cc-foot">
-        <div class="cc-enrolled"><i data-lucide="users" style="width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>2,847 enrolled</div>
-        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Manage</button>
-      </div>
-    </div>
-    <div class="course-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-        <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Sales · PAID</div>
-      </div>
-      <div class="cc-title">Cold Outreach Mastery</div>
-      <div class="cc-meta">8 modules · 1,204 enrolled · $49</div>
-      <div class="cc-foot">
-        <div class="cc-enrolled"><i data-lucide="dollar-sign" style="width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:1.75;vertical-align:middle;margin-right:3px;"></i>$58,996 earned</div>
-        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Manage</button>
-      </div>
-    </div>
-    <div class="empty-card">
-      <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Create your next course</div>
-      <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="graduation-cap"></i> Create Course</a>
-    </div>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="graduation-cap" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No courses created yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Publish your first course to<br>start teaching and earning.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="graduation-cap"></i> Create a course</a>
   </div>
-
-  <!-- SUBSCRIBED (courses he's learning from) -->
+  </div>
   <div id="pcourse-subscribed" style="display:none;">
-    <div class="course-card">
-      <div class="cc-tag">Mindset · ENROLLED</div>
-      <div class="cc-title">Deep Work Protocol</div>
-      <div class="cc-meta">Module 2 of 5 · By Jordan L.</div>
-      <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:40%"></div></div>
-      <div class="cc-foot">
-        <div class="cc-enrolled">40% complete</div>
-        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
-      </div>
-    </div>
-    <div class="course-card">
-      <div class="cc-tag" style="background:var(--gold-dim);color:var(--gold);">Business · ENROLLED</div>
-      <div class="cc-title">First $10K Online</div>
-      <div class="cc-meta">Module 6 of 10 · By Sam T.</div>
-      <div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:60%"></div></div>
-      <div class="cc-foot">
-        <div class="cc-enrolled">60% complete</div>
-        <button class="btn btn-secondary btn-sm" style="font-size:10px;">Continue</button>
-      </div>
-    </div>
-    <div class="empty-card">
-      <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Discover more courses</div>
-      <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;"><i data-lucide="compass"></i> Browse Courses</a>
-    </div>
+  <div style="text-align:center;padding:48px 24px;">
+    <i data-lucide="compass" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">Not enrolled in any course</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Courses you take from others<br>will appear here.</div>
+    <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="compass"></i> Browse courses</a>
+  </div>
   </div>
 </div>
 
 <!-- ===== PRO: AWARDS ===== -->
 <div class="tab-pane" id="pane-pro-achievements">
-  <div style="height:16px;"></div>
-  <div class="prof-post">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="flame" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
-      <div><div style="font-size:13px;font-weight:700;color:var(--black);">12-Day Streak</div><div style="font-size:11px;color:var(--sub);">Active now · Best: 14 days</div></div>
-      <div class="pill pill-green" style="margin-left:auto;font-size:8px;">ACTIVE</div>
-    </div>
-  </div>
-  <div class="prof-post">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="sunrise" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
-      <div><div style="font-size:13px;font-weight:700;color:var(--black);">Early Riser</div><div style="font-size:11px;color:var(--sub);">Checked in before 7AM for 7 days</div></div>
-      <div class="pill pill-gold" style="font-size:8px;">EARNED</div>
-    </div>
-  </div>
-  <div class="sect-lbl">Next to unlock</div>
-  <div class="badges-row" style="margin-bottom:16px;">
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="star"></i></div><div class="badge-nm">100 Check-Ins</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="layers"></i></div><div class="badge-nm">All Domains</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="zap"></i></div><div class="badge-nm">Level 10</div></div>
+  <div style="text-align:center;padding:40px 24px;">
+    <i data-lucide="award" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No awards yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Build streaks and hit milestones<br>to earn your first awards.</div>
+    <a href="/checkin" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="sunrise"></i> Check in</a>
   </div>
 </div>
 

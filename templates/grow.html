@@ -210,365 +210,42 @@
 
 <!-- ====== EXPLORE ====== -->
 <div class="tab-pane on" id="pane-explore" style="display:none;">
-  <div style="height:10px;"></div>
-  <div class="explore-badge"><i data-lucide="trending-up"></i> TRENDING NOW</div>
-
-  <!-- Explore post 1 -->
-  <div class="post-card" onclick="openPost(this,event)" style="margin-top:10px;">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">M</div>
-      <div><div class="pc-user">Marcus R.</div><div class="pc-time">2h ago</div></div>
-      <div class="explore-zone-pill" style="background:rgba(108,99,255,.1);border-color:rgba(108,99,255,.2);color:#6C63FF;">Mindset</div>
-    </div>
-    <div class="pc-body">Why 99% of people fail their goals in February: They start with motivation. Motivation is a feeling. Feelings fade. Build systems, not goals.</div>
-    <div class="pc-tags"><span class="pc-tag">#mindset</span><span class="pc-tag">#discipline</span><span class="pc-tag">#habits</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> 184</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> 43</div>
-      <div class="pc-action" style="margin-left:auto;" onclick="toggleBookmark(this)" class="bm-btn"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
+  <div style="text-align:center;padding:54px 24px;">
+    <i data-lucide="compass" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">Nothing trending yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">When people start posting, the best<br>content will surface here.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create the first post</a>
   </div>
-
-  <!-- Explore reel -->
-  <div class="reel-card" onclick="openReels()">
-    <div class="rc-bg"></div>
-    <div class="rc-badge">REEL</div>
-    <div class="rc-play"><i data-lucide="play"></i></div>
-    <div class="rc-info">
-      <div class="rc-user">Priya K. · <span style="color:rgba(255,255,255,.4);">#fitness</span></div>
-      <div class="rc-caption">Day 30 cold shower check-in. My body is different. My mind is different.</div>
-      <div class="rc-stats">
-        <div class="rc-stat"><i data-lucide="eye"></i> 8.7K</div>
-        <div class="rc-stat"><i data-lucide="heart"></i> 621</div>
-        <div class="rc-stat"><i data-lucide="message-circle"></i> 74</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Explore post 2 -->
-  <div class="post-card" onclick="openPost(this,event)">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">P</div>
-      <div><div class="pc-user">Priya K.</div><div class="pc-time">Yesterday</div></div>
-      <div class="explore-zone-pill" style="background:rgba(212,170,53,.1);border-color:rgba(212,170,53,.2);color:var(--gold);">Wealth</div>
-    </div>
-    <div class="pc-body">Reading 30 min daily for 3 weeks straight. The compounding is real. Mind domain at 82%. Small habits → massive change.</div>
-    <div class="pc-tags"><span class="pc-tag">#wealth</span><span class="pc-tag">#reading</span><span class="pc-tag">#growth</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> 124</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> 19</div>
-      <div class="pc-action" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-
-  <!-- Zone spotlight -->
-  <div style="padding:4px 20px 0;">
-    <div class="t-label mb-2">Zone Spotlight</div>
-    <div style="background:linear-gradient(135deg,#09090B,#0F0800);border:1px solid rgba(34,197,94,.1);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="switchTab('zones', document.querySelectorAll('.mt-btn')[3])">
-      <div style="width:48px;height:48px;border-radius:14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="dumbbell" style="width:20px;height:20px;stroke:#22C55E;fill:none;stroke-width:1.75;"></i></div>
-      <div style="flex:1;">
-        <div style="font-size:13px;font-weight:800;color:var(--black);">Fitness Zone</div>
-        <div style="font-size:10px;color:var(--sub);margin-top:2px;">18.2K members · 1,204 posts this week</div>
-      </div>
-      <div style="font-size:8px;font-weight:700;color:#22C55E;letter-spacing:1px;">JOIN →</div>
-    </div>
-  </div>
-
-  <!-- Explore post 3 -->
-  <div class="post-card" onclick="openPost(this,event)" style="margin-top:14px;">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">S</div>
-      <div><div class="pc-user">Sam T.</div><div class="pc-time">2d ago</div></div>
-      <div class="explore-zone-pill" style="background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.2);color:#F97316;">Sales</div>
-    </div>
-    <div class="pc-body">Cold showers every day for 30 days. Not easy. Worth it. Discipline in one area spills into everything else.</div>
-    <div class="pc-tags"><span class="pc-tag">#fitness</span><span class="pc-tag">#discipline</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> 211</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> 31</div>
-      <div class="pc-action" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-  <div style="height:16px;"></div>
 </div>
 
 <!-- ====== POSTS & REELS ====== -->
 <div class="tab-pane" id="pane-posts">
-  <div class="chip-row">
-    <div class="chip on" onclick="chipSet(this)">All</div>
-    <div class="chip" onclick="chipSet(this)">Mindset</div>
-    <div class="chip" onclick="chipSet(this)">Fitness</div>
-    <div class="chip" onclick="chipSet(this)">Wealth</div>
-    <div class="chip" onclick="chipSet(this)">Nutrition</div>
-    <div class="chip" onclick="chipSet(this)">Business</div>
-    <div class="chip" onclick="chipSet(this)">Running</div>
+  <div style="text-align:center;padding:54px 24px;">
+    <i data-lucide="image" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No posts or reels yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Share a photo or a reel to get<br>your community started.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="plus"></i> Create a post</a>
   </div>
-  <div style="height:10px;"></div>
-
-  {% set p = feed[0] %}
-  <div class="post-card" onclick="openPost(this,event)">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
-      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
-      <div class="pc-cat">Mindset</div>
-    </div>
-    <div class="pc-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>
-    <div class="pc-caption"><b>{{ p.user }}</b>{{ p.text }}</div>
-    <div class="pc-tags"><span class="pc-tag">#mindset</span><span class="pc-tag">#discipline</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-
-  {% set p = feed[1] %}
-  <div class="post-card" onclick="openPost(this,event)">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
-      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
-      <div class="pc-cat">Mindset</div>
-    </div>
-    <div class="pc-img" style="background:linear-gradient(150deg,#06121a,#0d0d0d 60%,#06121a);"><i data-lucide="image"></i></div>
-    <div class="pc-caption"><b>{{ p.user }}</b>{{ p.text }}</div>
-    <div class="pc-tags"><span class="pc-tag">#productivity</span><span class="pc-tag">#focus</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-
-  <div class="reel-card" onclick="openReels()">
-    <div class="rc-bg"></div>
-    <div class="rc-badge">REEL</div>
-    <div class="rc-play"><i data-lucide="play"></i></div>
-    <div class="rc-info">
-      <div class="rc-user">Jordan L.</div>
-      <div class="rc-caption">How I built a 5AM routine in 14 days — no alarm needed anymore</div>
-      <div class="rc-stats">
-        <div class="rc-stat"><i data-lucide="eye"></i> 4.2K</div>
-        <div class="rc-stat"><i data-lucide="heart"></i> 312</div>
-        <div class="rc-stat"><i data-lucide="message-circle"></i> 28</div>
-      </div>
-    </div>
-  </div>
-
-  {% set p = feed[2] %}
-  <div class="post-card" onclick="openPost(this,event)">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
-      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
-      <div class="pc-cat">Mind</div>
-    </div>
-    <div class="pc-img" style="background:linear-gradient(150deg,#0a1a0a,#0d0d0d 60%,#0a1a0a);"><i data-lucide="image"></i></div>
-    <div class="pc-caption"><b>{{ p.user }}</b>{{ p.text }}</div>
-    <div class="pc-tags"><span class="pc-tag">#reading</span><span class="pc-tag">#mindset</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-
-  <div class="reel-card" onclick="openReels()">
-    <div class="rc-bg"></div>
-    <div class="rc-badge">REEL</div>
-    <div class="rc-play"><i data-lucide="play"></i></div>
-    <div class="rc-info">
-      <div class="rc-user">Priya K.</div>
-      <div class="rc-caption">Day 30 cold shower check-in. My body is different. My mind is different.</div>
-      <div class="rc-stats">
-        <div class="rc-stat"><i data-lucide="eye"></i> 8.7K</div>
-        <div class="rc-stat"><i data-lucide="heart"></i> 621</div>
-        <div class="rc-stat"><i data-lucide="message-circle"></i> 74</div>
-      </div>
-    </div>
-  </div>
-
-  {% set p = feed[3] %}
-  <div class="post-card" onclick="openPost(this,event)">
-    <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
-      <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
-      <div class="pc-cat">Body</div>
-    </div>
-    <div class="pc-img" style="background:linear-gradient(150deg,#1a0606,#0d0d0d 60%,#1a0606);"><i data-lucide="image"></i></div>
-    <div class="pc-caption"><b>{{ p.user }}</b>{{ p.text }}</div>
-    <div class="pc-tags"><span class="pc-tag">#fitness</span><span class="pc-tag">#coldshower</span></div>
-    <div class="pc-foot">
-      <div class="pc-action"><i data-lucide="heart"></i> {{ p.likes }}</div>
-      <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pc-action bm-btn" style="margin-left:auto;" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="pc-action"><i data-lucide="share-2"></i></div>
-    </div>
-  </div>
-
-  <div class="coaches-cta">
-    <div class="cta-ico"><i data-lucide="users"></i></div>
-    <div class="cta-txt"><b>Coaches & Mentors</b> — Connect with vetted coaches across mindset, fitness, and wealth. Coming soon.</div>
-    <div class="pill pill-muted" style="font-size:8px;">SOON</div>
-  </div>
-  <div style="height:16px;"></div>
 </div>
 
 <!-- ====== THREADS ====== -->
 <div class="tab-pane" id="pane-threads">
-  <div style="height:10px;"></div>
-  <div class="thread-card" onclick="openPost(this,event)">
-    <div class="tc-head">
-      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">M</div>
-      <div><div class="pc-user">Marcus R.</div><div class="tc-meta">3h ago · #mindset</div></div>
-    </div>
-    <div class="tc-title">Why 99% of people fail their goals in February</div>
-    <div class="tc-body">They start with motivation. Motivation is a feeling. Feelings fade.<br><br>The people who actually change their lives build systems — not goals. Systems run even when you don't feel like it. That's the difference.</div>
-    <div class="tc-reply">
-      <div class="av av-28" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:10px;flex-shrink:0;">J</div>
-      <div class="tc-reply-txt">This is exactly what shifted things for me. Same goal, different system = different result.</div>
-    </div>
-    <div class="tc-foot">
-      <div class="tc-action"><i data-lucide="heart"></i> 184</div>
-      <div class="tc-action"><i data-lucide="message-circle"></i> 43</div>
-      <div class="tc-action"><i data-lucide="repeat-2"></i> 29</div>
-      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="tc-replies-count">43 replies</div>
-    </div>
+  <div style="text-align:center;padding:54px 24px;">
+    <i data-lucide="align-left" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No threads yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Start a conversation — write a<br>thread and share what you know.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="align-left"></i> Start a thread</a>
   </div>
-  <div class="thread-card" onclick="openPost(this,event)">
-    <div class="tc-head">
-      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">P</div>
-      <div><div class="pc-user">Priya K.</div><div class="tc-meta">Yesterday · #finance</div></div>
-    </div>
-    <div class="tc-title">I went from 0 savings to 3 months emergency fund in 11 months. Here's the framework:</div>
-    <div class="tc-body">1. Pay yourself first — automatically, day 1 of salary.<br>2. Make saving boring.<br>3. Cut one thing per month. Not everything at once.<br><br>The trick is making it invisible until it isn't.</div>
-    <div class="tc-reply">
-      <div class="av av-28" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:10px;flex-shrink:0;">S</div>
-      <div class="tc-reply-txt">Step 1 alone changed my life. Automate the hard part.</div>
-    </div>
-    <div class="tc-foot">
-      <div class="tc-action"><i data-lucide="heart"></i> 267</div>
-      <div class="tc-action"><i data-lucide="message-circle"></i> 61</div>
-      <div class="tc-action"><i data-lucide="repeat-2"></i> 88</div>
-      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="tc-replies-count">61 replies</div>
-    </div>
-  </div>
-  <div class="thread-card" onclick="openPost(this,event)">
-    <div class="tc-head">
-      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">J</div>
-      <div><div class="pc-user">Jordan L.</div><div class="tc-meta">2d ago · #fitness</div></div>
-    </div>
-    <div class="tc-title">The real reason you're not getting results in the gym</div>
-    <div class="tc-body">You're not undertrained. You're under-recovered.<br><br>Sleep, food, and stress are doing more damage than your workouts are doing good. Fix the basics before adding volume.</div>
-    <div class="tc-foot">
-      <div class="tc-action"><i data-lucide="heart"></i> 312</div>
-      <div class="tc-action"><i data-lucide="message-circle"></i> 57</div>
-      <div class="tc-action"><i data-lucide="repeat-2"></i> 41</div>
-      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="tc-replies-count">57 replies</div>
-    </div>
-  </div>
-  <div class="thread-card" onclick="openPost(this,event)">
-    <div class="tc-head">
-      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">S</div>
-      <div><div class="pc-user">Sam T.</div><div class="tc-meta">3d ago · #sales</div></div>
-    </div>
-    <div class="tc-title">Closed my first $10K deal. Here's what nobody tells you about B2B sales:</div>
-    <div class="tc-body">The close happens in the first 5 minutes, not the last 5.<br><br>If you haven't built trust by then, no technique saves you. Stop trying to be clever. Ask real questions. Listen twice as much as you talk.</div>
-    <div class="tc-foot">
-      <div class="tc-action"><i data-lucide="heart"></i> 198</div>
-      <div class="tc-action"><i data-lucide="message-circle"></i> 39</div>
-      <div class="tc-action"><i data-lucide="repeat-2"></i> 53</div>
-      <div class="tc-action bm-btn" onclick="toggleBookmark(this)"><i data-lucide="bookmark"></i></div>
-      <div class="tc-replies-count">39 replies</div>
-    </div>
-  </div>
-  <div style="height:16px;"></div>
 </div>
 
 <!-- ====== COURSES ====== -->
 <div class="tab-pane" id="pane-courses">
-  <div class="chip-row">
-    <div class="chip on" onclick="chipSet(this)">All</div>
-    <div class="chip" onclick="chipSet(this)">Fitness</div>
-    <div class="chip" onclick="chipSet(this)">Business</div>
-    <div class="chip" onclick="chipSet(this)">Finance</div>
-    <div class="chip" onclick="chipSet(this)">Mindset</div>
-    <div class="chip" onclick="chipSet(this)">Marathon</div>
-    <div class="chip" onclick="chipSet(this)">Coaching</div>
+  <div style="text-align:center;padding:54px 24px;">
+    <i data-lucide="graduation-cap" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+    <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No courses yet</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Courses from Professionals will<br>appear here once they publish.</div>
+    <a href="/create" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:16px;"><i data-lucide="graduation-cap"></i> Create a course</a>
   </div>
-  <div class="featured-card">
-    <div class="fc-bg"></div>
-    <div class="fc-glow"></div>
-    <div class="fc-content">
-      <div class="fc-tag"><i data-lucide="award"></i> FEATURED</div>
-      <div class="fc-title">The Discipline Operating System</div>
-      <div class="fc-meta">Free · 6 modules · 2,847 enrolled</div>
-    </div>
-  </div>
-  <div class="course-grid">
-    <div class="cg-card">
-      <div class="cg-top"><i data-lucide="trending-up"></i></div>
-      <div class="cg-body">
-        <div class="cg-cat">Sales</div>
-        <div class="cg-title">Cold Outreach Mastery</div>
-        <div class="cg-meta">8 modules · 1,204 enrolled</div>
-        <div class="cg-price price-paid">$49</div>
-      </div>
-    </div>
-    <div class="cg-card">
-      <div class="cg-top"><i data-lucide="dumbbell"></i></div>
-      <div class="cg-body">
-        <div class="cg-cat">Fitness</div>
-        <div class="cg-title">Marathon in 16 Weeks</div>
-        <div class="cg-meta">12 modules · 891 enrolled</div>
-        <div class="cg-price price-free">Free</div>
-      </div>
-    </div>
-    <div class="cg-card">
-      <div class="cg-top"><i data-lucide="brain"></i></div>
-      <div class="cg-body">
-        <div class="cg-cat">Mindset</div>
-        <div class="cg-title">Deep Work Protocol</div>
-        <div class="cg-meta">5 modules · 3,102 enrolled</div>
-        <div class="cg-price price-free">Free</div>
-      </div>
-    </div>
-    <div class="cg-card">
-      <div class="cg-top"><i data-lucide="dollar-sign"></i></div>
-      <div class="cg-body">
-        <div class="cg-cat">Finance</div>
-        <div class="cg-title">Savings Framework</div>
-        <div class="cg-meta">7 modules · 2,018 enrolled</div>
-        <div class="cg-price price-paid">$29</div>
-      </div>
-    </div>
-    <div class="cg-card">
-      <div class="cg-top"><i data-lucide="briefcase"></i></div>
-      <div class="cg-body">
-        <div class="cg-cat">Business</div>
-        <div class="cg-title">First $10K Online</div>
-        <div class="cg-meta">10 modules · 654 enrolled</div>
-        <div class="cg-price price-paid">$79</div>
-      </div>
-    </div>
-    <div class="cg-card">
-      <div class="cg-top"><i data-lucide="users"></i></div>
-      <div class="cg-body">
-        <div class="cg-cat">Coaching</div>
-        <div class="cg-title">High-Performance Coaching</div>
-        <div class="cg-meta">9 modules · 437 enrolled</div>
-        <div class="cg-price price-free">Free</div>
-      </div>
-    </div>
-  </div>
-  <div style="height:16px;"></div>
 </div>
 
 <div class="tw-foot">
@@ -581,88 +258,13 @@
   <button class="rv-close" onclick="closeReels()"><i data-lucide="x"></i></button>
   <div class="rv-top">Reels</div>
   <div class="rv-scroll" id="rvScroll">
-
-    <div class="rv-screen" style="background:linear-gradient(165deg,#1a1206,#000 70%);">
-      <div class="rv-progress"><div class="rv-progress-fill"></div></div>
-      <div class="rv-playicon"><i data-lucide="play"></i></div>
-      <div class="rv-rail">
-        <div class="rv-avatar">J</div>
-        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">312</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">28</div></div>
-        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
-      </div>
-      <div class="rv-info">
-        <div class="rv-user">Jordan L. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
-        <div class="rv-cap">How I built a 5AM routine in 14 days — no alarm needed anymore.</div>
-        <div class="rv-tag"><i data-lucide="hash"></i> discipline · morningroutine</div>
+    <div class="rv-screen" style="background:#000;display:flex;align-items:center;justify-content:center;">
+      <div style="text-align:center;padding:24px;">
+        <i data-lucide="play-circle" style="width:36px;height:36px;stroke:rgba(255,255,255,.4);fill:none;stroke-width:1.5;"></i>
+        <div style="font-size:13px;color:#fff;margin-top:12px;font-weight:700;">No reels yet</div>
+        <div style="font-size:12px;color:#888;margin-top:4px;">Reels will play here once people post them.</div>
       </div>
     </div>
-
-    <div class="rv-screen" style="background:linear-gradient(165deg,#06121a,#000 70%);">
-      <div class="rv-playicon"><i data-lucide="play"></i></div>
-      <div class="rv-rail">
-        <div class="rv-avatar">P</div>
-        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">621</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">74</div></div>
-        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
-      </div>
-      <div class="rv-info">
-        <div class="rv-user">Priya K. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
-        <div class="rv-cap">Day 30 cold shower check-in. My body is different. My mind is different.</div>
-        <div class="rv-tag"><i data-lucide="hash"></i> coldshower · 30daychallenge</div>
-      </div>
-    </div>
-
-    <div class="rv-screen" style="background:linear-gradient(165deg,#1a0606,#000 70%);">
-      <div class="rv-playicon"><i data-lucide="play"></i></div>
-      <div class="rv-rail">
-        <div class="rv-avatar">M</div>
-        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">1.2K</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">96</div></div>
-        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
-      </div>
-      <div class="rv-info">
-        <div class="rv-user">Marcus R. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
-        <div class="rv-cap">Motivation is a feeling. Discipline is a decision. Choose the decision every single day.</div>
-        <div class="rv-tag"><i data-lucide="hash"></i> mindset · discipline</div>
-      </div>
-    </div>
-
-    <div class="rv-screen" style="background:linear-gradient(165deg,#0a1a0a,#000 70%);">
-      <div class="rv-playicon"><i data-lucide="play"></i></div>
-      <div class="rv-rail">
-        <div class="rv-avatar">S</div>
-        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">844</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">52</div></div>
-        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
-      </div>
-      <div class="rv-info">
-        <div class="rv-user">Sam T. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
-        <div class="rv-cap">Closed my first $10K deal today. Here's the 30 seconds that changed everything.</div>
-        <div class="rv-tag"><i data-lucide="hash"></i> sales · entrepreneurship</div>
-      </div>
-    </div>
-
-    <div class="rv-screen" style="background:linear-gradient(165deg,#12061a,#000 70%);">
-      <div class="rv-playicon"><i data-lucide="play"></i></div>
-      <div class="rv-rail">
-        <div class="rv-avatar">A</div>
-        <div class="rv-act" onclick="rvLike(this)"><div class="rv-act-ico"><i data-lucide="heart"></i></div><div class="rv-act-num">409</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="message-circle"></i></div><div class="rv-act-num">37</div></div>
-        <div class="rv-act" onclick="rvSave(this)"><div class="rv-act-ico"><i data-lucide="bookmark"></i></div><div class="rv-act-num">Save</div></div>
-        <div class="rv-act"><div class="rv-act-ico"><i data-lucide="share-2"></i></div><div class="rv-act-num">Share</div></div>
-      </div>
-      <div class="rv-info">
-        <div class="rv-user">Alex M. <span class="rv-follow" onclick="rvFollow(this)">Follow</span></div>
-        <div class="rv-cap">4 hours of deep work, zero distractions. This is what locked-in actually looks like.</div>
-        <div class="rv-tag"><i data-lucide="hash"></i> deepwork · focus</div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -676,30 +278,7 @@
     <div id="pdPost" style="padding-top:16px;"></div>
     <div class="sect-lbl">Comments</div>
     <div class="pd-comments" id="pdComments">
-      <div class="pd-comment" style="border-top:none;">
-        <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">M</div>
-        <div class="pdc-body">
-          <div class="pdc-user">Marcus R.</div>
-          <div class="pdc-text">This hit different. Saving it and starting tomorrow.</div>
-          <div class="pdc-meta"><span>2h</span><span>12 likes</span><span>Reply</span></div>
-        </div>
-      </div>
-      <div class="pd-comment">
-        <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">P</div>
-        <div class="pdc-body">
-          <div class="pdc-user">Priya K.</div>
-          <div class="pdc-text">The consistency is what does it. Showed up for me too.</div>
-          <div class="pdc-meta"><span>4h</span><span>8 likes</span><span>Reply</span></div>
-        </div>
-      </div>
-      <div class="pd-comment">
-        <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">S</div>
-        <div class="pdc-body">
-          <div class="pdc-user">Sam T.</div>
-          <div class="pdc-text">Needed to read this today. Back to work.</div>
-          <div class="pdc-meta"><span>6h</span><span>3 likes</span><span>Reply</span></div>
-        </div>
-      </div>
+      <div style="text-align:center;padding:24px;color:var(--sub);font-size:12px;">No comments yet. Be the first.</div>
     </div>
   </div>
   <div class="pd-input">
