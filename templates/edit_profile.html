@@ -59,14 +59,14 @@
   <!-- Last name -->
   <div class="form-group">
     <label class="form-label">Last Name <span style="color:var(--sub);font-weight:500;">(optional)</span></label>
-    <input class="form-input" id="lastName" placeholder="Last name" maxlength="32" oninput="count('lastName','lnCount',32)">
+    <input class="form-input" id="lastName" placeholder="Last name" value="{{ u.name.split(' ',1)[1] if ' ' in u.name else '' }}" maxlength="32" oninput="count('lastName','lnCount',32)">
     <div class="char-count" id="lnCount">0/32</div>
   </div>
 
   <!-- Username -->
   <div class="form-group">
     <label class="form-label">Username</label>
-    <input class="form-input" id="username" placeholder="@username" id="usernameInput" maxlength="24" oninput="onUsernameInput(this)">
+    <input class="form-input" id="username" placeholder="@username" value="{{ u.username }}" maxlength="24" oninput="onUsernameInput(this)">
     <div id="usernameLock" class="username-lock" style="display:none;">
       <i data-lucide="lock" style="stroke:var(--sub);"></i>
       <div class="username-lock-txt" id="lockMsg"></div>
@@ -106,8 +106,8 @@ function count(inputId, countId, max) {
 
 /* username once-per-month lock */
 function initUsername() {
-  const stored = localStorage.getItem(USERNAME_KEY) || 'alex_builds';
-  document.getElementById('username').value = stored;
+  const stored = localStorage.getItem(USERNAME_KEY);
+  if (stored) document.getElementById('username').value = stored;
 
   const lastChange = localStorage.getItem(USERNAME_LAST_KEY);
   if (lastChange) {
@@ -167,21 +167,31 @@ function saveProfile() {
   document.getElementById('firstName').style.borderColor = '';
 
   const uname = document.getElementById('username').value.trim();
-  const stored = localStorage.getItem(USERNAME_KEY) || 'alex_builds';
+  const stored = localStorage.getItem(USERNAME_KEY) || '{{ u.username }}';
   if (uname && uname !== stored && !document.getElementById('username').disabled) {
     localStorage.setItem(USERNAME_KEY, uname);
     localStorage.setItem(USERNAME_LAST_KEY, new Date().toISOString());
   }
 
-  const toast = document.getElementById('toast');
-  toast.style.opacity = '1';
-  toast.style.transform = 'translateX(-50%) translateY(0)';
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(20px)';
-    setTimeout(() => { window.location.href = '/profile'; }, 280);
-  }, 1400);
+  const body = new URLSearchParams({
+    first: fn,
+    last: document.getElementById('lastName').value.trim(),
+    username: document.getElementById('username').disabled ? '' : uname,
+    bio: document.getElementById('bioInput').value.trim()
+  });
+  fetch('/edit-profile', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body})
+    .then(()=>{
+      const toast = document.getElementById('toast');
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => { window.location.href = '/profile'; }, 280);
+      }, 1200);
+    })
+    .catch(()=>alert('Could not save. Please try again.'));
 }
 
 initUsername();

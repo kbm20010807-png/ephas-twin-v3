@@ -361,6 +361,64 @@ def stats_ctx():
     s['weekly'] = [mood_by_date.get(d, 0) for d in last7]
     return s
 
+def quests_ctx(user):
+    import copy
+    q = copy.deepcopy(DEMO_QUESTS)
+    today = datetime.utcnow().date()
+    day_start = datetime.combine(today, datetime.min.time())
+    dates = _checkin_dates(user)
+    streak, _ = _streaks(dates)
+    total = len(dates)
+    level = (total * 50) // 200 + 1
+    posted_today = Post.query.filter(Post.user_id == user.id, Post.created_at >= day_start).count() > 0
+    checked_today = today in set(dates)
+    engaged = Like.query.filter_by(user_id=user.id).count() + Comment.query.filter_by(user_id=user.id).count()
+    following = Follow.query.filter_by(follower_id=user.id).count()
+    made_course = Post.query.filter_by(user_id=user.id, kind='course').count() > 0
+
+    def setp(lst, i, prog):
+        prog = max(0, min(100, int(prog)))
+        lst[i]['progress'] = prog
+        lst[i]['done'] = prog >= 100
+
+    setp(q['daily'], 0, 100 if checked_today else 0)
+    setp(q['daily'], 1, 100 if posted_today else 0)
+    setp(q['daily'], 2, 100 if engaged > 0 else 0)
+    setp(q['weekly'], 0, streak / 7 * 100)
+    setp(q['weekly'], 1, engaged / 5 * 100)
+    setp(q['weekly'], 2, 100 if following > 0 else 0)
+    setp(q['monthly'], 0, streak / 30 * 100)
+    setp(q['monthly'], 1, 100 if made_course else 0)
+    setp(q['monthly'], 2, level / 10 * 100)
+    q['seasonal'][0]['current'] = streak
+    q['seasonal'][0]['progress'] = max(0, min(100, int(streak / 90 * 100)))
+    q['seasonal'][0]['done'] = streak >= 90
+    return q
+
+def notifications_ctx(user):
+    notifs = []
+    my_post_ids = [p.id for p in Post.query.filter_by(user_id=user.id).all()]
+    actor_ids = set()
+    likes = comments = []
+    if my_post_ids:
+        likes = Like.query.filter(Like.post_id.in_(my_post_ids), Like.user_id != user.id).order_by(Like.id.desc()).limit(15).all()
+        comments = Comment.query.filter(Comment.post_id.in_(my_post_ids), Comment.user_id != user.id).order_by(Comment.id.desc()).limit(15).all()
+        actor_ids |= {x.user_id for x in likes} | {x.user_id for x in comments}
+    follows = Follow.query.filter_by(following_id=user.id).order_by(Follow.id.desc()).limit(15).all()
+    actor_ids |= {f.follower_id for f in follows}
+    names = {u.id: (u.name or u.username) for u in User.query.filter(User.id.in_(actor_ids or [0])).all()}
+    for f in follows:
+        notifs.append({'type': 'follow', 'icon': 'user-plus', 'sort': 'b' + str(f.id),
+                       'text': f"{names.get(f.follower_id, 'Someone')} started following you", 'time': 'recently', 'unread': False})
+    for c in comments:
+        notifs.append({'type': 'comment', 'icon': 'message-circle', 'sort': 'c' + str(c.id),
+                       'text': f"{names.get(c.user_id, 'Someone')} commented on your post", 'time': time_ago(c.created_at), 'unread': False})
+    for l in likes:
+        notifs.append({'type': 'like', 'icon': 'heart', 'sort': 'a' + str(l.id),
+                       'text': f"{names.get(l.user_id, 'Someone')} liked your post", 'time': 'recently', 'unread': False})
+    notifs.sort(key=lambda x: x['sort'], reverse=True)
+    return notifs
+
 @app.route('/')
 def index():
     return redirect('/home' if auth() else '/login')
@@ -536,9 +594,21 @@ def apply_pro():
     if not auth(): return redirect('/login')
     return render_template('apply_pro.html', u=user_ctx(), active='settings')
 
-@app.route('/edit-profile')
+@app.route('/edit-profile', methods=['GET', 'POST'])
 def edit_profile():
     if not auth(): return redirect('/login')
+    cu = current_user()
+    if request.method == 'POST':
+        first = (request.form.get('first') or '').strip()[:32]
+        last = (request.form.get('last') or '').strip()[:32]
+        if first:
+            cu.name = (first + ' ' + last).strip()
+        cu.bio = (request.form.get('bio') or '').strip()[:300]
+        uname = (request.form.get('username') or '').strip().lower()[:24]
+        if uname and uname != cu.username and not User.query.filter(User.username == uname, User.id != cu.id).first():
+            cu.username = uname
+        db.session.commit()
+        return ('', 204)
     return render_template('edit_profile.html', u=user_ctx(), active='profile')
 
 @app.route('/twin-pro')
@@ -549,12 +619,12 @@ def twin_pro():
 @app.route('/quests')
 def quests():
     if not auth(): return redirect('/login')
-    return render_template('quests.html', u=user_ctx(), quests=DEMO_QUESTS, active='home')
+    return render_template('quests.html', u=user_ctx(), quests=quests_ctx(current_user()), active='home')
 
 @app.route('/notifications')
 def notifications():
     if not auth(): return redirect('/login')
-    return render_template('notifications.html', u=user_ctx(), notifs=DEMO_NOTIFICATIONS, active='home')
+    return render_template('notifications.html', u=user_ctx(), notifs=notifications_ctx(current_user()), active='home')
 
 @app.route('/api/like/<int:post_id>', methods=['POST'])
 def api_like(post_id):

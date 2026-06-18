@@ -70,10 +70,11 @@
 <div class="q-pane on" id="qpane-daily">
   <div style="height:14px;"></div>
   <div class="q-summary">
-    <div class="qs-num">0<span style="font-size:18px;color:var(--sub);">/{{ quests.daily|length }}</span></div>
+    {% set dd = quests.daily|selectattr('done')|list %}
+    <div class="qs-num">{{ dd|length }}<span style="font-size:18px;color:var(--sub);">/{{ quests.daily|length }}</span></div>
     <div class="qs-info">
       <div class="qs-lbl">Daily Quests Complete</div>
-      <div class="qs-xp">0 XP earned · Resets at midnight</div>
+      <div class="qs-xp">{{ dd|sum(attribute='xp') }} XP earned · Resets at midnight</div>
     </div>
   </div>
   {% for q in quests.daily %}
@@ -106,10 +107,11 @@
 <div class="q-pane" id="qpane-weekly">
   <div style="height:14px;"></div>
   <div class="q-summary">
-    <div class="qs-num">0<span style="font-size:18px;color:var(--sub);">/{{ quests.weekly|length }}</span></div>
+    {% set wd = quests.weekly|selectattr('done')|list %}
+    <div class="qs-num">{{ wd|length }}<span style="font-size:18px;color:var(--sub);">/{{ quests.weekly|length }}</span></div>
     <div class="qs-info">
       <div class="qs-lbl">Weekly Quests Complete</div>
-      <div class="qs-xp">0 XP earned · Resets Monday</div>
+      <div class="qs-xp">{{ wd|sum(attribute='xp') }} XP earned · Resets Monday</div>
     </div>
   </div>
   {% for q in quests.weekly %}
@@ -142,10 +144,11 @@
 <div class="q-pane" id="qpane-monthly">
   <div style="height:14px;"></div>
   <div class="q-summary">
-    <div class="qs-num">0<span style="font-size:18px;color:var(--sub);">/{{ quests.monthly|length }}</span></div>
+    {% set md = quests.monthly|selectattr('done')|list %}
+    <div class="qs-num">{{ md|length }}<span style="font-size:18px;color:var(--sub);">/{{ quests.monthly|length }}</span></div>
     <div class="qs-info">
       <div class="qs-lbl">Monthly Milestones</div>
-      <div class="qs-xp">0 XP earned this month</div>
+      <div class="qs-xp">{{ md|sum(attribute='xp') }} XP earned this month</div>
     </div>
   </div>
   {% for q in quests.monthly %}
