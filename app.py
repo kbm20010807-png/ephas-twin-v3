@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'TWIN-EPHAS-V3-DEV-ONLY')
 
 # --- Database: Railway Postgres in production, local SQLite for dev ---
-db_url = os.environ.get('DATABASE_URL', '')
+db_url = os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_PUBLIC_URL') or ''
 if db_url.startswith('postgres://'):
     db_url = db_url.replace('postgres://', 'postgresql://', 1)  # SQLAlchemy needs postgresql://
 if not db_url:
