@@ -33,7 +33,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;}
     {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
     <form method="POST" action="/login" novalidate>
       <div class="form-group">
-        <label class="form-label">Email or Username</label>
+        <label class="form-label">Account</label>
         <input type="text" class="form-input" name="email" placeholder="Email or username" autocomplete="username">
       </div>
       <div class="form-group">
@@ -73,7 +73,7 @@ function authSoon(name){
   if(!t){
     t=document.createElement('div');
     t.id='authToast';
-    t.style.cssText='position:fixed;left:50%;bottom:32px;transform:translateX(-50%);max-width:330px;width:86%;background:var(--card);border:1px solid var(--gold-b);color:var(--black);font-size:12px;line-height:1.5;padding:13px 16px;border-radius:14px;z-index:9999;text-align:center;box-shadow:var(--sh-md);transition:opacity .3s;';
+    t.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);max-width:330px;width:86%;background:var(--card);border:1px solid var(--gold-b);color:var(--black);font-size:12px;line-height:1.5;padding:13px 16px;border-radius:14px;z-index:9999;text-align:center;box-shadow:var(--sh-md);transition:opacity .3s;pointer-events:none;';
     document.body.appendChild(t);
   }
   t.textContent = name + ' is coming soon — use email & password for now.';
