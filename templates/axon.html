@@ -16,6 +16,9 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 .ax-row.user{align-self:flex-end;flex-direction:row-reverse;}
 .ax-msg{padding:11px 14px;border-radius:16px;font-size:13px;line-height:1.55;}
 .ax-msg.bot{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:5px;}
+.ax-msg.bot strong{font-weight:700;color:var(--black);}
+.ax-msg.bot em{font-style:italic;color:var(--gold);}
+.ax-msg.bot .ax-li{color:var(--gold);font-weight:700;}
 .ax-msg.user{background:var(--gold);color:#000;border-bottom-right-radius:5px;font-weight:500;}
 .ax-row .ax-av{width:28px;height:28px;}
 .ax-row .ax-av svg{width:14px;height:14px;}
@@ -82,6 +85,17 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 <script>
 const msgs = document.getElementById('axMsgs');
 function scrollDown(){ msgs.scrollTop = msgs.scrollHeight; }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function mdFormat(t){
+  let h = esc(t);
+  h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');           // **bold**
+  h = h.replace(/(^|[\s(])_([^_]+)_/g, '$1<em>$2</em>');               // _italic_ (quotes)
+  h = h.split('\n').map(function(line){
+    var m = line.match(/^\s*[-•]\s+(.*)$/);
+    return m ? '<span class="ax-li">•</span> ' + m[1] : line;
+  }).join('\n');
+  return h.replace(/\n/g, '<br>');
+}
 function addMsg(role, text){
   const empty = document.getElementById('axEmpty'); if(empty) empty.remove();
   const row = document.createElement('div');
@@ -133,7 +147,7 @@ function send(){
         reader.read().then(({done, value}) => {
           if(done) return;
           acc += dec.decode(value, {stream:true});
-          bubble.textContent = acc;
+          bubble.innerHTML = mdFormat(acc);
           scrollDown();
           read();
         }).catch(() => {});
@@ -143,6 +157,8 @@ function send(){
 }
 function quick(el){ document.getElementById('axInput').value = el.textContent; send(); }
 function clearChat(){ fetch('/api/axon/clear', {method:'POST'}).then(() => location.reload()); }
+// Render markdown in existing (history) AXON messages on load
+document.querySelectorAll('.ax-msg.bot').forEach(function(el){ el.innerHTML = mdFormat(el.textContent); });
 scrollDown();
 </script>
 {% endblock %}
