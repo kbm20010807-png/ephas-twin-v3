@@ -1,4 +1,5 @@
 import os
+import random
 import requests
 from datetime import datetime, timedelta
 from collections import Counter
@@ -41,6 +42,7 @@ class User(db.Model):
     bio = db.Column(db.String(300), default='')
     city = db.Column(db.String(120), default='')
     job = db.Column(db.String(120), default='')
+    email_verified = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -122,6 +124,16 @@ class SearchLog(db.Model):
     term = db.Column(db.String(100), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
+class EmailCode(db.Model):
+    # Short-lived 6-digit codes for email verification & password reset.
+    __tablename__ = 'email_codes'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), index=True)
+    code = db.Column(db.String(6))
+    purpose = db.Column(db.String(10))  # verify | reset
+    expires_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 LEVEL_TITLES = [
     (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
@@ -142,6 +154,48 @@ def _i(v):
 def _f(v):
     try: return float(v)
     except (TypeError, ValueError): return None
+
+# --- Email (Resend) — verification & password reset. Key only from env. ---
+RESEND_KEY = os.environ.get('RESEND_API_KEY', '')
+EMAIL_FROM = os.environ.get('EMAIL_FROM', 'TWIN <onboarding@resend.dev>')
+
+def send_email(to, subject, html):
+    if not RESEND_KEY:
+        return False
+    try:
+        r = requests.post('https://api.resend.com/emails',
+                          headers={'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json'},
+                          json={'from': EMAIL_FROM, 'to': [to], 'subject': subject, 'html': html}, timeout=20)
+        return r.status_code < 300
+    except Exception:
+        return False
+
+def code_email_html(code, intro):
+    return (
+        '<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:34px;'
+        'background:#0A0A0A;color:#fff;border-radius:16px;">'
+        '<div style="font-size:30px;font-weight:800;letter-spacing:-1px;color:#fff;">TWIN</div>'
+        f'<p style="color:#aaa;font-size:14px;line-height:1.6;margin-top:18px;">{intro}</p>'
+        f'<div style="font-size:38px;font-weight:800;letter-spacing:10px;color:#D4AA35;margin:26px 0;text-align:center;">{code}</div>'
+        '<p style="color:#666;font-size:12px;line-height:1.5;">This code expires in 15 minutes. If you didn\'t request it, you can safely ignore this email.</p>'
+        '<p style="color:#444;font-size:11px;margin-top:26px;">TWIN — powered by EPHAS</p></div>'
+    )
+
+def issue_code(email, purpose):
+    EmailCode.query.filter_by(email=email, purpose=purpose).delete()
+    code = f'{random.randint(0, 999999):06d}'
+    db.session.add(EmailCode(email=email, code=code, purpose=purpose,
+                             expires_at=datetime.utcnow() + timedelta(minutes=15)))
+    db.session.commit()
+    return code
+
+def check_code(email, purpose, code):
+    rec = EmailCode.query.filter_by(email=email, purpose=purpose, code=(code or '').strip()).first()
+    if rec and rec.expires_at and rec.expires_at > datetime.utcnow():
+        db.session.delete(rec)
+        db.session.commit()
+        return True
+    return False
 
 # --- AXON (AI coach) — Anthropic API via direct requests (NOT the SDK; key only from env) ---
 ANTHROPIC_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
@@ -327,6 +381,13 @@ def serialize_posts(posts, viewer=None):
 
 with app.app_context():
     db.create_all()
+    # Lightweight migration: add email_verified to existing Postgres tables (no-op on fresh/SQLite)
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 DEMO_USER = {
     "name": "You",
@@ -667,6 +728,11 @@ def signup():
         session.clear()
         session['accounts'] = accounts
         _set_active(user.id)
+        if RESEND_KEY:
+            code = issue_code(email, 'verify')
+            send_email(email, 'Verify your TWIN account',
+                       code_email_html(code, 'Welcome to TWIN. Enter this code to verify your email:'))
+            return redirect('/verify-email')
         return redirect('/home')
     if auth() and not request.args.get('add'):
         return redirect('/home')
@@ -694,6 +760,60 @@ def logout():
         return redirect('/home')
     session.clear()
     return redirect('/login')
+
+@app.route('/verify-email', methods=['GET', 'POST'])
+def verify_email():
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    if cu.email_verified:
+        return redirect('/home')
+    if request.method == 'POST':
+        if check_code(cu.email, 'verify', request.form.get('code')):
+            cu.email_verified = True
+            db.session.commit()
+            return redirect('/home')
+        return render_template('verify_email.html', auth_page=True, email=cu.email, error='Invalid or expired code.')
+    return render_template('verify_email.html', auth_page=True, email=cu.email)
+
+@app.route('/resend-verify', methods=['POST'])
+def resend_verify():
+    if not auth(): return ('', 401)
+    cu = current_user()
+    if RESEND_KEY:
+        code = issue_code(cu.email, 'verify')
+        send_email(cu.email, 'Verify your TWIN account',
+                   code_email_html(code, 'Enter this code to verify your email:'))
+    return {'ok': True, 'sent': bool(RESEND_KEY)}
+
+@app.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip().lower()
+        user = User.query.filter_by(email=email).first()
+        if user and RESEND_KEY:
+            code = issue_code(email, 'reset')
+            send_email(email, 'Reset your TWIN password',
+                       code_email_html(code, 'Use this code to reset your TWIN password:'))
+        # Always the same response — never reveal which emails exist
+        return render_template('reset.html', auth_page=True, email=email)
+    return render_template('forgot.html', auth_page=True)
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset():
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip().lower()
+        pw = request.form.get('password') or ''
+        if len(pw) < 8 or not any(c.isupper() for c in pw) or not any(not c.isalnum() for c in pw):
+            return render_template('reset.html', auth_page=True, email=email,
+                                   error='Password needs 8+ characters, a capital letter, and a symbol.')
+        if not check_code(email, 'reset', request.form.get('code')):
+            return render_template('reset.html', auth_page=True, email=email, error='Invalid or expired code.')
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.set_password(pw)
+            db.session.commit()
+        return render_template('login.html', auth_page=True, error='Password updated — sign in with your new password.')
+    return render_template('reset.html', auth_page=True, email=request.args.get('email', ''))
 
 @app.route('/home')
 def home():

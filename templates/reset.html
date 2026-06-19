@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Reset Password{% endblock %}
+{% block head %}
+<style>
+body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 18%,rgba(212,170,53,.07),transparent 60%);pointer-events:none;}
+.auth-wrap{flex:1;display:flex;flex-direction:column;padding:80px 28px 40px;position:relative;}
+.auth-logo{font-family:'Arpubes',sans-serif;font-size:44px;letter-spacing:-3px;color:var(--black);text-align:center;line-height:1;}
+.auth-sub{font-size:13px;color:var(--sub);text-align:center;margin-top:12px;line-height:1.6;}
+.code-input{letter-spacing:8px;text-align:center;font-size:18px;font-weight:700;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-bg"></div>
+<div class="auth-wrap">
+  <div style="margin-bottom:30px;">
+    <div class="auth-logo">TWIN</div>
+    <div class="auth-sub">If an account exists for<br><b style="color:var(--black);">{{ email }}</b>, we sent a 6-digit code.</div>
+  </div>
+  {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
+  <form method="POST" action="/reset">
+    <input type="hidden" name="email" value="{{ email }}">
+    <div class="form-group">
+      <label class="form-label">6-digit code</label>
+      <input name="code" class="form-input code-input" placeholder="000000" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">New password</label>
+      <input type="password" name="password" class="form-input" placeholder="Min 8 chars, a capital & a symbol" autocomplete="new-password" required>
+    </div>
+    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);">
+      <i data-lucide="check"></i> RESET PASSWORD
+    </button>
+  </form>
+  <div style="text-align:center;padding-top:22px;">
+    <a href="/forgot" style="font-size:12px;color:var(--gold);font-weight:700;text-decoration:none;">Didn't get a code? Try again</a>
+  </div>
+</div>
+{% endblock %}
