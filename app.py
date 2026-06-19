@@ -244,12 +244,37 @@ def user_interests(user):
     for sl in SearchLog.query.filter_by(user_id=user.id).order_by(SearchLog.id.desc()).limit(20).all():
         if sl.term:
             interests[sl.term.lower()] += 1
-    # Growth edge: surface content for the user's WEAKEST life domains
-    for d in stats_ctx()['domains']:
+
+    # ===== THE DIGITAL-TWIN EDGE: rank content to fix what the user's TRACKER DATA shows =====
+    s = stats_ctx()
+    # Weakest life domains -> boost their topics
+    for d in s['domains']:
         if d['pct'] < 60:
             w = (60 - d['pct']) / 30.0  # weaker domain -> bigger boost
             for cat in DOMAIN_CATS.get(d['name'], []):
                 interests[cat] += w
+    # Direct check-in signals: surface content that fixes the exact problem the data reveals
+    if s['avg_sleep'] and (s['avg_sleep'] < 6.5 or s['avg_sleep'] > 8.5):
+        for k in ('sleep', 'recovery', 'rest', 'wellbeing'):
+            interests[k] += 2.5
+    if s['avg_energy'] and s['avg_energy'] < 6:
+        for k in ('energy', 'fitness', 'nutrition', 'health'):
+            interests[k] += 2.5
+    if s['avg_mood'] and s['avg_mood'] < 6:
+        for k in ('mindset', 'mental', 'meditation', 'wellbeing'):
+            interests[k] += 2.5
+    # Habit gaps: if a tracked habit is rarely done, surface content about it
+    habit_cats = {
+        'Workout': ['fitness', 'workout', 'gym'], 'Cold Shower': ['discipline', 'wellbeing'],
+        'Reading': ['reading', 'mindset', 'focus'], 'Deep Work': ['productivity', 'focus', 'discipline'],
+        'Journaling': ['mindset', 'mental'], 'Hydration': ['health', 'nutrition'],
+        'Meditation': ['meditation', 'mindfulness', 'wellbeing'], 'No Screens': ['focus', 'discipline'],
+    }
+    for h in s['habits']:
+        if h['pct'] < 40:
+            for k in habit_cats.get(h['name'], []):
+                interests[k] += 1.5
+    # (Phase 3: bank/spending data plugs in here the same way -> high spending boosts money/budgeting content)
     return interests
 
 def rank_posts(post_objs, user):
