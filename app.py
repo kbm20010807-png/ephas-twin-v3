@@ -419,6 +419,29 @@ def current_user():
 def auth():
     return current_user() is not None
 
+def _set_active(user_id):
+    """Make user_id the active account, keeping it in the multi-account list (cap 5)."""
+    accounts = session.get('accounts', [])
+    if user_id not in accounts:
+        accounts.append(user_id)
+    session['accounts'] = accounts[-5:]
+    session['user_id'] = user_id
+
+def session_accounts():
+    """All accounts currently signed in on this device, with the active one flagged."""
+    ids = session.get('accounts', [])
+    cu = current_user()
+    if not ids and cu:
+        ids = [cu.id]
+    users = {u.id: u for u in User.query.filter(User.id.in_(ids or [0])).all()}
+    active = session.get('user_id')
+    out = []
+    for i in ids:
+        u = users.get(i)
+        if u:
+            out.append({'id': u.id, 'name': u.name or u.username, 'username': u.username, 'active': u.id == active})
+    return out
+
 def _checkin_dates(user):
     rows = db.session.query(CheckIn.date).filter_by(user_id=user.id).distinct().all()
     return sorted({r[0] for r in rows if r[0]})
@@ -604,11 +627,13 @@ def login():
         pw = request.form.get('password') or ''
         user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
         if user and user.check_password(pw):
+            accounts = session.get('accounts', [])
             session.clear()
-            session['user_id'] = user.id
+            session['accounts'] = accounts
+            _set_active(user.id)
             return redirect('/home')
         return render_template('login.html', auth_page=True, error='Invalid email or password.')
-    if auth():
+    if auth() and not request.args.get('add'):
         return redirect('/home')
     return render_template('login.html', auth_page=True)
 
@@ -638,15 +663,35 @@ def signup():
         user.set_password(pw)
         db.session.add(user)
         db.session.commit()
+        accounts = session.get('accounts', [])
         session.clear()
-        session['user_id'] = user.id
+        session['accounts'] = accounts
+        _set_active(user.id)
         return redirect('/home')
-    if auth():
+    if auth() and not request.args.get('add'):
         return redirect('/home')
     return render_template('signup.html', auth_page=True)
 
+@app.route('/switch/<int:user_id>')
+def switch_account(user_id):
+    if not auth(): return redirect('/login')
+    if user_id in session.get('accounts', []):
+        session['user_id'] = user_id
+    return redirect('/home')
+
+@app.route('/add-account')
+def add_account():
+    if not auth(): return redirect('/login')
+    return redirect('/login?add=1')
+
 @app.route('/logout')
 def logout():
+    cur = session.get('user_id')
+    accounts = [a for a in session.get('accounts', []) if a != cur]
+    if accounts:
+        session['accounts'] = accounts
+        session['user_id'] = accounts[-1]  # fall back to another signed-in account
+        return redirect('/home')
     session.clear()
     return redirect('/login')
 
@@ -784,7 +829,7 @@ def api_axon_clear():
 @app.route('/settings')
 def settings():
     if not auth(): return redirect('/login')
-    return render_template('settings.html', u=user_ctx(), active='settings')
+    return render_template('settings.html', u=user_ctx(), accounts=session_accounts(), active='settings')
 
 @app.route('/calendar')
 def calendar():

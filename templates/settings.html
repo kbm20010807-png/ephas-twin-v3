@@ -216,6 +216,34 @@
   <div class="ae-txt"><b>EPHAS</b> is a free community for human excellence. TWIN is your digital twin — it learns who you are and, with AXON, pushes you to grow across mind, body, and wealth.</div>
 </div>
 
+<!-- ACCOUNTS (multi-account switcher) -->
+<div class="block-label">Accounts</div>
+<div class="settings-block">
+  {% for a in accounts %}
+  <a href="{% if not a.active %}/switch/{{ a.id }}{% else %}#{% endif %}" class="s-row" style="text-decoration:none;{% if a.active %}cursor:default;{% endif %}">
+    <div class="s-left">
+      <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ a.name[0]|upper }}</div>
+      <div>
+        <div class="s-title">{{ a.name }}</div>
+        <div class="s-sub">@{{ a.username }}{% if a.active %} · Active{% endif %}</div>
+      </div>
+    </div>
+    {% if a.active %}
+    <i data-lucide="check-circle" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;"></i>
+    {% else %}
+    <div class="s-arrow"><i data-lucide="repeat"></i></div>
+    {% endif %}
+  </a>
+  {% endfor %}
+  <a href="/add-account" class="s-row" style="text-decoration:none;">
+    <div class="s-left">
+      <div class="s-ico-wrap"><i data-lucide="plus"></i></div>
+      <div><div class="s-title">Add account</div><div class="s-sub">Log into another account</div></div>
+    </div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
+</div>
+
 <a href="/logout" class="sign-out-btn">
   <i data-lucide="log-out"></i>
   SIGN OUT
