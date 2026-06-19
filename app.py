@@ -193,15 +193,25 @@ def _f(v):
 RESEND_KEY = os.environ.get('RESEND_API_KEY', '')
 EMAIL_FROM = os.environ.get('EMAIL_FROM', 'TWIN <onboarding@resend.dev>')
 
+LAST_EMAIL_ERROR = {'status': None, 'body': None, 'note': 'no email sent yet'}
+
 def send_email(to, subject, html):
     if not RESEND_KEY:
+        LAST_EMAIL_ERROR.update(status=None, body=None, note='RESEND_API_KEY is empty/not set in environment')
+        print('[email] skipped: RESEND_API_KEY not set')
         return False
     try:
         r = requests.post('https://api.resend.com/emails',
                           headers={'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json'},
                           json={'from': EMAIL_FROM, 'to': [to], 'subject': subject, 'html': html}, timeout=20)
-        return r.status_code < 300
-    except Exception:
+        ok = r.status_code < 300
+        LAST_EMAIL_ERROR.update(status=r.status_code, body=r.text[:600],
+                                note=('sent OK' if ok else 'Resend rejected the send'))
+        print(f'[email] to={to} from={EMAIL_FROM} status={r.status_code} body={r.text[:300]}')
+        return ok
+    except Exception as e:
+        LAST_EMAIL_ERROR.update(status=None, body=str(e)[:600], note='request to Resend threw an exception')
+        print(f'[email] exception: {e}')
         return False
 
 def code_email_html(code, intro):
@@ -1332,6 +1342,27 @@ def admin_reset_all():
     db.session.commit()
     session.clear()
     return f'Wiped all data — {counts}. Every account is deleted.'
+
+@app.route('/admin/email-test')
+def admin_email_test():
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if not admin_key or request.args.get('key', '') != admin_key:
+        return ('Forbidden', 403)
+    to = (request.args.get('to') or '').strip()
+    info = {
+        'RESEND_API_KEY_present': bool(RESEND_KEY),
+        'RESEND_API_KEY_prefix': (RESEND_KEY[:6] + '...') if RESEND_KEY else None,
+        'EMAIL_FROM': EMAIL_FROM,
+    }
+    if to:
+        sent = send_email(to, 'TWIN email test',
+                          '<p style="font-family:Arial">If you got this, TWIN email is working ✅</p>')
+        info['attempted_send_to'] = to
+        info['sent'] = sent
+        info['resend_response'] = dict(LAST_EMAIL_ERROR)
+    else:
+        info['hint'] = 'add &to=youremail@example.com to actually send a test'
+    return info
 
 @app.route('/api/like/<int:post_id>', methods=['POST'])
 def api_like(post_id):
