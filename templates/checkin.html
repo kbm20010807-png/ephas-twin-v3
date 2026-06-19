@@ -30,7 +30,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .so-check{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:pop .4s ease;}
 .so-check svg{width:36px;height:36px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .so-xp{font-family:'Inter',sans-serif;font-weight:800;font-size:42px;letter-spacing:-2px;color:var(--gold);margin:12px 0 6px;}
-.motiv-player{display:none;width:100%;max-width:320px;background:#0F0F0F;border:1px solid rgba(212,170,53,.2);border-radius:18px;padding:18px;margin-bottom:14px;}
+.motiv-player{display:none;width:100%;max-width:320px;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:18px;padding:18px;margin-bottom:14px;}
 .motiv-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:18px;}
 .motiv-wave span{width:3px;border-radius:2px;background:var(--gold);opacity:.7;animation:motivWave 1.1s ease-in-out infinite;}
 .motiv-wave span:nth-child(odd){animation-delay:.2s;}
@@ -178,8 +178,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- AXON interactive coach -->
   <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
-    <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(212,170,53,.2);border-radius:16px;padding:14px;text-align:left;">
-      <div style="width:30px;height:30px;border-radius:9px;background:rgba(212,170,53,.12);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+    <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:16px;padding:14px;text-align:left;">
+      <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
       <div style="flex:1;"><div style="font-family:'Arpubes',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
     </div>
     <button id="axonHabitBtn" onclick="addCoachHabit()" style="display:none;width:100%;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-xl);padding:12px;font-size:12px;font-weight:700;cursor:pointer;"></button>
@@ -188,7 +188,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <div class="motiv-player" id="motivPlayer">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(212,170,53,.12);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="mic" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="mic" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
       <div style="text-align:left;flex:1;"><div style="font-size:12px;font-weight:700;color:#fff;">Your Morning Speech</div><div style="font-size:10px;color:#666;">Warrior voice · 3 min</div></div>
       <div class="pill pill-gold" style="font-size:8px;">PRO · SOON</div>
     </div>
@@ -208,7 +208,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 {% block scripts %}
 <script>
 let step=1;
-function updateProg(){for(let i=1;i<=6;i++){const s=document.getElementById('p'+i);s.classList.remove('done');if(i<step)s.style.background='var(--gold)';else if(i===step)s.style.background='rgba(212,170,53,.35)';else s.style.background='var(--border)';}}
+function updateProg(){for(let i=1;i<=6;i++){const s=document.getElementById('p'+i);s.classList.remove('done');if(i<step)s.style.background='var(--gold)';else if(i===step)s.style.background='rgba(200,164,90,.35)';else s.style.background='var(--border)';}}
 function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.remove('active'));document.getElementById('s'+n).classList.add('active');step=n;updateProg();}
 function next(n){show(n+1);}
 function prev(n){show(n-1);}
