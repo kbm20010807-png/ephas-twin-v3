@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Search{% endblock %}
+
+{% block head %}
+<style>
+.srch-bar{flex:1;position:relative;}
+.srch-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:11px 16px 11px 40px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;box-sizing:border-box;}
+.srch-inp:focus{border-color:var(--gold);}
+.srch-inp::placeholder{color:var(--muted);}
+.srch-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);}
+.srch-ico svg{width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.srch-person{display:flex;align-items:center;gap:12px;padding:11px 20px;}
+.sp-name{font-size:13px;font-weight:700;color:var(--black);}
+.sp-user{font-size:11px;color:var(--sub);}
+.sp-follow{margin-left:auto;background:var(--gold);color:#000;border:none;border-radius:var(--r-full);padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;}
+.sp-follow.following{background:var(--bg-2);color:var(--sub);border:1px solid var(--border);}
+.srch-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin:0 20px 10px;box-shadow:var(--sh);}
+.srch-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
+.srch-act svg{width:14px;height:14px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.srch-act.like-btn.liked{color:#EF4444;}
+.srch-act.like-btn.liked svg{stroke:#EF4444;fill:#EF4444;}
+.srch-act.bm-btn.saved{color:var(--gold);}
+.srch-act.bm-btn.saved svg{stroke:var(--gold);}
+.srch-empty{text-align:center;padding:64px 28px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <a href="/grow" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <form action="/search" method="get" class="srch-bar">
+    <div class="srch-ico"><i data-lucide="search"></i></div>
+    <input name="q" value="{{ q }}" class="srch-inp" placeholder="Search posts, people, courses..." autocomplete="off" autofocus>
+  </form>
+</div>
+
+{% if not q %}
+<div class="srch-empty">
+  <i data-lucide="search" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">Search TWIN</div>
+  <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Find people, posts, threads, and courses<br>across the whole community.</div>
+</div>
+{% elif not people and not posts and not courses %}
+<div class="srch-empty">
+  <i data-lucide="search-x" style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;">No results for "{{ q }}"</div>
+  <div style="font-size:12px;color:var(--sub);margin-top:5px;">Try a different word or topic.</div>
+</div>
+{% else %}
+
+{% if people %}
+<div class="sect-lbl">People</div>
+{% for p in people %}
+<div class="srch-person">
+  <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+  <div><div class="sp-name">{{ p.name }}</div><div class="sp-user">@{{ p.username }}</div></div>
+  {% if p.id != u_id %}<button class="sp-follow" onclick="toggleFollow(this,{{ p.id }})">Follow</button>{% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if posts %}
+<div class="sect-lbl">Posts & Threads</div>
+{% for p in posts %}
+<div class="srch-post" data-id="{{ p.id }}">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+    <div><div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div><div style="font-size:10px;color:var(--sub);">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div></div>
+  </div>
+  <div style="font-size:13px;color:var(--text);line-height:1.5;">{% if p.title %}<b>{{ p.title }}</b> {% endif %}{{ p.text }}</div>
+  <div style="display:flex;gap:16px;margin-top:10px;align-items:center;">
+    <div class="srch-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+    <div class="srch-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+    <div class="srch-act bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if courses %}
+<div class="sect-lbl">Courses</div>
+{% for p in courses %}
+<div class="srch-post" data-id="{{ p.id }}">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="width:40px;height:40px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="graduation-cap" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+    <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--black);">{{ p.title }}</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">{{ p.category }} · By {{ p.user }}</div></div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<div style="height:20px;"></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleLike(btn, id){
+  const n = btn.querySelector('.like-n');
+  fetch('/api/like/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('liked', d.liked); if(n) n.textContent=d.count;
+  }).catch(()=>{});
+}
+function toggleBookmark(btn, id){
+  btn.classList.toggle('saved');
+  fetch('/api/bookmark/'+id,{method:'POST'}).catch(()=>{});
+}
+function toggleFollow(btn, id){
+  fetch('/api/follow/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('following', d.following);
+    btn.textContent = d.following ? 'Following' : 'Follow';
+  }).catch(()=>{});
+}
+</script>
+{% endblock %}

@@ -113,6 +113,14 @@ class AxonMessage(db.Model):
     content = db.Column(db.Text, default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
+class SearchLog(db.Model):
+    # Every search is an interest signal that feeds the recommendation algorithm.
+    __tablename__ = 'search_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    term = db.Column(db.String(100), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
 
 LEVEL_TITLES = [
     (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
@@ -621,6 +629,33 @@ def grow():
     explore = serialize_posts(Post.query.order_by(Post.created_at.desc()).limit(30).all(), cu)
     return render_template('grow.html', u=user_ctx(), gposts=posts, gthreads=threads,
                            gcourses=courses, gexplore=explore, active='grow')
+
+@app.route('/search')
+def search():
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    q = (request.args.get('q') or '').strip()
+    people, posts, courses = [], [], []
+    if q:
+        db.session.add(SearchLog(user_id=cu.id, term=q[:100]))
+        db.session.commit()
+        like = f'%{q}%'
+        people_rows = User.query.filter(
+            db.or_(User.name.ilike(like), User.username.ilike(like))).limit(20).all()
+        people = [{'name': u.name or u.username, 'username': u.username,
+                   'init': (u.name or u.username or 'U')[0].upper(), 'id': u.id} for u in people_rows]
+        post_rows = Post.query.filter(
+            Post.kind.in_(['post', 'thread', 'reel']),
+            db.or_(Post.text.ilike(like), Post.title.ilike(like), Post.category.ilike(like))
+        ).order_by(Post.created_at.desc()).limit(30).all()
+        posts = serialize_posts(post_rows, cu)
+        course_rows = Post.query.filter(
+            Post.kind == 'course',
+            db.or_(Post.title.ilike(like), Post.text.ilike(like), Post.category.ilike(like))
+        ).order_by(Post.created_at.desc()).limit(20).all()
+        courses = serialize_posts(course_rows, cu)
+    return render_template('search.html', u=user_ctx(), q=q, u_id=cu.id,
+                           people=people, posts=posts, courses=courses, active='grow')
 
 @app.route('/profile')
 def profile():
