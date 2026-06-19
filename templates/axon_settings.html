@@ -153,42 +153,39 @@
   </div>
 </div>
 
-<!-- MORNING MOTIVATION VOICE (coming soon) -->
-<div class="sect-lbl" style="display:flex;align-items:center;gap:8px;">Morning Motivation Voice <span class="pill pill-gold" style="font-size:8px;">PRO · SOON</span></div>
+<!-- AXON PERSONALITY -->
+<div class="sect-lbl">AXON personality</div>
+<div class="insight-card">
+  <div class="ic-top">
+    <div class="ic-ico"><i data-lucide="sparkles"></i></div>
+    <div style="font-family:'Arpubes',sans-serif;font-size:12px;color:#888;letter-spacing:.5px;">How should AXON talk to you?</div>
+  </div>
+  <div class="freq-row" id="persRow" style="flex-wrap:wrap;gap:8px;">
+    <div class="freq-btn {% if personality=='mentor' %}on{% endif %}" data-p="mentor" onclick="setPers(this)">Mentor</div>
+    <div class="freq-btn {% if personality=='friendly' %}on{% endif %}" data-p="friendly" onclick="setPers(this)">Friendly</div>
+    <div class="freq-btn {% if personality=='tough' %}on{% endif %}" data-p="tough" onclick="setPers(this)">Tough</div>
+    <div class="freq-btn {% if personality=='calm' %}on{% endif %}" data-p="calm" onclick="setPers(this)">Calm</div>
+    <div class="freq-btn {% if personality=='hype' %}on{% endif %}" data-p="hype" onclick="setPers(this)">Hype</div>
+  </div>
+  <div style="font-size:11px;color:#666;margin-top:10px;line-height:1.5;">Friendly is great for a relaxed morning chat on the way to work.</div>
+  <div id="persSaved" style="font-size:10px;font-weight:700;color:#22C55E;margin-top:8px;display:none;">Saved ✓</div>
+</div>
+
+<!-- AXON VOICE -->
+<div class="sect-lbl">AXON voice</div>
 <div class="insight-card">
   <div class="ic-top">
     <div class="ic-ico"><i data-lucide="mic"></i></div>
-    <div style="font-family:'Arpubes',sans-serif;font-size:12px;color:#888;letter-spacing:.5px;">How should AXON speak your morning?</div>
+    <div style="font-family:'Arpubes',sans-serif;font-size:12px;color:#888;letter-spacing:.5px;">The voice AXON speaks with</div>
   </div>
-
   <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#666;text-transform:uppercase;margin-bottom:8px;">Speaker</div>
-  <div class="freq-row" style="margin-bottom:14px;">
-    <div class="freq-btn on" onclick="setVoice(this)">Warrior — dark, no excuses</div>
-    <div class="freq-btn" onclick="setVoice(this)">Uplifting — bright, positive</div>
-    <div class="freq-btn" onclick="setVoice(this)">Stoic — calm, grounded</div>
-  </div>
-
-  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#666;text-transform:uppercase;margin-bottom:8px;">Voice</div>
-  <div class="freq-row" style="margin-bottom:14px;">
-    <div class="freq-btn on" onclick="setVoice(this)">Male</div>
-    <div class="freq-btn" onclick="setVoice(this)">Female</div>
-  </div>
-
-  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#666;text-transform:uppercase;margin-bottom:8px;">Length</div>
-  <div class="freq-row" style="margin-bottom:14px;">
-    <div class="freq-btn" onclick="setVoice(this)">2 min</div>
-    <div class="freq-btn on" onclick="setVoice(this)">3 min</div>
-    <div class="freq-btn" onclick="setVoice(this)">5 min</div>
-  </div>
-
-  <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #1C1C1C;">
-    <div style="font-size:12px;font-weight:600;color:#C0C0C0;">Background music</div>
-    <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;">
-    <div style="font-size:12px;font-weight:600;color:#C0C0C0;">Hands-free voice check-in <span style="font-size:9px;color:#666;">(for driving)</span></div>
-    <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-  </div>
+  <select id="voiceSel" class="form-input" style="background:#111;color:#fff;border-color:#222;margin-bottom:16px;"></select>
+  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#666;text-transform:uppercase;margin-bottom:8px;">Speed</div>
+  <input type="range" id="rateSel" min="0.6" max="1.4" step="0.05" value="1.03" class="range-input" oninput="saveVoicePrefs()" style="margin-bottom:18px;">
+  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#666;text-transform:uppercase;margin-bottom:8px;">Pitch / tone</div>
+  <input type="range" id="pitchSel" min="0.6" max="1.4" step="0.05" value="1" class="range-input" oninput="saveVoicePrefs()" style="margin-bottom:16px;">
+  <button class="btn btn-secondary btn-full" onclick="testVoice()" style="border-radius:var(--r-xl);"><i data-lucide="play"></i> Test voice</button>
+  <div id="voiceNote" style="font-size:11px;color:#666;margin-top:10px;display:none;">Voice options come from your device. iPhone has great built-in voices in Settings → Accessibility → Spoken Content.</div>
 </div>
 
 <div class="save-btn">
@@ -210,7 +207,48 @@ function togDomain(inp){
   if(inp.checked)row.classList.add('dt-active');else row.classList.remove('dt-active');
 }
 function setFreq(el){el.closest('.freq-row').querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
-function setVoice(el){el.closest('.freq-row').querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+
+// ---- Personality (saved to server) ----
+function setPers(el){
+  document.getElementById('persRow').querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  fetch('/axon-settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'personality='+encodeURIComponent(el.dataset.p)})
+    .then(()=>{ const s=document.getElementById('persSaved'); s.style.display='block'; setTimeout(()=>s.style.display='none',1600); }).catch(()=>{});
+}
+
+// ---- Voice settings (device-specific -> localStorage) ----
+function loadVoices(){
+  const sel=document.getElementById('voiceSel');
+  if(!sel || !window.speechSynthesis) return;
+  let voices=speechSynthesis.getVoices();
+  const en=voices.filter(v=>(v.lang||'').toLowerCase().startsWith('en'));
+  voices = en.length ? en : voices;
+  if(!voices.length) return;
+  sel.innerHTML='';
+  voices.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=v.name+' ('+v.lang+')'; sel.appendChild(o); });
+  const saved=localStorage.getItem('axon_voice'); if(saved) sel.value=saved;
+  sel.onchange=saveVoicePrefs;
+  document.getElementById('voiceNote').style.display='block';
+}
+function saveVoicePrefs(){
+  localStorage.setItem('axon_voice',document.getElementById('voiceSel').value||'');
+  localStorage.setItem('axon_rate',document.getElementById('rateSel').value);
+  localStorage.setItem('axon_pitch',document.getElementById('pitchSel').value);
+}
+function testVoice(){
+  if(!window.speechSynthesis) return;
+  const u=new SpeechSynthesisUtterance("Hey, it's AXON. Let's make today count.");
+  const v=speechSynthesis.getVoices().find(x=>x.name===document.getElementById('voiceSel').value);
+  if(v) u.voice=v;
+  u.rate=parseFloat(document.getElementById('rateSel').value)||1.03;
+  u.pitch=parseFloat(document.getElementById('pitchSel').value)||1;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('rateSel').value=localStorage.getItem('axon_rate')||'1.03';
+  document.getElementById('pitchSel').value=localStorage.getItem('axon_pitch')||'1';
+  if(window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+});
 function saveSettings(){
   const btn=event.target.closest('button');
   btn.innerHTML='<i data-lucide="check"></i> SAVED';

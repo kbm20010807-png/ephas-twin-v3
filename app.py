@@ -51,6 +51,7 @@ class User(db.Model):
     last_username_change = db.Column(db.DateTime)
     tz_offset = db.Column(db.Integer, default=0)  # minutes east of UTC (from the user's device)
     is_pro = db.Column(db.Boolean, default=False)  # TWIN Pro subscriber
+    axon_personality = db.Column(db.String(20), default='mentor')  # how AXON talks
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -273,6 +274,17 @@ AXON_DAILY_BETA = int(os.environ.get('AXON_DAILY_BETA', '80'))            # beta
 AXON_TIERS_ENABLED = os.environ.get('AXON_TIERS_ENABLED', '0') == '1'
 LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
 
+# How AXON talks — the user picks one in AXON settings
+AXON_PERSONALITIES = {
+    'mentor':   "Speak like a wise, no-nonsense MENTOR — part coach, part preacher. Direct, firm, grounded. "
+                "Tell hard truths plainly; never coddle or shame.",
+    'friendly': "Speak like a warm, upbeat FRIEND riding shotgun with them. Casual, encouraging, easy banter, a little humor. "
+                "Light and human — like a good morning chat on the way to work.",
+    'tough':    "Speak like a TOUGH, demanding coach. Blunt, high standards, push hard, zero excuses — firm but never cruel.",
+    'calm':     "Speak like a CALM, grounding presence — slow, steady, reassuring, therapist-like. Help them breathe and think clearly.",
+    'hype':     "Speak like a HIGH-ENERGY hype man. Punchy, motivating, fire them up with belief — short bursts of energy.",
+}
+
 def axon_usage(user):
     """Today's AXON usage: (used, limit, is_pro, model). Pre-launch: everyone is on Sonnet."""
     if not AXON_TIERS_ENABLED:
@@ -446,10 +458,9 @@ def axon_system_prompt(user):
         "You remember everything they've told you in past conversations (it's in the message history). "
         "Adapt to whoever they need you to be: gym coach, nutrition coach, mindset/discipline coach, "
         "relationship guide, or a calm psychologist-style listener — based on what they bring.\n\n"
-        "VOICE & TONE:\n"
-        "- Speak like a wise, no-nonsense mentor — part coach, part preacher. Logical, sharp, grounded, and a little firm.\n"
-        "- Do NOT coddle or sugar-coat. Make them take it seriously. Tell hard truths plainly — but never shame, mock, or demean.\n"
-        "- Be the voice that respects them enough to be honest. Wisdom over hype.\n\n"
+        "VOICE & TONE (the user chose this personality):\n"
+        f"- {AXON_PERSONALITIES.get(getattr(user, 'axon_personality', 'mentor') or 'mentor', AXON_PERSONALITIES['mentor'])}\n"
+        "- Whatever the tone, stay perceptive and honest; never shame, mock, or demean.\n\n"
         "LENGTH (critical — match the reply to the question):\n"
         "- Be SHORT by default. Most replies are 1-3 sentences. Brevity is the rule; earn every extra line.\n"
         "- Simple, casual, or closed questions get a tiny answer — one sentence, or even just 'Yes.' / 'No.' Don't pad or over-explain.\n"
@@ -653,6 +664,7 @@ with app.app_context():
         "ALTER TABLE likes ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
         "ALTER TABLE follows ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS axon_personality VARCHAR(20) DEFAULT 'mentor'",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1685,10 +1697,18 @@ def create():
         return ('', 204)
     return render_template('create.html', u=user_ctx(), active='grow')
 
-@app.route('/axon-settings')
+@app.route('/axon-settings', methods=['GET', 'POST'])
 def axon_settings():
     if not auth(): return redirect('/login')
-    return render_template('axon_settings.html', u=user_ctx(), active='settings')
+    cu = current_user()
+    if request.method == 'POST':
+        p = (request.form.get('personality') or '').strip().lower()
+        if p in AXON_PERSONALITIES:
+            cu.axon_personality = p
+            db.session.commit()
+        return {'ok': True, 'personality': cu.axon_personality}
+    return render_template('axon_settings.html', u=user_ctx(),
+                           personality=(cu.axon_personality or 'mentor'), active='settings')
 
 @app.route('/apply-pro')
 def apply_pro():
