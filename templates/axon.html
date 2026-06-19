@@ -38,6 +38,11 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 .ax-input::placeholder{color:var(--muted);}
 .ax-send{width:42px;height:42px;border-radius:50%;background:var(--gold);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .ax-send svg{width:18px;height:18px;stroke:#000;fill:none;stroke-width:2.5;}
+.ax-mic{width:42px;height:42px;border-radius:50%;background:var(--bg-2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.ax-mic svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:2;}
+.ax-mic.listening{background:var(--gold);border-color:var(--gold);animation:micPulse 1.2s infinite;}
+.ax-mic.listening svg{stroke:#000;}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(200,164,90,.55);}50%{box-shadow:0 0 0 9px rgba(200,164,90,0);}}
 </style>
 {% endblock %}
 
@@ -49,6 +54,7 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
     <div class="ax-name">AXON</div>
     <div class="ax-status">● Online</div>
   </div>
+  <button class="tb-btn" id="axSpk" onclick="toggleVoice()" title="AXON voice"><i data-lucide="volume-x"></i></button>
   <button class="tb-btn" onclick="clearChat()"><i data-lucide="trash-2"></i></button>
 </div>
 
@@ -77,6 +83,7 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 </div>
 
 <div class="ax-input-bar">
+  <button class="ax-mic" id="axMic" onclick="toggleMic()" title="Talk to AXON"><i data-lucide="mic"></i></button>
   <textarea class="ax-input" id="axInput" rows="1" placeholder="Message AXON..." autocomplete="off" oninput="axGrow(this)" onkeydown="axKey(event)"></textarea>
   <button class="ax-send" onclick="send()"><i data-lucide="arrow-up"></i></button>
 </div>
@@ -137,10 +144,11 @@ let axCurBubble = null;
 
 function axGrow(el){ el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 130) + 'px'; }
 function axKey(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } }
-function send(){
+function send(fromVoice){
   const inp = document.getElementById('axInput');
   const text = inp.value.trim();
   if(!text) return;
+  lastVoice = !!fromVoice;
   inp.value = '';
   inp.style.height = 'auto';   // reset the grown box after sending
   addMsg('user', text);
@@ -175,7 +183,7 @@ function fireAxon(){
       let acc = '';
       (function read(){
         reader.read().then(({done, value}) => {
-          if(done){ axStreaming = false; axCurBubble = null; return; }
+          if(done){ axStreaming = false; axCurBubble = null; speak(acc); return; }
           acc += dec.decode(value, {stream:true});
           bubble.innerHTML = mdFormat(acc);
           scrollDown();
@@ -190,7 +198,55 @@ function fireAxon(){
       addMsg('bot', 'Something went wrong — give me a sec and try again.');
     });
 }
-function quick(el){ document.getElementById('axInput').value = el.textContent; send(); }
+function quick(el){ document.getElementById('axInput').value = el.textContent; send(false); }
+
+// ---------- VOICE (browser-native: free, no extra tokens; the daily limit still caps usage) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, listening = false, voiceOut = false, lastVoice = false;
+const micBtn = document.getElementById('axMic');
+const spkBtn = document.getElementById('axSpk');
+if(!SR && micBtn){ micBtn.style.display = 'none'; }  // hide mic if speech input unsupported
+
+function toggleVoice(){
+  voiceOut = !voiceOut;
+  spkBtn.innerHTML = voiceOut ? '<i data-lucide="volume-2"></i>' : '<i data-lucide="volume-x"></i>';
+  if(window.lucide) lucide.createIcons();
+  if(voiceOut && window.speechSynthesis){
+    // unlock audio on iOS with a tiny silent utterance triggered by this tap
+    const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u);
+  } else if(window.speechSynthesis){
+    speechSynthesis.cancel();
+  }
+}
+function startListen(){
+  if(!SR) return;
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  recog = new SR(); recog.lang = 'en-US'; recog.interimResults = false; recog.maxAlternatives = 1;
+  listening = true; micBtn.classList.add('listening');
+  recog.onresult = e => {
+    const t = e.results[0][0].transcript;
+    document.getElementById('axInput').value = t;
+    stopListen();
+    send(true);
+  };
+  recog.onerror = () => stopListen();
+  recog.onend = () => { listening = false; micBtn.classList.remove('listening'); };
+  try { recog.start(); } catch(e) {}
+}
+function stopListen(){ listening = false; micBtn.classList.remove('listening'); if(recog){ try{ recog.stop(); }catch(e){} } }
+function toggleMic(){ listening ? stopListen() : startListen(); }
+
+function speak(text){
+  if(!voiceOut || !window.speechSynthesis || !text) return;
+  const clean = text.replace(/\*\*/g,'').replace(/[_•#>]/g,'').replace(/\s+/g,' ').trim();
+  if(!clean) return;
+  const u = new SpeechSynthesisUtterance(clean);
+  u.rate = 1.03; u.pitch = 1;
+  // hands-free: after AXON finishes speaking a voice reply, listen again
+  u.onend = () => { if(voiceOut && lastVoice && !listening){ lastVoice = false; setTimeout(startListen, 350); } };
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
 function clearChat(){ fetch('/api/axon/clear', {method:'POST'}).then(() => location.reload()); }
 // Render markdown in existing (history) AXON messages on load
 document.querySelectorAll('.ax-msg.bot').forEach(function(el){ el.innerHTML = mdFormat(el.textContent); });
