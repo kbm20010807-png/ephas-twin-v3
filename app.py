@@ -303,8 +303,28 @@ def _merge_roles(msgs):
             out.append({'role': m['role'], 'content': m['content']})
     return out
 
+def ensure_habit(user, name, is_bad, source='axon'):
+    """Auto-create a habit if the user doesn't already have one by that name (case-insensitive)."""
+    name = (name or '').strip().strip('.').strip()[:80]
+    if not name or len(name) < 2:
+        return False
+    if Habit.query.filter_by(user_id=user.id).count() >= 25:
+        return False
+    exists = Habit.query.filter(Habit.user_id == user.id, func.lower(Habit.name) == name.lower()).first()
+    if exists:
+        return False
+    db.session.add(Habit(user_id=user.id, name=name, is_bad=is_bad, private=is_bad))  # bad habits auto-private
+    db.session.commit()
+    return True
+
+def seed_habits_from_profile(user, profile):
+    """Turn the bad habits picked in onboarding into 'quit' habits automatically."""
+    for h in [x.strip() for x in (profile.bad_habits or '').split(',') if x.strip()]:
+        ensure_habit(user, h, True, source='onboarding')
+
 def roll_axon_memory(user):
-    """Once per new day: distill previous days' un-summarized messages into the long-term memory."""
+    """Once per new day: distill previous days' messages into long-term memory AND auto-detect
+    habits the user committed to (build/quit), adding them to 'Your Habits' automatically."""
     if not ANTHROPIC_KEY:
         return
     mem = get_axon_memory(user)
@@ -316,21 +336,37 @@ def roll_axon_memory(user):
     if not old:
         return
     convo = '\n'.join(f"{'User' if r.role == 'user' else 'AXON'}: {_safe(r.content, 400)}" for r in old)[:6000]
-    sys = ("You maintain a compact long-term memory of a coaching client for their AI coach AXON. "
-           "Merge the existing memory with the new conversation below. Keep ONLY durable, useful facts: "
-           "goals, commitments, recurring struggles/triggers, wins, preferences, key life context, and anything "
-           "they asked AXON to remember. Tight bullet points, max ~180 words. Drop small talk. Output ONLY the updated memory.")
+    sys = ("You maintain a compact long-term memory AND extract habits for a coaching client's AI coach AXON. "
+           "Output EXACTLY two sections and nothing else:\n"
+           "MEMORY:\n<merge existing memory with the new conversation — durable facts, goals, struggles, wins, "
+           "commitments; tight bullets, max ~180 words; drop small talk>\n"
+           "HABITS:\n<only habits the user CLEARLY committed to in the NEW conversation; one per line as "
+           "'build: <short name>' (a good habit to do) or 'quit: <short name>' (a bad habit to stop); "
+           "keep names 1-4 words; if none, write 'none'>")
     msg = f"EXISTING MEMORY:\n{mem.summary or '(none yet)'}\n\nNEW CONVERSATION (before today):\n{convo}"
     try:
         headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-        body = {"model": AXON_MODEL, "max_tokens": 400, "system": sys, "messages": [{"role": "user", "content": msg}]}
+        body = {"model": AXON_MODEL, "max_tokens": 500, "system": sys, "messages": [{"role": "user", "content": msg}]}
         r = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=40)
         data = r.json()
         if r.status_code < 300 and 'content' in data:
-            mem.summary = data['content'][0]['text'].strip()[:4000]
+            text = data['content'][0]['text']
+            mem_part, hab_part = text, ''
+            if 'HABITS:' in text:
+                mem_part, hab_part = text.split('HABITS:', 1)
+            mem_part = mem_part.split('MEMORY:', 1)[-1].strip()
+            if mem_part:
+                mem.summary = mem_part[:4000]
             mem.last_summarized_at = start
             mem.updated_at = datetime.utcnow()
             db.session.commit()
+            for line in hab_part.splitlines():
+                line = line.strip().lstrip('-*•').strip()
+                low = line.lower()
+                if low.startswith('build:'):
+                    ensure_habit(user, line.split(':', 1)[1], False)
+                elif low.startswith('quit:'):
+                    ensure_habit(user, line.split(':', 1)[1], True)
     except Exception as e:
         print(f'[axon-memory] {e}')
 
@@ -1038,6 +1074,7 @@ def onboarding():
         p.focus = (request.form.get('focus') or '').strip()[:200]
         p.onboarded = True
         db.session.commit()
+        seed_habits_from_profile(cu, p)  # auto-add the bad habits they want to quit
         if RESEND_KEY and not cu.email_verified:
             return redirect('/verify-email')
         return redirect('/home')
@@ -1575,6 +1612,7 @@ def personal():
         p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
         p.focus = (request.form.get('focus') or '').strip()[:200]
         db.session.commit()
+        seed_habits_from_profile(cu, p)  # auto-add any newly-listed bad habits to quit
         saved = True
     return render_template('personal.html', u=user_ctx(), p=p, saved=saved, active='settings')
 
