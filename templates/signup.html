@@ -6,38 +6,36 @@
 body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 .auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 20%,rgba(200,164,90,.06) 0%,transparent 60%);pointer-events:none;}
 .auth-wrap{flex:1;display:flex;flex-direction:column;padding:60px 28px 40px;}
-.auth-head{text-align:center;margin-bottom:36px;}
-.auth-mark{width:76px;height:76px;object-fit:contain;margin:0 auto 12px;display:block;}
-.auth-logo{font-family:'Arpubes',sans-serif;font-size:38px;letter-spacing:-3px;color:#fff;line-height:1;}
-.auth-title{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:#fff;margin-top:24px;}
-.auth-desc{font-size:12px;color:#555;margin-top:6px;line-height:1.5;}
-.step-bar-auth{display:flex;gap:5px;margin-bottom:28px;}
+.auth-head{text-align:center;margin-bottom:32px;}
+.auth-mark{width:64px;height:64px;object-fit:contain;margin:0 auto 14px;display:block;}
+.auth-title{font-family:'Arpubes',sans-serif;font-size:26px;letter-spacing:-1px;color:#fff;line-height:1.1;}
+.auth-desc{font-size:12.5px;color:#666;margin-top:8px;line-height:1.5;}
+.step-bar-auth{display:flex;gap:5px;margin-bottom:30px;}
 .sba{flex:1;height:3px;border-radius:3px;background:#1A1A1A;transition:background .3s;}
-.sba.done{background:var(--gold);}
+.sba.done{background:var(--grad);}
 .form-input{background:#111;border-color:#222;color:#fff;}
 .form-input:focus{background:#161616;border-color:var(--gold);}
 .form-input::placeholder{color:#444;}
-.form-label{color:#555;}
-.goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
-.goal-btn{background:#111;border:1.5px solid #1C1C1C;border-radius:var(--r);padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s,background .15s;}
-.goal-btn.sel{border-color:var(--gold);background:rgba(200,164,90,.07);}
-.goal-btn svg{width:22px;height:22px;stroke:#555;fill:none;stroke-width:1.75;transition:stroke .15s;}
-.goal-btn.sel svg{stroke:var(--gold);}
-.goal-name{font-size:11px;font-weight:700;color:#555;letter-spacing:.5px;transition:color .15s;}
-.goal-btn.sel .goal-name{color:var(--gold);}
+.form-label{color:#666;}
 .auth-foot{text-align:center;padding-top:20px;}
-.auth-foot-txt{font-size:12px;color:#555;}
-.auth-foot-lnk{color:var(--gold);font-weight:700;text-decoration:none;}
-.step-view{display:none;}.step-view.active{display:block;}
+.auth-foot-txt{font-size:12px;color:#666;}
+.auth-foot-lnk{color:var(--gold);font-weight:700;text-decoration:none;cursor:pointer;}
+.step-view{display:none;animation:fadeUp .25s ease;}.step-view.active{display:block;}
 .pwd-meter{margin-top:9px;display:none;}
 .pwd-bar{height:5px;border-radius:3px;background:#1C1C1C;overflow:hidden;}
 .pwd-bar-fill{height:100%;width:0;border-radius:3px;transition:width .25s,background .25s;}
 .pwd-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;}
-#pwdLabel{font-weight:800;letter-spacing:.5px;}
-#pwdHint{color:#555;}
-.uname-status{font-size:10px;margin-top:6px;font-weight:700;letter-spacing:.3px;min-height:12px;}
-.uname-status.ok{color:#22C55E;}
-.uname-status.bad{color:#EF4444;}
+#pwdLabel{font-weight:800;letter-spacing:.5px;}#pwdHint{color:#666;}
+.uname-status{font-size:10.5px;margin-top:6px;font-weight:700;letter-spacing:.3px;min-height:13px;}
+.uname-status.ok{color:#22C55E;}.uname-status.bad{color:#EF4444;}.uname-status.wait{color:#888;}
+.code-wrap{margin-top:14px;background:#0D0D0D;border:1px solid #1E1E1E;border-radius:var(--r-lg);padding:16px;}
+.code-sent{font-size:12px;color:#888;line-height:1.5;margin-bottom:12px;}
+.code-sent b{color:#fff;}
+.code-input{letter-spacing:10px;text-align:center;font-size:20px;font-weight:800;}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#666;cursor:pointer;margin-bottom:18px;}
+.back-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+.btn-block{margin-top:6px;}
+.tiny-note{font-size:11px;color:#555;text-align:center;margin-top:12px;line-height:1.5;}
 </style>
 {% endblock %}
 
@@ -46,34 +44,73 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 <div class="auth-wrap">
   <div class="auth-head">
     <img src="/static/twin_logo.png" class="auth-mark" alt="TWIN" onerror="this.style.display='none'">
-    <div class="auth-logo">TWIN</div>
-    <div class="auth-title" id="stepTitle">Create your account</div>
-    <div class="auth-desc" id="stepDesc">Start your journey with TWIN — powered by EPHAS</div>
+    <div class="auth-title" id="stepTitle">What's your name?</div>
+    <div class="auth-desc" id="stepDesc">Let's start with the basics.</div>
   </div>
 
   <div class="step-bar-auth">
     <div class="sba done" id="seg1"></div>
     <div class="sba" id="seg2"></div>
     <div class="sba" id="seg3"></div>
+    <div class="sba" id="seg4"></div>
   </div>
 
+  <div class="back-link" id="backLink" onclick="prevStep()" style="display:none;"><i data-lucide="arrow-left"></i> Back</div>
+
+  {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
+
   <form method="POST" action="/signup" id="signupForm">
-  <!-- STEP 1: Account -->
+  <!-- STEP 1: NAME -->
   <div class="step-view active" id="step1">
-    {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
     <div class="form-group">
       <label class="form-label">Full Name</label>
-      <input type="text" class="form-input" id="inp-name" name="name" placeholder="Your name" autocomplete="name">
+      <input type="text" class="form-input" id="inp-name" name="name" placeholder="Your name" autocomplete="name" autofocus>
     </div>
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input type="email" class="form-input" id="inp-email" name="email" placeholder="you@example.com" autocomplete="email">
-    </div>
+    <div class="form-error" id="step1err" style="margin-bottom:10px;"></div>
+    <button type="button" class="btn btn-gold btn-full btn-block" onclick="nextStep()" style="border-radius:var(--r-xl);">
+      <i data-lucide="arrow-right"></i> CONTINUE
+    </button>
+  </div>
+
+  <!-- STEP 2: USERNAME -->
+  <div class="step-view" id="step2">
     <div class="form-group">
       <label class="form-label">Username</label>
       <input type="text" class="form-input" id="inp-username" name="username" placeholder="username" autocomplete="off" oninput="onUsername()">
       <div class="uname-status" id="unameStatus"></div>
     </div>
+    <div class="form-error" id="step2err" style="margin-bottom:10px;"></div>
+    <button type="button" class="btn btn-gold btn-full btn-block" onclick="nextStep()" style="border-radius:var(--r-xl);">
+      <i data-lucide="arrow-right"></i> CONTINUE
+    </button>
+  </div>
+
+  <!-- STEP 3: EMAIL + CODE -->
+  <div class="step-view" id="step3">
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="inp-email" name="email" placeholder="you@example.com" autocomplete="email" oninput="onEmailEdit()">
+      <div class="uname-status" id="emailStatus"></div>
+    </div>
+
+    <div class="code-wrap" id="codeBox" style="display:none;">
+      <div class="code-sent">We sent a 6-digit code to <b id="codeEmailLabel"></b>. Enter it below to confirm your email.</div>
+      <input type="text" class="form-input code-input" id="inp-code" inputmode="numeric" maxlength="6" placeholder="······" oninput="onCodeInput()">
+      <div class="uname-status" id="codeStatus"></div>
+      <div style="text-align:center;margin-top:8px;"><span class="auth-foot-txt">Didn't get it? </span><a class="auth-foot-lnk" onclick="sendCode(true)">Resend</a></div>
+    </div>
+
+    <button type="button" class="btn btn-gold btn-full btn-block" id="sendBtn" onclick="sendCode(false)" style="border-radius:var(--r-xl);">
+      <i data-lucide="send"></i> SEND CODE
+    </button>
+    <button type="button" class="btn btn-gold btn-full btn-block hidden" id="step3Continue" onclick="nextStep()" style="border-radius:var(--r-xl);">
+      <i data-lucide="arrow-right"></i> CONTINUE
+    </button>
+    <div class="tiny-note" id="emailNote"></div>
+  </div>
+
+  <!-- STEP 4: PASSWORD -->
+  <div class="step-view" id="step4">
     <div class="form-group">
       <label class="form-label">Password</label>
       <input type="password" class="form-input" id="inp-pwd" name="password" placeholder="Min 8 characters" autocomplete="new-password" oninput="checkPwd();checkMatch()">
@@ -87,56 +124,9 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
       <input type="password" class="form-input" id="inp-pwd2" name="confirm" placeholder="Re-enter password" autocomplete="new-password" oninput="checkMatch()">
       <div class="uname-status" id="matchStatus"></div>
     </div>
-    <div class="form-error" id="step1err" style="margin-bottom:10px;"></div>
-    <button type="button" class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);margin-top:4px;">
-      <i data-lucide="arrow-right"></i> CONTINUE
-    </button>
-  </div>
-
-  <!-- STEP 2: Goals -->
-  <div class="step-view" id="step2">
-    <div class="goals-grid">
-      <div class="goal-btn" onclick="toggleGoal(this)">
-        <i data-lucide="brain"></i>
-        <div class="goal-name">MINDSET</div>
-      </div>
-      <div class="goal-btn" onclick="toggleGoal(this)">
-        <i data-lucide="dumbbell"></i>
-        <div class="goal-name">FITNESS</div>
-      </div>
-      <div class="goal-btn" onclick="toggleGoal(this)">
-        <i data-lucide="trending-up"></i>
-        <div class="goal-name">WEALTH</div>
-      </div>
-      <div class="goal-btn" onclick="toggleGoal(this)">
-        <i data-lucide="target"></i>
-        <div class="goal-name">PURPOSE</div>
-      </div>
-      <div class="goal-btn" onclick="toggleGoal(this)">
-        <i data-lucide="heart"></i>
-        <div class="goal-name">WELLBEING</div>
-      </div>
-      <div class="goal-btn" onclick="toggleGoal(this)">
-        <i data-lucide="users"></i>
-        <div class="goal-name">SOCIAL</div>
-      </div>
-    </div>
-    <button type="button" class="btn btn-gold btn-full" onclick="nextStep()" style="border-radius:var(--r-xl);">
-      <i data-lucide="arrow-right"></i> CONTINUE
-    </button>
-  </div>
-
-  <!-- STEP 3: Done -->
-  <div class="step-view" id="step3">
-    <div style="text-align:center;padding:20px 0 32px;">
-      <div style="width:72px;height:72px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold-b);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-        <i data-lucide="check-circle" style="width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i>
-      </div>
-      <div style="font-family:'Arpubes',sans-serif;font-size:24px;letter-spacing:-1px;color:#fff;margin-bottom:10px;">You're all set</div>
-      <div style="font-size:13px;color:#555;line-height:1.6;max-width:260px;margin:0 auto;">TWIN is ready. Start with your first check-in and let AXON learn your patterns.</div>
-    </div>
-    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);">
-      <i data-lucide="arrow-right"></i> ENTER TWIN
+    <div class="form-error" id="step4err" style="margin-bottom:10px;"></div>
+    <button type="submit" class="btn btn-gold btn-full btn-block" style="border-radius:var(--r-xl);">
+      <i data-lucide="check"></i> CREATE ACCOUNT
     </button>
   </div>
   </form>
@@ -150,89 +140,161 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 
 {% block scripts %}
 <script>
-function checkPwd() {
-  const v = document.getElementById('inp-pwd').value;
-  const meter = document.getElementById('pwdMeter');
-  meter.style.display = v ? 'block' : 'none';
-  const hasLen = v.length >= 8, hasUp = /[A-Z]/.test(v), hasLow = /[a-z]/.test(v),
-        hasNum = /[0-9]/.test(v), hasSpec = /[^A-Za-z0-9]/.test(v);
-  let score = [hasLen, hasUp, hasLow, hasNum, hasSpec].filter(Boolean).length;
-  const fill = document.getElementById('pwdBarFill'),
-        label = document.getElementById('pwdLabel'),
-        hint = document.getElementById('pwdHint');
-  let color = '#EF4444', txt = 'Weak';
-  if (score >= 5) { color = '#22C55E'; txt = 'Excellent'; }
-  else if (score === 4) { color = '#22C55E'; txt = 'Good'; }
-  else if (score === 3) { color = '#F59E0B'; txt = 'Fair'; }
-  fill.style.width = (score * 20) + '%';
-  fill.style.background = color;
-  label.textContent = txt;
-  label.style.color = color;
-  const missing = [];
-  if (!hasLen) missing.push('8+ chars');
-  if (!hasUp) missing.push('a capital');
-  if (!hasSpec) missing.push('a symbol');
-  hint.textContent = missing.length ? 'Add ' + missing.join(', ') : 'Looks strong';
-  hint.style.color = missing.length ? '#555' : '#22C55E';
+let curStep = 1;
+let usernameOk = false, unameTimer = null;
+let emailVerified = false;
+
+const titles = ["What's your name?", "Welcome, {n}", "Your email", "Set a password"];
+const descs  = ["Let's start with the basics.",
+                "Now pick your @username — this is how people find you.",
+                "We'll send a quick code to confirm it's really you.",
+                "Last step — secure your account."];
+
+function setHead(){
+  const name = (document.getElementById('inp-name').value.trim() || 'there');
+  document.getElementById('stepTitle').textContent = titles[curStep-1].replace('{n}', name);
+  document.getElementById('stepDesc').textContent = descs[curStep-1];
+  document.getElementById('backLink').style.display = curStep > 1 ? 'inline-flex' : 'none';
+  if (window.lucide) lucide.createIcons();
 }
 
-let usernameOk = false;
-let unameTimer = null;
+function showStep(n){
+  document.getElementById('step'+curStep).classList.remove('active');
+  curStep = n;
+  document.getElementById('step'+curStep).classList.add('active');
+  for (let i=1;i<=4;i++) document.getElementById('seg'+i).classList.toggle('done', i<=curStep);
+  setHead();
+}
+
+function nextStep(){
+  if (curStep === 1){
+    const name = document.getElementById('inp-name').value.trim();
+    const err = document.getElementById('step1err');
+    if (!name){ err.textContent='Please enter your name.'; err.classList.add('show'); return; }
+    err.classList.remove('show');
+  }
+  if (curStep === 2){
+    const uname = document.getElementById('inp-username').value.trim();
+    const err = document.getElementById('step2err');
+    if (uname.length < 3 || !usernameOk){ err.textContent='Pick an available username (3+ characters).'; err.classList.add('show'); return; }
+    err.classList.remove('show');
+  }
+  if (curStep === 3){
+    if (!emailVerified){ return; }
+  }
+  if (curStep < 4) showStep(curStep+1);
+}
+function prevStep(){ if (curStep > 1) showStep(curStep-1); }
+
+/* ---- USERNAME ---- */
 function onUsername(){
   const inp = document.getElementById('inp-username');
-  inp.value = inp.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase();
-  const v = inp.value;
-  const st = document.getElementById('unameStatus');
-  usernameOk = false;
-  clearTimeout(unameTimer);
-  if (v.length < 3) { st.textContent = v ? 'At least 3 characters' : ''; st.className = 'uname-status bad'; return; }
-  st.textContent = 'Checking…'; st.className = 'uname-status';
-  unameTimer = setTimeout(() => {
-    fetch('/api/check-username?u=' + encodeURIComponent(v)).then(r=>r.json()).then(d=>{
+  inp.value = inp.value.replace(/[^a-zA-Z0-9_.]/g,'').toLowerCase();
+  const v = inp.value, st = document.getElementById('unameStatus');
+  usernameOk = false; clearTimeout(unameTimer);
+  if (v.length < 3){ st.textContent = v ? 'At least 3 characters' : ''; st.className='uname-status bad'; return; }
+  st.textContent='Checking…'; st.className='uname-status wait';
+  unameTimer = setTimeout(()=>{
+    fetch('/api/check-username?u='+encodeURIComponent(v)).then(r=>r.json()).then(d=>{
       if (d.username !== document.getElementById('inp-username').value) return;
-      if (d.available) { st.textContent = '✓ @' + v + ' is available'; st.className = 'uname-status ok'; usernameOk = true; }
-      else { st.textContent = '✗ @' + v + ' is taken'; st.className = 'uname-status bad'; usernameOk = false; }
+      if (d.available){ st.textContent='✓ @'+v+' is available'; st.className='uname-status ok'; usernameOk=true; }
+      else { st.textContent='✗ @'+v+' is taken'; st.className='uname-status bad'; usernameOk=false; }
     }).catch(()=>{ st.textContent=''; });
   }, 350);
 }
-function checkMatch(){
-  const p = document.getElementById('inp-pwd').value;
-  const c = document.getElementById('inp-pwd2').value;
-  const st = document.getElementById('matchStatus');
-  if (!c) { st.textContent = ''; return; }
-  if (p === c) { st.textContent = '✓ Passwords match'; st.className = 'uname-status ok'; }
-  else { st.textContent = '✗ Passwords don\'t match'; st.className = 'uname-status bad'; }
+
+/* ---- EMAIL + CODE ---- */
+function onEmailEdit(){
+  // editing the email after a code was sent resets verification
+  emailVerified = false;
+  document.getElementById('codeBox').style.display='none';
+  document.getElementById('sendBtn').classList.remove('hidden');
+  document.getElementById('step3Continue').classList.add('hidden');
+  document.getElementById('emailStatus').textContent='';
+  document.getElementById('emailNote').textContent='';
+}
+function sendCode(isResend){
+  const email = document.getElementById('inp-email').value.trim().toLowerCase();
+  const st = document.getElementById('emailStatus');
+  const note = document.getElementById('emailNote');
+  if (!email || email.indexOf('@')===-1 || email.indexOf('.')===-1){ st.textContent='Enter a valid email.'; st.className='uname-status bad'; return; }
+  st.textContent='Sending…'; st.className='uname-status wait'; note.textContent='';
+  const fd = new URLSearchParams({email});
+  fetch('/api/signup/send-code',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:fd})
+    .then(r=>r.json()).then(d=>{
+      if (!d.ok){
+        if (d.reason==='taken'){ st.textContent='✗ An account already uses this email.'; st.className='uname-status bad'; }
+        else { st.textContent='✗ That email looks invalid.'; st.className='uname-status bad'; }
+        return;
+      }
+      if (d.sent){
+        st.textContent=''; st.className='uname-status';
+        document.getElementById('codeEmailLabel').textContent=email;
+        document.getElementById('codeBox').style.display='block';
+        document.getElementById('sendBtn').classList.add('hidden');
+        document.getElementById('inp-code').focus();
+        if (isResend) { document.getElementById('codeStatus').textContent='New code sent.'; document.getElementById('codeStatus').className='uname-status wait'; }
+      } else {
+        // Resend not configured yet — let them through, verify later
+        emailVerified = true;
+        st.textContent='✓ Email saved'; st.className='uname-status ok';
+        document.getElementById('sendBtn').classList.add('hidden');
+        document.getElementById('step3Continue').classList.remove('hidden');
+        note.textContent='Email confirmation will be enabled shortly — you can finish signing up now.';
+      }
+    }).catch(()=>{ st.textContent='Network error, try again.'; st.className='uname-status bad'; });
+}
+function onCodeInput(){
+  const inp = document.getElementById('inp-code');
+  inp.value = inp.value.replace(/[^0-9]/g,'');
+  if (inp.value.length === 6) verifyCode();
+}
+function verifyCode(){
+  const email = document.getElementById('inp-email').value.trim().toLowerCase();
+  const code = document.getElementById('inp-code').value;
+  const st = document.getElementById('codeStatus');
+  st.textContent='Verifying…'; st.className='uname-status wait';
+  fetch('/api/signup/verify-code',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({email,code})})
+    .then(r=>r.json()).then(d=>{
+      if (d.ok){
+        emailVerified = true;
+        st.textContent='✓ Email confirmed'; st.className='uname-status ok';
+        document.getElementById('step3Continue').classList.remove('hidden');
+        document.getElementById('emailStatus').textContent='✓ Verified'; document.getElementById('emailStatus').className='uname-status ok';
+      } else {
+        st.textContent='✗ Wrong or expired code'; st.className='uname-status bad';
+      }
+    }).catch(()=>{ st.textContent='Network error, try again.'; st.className='uname-status bad'; });
 }
 
-let curStep = 1;
-function nextStep() {
-  if (curStep === 1) {
-    const name = document.getElementById('inp-name').value.trim();
-    const email = document.getElementById('inp-email').value.trim();
-    const uname = document.getElementById('inp-username').value.trim();
-    const pwd = document.getElementById('inp-pwd').value;
-    const pwd2 = document.getElementById('inp-pwd2').value;
-    const err = document.getElementById('step1err');
-    if (!name) { err.textContent = 'Please enter your name.'; err.classList.add('show'); return; }
-    if (!email || email.indexOf('@') === -1) { err.textContent = 'Please enter a valid email.'; err.classList.add('show'); return; }
-    if (uname.length < 3 || !usernameOk) { err.textContent = 'Pick an available username (3+ characters).'; err.classList.add('show'); return; }
-    if (pwd.length < 8 || !/[A-Z]/.test(pwd) || !/[^A-Za-z0-9]/.test(pwd)) {
-      err.textContent = 'Password needs 8+ characters, a capital letter, and a symbol.';
-      err.classList.add('show'); return;
-    }
-    if (pwd !== pwd2) { err.textContent = 'Passwords don\'t match.'; err.classList.add('show'); return; }
-    err.classList.remove('show');
-  }
-  document.getElementById('step' + curStep).classList.remove('active');
-  curStep++;
-  document.getElementById('step' + curStep).classList.add('active');
-  document.getElementById('seg' + curStep).classList.add('done');
-  const titles = ['', 'Create your account', 'What are you here to work on?', 'Ready to begin'];
-  const descs = ['', 'Start your journey with TWIN — powered by EPHAS', 'Pick your focus areas (select all that apply)', 'Your TWIN profile is ready'];
-  document.getElementById('stepTitle').textContent = titles[curStep];
-  document.getElementById('stepDesc').textContent = descs[curStep];
-  if(curStep === 3) document.getElementById('authFoot').style.display = 'none';
+/* ---- PASSWORD ---- */
+function checkPwd(){
+  const v = document.getElementById('inp-pwd').value;
+  const meter = document.getElementById('pwdMeter');
+  meter.style.display = v ? 'block' : 'none';
+  const hasLen=v.length>=8, hasUp=/[A-Z]/.test(v), hasLow=/[a-z]/.test(v), hasNum=/[0-9]/.test(v), hasSpec=/[^A-Za-z0-9]/.test(v);
+  let score=[hasLen,hasUp,hasLow,hasNum,hasSpec].filter(Boolean).length;
+  const fill=document.getElementById('pwdBarFill'), label=document.getElementById('pwdLabel'), hint=document.getElementById('pwdHint');
+  let color='#EF4444', txt='Weak';
+  if (score>=5){ color='#22C55E'; txt='Excellent'; } else if (score===4){ color='#22C55E'; txt='Good'; } else if (score===3){ color='#F59E0B'; txt='Fair'; }
+  fill.style.width=(score*20)+'%'; fill.style.background=color; label.textContent=txt; label.style.color=color;
+  const missing=[]; if(!hasLen)missing.push('8+ chars'); if(!hasUp)missing.push('a capital'); if(!hasSpec)missing.push('a symbol');
+  hint.textContent = missing.length ? 'Add '+missing.join(', ') : 'Looks strong';
+  hint.style.color = missing.length ? '#666' : '#22C55E';
 }
-function toggleGoal(el) { el.classList.toggle('sel'); }
+function checkMatch(){
+  const p=document.getElementById('inp-pwd').value, c=document.getElementById('inp-pwd2').value, st=document.getElementById('matchStatus');
+  if (!c){ st.textContent=''; return; }
+  if (p===c){ st.textContent='✓ Passwords match'; st.className='uname-status ok'; }
+  else { st.textContent="✗ Passwords don't match"; st.className='uname-status bad'; }
+}
+
+document.getElementById('signupForm').addEventListener('submit', function(e){
+  const pwd=document.getElementById('inp-pwd').value, pwd2=document.getElementById('inp-pwd2').value, err=document.getElementById('step4err');
+  if (pwd.length<8 || !/[A-Z]/.test(pwd) || !/[^A-Za-z0-9]/.test(pwd)){
+    e.preventDefault(); err.textContent='Password needs 8+ characters, a capital letter, and a symbol.'; err.classList.add('show'); return;
+  }
+  if (pwd!==pwd2){ e.preventDefault(); err.textContent="Passwords don't match."; err.classList.add('show'); return; }
+});
 </script>
 {% endblock %}

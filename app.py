@@ -145,6 +145,9 @@ class Profile(db.Model):
     height = db.Column(db.String(20), default='')
     weight = db.Column(db.String(20), default='')
     age = db.Column(db.String(10), default='')
+    sex = db.Column(db.String(10), default='')            # male | female
+    birth_date = db.Column(db.String(20), default='')     # YYYY-MM-DD
+    religion = db.Column(db.String(40), default='')       # so AXON can tailor (and track growth goals)
     primary_goal = db.Column(db.String(300), default='')
     bad_habits = db.Column(db.String(400), default='')   # habits the user wants to stop (comma-sep)
     focus = db.Column(db.String(200), default='')        # focus areas (comma-sep)
@@ -266,14 +269,29 @@ def axon_system_prompt(user):
     # Private onboarding profile (AXON-only)
     prof = Profile.query.filter_by(user_id=user.id).first()
     prof_bits = []
+    sex = getattr(prof, 'sex', '') or ''
+    religion = getattr(prof, 'religion', '') or ''
     if prof:
         if prof.height: prof_bits.append(f"height {_safe(prof.height, 20)}")
         if prof.weight: prof_bits.append(f"weight {_safe(prof.weight, 20)}")
         if prof.age: prof_bits.append(f"age {_safe(prof.age, 10)}")
+        if getattr(prof, 'birth_date', ''): prof_bits.append(f"born {_safe(prof.birth_date, 20)}")
+        if sex: prof_bits.append(f"sex: {sex}")
+        if religion: prof_bits.append(f"religion: {religion}")
         if prof.primary_goal: prof_bits.append(f"main goal: {_safe(prof.primary_goal, 150)}")
         if prof.bad_habits: prof_bits.append(f"trying to quit: {_safe(prof.bad_habits, 150)}")
         if prof.focus: prof_bits.append(f"focus areas: {_safe(prof.focus, 120)}")
     prof_txt = '; '.join(prof_bits) or 'not shared yet'
+    # Tailoring rules
+    if sex in ('male', 'female'):
+        sex_rule = f"Tailor health, fitness and hormonal advice to a {sex} body where it matters."
+    else:
+        sex_rule = "Sex not specified — keep body/health advice gender-neutral; do not assume."
+    if religion in ('islam', 'christianity', 'judaism'):
+        rel_rule = (f"They identify with {religion.title()}. If they want to grow spiritually, you may support "
+                    f"faith-consistent habits and encouragement, respectfully — only when they raise it.")
+    else:
+        rel_rule = "No specific faith to tailor to — keep guidance secular unless they bring up religion."
     # Courses AXON can recommend from inside the app
     courses = Post.query.filter_by(kind='course').order_by(Post.created_at.desc()).limit(12).all()
     course_txt = ', '.join(f"{_safe(p.title, 60)} [{_safe(p.category, 24)}]" for p in courses) or 'none published yet'
@@ -298,6 +316,7 @@ def axon_system_prompt(user):
         f"What they're working on (their own recent words): {notes_txt}\n"
         f"TWIN courses you can recommend: {course_txt}\n"
         "[END USER DATA]\n\n"
+        f"{sex_rule} {rel_rule}\n"
         "Only discuss the user's growth, habits, wellbeing, and the app. If asked something off-topic, steer back."
     )
 
@@ -459,6 +478,9 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS sex VARCHAR(10) DEFAULT ''",
+        "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS birth_date VARCHAR(20) DEFAULT ''",
+        "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS religion VARCHAR(40) DEFAULT ''",
     ):
         try:
             db.session.execute(text(stmt))
@@ -564,6 +586,20 @@ def get_profile(user):
         db.session.add(p)
         db.session.commit()
     return p
+
+SEX_OPTIONS = ('male', 'female', 'prefer not to say')
+RELIGION_OPTIONS = ('islam', 'christianity', 'judaism', 'other')
+
+def apply_basics(p, form):
+    """Apply the private 'basics' fields (sex/birth date/height/weight/age/religion) to a Profile."""
+    p.height = (form.get('height') or '').strip()[:20]
+    p.weight = (form.get('weight') or '').strip()[:20]
+    p.age = (form.get('age') or '').strip()[:10]
+    p.birth_date = (form.get('birth_date') or '').strip()[:20]
+    sex = (form.get('sex') or '').strip().lower()
+    p.sex = sex if sex in SEX_OPTIONS else ''
+    rel = (form.get('religion') or '').strip().lower()
+    p.religion = rel if rel in RELIGION_OPTIONS else ''
 
 def reauthed():
     return session.get('reauth_until', 0) > datetime.utcnow().timestamp()
@@ -829,7 +865,9 @@ def signup():
             err = 'That username is already taken.'
         if err:
             return render_template('signup.html', auth_page=True, error=err)
+        pre_verified = email in session.get('signup_verified', [])
         user = User(email=email, username=username, name=name or username)
+        user.email_verified = pre_verified
         user.set_password(pw)
         db.session.add(user)
         db.session.commit()
@@ -837,7 +875,8 @@ def signup():
         session.clear()
         session['accounts'] = accounts
         _set_active(user.id)
-        if RESEND_KEY:
+        # If they didn't verify in-flow (e.g. Resend just got configured), send a code to verify later.
+        if RESEND_KEY and not pre_verified:
             send_email(email, 'Verify your TWIN account',
                        code_email_html(issue_code(email, 'verify'), 'Welcome to TWIN. Enter this code to verify your email:'))
         return redirect('/onboarding')
@@ -851,9 +890,7 @@ def onboarding():
     cu = current_user()
     p = get_profile(cu)
     if request.method == 'POST':
-        p.height = (request.form.get('height') or '').strip()[:20]
-        p.weight = (request.form.get('weight') or '').strip()[:20]
-        p.age = (request.form.get('age') or '').strip()[:10]
+        apply_basics(p, request.form)
         p.primary_goal = (request.form.get('primary_goal') or '').strip()[:300]
         p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
         p.focus = (request.form.get('focus') or '').strip()[:200]
@@ -873,6 +910,33 @@ def onboarding_skip():
     if RESEND_KEY and not current_user().email_verified:
         return redirect('/verify-email')
     return redirect('/home')
+
+@app.route('/api/signup/send-code', methods=['POST'])
+def signup_send_code():
+    email = (request.form.get('email') or '').strip().lower()
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return {'ok': False, 'reason': 'invalid'}
+    if User.query.filter_by(email=email).first():
+        return {'ok': False, 'reason': 'taken'}
+    if not RESEND_KEY:
+        # Email not configured yet — let signup proceed without a code (verify later).
+        return {'ok': True, 'sent': False}
+    code = issue_code(email, 'verify')
+    sent = send_email(email, 'Your TWIN verification code',
+                      code_email_html(code, 'Enter this code to confirm your email and finish creating your TWIN account:'))
+    return {'ok': True, 'sent': bool(sent)}
+
+@app.route('/api/signup/verify-code', methods=['POST'])
+def signup_verify_code():
+    email = (request.form.get('email') or '').strip().lower()
+    code = request.form.get('code') or ''
+    if check_code(email, 'verify', code):
+        verified = session.get('signup_verified', [])
+        if email not in verified:
+            verified.append(email)
+        session['signup_verified'] = verified[-5:]
+        return {'ok': True}
+    return {'ok': False}
 
 @app.route('/api/check-username')
 def check_username():
@@ -1232,9 +1296,7 @@ def personal():
     p = get_profile(cu)
     saved = False
     if request.method == 'POST':
-        p.height = (request.form.get('height') or '').strip()[:20]
-        p.weight = (request.form.get('weight') or '').strip()[:20]
-        p.age = (request.form.get('age') or '').strip()[:10]
+        apply_basics(p, request.form)
         p.primary_goal = (request.form.get('primary_goal') or '').strip()[:300]
         p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
         p.focus = (request.form.get('focus') or '').strip()[:200]

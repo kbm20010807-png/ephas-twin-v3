@@ -26,7 +26,32 @@ body{background:var(--bg);min-height:100vh;}
 
   <form method="POST" action="/onboarding" id="obForm" onsubmit="collect()">
     <div class="form-group">
-      <label class="ob-lbl">About you</label>
+      <label class="ob-lbl">Sex</label>
+      <div class="chip-wrap" id="sexChips">
+        {% for s in ['Male','Female','Prefer not to say'] %}
+        <div class="ob-chip {% if p.sex == s|lower %}on{% endif %}" onclick="selectOne('sexChips',this)">{{ s }}</div>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="sex" id="sexHidden" value="{{ p.sex }}">
+    </div>
+
+    <div class="form-group">
+      <label class="ob-lbl">Date of birth</label>
+      <input name="birth_date" type="date" class="form-input" value="{{ p.birth_date }}">
+    </div>
+
+    <div class="form-group">
+      <label class="ob-lbl">Religion</label>
+      <div class="chip-wrap" id="relChips">
+        {% for r in ['Islam','Christianity','Judaism','Other'] %}
+        <div class="ob-chip {% if p.religion == r|lower %}on{% endif %}" onclick="selectOne('relChips',this)">{{ r }}</div>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="religion" id="relHidden" value="{{ p.religion }}">
+    </div>
+
+    <div class="form-group">
+      <label class="ob-lbl">Body</label>
       <div class="ob-row">
         <input name="age" class="form-input" placeholder="Age" inputmode="numeric" value="{{ p.age }}">
         <input name="height" class="form-input" placeholder="Height" value="{{ p.height }}">
@@ -77,6 +102,12 @@ function chipText(wrapId){
 function collect(){
   document.getElementById('badHidden').value = chipText('badChips');
   document.getElementById('focusHidden').value = chipText('focusChips');
+}
+function selectOne(wrapId, el){
+  document.querySelectorAll('#'+wrapId+' .ob-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  const hidden = wrapId === 'sexChips' ? 'sexHidden' : 'relHidden';
+  document.getElementById(hidden).value = el.textContent.trim().toLowerCase();
 }
 function addCustom(e, wrapId, inpId){
   if(e.key !== 'Enter') return;
