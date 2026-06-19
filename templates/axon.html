@@ -31,8 +31,8 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 .ax-typing span:nth-child(2){animation-delay:.2s;}
 .ax-typing span:nth-child(3){animation-delay:.4s;}
 @keyframes axBlink{0%,60%,100%{opacity:.3;}30%{opacity:1;}}
-.ax-input-bar{padding:12px 14px 30px;border-top:1px solid var(--border);background:var(--bg);display:flex;gap:10px;align-items:center;flex-shrink:0;}
-.ax-input{flex:1;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;}
+.ax-input-bar{padding:12px 14px 30px;border-top:1px solid var(--border);background:var(--bg);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;}
+.ax-input{flex:1;background:var(--bg-2);border:1.5px solid var(--border);border-radius:20px;padding:11px 16px;font-size:13px;line-height:1.4;color:var(--black);outline:none;transition:border-color .15s;resize:none;max-height:130px;overflow-y:auto;font-family:inherit;}
 .ax-input:focus{border-color:var(--gold);}
 .ax-input::placeholder{color:var(--muted);}
 .ax-send{width:42px;height:42px;border-radius:50%;background:var(--gold);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
@@ -76,7 +76,7 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 </div>
 
 <div class="ax-input-bar">
-  <input class="ax-input" id="axInput" placeholder="Message AXON..." autocomplete="off" onkeydown="if(event.key==='Enter')send()">
+  <textarea class="ax-input" id="axInput" rows="1" placeholder="Message AXON..." autocomplete="off" oninput="axGrow(this)" onkeydown="axKey(event)"></textarea>
   <button class="ax-send" onclick="send()"><i data-lucide="arrow-up"></i></button>
 </div>
 {% endblock %}
@@ -134,11 +134,14 @@ let axTimer = null;      // 1s debounce timer
 let axStreaming = false;
 let axCurBubble = null;
 
+function axGrow(el){ el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 130) + 'px'; }
+function axKey(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } }
 function send(){
   const inp = document.getElementById('axInput');
   const text = inp.value.trim();
   if(!text) return;
   inp.value = '';
+  inp.style.height = 'auto';   // reset the grown box after sending
   addMsg('user', text);
   axPending.push(text);
   // If AXON is mid-reply, interrupt it and we'll regenerate with this new message included
