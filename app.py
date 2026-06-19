@@ -147,6 +147,23 @@ class Profile(db.Model):
     focus = db.Column(db.String(200), default='')        # focus areas (comma-sep)
     onboarded = db.Column(db.Boolean, default=False)
 
+class Habit(db.Model):
+    __tablename__ = 'habits'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    name = db.Column(db.String(80), default='')
+    is_bad = db.Column(db.Boolean, default=False)   # a habit to QUIT -> streak = days clean
+    private = db.Column(db.Boolean, default=False)  # bad habits are forced private
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class HabitLog(db.Model):
+    # one row = a successful day (did the good habit / stayed clean of the bad one)
+    __tablename__ = 'habit_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    habit_id = db.Column(db.Integer, db.ForeignKey('habits.id'), index=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    date = db.Column(db.Date, index=True)
+
 
 LEVEL_TITLES = [
     (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
@@ -527,6 +544,21 @@ def get_profile(user):
         db.session.commit()
     return p
 
+def habit_streak(habit_id):
+    rows = db.session.query(HabitLog.date).filter_by(habit_id=habit_id).distinct().all()
+    dates = sorted({r[0] for r in rows if r[0]})
+    cur, _ = _streaks(dates)
+    return cur
+
+def serialize_habits(user):
+    today = datetime.utcnow().date()
+    out = []
+    for h in Habit.query.filter_by(user_id=user.id).order_by(Habit.created_at).all():
+        done = HabitLog.query.filter_by(habit_id=h.id, date=today).first() is not None
+        out.append({'id': h.id, 'name': h.name, 'is_bad': h.is_bad, 'private': h.private,
+                    'streak': habit_streak(h.id), 'done_today': done})
+    return out
+
 def _set_active(user_id):
     """Make user_id the active account, keeping it in the multi-account list (cap 5)."""
     accounts = session.get('accounts', [])
@@ -903,7 +935,8 @@ def home():
     if not auth(): return redirect('/login')
     cu = current_user()
     community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
-    return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community, active='home')
+    return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
+                           habits=serialize_habits(cu), active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
@@ -1005,6 +1038,65 @@ def profile():
 def messages():
     if not auth(): return redirect('/login')
     return render_template('messages.html', u=user_ctx(), threads=DEMO_THREADS, active='messages')
+
+@app.route('/habits')
+def habits():
+    if not auth(): return redirect('/login')
+    return render_template('habits.html', u=user_ctx(), habits=serialize_habits(current_user()), active='home')
+
+@app.route('/api/habit/add', methods=['POST'])
+def habit_add():
+    if not auth(): return ('', 401)
+    name = (request.form.get('name') or '').strip()[:80]
+    if not name:
+        return ('', 400)
+    is_bad = request.form.get('is_bad') == '1'
+    private = is_bad or request.form.get('private') == '1'  # bad habits are always private
+    db.session.add(Habit(user_id=current_user().id, name=name, is_bad=is_bad, private=private))
+    db.session.commit()
+    return redirect('/habits')
+
+@app.route('/api/habit/edit/<int:hid>', methods=['POST'])
+def habit_edit(hid):
+    if not auth(): return ('', 401)
+    h = Habit.query.filter_by(id=hid, user_id=current_user().id).first()
+    if not h:
+        return ('', 404)
+    name = (request.form.get('name') or '').strip()[:80]
+    if name:
+        h.name = name
+    if not h.is_bad:  # bad habits stay private
+        h.private = request.form.get('private') == '1'
+    db.session.commit()
+    return redirect('/habits')
+
+@app.route('/api/habit/delete/<int:hid>', methods=['POST'])
+def habit_delete(hid):
+    if not auth(): return ('', 401)
+    h = Habit.query.filter_by(id=hid, user_id=current_user().id).first()
+    if h:
+        HabitLog.query.filter_by(habit_id=h.id).delete()
+        db.session.delete(h)
+        db.session.commit()
+    return redirect('/habits')
+
+@app.route('/api/habit/toggle/<int:hid>', methods=['POST'])
+def habit_toggle(hid):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    h = Habit.query.filter_by(id=hid, user_id=cu.id).first()
+    if not h:
+        return ('', 404)
+    today = datetime.utcnow().date()
+    log = HabitLog.query.filter_by(habit_id=hid, date=today).first()
+    if log:
+        db.session.delete(log)
+        done = False
+    else:
+        db.session.add(HabitLog(habit_id=hid, user_id=cu.id, date=today))
+        done = True
+    db.session.commit()
+    return {'done': done, 'streak': habit_streak(hid)}
 
 @app.route('/axon')
 def axon():

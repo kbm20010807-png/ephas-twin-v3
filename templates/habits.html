@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Habits{% endblock %}
+{% block head %}
+<style>
+.habit-add{margin:14px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;box-shadow:var(--sh);}
+.habit-add input[type=text]{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 14px;font-size:13px;color:var(--black);outline:none;box-sizing:border-box;}
+.habit-add input[type=text]:focus{border-color:var(--gold);}
+.ha-opts{display:flex;gap:16px;margin:12px 0;}
+.ha-toggle{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
+.ha-toggle input{width:16px;height:16px;accent-color:var(--gold);}
+.habit-card{display:flex;align-items:center;gap:13px;margin:10px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;box-shadow:var(--sh);}
+.habit-check{width:44px;height:44px;border-radius:50%;border:2px solid var(--border);background:var(--bg-2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.habit-check svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2.5;transition:stroke .15s;}
+.habit-check.on{background:var(--gold);border-color:var(--gold);}
+.habit-check.on svg{stroke:#000;}
+.habit-body{flex:1;min-width:0;}
+.habit-name{font-size:14px;font-weight:700;color:var(--black);display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.habit-tag{font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:var(--r-full);text-transform:uppercase;background:var(--bg-2);border:1px solid var(--border);color:var(--sub);}
+.habit-tag.bad{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);color:#EF4444;}
+.habit-streak{font-size:11px;color:var(--sub);margin-top:4px;display:flex;align-items:center;gap:5px;}
+.habit-streak svg{width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:2;}
+.habit-streak .hstreak{font-weight:800;color:var(--gold);}
+.habit-menu{background:none;border:none;cursor:pointer;padding:6px;flex-shrink:0;}
+.habit-menu svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;}
+.h-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:flex-end;justify-content:center;}
+.h-modal.on{display:flex;}
+.h-modal-box{background:var(--bg);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:430px;padding:24px 20px 32px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/home" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Habits</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<form action="/api/habit/add" method="post" class="habit-add">
+  <input type="text" name="name" placeholder="New habit — e.g. Workout, or Quit smoking" required maxlength="80">
+  <div class="ha-opts">
+    <label class="ha-toggle"><input type="checkbox" id="isBad" name="is_bad" value="1" onchange="syncBad()"> Habit to quit</label>
+    <label class="ha-toggle"><input type="checkbox" id="isPriv" name="private" value="1"> Private</label>
+  </div>
+  <button type="submit" class="btn btn-gold btn-sm" style="border-radius:var(--r-xl);"><i data-lucide="plus"></i> Add habit</button>
+</form>
+
+{% if habits %}
+{% for h in habits %}
+<div class="habit-card">
+  <button class="habit-check {% if h.done_today %}on{% endif %}" onclick="toggleHabit(this,{{ h.id }})"><i data-lucide="check"></i></button>
+  <div class="habit-body">
+    <div class="habit-name">{{ h.name }}
+      {% if h.is_bad %}<span class="habit-tag bad">QUIT</span>{% endif %}
+      {% if h.private %}<span class="habit-tag">PRIVATE</span>{% endif %}
+    </div>
+    <div class="habit-streak"><i data-lucide="flame"></i> <span class="hstreak">{{ h.streak }}</span> {% if h.is_bad %}days clean{% else %}day streak{% endif %}</div>
+  </div>
+  <button class="habit-menu" onclick="openEdit({{ h.id }}, this)" data-name="{{ h.name }}" data-priv="{{ 1 if h.private else 0 }}" data-bad="{{ 1 if h.is_bad else 0 }}"><i data-lucide="more-vertical"></i></button>
+</div>
+{% endfor %}
+{% else %}
+<div style="text-align:center;padding:50px 28px;">
+  <i data-lucide="repeat" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No habits yet</div>
+  <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Add a habit above — build a streak,<br>or track a habit you want to quit.</div>
+</div>
+{% endif %}
+
+<!-- EDIT MODAL -->
+<div class="h-modal" id="hModal" onclick="closeEdit()">
+  <div class="h-modal-box" onclick="event.stopPropagation()">
+    <div class="t-lg mb-4">Edit habit</div>
+    <form action="/api/habit/edit/0" method="post" id="editForm">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" id="editName" class="form-input" maxlength="80">
+      </div>
+      <label class="ha-toggle" id="editPrivWrap" style="margin:10px 0 18px;"><input type="checkbox" name="private" value="1" id="editPriv"> Private</label>
+      <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-bottom:10px;"><i data-lucide="check"></i> Save</button>
+    </form>
+    <form action="/api/habit/delete/0" method="post" id="deleteForm">
+      <button type="submit" class="btn btn-danger btn-full" style="border-radius:var(--r-xl);"><i data-lucide="trash-2"></i> Delete habit</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function syncBad(){
+  const bad = document.getElementById('isBad').checked;
+  const priv = document.getElementById('isPriv');
+  if(bad){ priv.checked = true; priv.disabled = true; } else { priv.disabled = false; }
+}
+function toggleHabit(btn, id){
+  fetch('/api/habit/toggle/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('on', d.done);
+    const card = btn.closest('.habit-card');
+    const st = card.querySelector('.hstreak');
+    if(st) st.textContent = d.streak;
+  }).catch(()=>{});
+}
+function openEdit(id, btn){
+  document.getElementById('editForm').action = '/api/habit/edit/'+id;
+  document.getElementById('deleteForm').action = '/api/habit/delete/'+id;
+  document.getElementById('editName').value = btn.dataset.name;
+  const isBad = btn.dataset.bad === '1';
+  const priv = document.getElementById('editPriv');
+  priv.checked = btn.dataset.priv === '1';
+  document.getElementById('editPrivWrap').style.display = isBad ? 'none' : 'flex';
+  document.getElementById('hModal').classList.add('on');
+}
+function closeEdit(){ document.getElementById('hModal').classList.remove('on'); }
+</script>
+{% endblock %}

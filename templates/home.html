@@ -97,6 +97,16 @@
 .qc-title{font-size:13px;font-weight:800;color:var(--black);margin-bottom:3px;}
 .qc-sub{font-size:11px;color:var(--sub);}
 .qc-tag{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);white-space:nowrap;}
+.hm-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);}
+.hm-row:last-child{border-bottom:none;}
+.hm-check{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);background:var(--bg-2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.hm-check svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;}
+.hm-check.on{background:var(--gold);border-color:var(--gold);}
+.hm-check.on svg{stroke:#000;}
+.hm-name{flex:1;font-size:13px;font-weight:600;color:var(--black);display:flex;align-items:center;gap:5px;}
+.hm-name svg{stroke:var(--muted);fill:none;stroke-width:2;}
+.hm-streak{font-size:11px;color:var(--sub);}
+.hm-streak .hstreak{font-family:'Inter',sans-serif;font-weight:800;color:var(--gold);font-size:14px;}
 </style>
 {% endblock %}
 
@@ -192,6 +202,28 @@
   </div>
   <div class="qc-tag">VIEW ALL</div>
 </a>
+
+<!-- HABITS -->
+<div style="padding:20px 20px 0;">
+  <div class="flex justify-b items-c mb-3">
+    <div class="t-label">Your habits</div>
+    <a href="/habits" style="font-size:11px;color:var(--gold);font-weight:700;text-decoration:none;">Manage →</a>
+  </div>
+  {% if habits %}
+  {% for h in habits %}
+  <div class="hm-row">
+    <button class="hm-check {% if h.done_today %}on{% endif %}" onclick="hToggle(this,{{ h.id }})"><i data-lucide="check"></i></button>
+    <div class="hm-name">{{ h.name }}{% if h.private %} <i data-lucide="lock" style="width:11px;height:11px;"></i>{% endif %}</div>
+    <div class="hm-streak"><span class="hstreak">{{ h.streak }}</span> {% if h.is_bad %}clean{% else %}d{% endif %}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <a href="/habits" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px dashed var(--border);border-radius:var(--r-lg);padding:14px;text-decoration:none;">
+    <div class="qc-ico" style="width:36px;height:36px;"><i data-lucide="plus" style="stroke:var(--gold);"></i></div>
+    <div style="font-size:12px;color:var(--sub);">Add a habit to build streaks — or quit a bad one.</div>
+  </a>
+  {% endif %}
+</div>
 
 <a href="/axon" class="axon-card">
   <div class="axon-glow"></div>
@@ -303,6 +335,13 @@ function hLike(btn, id) {
   fetch('/api/like/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
     btn.classList.toggle('liked', d.liked);
     if (n) n.textContent = d.count;
+  }).catch(()=>{});
+}
+function hToggle(btn, id) {
+  fetch('/api/habit/toggle/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.classList.toggle('on', d.done);
+    const st = btn.closest('.hm-row').querySelector('.hstreak');
+    if (st) st.textContent = d.streak;
   }).catch(()=>{});
 }
 </script>
