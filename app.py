@@ -47,6 +47,7 @@ class User(db.Model):
     avatar = db.Column(db.Text, default='')   # base64 data URL (resized small)
     banner = db.Column(db.Text, default='')   # base64 data URL (resized)
     last_username_change = db.Column(db.DateTime)
+    tz_offset = db.Column(db.Integer, default=0)  # minutes east of UTC (from the user's device)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -260,13 +261,16 @@ ANTHROPIC_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 AXON_MODEL = os.environ.get('AXON_MODEL', 'claude-sonnet-4-6')
 LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
-TZ_OFFSET = timedelta(hours=int(os.environ.get('TZ_OFFSET_HOURS', '3')))  # user's day boundary (Qatar = +3)
+def user_tz_offset(user):
+    """Minutes east of UTC, captured from the user's own device. 0 = UTC until reported."""
+    return getattr(user, 'tz_offset', 0) or 0
 
-def _day_start_utc():
-    """UTC instant of the user's local midnight today — defines the 'today' chat window."""
-    local_now = datetime.utcnow() + TZ_OFFSET
+def _day_start_utc(offset_min):
+    """UTC instant of the user's LOCAL midnight today — defines their personal 'today' chat window."""
+    off = timedelta(minutes=offset_min)
+    local_now = datetime.utcnow() + off
     local_midnight = datetime(local_now.year, local_now.month, local_now.day)
-    return local_midnight - TZ_OFFSET
+    return local_midnight - off
 
 def get_axon_memory(user):
     m = AxonMemory.query.filter_by(user_id=user.id).first()
@@ -276,10 +280,11 @@ def get_axon_memory(user):
         db.session.commit()
     return m
 
-def axon_today_messages(uid, limit=40):
-    """Just today's conversation (token-efficient) — older days live in AxonMemory."""
+def axon_today_messages(user, limit=40):
+    """Just today's conversation in the user's own timezone (token-efficient) — older days live in AxonMemory."""
+    start = _day_start_utc(user_tz_offset(user))
     rows = (AxonMessage.query
-            .filter(AxonMessage.user_id == uid, AxonMessage.created_at >= _day_start_utc())
+            .filter(AxonMessage.user_id == user.id, AxonMessage.created_at >= start)
             .order_by(AxonMessage.created_at).all())
     return rows[-limit:]
 
@@ -288,7 +293,7 @@ def roll_axon_memory(user):
     if not ANTHROPIC_KEY:
         return
     mem = get_axon_memory(user)
-    start = _day_start_utc()
+    start = _day_start_utc(user_tz_offset(user))
     q = AxonMessage.query.filter(AxonMessage.user_id == user.id, AxonMessage.created_at < start)
     if mem.last_summarized_at:
         q = q.filter(AxonMessage.created_at > mem.last_summarized_at)
@@ -405,7 +410,7 @@ def axon_reply(user, message):
         return "AXON isn't connected yet. Add your ANTHROPIC_API_KEY in Railway and I'll come online to coach you."
     db.session.add(AxonMessage(user_id=user.id, role='user', content=_safe(message, 2000)))
     db.session.commit()
-    msgs = [{"role": r.role, "content": r.content} for r in axon_today_messages(user.id)]
+    msgs = [{"role": r.role, "content": r.content} for r in axon_today_messages(user)]
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(user), "messages": msgs}
     try:
@@ -568,6 +573,7 @@ with app.app_context():
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS sex VARCHAR(10) DEFAULT ''",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS birth_date VARCHAR(20) DEFAULT ''",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS religion VARCHAR(40) DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS tz_offset INTEGER DEFAULT 0",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1283,7 +1289,7 @@ def axon():
     if not auth(): return redirect('/login')
     cu = current_user()
     roll_axon_memory(cu)  # fold any previous days into long-term memory (runs ~once/day)
-    rows = axon_today_messages(cu.id, limit=200)  # fresh chat each day; past days live in memory
+    rows = axon_today_messages(cu, limit=200)  # fresh chat each day (user's own TZ); past days live in memory
     history = [{'role': r.role, 'content': r.content} for r in rows]
     return render_template('axon.html', u=user_ctx(), history=history, active='messages')
 
@@ -1309,7 +1315,7 @@ def api_axon_stream():
     # Save the user's message, then build the request inside the request context.
     db.session.add(AxonMessage(user_id=uid, role='user', content=_safe(msg, 2000)))
     db.session.commit()
-    messages = [{"role": r.role, "content": r.content} for r in axon_today_messages(uid)]
+    messages = [{"role": r.role, "content": r.content} for r in axon_today_messages(cu)]
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(cu),
             "messages": messages, "stream": True}
@@ -1353,6 +1359,20 @@ def api_axon_stream():
 
     return Response(generate(), mimetype='text/plain',
                     headers={'X-Accel-Buffering': 'no', 'Cache-Control': 'no-cache'})
+
+@app.route('/api/tz', methods=['POST'])
+def api_tz():
+    if not auth(): return ('', 401)
+    try:
+        off = int(request.form.get('offset', '0'))
+    except (TypeError, ValueError):
+        off = 0
+    off = max(-720, min(840, off))  # clamp to real-world range (UTC-12 .. UTC+14)
+    cu = current_user()
+    if cu.tz_offset != off:
+        cu.tz_offset = off
+        db.session.commit()
+    return {'ok': True, 'offset': off}
 
 @app.route('/api/axon/clear', methods=['POST'])
 def api_axon_clear():

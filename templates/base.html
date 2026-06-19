@@ -55,6 +55,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if(lbl) lbl.textContent = isEvening ? 'CHECK OUT' : 'CHECK IN';
   if(lnk) lnk.setAttribute('href', isEvening ? '/checkout' : '/checkin');
 
+  // Report the user's own timezone offset (minutes east of UTC) so AXON's "day" follows their local time
+  try {
+    var off = -new Date().getTimezoneOffset();
+    if (localStorage.getItem('tzoff') !== String(off)) {
+      fetch('/api/tz', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'offset='+off})
+        .then(function(r){ if(r.ok) localStorage.setItem('tzoff', String(off)); }).catch(function(){});
+    }
+  } catch(e) {}
+
   // Page transitions
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     a.addEventListener('click', function(e) {
