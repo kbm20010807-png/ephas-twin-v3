@@ -27,7 +27,8 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,        # JS can't read the session cookie (blocks cookie theft via XSS)
     SESSION_COOKIE_SAMESITE='Lax',       # blocks most cross-site request forgery
     SESSION_COOKIE_SECURE=_is_prod,      # only send cookie over HTTPS in production
-    MAX_CONTENT_LENGTH=8 * 1024 * 1024,  # cap request size (8MB) to limit abuse
+    MAX_CONTENT_LENGTH=12 * 1024 * 1024,      # cap request size (12MB) to limit abuse
+    MAX_FORM_MEMORY_SIZE=12 * 1024 * 1024,    # allow large base64 image fields (avatar/banner) in forms
 )
 
 db = SQLAlchemy(app)

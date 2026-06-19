@@ -7,17 +7,37 @@
 .ep-banner-img{width:100%;height:100%;object-fit:cover;}
 .ep-banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px;}
 .ep-banner-overlay svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.75;}
-.ep-av-wrap{position:relative;width:76px;height:76px;margin:-38px 0 0 20px;z-index:2;}
-.ep-av{width:76px;height:76px;border-radius:50%;background:var(--bg-2);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:26px;font-weight:900;color:var(--gold);overflow:hidden;}
+.ep-av-wrap{position:relative;width:86px;height:86px;margin:-43px 0 0 20px;z-index:2;cursor:pointer;}
+.ep-av-wrap:active{transform:scale(.97);}
+.ep-av{width:86px;height:86px;border-radius:50%;background:var(--bg-2);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:28px;font-weight:900;color:var(--gold);overflow:hidden;}
 .ep-av img{width:100%;height:100%;object-fit:cover;}
-.ep-av-btn{position:absolute;bottom:2px;right:2px;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.ep-av-btn svg{width:11px;height:11px;stroke:#000;fill:none;stroke-width:2.5;}
+.ep-av-hint{position:absolute;inset:3px;border-radius:50%;background:rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;pointer-events:none;}
+.ep-av-wrap:hover .ep-av-hint{opacity:1;}
+.ep-av-hint svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
+.ep-av-btn{position:absolute;bottom:2px;right:2px;width:26px;height:26px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.ep-av-btn svg{width:12px;height:12px;stroke:#000;fill:none;stroke-width:2.5;}
 .ep-fields{padding:20px 20px 0;}
 .username-lock{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;margin-top:8px;}
 .username-lock svg{width:12px;height:12px;flex-shrink:0;}
 .username-lock-txt{font-size:10px;color:var(--sub);line-height:1.4;flex:1;}
 .ep-save-btn{margin:24px 20px 40px;}
 .char-count{font-size:10px;color:var(--sub);text-align:right;margin-top:4px;}
+
+/* CROP / ZOOM EDITOR */
+.crop-modal{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;}
+.crop-head{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:18px 22px;}
+.crop-head button{background:none;border:none;font-size:14px;font-weight:700;cursor:pointer;color:#bbb;letter-spacing:.3px;}
+.crop-head button.crop-done{color:var(--gold);}
+.crop-head .crop-ttl{color:#fff;font-size:13px;font-weight:600;}
+.crop-frame{overflow:hidden;background:#0c0c0c;touch-action:none;cursor:grab;box-shadow:0 0 0 2px rgba(255,255,255,.25),0 0 0 9999px rgba(0,0,0,.45);}
+.crop-frame:active{cursor:grabbing;}
+.crop-frame canvas{display:block;}
+.crop-controls{display:flex;align-items:center;gap:12px;width:100%;max-width:340px;}
+.crop-controls svg{width:16px;height:16px;stroke:#888;fill:none;stroke-width:2;flex-shrink:0;}
+.crop-zoom{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:#333;outline:none;}
+.crop-zoom::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);cursor:pointer;}
+.crop-zoom::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;}
+.crop-hint{color:#777;font-size:11px;text-align:center;}
 </style>
 {% endblock %}
 
@@ -38,12 +58,11 @@
 <input type="file" id="bannerFile" style="display:none;" accept="image/*">
 <input type="hidden" id="bannerData">
 
-<!-- AVATAR -->
-<div class="ep-av-wrap">
+<!-- AVATAR (whole circle is the change button) -->
+<div class="ep-av-wrap" onclick="document.getElementById('avatarFile').click()" title="Change profile photo">
   <div class="ep-av" id="avCircle">{% if u.avatar %}<img src="{{ u.avatar }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
-  <div class="ep-av-btn" onclick="document.getElementById('avatarFile').click()">
-    <i data-lucide="camera"></i>
-  </div>
+  <div class="ep-av-hint"><i data-lucide="camera"></i></div>
+  <div class="ep-av-btn"><i data-lucide="camera"></i></div>
 </div>
 <input type="file" id="avatarFile" style="display:none;" accept="image/*">
 <input type="hidden" id="avatarData">
@@ -94,6 +113,22 @@
 <div id="toast" style="position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:#09090B;border:1px solid var(--gold-b);border-radius:var(--r-full);padding:10px 20px;font-size:12px;font-weight:700;color:var(--gold);opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;z-index:9999;">
   <i data-lucide="check-circle" style="width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:2;vertical-align:middle;margin-right:6px;"></i>Profile updated
 </div>
+
+<!-- CROP / ZOOM EDITOR -->
+<div class="crop-modal" id="cropModal">
+  <div class="crop-head">
+    <button onclick="cropCancel()">Cancel</button>
+    <span class="crop-ttl" id="cropTitle">Edit photo</span>
+    <button class="crop-done" onclick="cropApply()">Done</button>
+  </div>
+  <div class="crop-frame" id="cropFrame"><canvas id="cropCanvas"></canvas></div>
+  <div class="crop-controls">
+    <i data-lucide="image"></i>
+    <input type="range" class="crop-zoom" id="cropZoom" min="1" max="4" step="0.01" value="1" oninput="cropZoomInput()">
+    <i data-lucide="zoom-in"></i>
+  </div>
+  <div class="crop-hint">Drag to reposition · slide to zoom</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -106,40 +141,103 @@ function onUsernameInput(el) {
   el.value = el.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase();
 }
 
-/* Resize an image client-side -> small JPEG data URL (keeps the DB light) */
-function resizeImage(file, maxW, quality, cb) {
+/* ---------- CROP / ZOOM EDITOR ---------- */
+const crop = { img:null, mode:'avatar', FW:0, FH:0, baseScale:1, scale:1, tx:0, ty:0, outW:512, drag:false, lx:0, ly:0 };
+const cropCanvas = document.getElementById('cropCanvas');
+const cropFrame  = document.getElementById('cropFrame');
+
+function openCropper(file, mode) {
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
-      let w = img.width, h = img.height;
-      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      cb(canvas.toDataURL('image/jpeg', quality));
+      crop.img = img; crop.mode = mode;
+      const maxW = Math.min(window.innerWidth - 56, 360);
+      if (mode === 'avatar') { crop.FW = Math.round(maxW * 0.82); crop.FH = crop.FW; crop.outW = 512; }
+      else { crop.FW = maxW; crop.FH = Math.round(maxW * 120 / 430); crop.outW = 1600; }
+      cropCanvas.width = crop.FW; cropCanvas.height = crop.FH;
+      cropCanvas.style.width = crop.FW + 'px'; cropCanvas.style.height = crop.FH + 'px';
+      cropFrame.style.borderRadius = (mode === 'avatar') ? '50%' : '14px';
+      document.getElementById('cropTitle').textContent = (mode === 'avatar') ? 'Profile photo' : 'Banner';
+      crop.baseScale = Math.max(crop.FW / img.width, crop.FH / img.height);
+      crop.scale = crop.baseScale;
+      crop.tx = (crop.FW - img.width * crop.scale) / 2;
+      crop.ty = (crop.FH - img.height * crop.scale) / 2;
+      document.getElementById('cropZoom').value = 1;
+      cropClamp(); cropDraw();
+      document.getElementById('cropModal').style.display = 'flex';
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
-
-document.getElementById('avatarFile').addEventListener('change', function() {
-  if (!this.files.length) return;
-  resizeImage(this.files[0], 256, 0.85, dataUrl => {
+function cropClamp() {
+  const dw = crop.img.width * crop.scale, dh = crop.img.height * crop.scale;
+  crop.tx = Math.min(0, Math.max(crop.FW - dw, crop.tx));
+  crop.ty = Math.min(0, Math.max(crop.FH - dh, crop.ty));
+}
+function cropDraw() {
+  if (!crop.img) return;
+  const ctx = cropCanvas.getContext('2d');
+  ctx.clearRect(0, 0, crop.FW, crop.FH);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(crop.img, crop.tx, crop.ty, crop.img.width * crop.scale, crop.img.height * crop.scale);
+}
+function cropZoomInput() {
+  const z = parseFloat(document.getElementById('cropZoom').value);
+  const newScale = crop.baseScale * z;
+  // keep the frame center stable while zooming
+  const cx = (crop.FW / 2 - crop.tx) / crop.scale;
+  const cy = (crop.FH / 2 - crop.ty) / crop.scale;
+  crop.scale = newScale;
+  crop.tx = crop.FW / 2 - cx * crop.scale;
+  crop.ty = crop.FH / 2 - cy * crop.scale;
+  cropClamp(); cropDraw();
+}
+function cropCancel() {
+  document.getElementById('cropModal').style.display = 'none';
+  crop.img = null;
+  document.getElementById('avatarFile').value = '';
+  document.getElementById('bannerFile').value = '';
+}
+function cropApply() {
+  const outW = crop.outW, outH = Math.round(crop.FH / crop.FW * outW), ratio = outW / crop.FW;
+  const out = document.createElement('canvas'); out.width = outW; out.height = outH;
+  const ctx = out.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(crop.img, crop.tx * ratio, crop.ty * ratio,
+                crop.img.width * crop.scale * ratio, crop.img.height * crop.scale * ratio);
+  const dataUrl = out.toDataURL('image/jpeg', crop.mode === 'avatar' ? 0.92 : 0.85);
+  if (crop.mode === 'avatar') {
     document.getElementById('avCircle').innerHTML = '<img src="' + dataUrl + '" alt="">';
     document.getElementById('avatarData').value = dataUrl;
-  });
-});
-
-document.getElementById('bannerFile').addEventListener('change', function() {
-  if (!this.files.length) return;
-  resizeImage(this.files[0], 900, 0.8, dataUrl => {
+  } else {
     const prev = document.getElementById('bannerPreview');
     prev.src = dataUrl; prev.style.display = 'block';
     document.getElementById('bannerData').value = dataUrl;
     document.getElementById('bannerOverlay').style.background = 'rgba(0,0,0,.35)';
-  });
+  }
+  cropCancel();
+}
+// drag to reposition (mouse + touch)
+function cropDown(x, y) { crop.drag = true; crop.lx = x; crop.ly = y; }
+function cropMove(x, y) {
+  if (!crop.drag) return;
+  crop.tx += (x - crop.lx); crop.ty += (y - crop.ly);
+  crop.lx = x; crop.ly = y; cropClamp(); cropDraw();
+}
+function cropUp() { crop.drag = false; }
+cropCanvas.addEventListener('mousedown', e => cropDown(e.clientX, e.clientY));
+window.addEventListener('mousemove', e => cropMove(e.clientX, e.clientY));
+window.addEventListener('mouseup', cropUp);
+cropCanvas.addEventListener('touchstart', e => { const t = e.touches[0]; cropDown(t.clientX, t.clientY); }, {passive:true});
+cropCanvas.addEventListener('touchmove', e => { const t = e.touches[0]; cropMove(t.clientX, t.clientY); e.preventDefault(); }, {passive:false});
+cropCanvas.addEventListener('touchend', cropUp);
+
+document.getElementById('avatarFile').addEventListener('change', function() {
+  if (this.files.length) openCropper(this.files[0], 'avatar');
+});
+document.getElementById('bannerFile').addEventListener('change', function() {
+  if (this.files.length) openCropper(this.files[0], 'banner');
 });
 
 function saveProfile() {
