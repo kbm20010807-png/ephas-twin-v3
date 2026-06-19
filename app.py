@@ -701,26 +701,27 @@ def login():
 @app.route('/signup', methods=['GET','POST'])
 def signup():
     if request.method == 'POST':
-        name = (request.form.get('name') or '').strip()
+        name = (request.form.get('name') or '').strip()[:120]
         email = (request.form.get('email') or '').strip().lower()
         pw = request.form.get('password') or ''
-        username = (request.form.get('username') or email.split('@')[0]).strip().lower()
+        confirm = request.form.get('confirm') or ''
+        username = ''.join(c for c in (request.form.get('username') or '').strip().lower() if c.isalnum() or c in '_.')[:24]
         err = None
         if not email or '@' not in email:
             err = 'Enter a valid email address.'
         elif len(pw) < 8 or not any(c.isupper() for c in pw) or not any(not c.isalnum() for c in pw):
             err = 'Password needs 8+ characters, a capital letter, and a symbol.'
+        elif pw != confirm:
+            err = 'Passwords do not match.'
+        elif len(username) < 3:
+            err = 'Choose a username (at least 3 characters).'
         elif User.query.filter_by(email=email).first():
             err = 'An account with this email already exists.'
+        elif User.query.filter_by(username=username).first():
+            err = 'That username is already taken.'
         if err:
             return render_template('signup.html', auth_page=True, error=err)
-        base = ''.join(c for c in (username or 'user') if c.isalnum() or c in '_.') or 'user'
-        username = base
-        i = 1
-        while User.query.filter_by(username=username).first():
-            i += 1
-            username = f"{base}{i}"
-        user = User(email=email, username=username, name=name or base)
+        user = User(email=email, username=username, name=name or username)
         user.set_password(pw)
         db.session.add(user)
         db.session.commit()
@@ -737,6 +738,14 @@ def signup():
     if auth() and not request.args.get('add'):
         return redirect('/home')
     return render_template('signup.html', auth_page=True)
+
+@app.route('/api/check-username')
+def check_username():
+    u = ''.join(c for c in (request.args.get('u') or '').strip().lower() if c.isalnum() or c in '_.')[:24]
+    if len(u) < 3:
+        return {'available': False, 'reason': 'short', 'username': u}
+    taken = User.query.filter_by(username=u).first() is not None
+    return {'available': not taken, 'username': u}
 
 @app.route('/switch/<int:user_id>')
 def switch_account(user_id):
