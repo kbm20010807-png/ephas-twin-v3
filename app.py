@@ -50,6 +50,7 @@ class User(db.Model):
     banner = db.Column(db.Text, default='')   # base64 data URL (resized)
     last_username_change = db.Column(db.DateTime)
     tz_offset = db.Column(db.Integer, default=0)  # minutes east of UTC (from the user's device)
+    is_pro = db.Column(db.Boolean, default=False)  # TWIN Pro subscriber
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -263,8 +264,27 @@ def check_code(email, purpose, code):
 # --- AXON (AI coach) — Anthropic API via direct requests (NOT the SDK; key only from env) ---
 ANTHROPIC_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
-AXON_MODEL = os.environ.get('AXON_MODEL', 'claude-sonnet-4-6')
+AXON_MODEL = os.environ.get('AXON_MODEL', 'claude-sonnet-4-6')              # the smart coach (Pro / beta)
+AXON_MODEL_FREE = os.environ.get('AXON_MODEL_FREE', 'claude-haiku-4-5-20251001')  # Free tier (post-launch)
+AXON_DAILY_FREE = int(os.environ.get('AXON_DAILY_FREE', '15'))             # ~5 min/day
+AXON_DAILY_PRO = int(os.environ.get('AXON_DAILY_PRO', '60'))              # ~30 min/day
+AXON_DAILY_BETA = int(os.environ.get('AXON_DAILY_BETA', '80'))            # beta: generous, just an abuse cap
+# Tiers stay OFF until launch — everyone gets the full Sonnet experience. Flip AXON_TIERS_ENABLED=1 to go live.
+AXON_TIERS_ENABLED = os.environ.get('AXON_TIERS_ENABLED', '0') == '1'
 LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
+
+def axon_usage(user):
+    """Today's AXON usage: (used, limit, is_pro, model). Pre-launch: everyone is on Sonnet."""
+    if not AXON_TIERS_ENABLED:
+        is_pro, limit, model = True, AXON_DAILY_BETA, AXON_MODEL   # full experience for all beta users
+    else:
+        is_pro = bool(getattr(user, 'is_pro', False))
+        limit = AXON_DAILY_PRO if is_pro else AXON_DAILY_FREE
+        model = AXON_MODEL if is_pro else AXON_MODEL_FREE
+    start = _day_start_utc(user_tz_offset(user))
+    used = AxonMessage.query.filter(AxonMessage.user_id == user.id, AxonMessage.role == 'user',
+                                    AxonMessage.created_at >= start).count()
+    return used, limit, is_pro, model
 def user_tz_offset(user):
     """Minutes east of UTC, captured from the user's own device. 0 = UTC until reported."""
     return getattr(user, 'tz_offset', 0) or 0
@@ -346,7 +366,8 @@ def roll_axon_memory(user):
     msg = f"EXISTING MEMORY:\n{mem.summary or '(none yet)'}\n\nNEW CONVERSATION (before today):\n{convo}"
     try:
         headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-        body = {"model": AXON_MODEL, "max_tokens": 500, "system": sys, "messages": [{"role": "user", "content": msg}]}
+        # background summarization runs on the cheap model regardless of plan
+        body = {"model": AXON_MODEL_FREE, "max_tokens": 500, "system": sys, "messages": [{"role": "user", "content": msg}]}
         r = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=40)
         data = r.json()
         if r.status_code < 300 and 'content' in data:
@@ -429,14 +450,18 @@ def axon_system_prompt(user):
         "- Speak like a wise, no-nonsense mentor — part coach, part preacher. Logical, sharp, grounded, and a little firm.\n"
         "- Do NOT coddle or sugar-coat. Make them take it seriously. Tell hard truths plainly — but never shame, mock, or demean.\n"
         "- Be the voice that respects them enough to be honest. Wisdom over hype.\n\n"
-        "FORMAT (very important — keep it easy to read):\n"
-        "- Short, scannable replies. Use line breaks generously; avoid walls of text.\n"
-        "- When giving points or steps, put each on its own line starting with '- ' (a dash). Use **bold** for the few words that matter most.\n"
-        "- End with ONE sharp question OR one clear next action — not both.\n\n"
+        "LENGTH (critical — match the reply to the question):\n"
+        "- Be SHORT by default. Most replies are 1-3 sentences. Brevity is the rule; earn every extra line.\n"
+        "- Simple, casual, or closed questions get a tiny answer — one sentence, or even just 'Yes.' / 'No.' Don't pad or over-explain.\n"
+        "- Only go longer (a few dashed points) when they ask something genuinely deep, ask for a plan, or are clearly struggling and need it.\n"
+        "- Never lecture when a sentence will do. Talking less, but sharper, is more powerful.\n\n"
+        "FORMAT:\n"
+        "- For multi-point answers, put each point on its own line starting with '- '. Use **bold** only on the few words that matter.\n"
+        "- End with at most ONE sharp question or next action — and only if it adds value. Short replies often need no question.\n\n"
         "QUOTE:\n"
-        "- When it fits the exact problem they're facing, include ONE short, relevant quote that hits their struggle "
-        "(timeless wisdom, a respected thinker, or — only if they follow a faith — scripture from THEIR tradition). "
-        "Put it on its own line in italics, like:  _\"the quote\" — Source_.  Don't force a quote into every message; use it when it lands.\n\n"
+        "- Use a quote RARELY — only on a substantive reply about a real struggle, never on short/casual answers. "
+        "When it truly fits: ONE short relevant line (timeless wisdom, a respected thinker, or — only if they follow a faith — "
+        "scripture from THEIR tradition), on its own line in italics like  _\"the quote\" — Source_.\n\n"
         "Hold them accountable, ask sharp follow-ups, and reference their real numbers. "
         "When a TWIN course genuinely fits their need, recommend it by name from the list below. "
         "These topics can be sensitive (addictions, habits, mental health) — be honest and firm but supportive; "
@@ -627,6 +652,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS tz_offset INTEGER DEFAULT 0",
         "ALTER TABLE likes ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
         "ALTER TABLE follows ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1450,12 +1476,21 @@ def api_axon_stream():
     if not ANTHROPIC_KEY:
         return Response("AXON isn't connected yet. Add your ANTHROPIC_API_KEY in Railway and I'll come online.",
                         mimetype='text/plain')
+    # Daily usage gate (Free vs Pro)
+    used, limit, is_pro, model = axon_usage(cu)
+    if used >= limit:
+        if is_pro:
+            txt = f"That's our AXON time for today ({limit} messages) — rest, apply what we covered, and come back tomorrow. Resets at your midnight."
+        else:
+            txt = (f"That's your daily AXON time ({limit} messages on Free). Upgrade to **TWIN Pro** for "
+                   f"{AXON_DAILY_PRO} messages a day and the smarter coach. Resets at your midnight.")
+        return Response(txt, mimetype='text/plain')
     # Save the user's message, then build the request inside the request context.
     db.session.add(AxonMessage(user_id=uid, role='user', content=_safe(msg, 2000)))
     db.session.commit()
     messages = _merge_roles([{"role": r.role, "content": r.content} for r in axon_today_messages(cu)])
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-    body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(cu),
+    body = {"model": model, "max_tokens": 700, "system": axon_system_prompt(cu),
             "messages": messages, "stream": True}
 
     def generate():
