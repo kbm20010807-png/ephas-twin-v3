@@ -67,6 +67,7 @@
 .story-ring.yours{background:transparent;border:2px dashed var(--gold);padding:0;width:58px;height:58px;}
 .story-ring.seen{background:var(--border);}
 .story-inner{width:100%;height:100%;border-radius:50%;border:2px solid var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-2);font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);}
+.story-inner img{width:100%;height:100%;object-fit:cover;}
 .story-ring.yours .story-inner{font-size:20px;}
 .story-ring.active .story-inner{font-size:18px;}
 .story-lbl{font-size:9px;font-weight:600;color:var(--sub);white-space:nowrap;max-width:62px;overflow:hidden;text-overflow:ellipsis;text-align:center;}
@@ -79,7 +80,8 @@
 .story-bar-fill{height:100%;background:var(--gold);border-radius:3px;animation:storyProgress 5s linear forwards;}
 @keyframes storyProgress{from{width:0}to{width:100%}}
 .story-card{width:100%;max-width:360px;background:#0A0A0A;border:1px solid rgba(200,164,90,.15);border-radius:20px;padding:24px;text-align:center;}
-.story-av{width:60px;height:60px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:22px;font-weight:900;color:var(--gold);background:#09090B;}
+.story-av{width:60px;height:60px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:22px;font-weight:900;color:var(--gold);background:#09090B;overflow:hidden;}
+.story-av img{width:100%;height:100%;object-fit:cover;}
 .story-username{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
 .story-subtitle{font-size:10px;color:#666;letter-spacing:1px;margin-bottom:20px;}
 .story-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -121,9 +123,15 @@
 <!-- STORIES STRIP -->
 <div class="stories-strip">
   <a href="/checkin" class="story-item" style="text-decoration:none;">
-    <div class="story-ring yours"><div class="story-inner" style="font-size:20px;">{{ u.first[0]|upper }}</div></div>
+    <div class="story-ring yours"><div class="story-inner" style="font-size:20px;">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.first[0]|upper }}{% endif %}</div></div>
     <div class="story-lbl">Your story</div>
   </a>
+  {% for s in stories %}
+  <div class="story-item" onclick="openStory({{ loop.index0 }})">
+    <div class="story-ring active"><div class="story-inner">{% if s.has_avatar %}<img src="/avatar/{{ s.id }}" alt="">{% else %}{{ s.init }}{% endif %}</div></div>
+    <div class="story-lbl">{{ s.first }}</div>
+  </div>
+  {% endfor %}
 </div>
 
 <!-- STORY OVERLAY -->
@@ -313,13 +321,16 @@ const months=['January','February','March','April','May','June','July','August',
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
 
-function openStory(id, init, name, sleep, energy, mood, streak) {
-  document.getElementById('storyAv').textContent = init;
-  document.getElementById('storyName').textContent = name;
-  document.getElementById('storySleep').textContent = sleep;
-  document.getElementById('storyEnergy').textContent = energy;
-  document.getElementById('storyMood').textContent = mood;
-  document.getElementById('storyStreak').textContent = streak + '-Day Streak';
+const STORIES = {{ stories|tojson }};
+function openStory(i) {
+  const s = STORIES[i]; if(!s) return;
+  const av = document.getElementById('storyAv');
+  av.innerHTML = s.has_avatar ? '<img src="/avatar/' + s.id + '" alt="">' : s.init;
+  document.getElementById('storyName').textContent = s.name;
+  document.getElementById('storySleep').textContent = s.sleep;
+  document.getElementById('storyEnergy').textContent = s.energy;
+  document.getElementById('storyMood').textContent = s.mood;
+  document.getElementById('storyStreak').textContent = s.streak + '-Day Streak';
   const fill = document.getElementById('storyBarFill');
   fill.style.animation = 'none';
   fill.offsetHeight;

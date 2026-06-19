@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import random
 import requests
 from datetime import datetime, timedelta, timezone
@@ -787,6 +788,7 @@ def user_ctx():
     xp = total * 50
     level = xp // 200 + 1
     u.update({
+        'id': cu.id,
         'name': full,
         'first': full.split(' ')[0],
         'username': cu.username,
@@ -1163,13 +1165,55 @@ def reset():
         return render_template('login.html', auth_page=True, error='Password updated — sign in with your new password.')
     return render_template('reset.html', auth_page=True, email=request.args.get('email', ''))
 
+@app.route('/avatar/<int:uid>')
+def avatar_img(uid):
+    """Serve a user's avatar as a real image (cached) so pages don't embed base64 blobs."""
+    u = User.query.get(uid)
+    if u and u.avatar and u.avatar.startswith('data:') and ',' in u.avatar:
+        header, b64 = u.avatar.split(',', 1)
+        mime = header[5:].split(';')[0] or 'image/jpeg'
+        try:
+            return Response(base64.b64decode(b64), mimetype=mime,
+                            headers={'Cache-Control': 'public, max-age=300'})
+        except Exception:
+            pass
+    return ('', 404)
+
+def stories_ctx(cu):
+    """Recent check-in 'stories' from other users (last 2 days) — avatar, name, metrics."""
+    today = datetime.utcnow().date()
+    cutoff = today - timedelta(days=2)
+    rows = (CheckIn.query.filter(CheckIn.kind == 'morning', CheckIn.date >= cutoff, CheckIn.user_id != cu.id)
+            .order_by(CheckIn.date.desc(), CheckIn.id.desc()).all())
+    seen, out = set(), []
+    for ci in rows:
+        if ci.user_id in seen:
+            continue
+        seen.add(ci.user_id)
+        u = User.query.get(ci.user_id)
+        if not u:
+            continue
+        streak, _ = _streaks(_checkin_dates(u))
+        nm = u.name or u.username
+        out.append({
+            'id': u.id, 'name': nm, 'first': nm.split(' ')[0][:14],
+            'init': (nm[:1] or 'U').upper(), 'has_avatar': bool(u.avatar),
+            'sleep': ci.sleep if ci.sleep is not None else '—',
+            'energy': ci.energy if ci.energy is not None else '—',
+            'mood': ci.mood if ci.mood is not None else '—',
+            'streak': streak, 'today': ci.date == today,
+        })
+        if len(out) >= 25:
+            break
+    return out
+
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
     cu = current_user()
     community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
-                           habits=serialize_habits(cu), active='home')
+                           habits=serialize_habits(cu), stories=stories_ctx(cu), active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
