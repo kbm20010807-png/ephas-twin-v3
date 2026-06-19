@@ -2,7 +2,7 @@ import os
 import json
 import random
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import Counter
 from sqlalchemy import func
 from flask import Flask, render_template, redirect, session, request, jsonify, Response
@@ -92,6 +92,7 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), index=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -112,6 +113,7 @@ class Follow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
     following_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class AxonMessage(db.Model):
     # Persistent, private per-user chat history — this is how AXON remembers & adapts to each person.
@@ -586,6 +588,8 @@ with app.app_context():
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS birth_date VARCHAR(20) DEFAULT ''",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS religion VARCHAR(40) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS tz_offset INTEGER DEFAULT 0",
+        "ALTER TABLE likes ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
+        "ALTER TABLE follows ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
     ):
         try:
             db.session.execute(text(stmt))
@@ -868,35 +872,66 @@ def stats_ctx():
     s['weekly'] = [mood_by_date.get(d, 0) for d in last7]
     return s
 
+def quest_periods():
+    """Shared GLOBAL reset windows in UTC so every user is on the exact same schedule.
+    Returns starts and next-reset epoch seconds for daily/weekly/monthly."""
+    now = datetime.utcnow()
+    today = now.date()
+    day_start = datetime.combine(today, datetime.min.time())
+    week_start = datetime.combine(today - timedelta(days=today.weekday()), datetime.min.time())  # Monday 00:00 UTC
+    month_start = datetime.combine(today.replace(day=1), datetime.min.time())                     # 1st 00:00 UTC
+    next_day = day_start + timedelta(days=1)
+    next_week = week_start + timedelta(days=7)
+    if month_start.month == 12:
+        next_month = month_start.replace(year=month_start.year + 1, month=1)
+    else:
+        next_month = month_start.replace(month=month_start.month + 1)
+    epoch = lambda d: int(d.replace(tzinfo=timezone.utc).timestamp())
+    return {
+        'day_start': day_start, 'week_start': week_start, 'month_start': month_start,
+        'reset': {'daily': epoch(next_day), 'weekly': epoch(next_week), 'monthly': epoch(next_month)},
+    }
+
 def quests_ctx(user):
     import copy
     q = copy.deepcopy(DEMO_QUESTS)
-    today = datetime.utcnow().date()
-    day_start = datetime.combine(today, datetime.min.time())
-    dates = _checkin_dates(user)
-    streak, _ = _streaks(dates)
+    P = quest_periods()
+    day_start, week_start, month_start = P['day_start'], P['week_start'], P['month_start']
+    q['reset'] = P['reset']
+
+    dates = set(_checkin_dates(user))
+    streak, _ = _streaks(sorted(dates))
     total = len(dates)
     level = (total * 50) // 200 + 1
+    # period-scoped counts (UTC)
+    def checkins_since(start): return len({d for d in dates if d >= start.date()})
     posted_today = Post.query.filter(Post.user_id == user.id, Post.created_at >= day_start).count() > 0
-    checked_today = today in set(dates)
-    engaged = Like.query.filter_by(user_id=user.id).count() + Comment.query.filter_by(user_id=user.id).count()
-    following = Follow.query.filter_by(follower_id=user.id).count()
-    made_course = Post.query.filter_by(user_id=user.id, kind='course').count() > 0
+    checked_today = datetime.utcnow().date() in dates
+    eng_today = (Like.query.filter(Like.user_id == user.id, Like.created_at >= day_start).count()
+                 + Comment.query.filter(Comment.user_id == user.id, Comment.created_at >= day_start).count())
+    eng_week = (Like.query.filter(Like.user_id == user.id, Like.created_at >= week_start).count()
+                + Comment.query.filter(Comment.user_id == user.id, Comment.created_at >= week_start).count())
+    follow_week = Follow.query.filter(Follow.follower_id == user.id, Follow.created_at >= week_start).count()
+    course_month = Post.query.filter(Post.user_id == user.id, Post.kind == 'course', Post.created_at >= month_start).count() > 0
 
     def setp(lst, i, prog):
         prog = max(0, min(100, int(prog)))
         lst[i]['progress'] = prog
         lst[i]['done'] = prog >= 100
 
+    # DAILY (resets 00:00 UTC)
     setp(q['daily'], 0, 100 if checked_today else 0)
     setp(q['daily'], 1, 100 if posted_today else 0)
-    setp(q['daily'], 2, 100 if engaged > 0 else 0)
-    setp(q['weekly'], 0, streak / 7 * 100)
-    setp(q['weekly'], 1, engaged / 5 * 100)
-    setp(q['weekly'], 2, 100 if following > 0 else 0)
-    setp(q['monthly'], 0, streak / 30 * 100)
-    setp(q['monthly'], 1, 100 if made_course else 0)
+    setp(q['daily'], 2, 100 if eng_today > 0 else 0)
+    # WEEKLY (resets Monday 00:00 UTC) — counts only this week's activity
+    setp(q['weekly'], 0, checkins_since(week_start) / 7 * 100)
+    setp(q['weekly'], 1, eng_week / 5 * 100)
+    setp(q['weekly'], 2, 100 if follow_week > 0 else 0)
+    # MONTHLY (resets 1st 00:00 UTC)
+    setp(q['monthly'], 0, checkins_since(month_start) / 30 * 100)
+    setp(q['monthly'], 1, 100 if course_month else 0)
     setp(q['monthly'], 2, level / 10 * 100)
+    # SEASONAL (cumulative milestone)
     q['seasonal'][0]['current'] = streak
     q['seasonal'][0]['progress'] = max(0, min(100, int(streak / 90 * 100)))
     q['seasonal'][0]['done'] = streak >= 90

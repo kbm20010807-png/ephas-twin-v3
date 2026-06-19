@@ -74,7 +74,7 @@
     <div class="qs-num">{{ dd|length }}<span style="font-size:18px;color:var(--sub);">/{{ quests.daily|length }}</span></div>
     <div class="qs-info">
       <div class="qs-lbl">Daily Quests Complete</div>
-      <div class="qs-xp">{{ dd|sum(attribute='xp') }} XP earned · Resets at midnight</div>
+      <div class="qs-xp">{{ dd|sum(attribute='xp') }} XP earned · Resets in <span class="q-reset" data-reset="{{ quests.reset.daily }}">…</span></div>
     </div>
   </div>
   {% for q in quests.daily %}
@@ -111,7 +111,7 @@
     <div class="qs-num">{{ wd|length }}<span style="font-size:18px;color:var(--sub);">/{{ quests.weekly|length }}</span></div>
     <div class="qs-info">
       <div class="qs-lbl">Weekly Quests Complete</div>
-      <div class="qs-xp">{{ wd|sum(attribute='xp') }} XP earned · Resets Monday</div>
+      <div class="qs-xp">{{ wd|sum(attribute='xp') }} XP earned · Resets in <span class="q-reset" data-reset="{{ quests.reset.weekly }}">…</span></div>
     </div>
   </div>
   {% for q in quests.weekly %}
@@ -148,7 +148,7 @@
     <div class="qs-num">{{ md|length }}<span style="font-size:18px;color:var(--sub);">/{{ quests.monthly|length }}</span></div>
     <div class="qs-info">
       <div class="qs-lbl">Monthly Milestones</div>
-      <div class="qs-xp">{{ md|sum(attribute='xp') }} XP earned this month</div>
+      <div class="qs-xp">{{ md|sum(attribute='xp') }} XP earned · Resets in <span class="q-reset" data-reset="{{ quests.reset.monthly }}">…</span></div>
     </div>
   </div>
   {% for q in quests.monthly %}
@@ -205,5 +205,29 @@ function switchQ(tab, el) {
   document.querySelectorAll('.q-pane').forEach(p => p.classList.remove('on'));
   document.getElementById('qpane-' + tab).classList.add('on');
 }
+
+// Live countdown to each global UTC reset (same for every user)
+function fmtCountdown(secs){
+  if(secs <= 0) return 'now';
+  const d = Math.floor(secs/86400), h = Math.floor((secs%86400)/3600),
+        m = Math.floor((secs%3600)/60), s = secs%60;
+  if(d > 0) return d + 'd ' + h + 'h';
+  if(h > 0) return h + 'h ' + m + 'm';
+  if(m > 0) return m + 'm ' + s + 's';
+  return s + 's';
+}
+function tickResets(){
+  const now = Math.floor(Date.now()/1000);
+  let needReload = false;
+  document.querySelectorAll('.q-reset').forEach(el => {
+    const target = parseInt(el.getAttribute('data-reset'), 10);
+    const left = target - now;
+    el.textContent = fmtCountdown(left);
+    if(left <= 0) needReload = true;
+  });
+  if(needReload) location.reload();  // a period rolled over -> refresh progress
+}
+tickResets();
+setInterval(tickResets, 1000);
 </script>
 {% endblock %}
