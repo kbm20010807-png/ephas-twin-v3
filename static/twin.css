@@ -12,6 +12,8 @@
   --border:#E9E7E2;--black:#1A1916;--text:#26241F;--sub:#8A877F;--muted:#C9C6BF;
   /* ===== BOXES (own tints, all warm-matched) ===== */
   --box-gold:#FBF6EC;--box-gold-b:#EFE2C8;--box-plat:#F6F6F3;--box-plat-b:#E5E3DD;
+  /* ===== APP BACKDROP — white/platinum with a soft gold glow rising from below ===== */
+  --app-bg:radial-gradient(135% 90% at 50% 100%, rgba(200,164,90,.20) 0%, rgba(200,164,90,.06) 38%, transparent 64%), linear-gradient(180deg,#FCFBFA 0%,#F3EEE4 100%);
   /* ===== STATUS ===== */
   --green:#3FA66B;--green-dim:rgba(63,166,107,0.1);--green-b:rgba(63,166,107,0.2);
   --red:#D9534F;--red-dim:rgba(217,83,79,0.1);
@@ -26,11 +28,15 @@
   --bg:#0B0A09;--bg-2:#16150F;--card:#161512;--surface:#1C1A15;
   --border:#272620;--black:#F5F3EE;--text:#E7E4DD;--sub:#928E84;--muted:#3C3A33;
   --box-gold:#1C1710;--box-gold-b:#3A2F1C;--box-plat:#161614;--box-plat-b:#2A2926;
+  /* dark platinum top -> warm, with a gold glow rising from below */
+  --app-bg:radial-gradient(135% 90% at 50% 100%, rgba(206,168,92,.22) 0%, rgba(206,168,92,.07) 40%, transparent 66%), linear-gradient(180deg,#0C0C0E 0%,#15120B 100%);
   --sh:0 1px 3px rgba(0,0,0,0.5);--sh-md:0 6px 22px rgba(0,0,0,0.6);
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;background:var(--bg);}
 body{background:var(--bg);color:var(--black);font-family:'Inter',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;}
+/* Premium app backdrop: fixed gold-glow gradient behind everything (cards stay solid on top). Only on app pages. */
+body.app-bg::before{content:'';position:fixed;inset:0;background:var(--app-bg);z-index:-1;pointer-events:none;}
 a{text-decoration:none;color:inherit;}
 button{font-family:inherit;cursor:pointer;}
 input,textarea,select{font-family:inherit;}

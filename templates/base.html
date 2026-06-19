@@ -13,7 +13,7 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 {% block head %}{% endblock %}
 </head>
-<body class="pg">
+<body class="pg{% if not auth_page %} app-bg{% endif %}">
 
 {% block content %}{% endblock %}
 
