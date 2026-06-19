@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import datetime, timedelta
 from collections import Counter
+from sqlalchemy import func
 from flask import Flask, render_template, redirect, session, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -217,6 +218,61 @@ def time_ago(dt):
     if s < 86400: return f'{int(s // 3600)}h ago'
     if s < 604800: return f'{int(s // 86400)}d ago'
     return dt.strftime('%b %d')
+
+# --- Tier-1 recommendation algorithm: rank a feed to the user (interests + engagement + follows + growth gaps) ---
+DOMAIN_CATS = {
+    'Mind': ['mindset', 'mental', 'reading', 'focus', 'productivity', 'discipline'],
+    'Body': ['fitness', 'workout', 'nutrition', 'gym', 'health', 'running', 'marathon'],
+    'Wealth': ['wealth', 'money', 'finance', 'sales', 'business', 'entrepreneurship', 'savings'],
+    'Purpose': ['purpose', 'goals', 'mission', 'spirituality'],
+    'Social': ['social', 'relationships', 'coaching', 'community'],
+    'Wellbeing': ['wellbeing', 'wellness', 'sleep', 'meditation', 'mindfulness'],
+}
+
+def user_interests(user):
+    """A weighted profile of what this user is into — built from their activity + growth gaps."""
+    interests = Counter()
+    for p in Post.query.filter_by(user_id=user.id).all():
+        if p.category:
+            interests[p.category.lower()] += 2
+    eng_ids = [l.post_id for l in Like.query.filter_by(user_id=user.id).all()] + \
+              [b.post_id for b in Bookmark.query.filter_by(user_id=user.id).all()]
+    if eng_ids:
+        for p in Post.query.filter(Post.id.in_(eng_ids)).all():
+            if p.category:
+                interests[p.category.lower()] += 1
+    for sl in SearchLog.query.filter_by(user_id=user.id).order_by(SearchLog.id.desc()).limit(20).all():
+        if sl.term:
+            interests[sl.term.lower()] += 1
+    # Growth edge: surface content for the user's WEAKEST life domains
+    for d in stats_ctx()['domains']:
+        if d['pct'] < 60:
+            w = (60 - d['pct']) / 30.0  # weaker domain -> bigger boost
+            for cat in DOMAIN_CATS.get(d['name'], []):
+                interests[cat] += w
+    return interests
+
+def rank_posts(post_objs, user):
+    interests = user_interests(user)
+    following = {f.following_id for f in Follow.query.filter_by(follower_id=user.id).all()}
+    like_counts = dict(db.session.query(Like.post_id, func.count(Like.id)).group_by(Like.post_id).all())
+    comment_counts = dict(db.session.query(Comment.post_id, func.count(Comment.id)).group_by(Comment.post_id).all())
+    now = datetime.utcnow()
+
+    def score(p):
+        sc = 0.0
+        text = ((p.category or '') + ' ' + (p.title or '') + ' ' + (p.text or '')).lower()
+        for kw, w in interests.items():
+            if kw and kw in text:
+                sc += w * 5
+        sc += like_counts.get(p.id, 0) * 2 + comment_counts.get(p.id, 0) * 2
+        if p.user_id in following:
+            sc += 8
+        age_h = (now - p.created_at).total_seconds() / 3600 if p.created_at else 999
+        sc += max(0, 72 - age_h) * 0.1  # mild freshness boost
+        return sc
+
+    return sorted(post_objs, key=score, reverse=True)
 
 def serialize_posts(posts, viewer=None):
     posts = list(posts)
@@ -626,7 +682,9 @@ def grow():
     posts = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'reel'])).order_by(Post.created_at.desc()).limit(50).all(), cu)
     threads = serialize_posts(Post.query.filter_by(kind='thread').order_by(Post.created_at.desc()).limit(50).all(), cu)
     courses = serialize_posts(Post.query.filter_by(kind='course').order_by(Post.created_at.desc()).limit(50).all(), cu)
-    explore = serialize_posts(Post.query.order_by(Post.created_at.desc()).limit(30).all(), cu)
+    # Explore = personalized "For You" feed, ranked by the Tier-1 algorithm
+    explore_candidates = Post.query.filter(Post.kind.in_(['post', 'thread', 'reel'])).order_by(Post.created_at.desc()).limit(80).all()
+    explore = serialize_posts(rank_posts(explore_candidates, cu)[:30], cu)
     return render_template('grow.html', u=user_ctx(), gposts=posts, gthreads=threads,
                            gcourses=courses, gexplore=explore, active='grow')
 
