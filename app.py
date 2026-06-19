@@ -274,6 +274,20 @@ AXON_DAILY_BETA = int(os.environ.get('AXON_DAILY_BETA', '80'))            # beta
 AXON_TIERS_ENABLED = os.environ.get('AXON_TIERS_ENABLED', '0') == '1'
 LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
 
+# ElevenLabs realistic voices (optional — set ELEVENLABS_API_KEY to enable; falls back to device voices)
+ELEVENLABS_KEY = os.environ.get('ELEVENLABS_API_KEY', '')
+ELEVEN_MODEL = os.environ.get('ELEVEN_MODEL', 'eleven_turbo_v2_5')  # fast + cheaper
+ELEVEN_VOICES = [
+    {'id': 'pNInz6obpgDQGcFmaJgB', 'name': 'Adam',   'desc': 'Deep, steady, grounded — a calm mentor'},
+    {'id': 'TxGEqnHWrfWFTfGW9XjX', 'name': 'Josh',   'desc': 'Young, warm, friendly — easy morning chat'},
+    {'id': 'VR6AewLTigWG4xSOukaG', 'name': 'Arnold', 'desc': 'Crisp, firm, no-excuses — tough coach'},
+    {'id': 'ErXwobaYiN019PkySvjV', 'name': 'Antoni', 'desc': 'Well-rounded, confident — all-purpose'},
+    {'id': '21m00Tcm4TlvDq8ikWAM', 'name': 'Rachel', 'desc': 'Calm, clear, reassuring — soothing guide'},
+    {'id': 'EXAVITQu4vr4xnSDxMaL', 'name': 'Bella',  'desc': 'Soft, gentle, encouraging — kind & warm'},
+    {'id': 'AZnzlk1XvdvUeBnXmlld', 'name': 'Domi',   'desc': 'Strong, energetic — hype & motivation'},
+    {'id': 'MF3mGyEYCl7XYWbV9V6O', 'name': 'Elli',   'desc': 'Expressive, emotional — empathetic listener'},
+]
+
 # How AXON talks — the user picks one in AXON settings
 AXON_PERSONALITIES = {
     'mentor':   "Speak like a wise, no-nonsense MENTOR — part coach, part preacher. Direct, firm, grounded. "
@@ -1550,6 +1564,37 @@ def api_axon_stream():
 
     return Response(generate(), mimetype='text/plain',
                     headers={'X-Accel-Buffering': 'no', 'Cache-Control': 'no-cache'})
+
+@app.route('/api/axon/voices')
+def axon_voices():
+    if not auth(): return ('', 401)
+    return {'enabled': bool(ELEVENLABS_KEY), 'voices': ELEVEN_VOICES}
+
+@app.route('/api/axon/tts', methods=['POST'])
+def axon_tts():
+    """Realistic AXON speech via ElevenLabs (if configured). Returns mp3, or 204 to fall back to device voice."""
+    if not auth(): return ('', 401)
+    if not ELEVENLABS_KEY:
+        return ('', 204)
+    text = (request.form.get('text') or '').strip()[:1200]
+    voice_id = (request.form.get('voice_id') or ELEVEN_VOICES[0]['id']).strip()
+    if not any(v['id'] == voice_id for v in ELEVEN_VOICES):
+        voice_id = ELEVEN_VOICES[0]['id']
+    if not text:
+        return ('', 204)
+    try:
+        r = requests.post(
+            f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}',
+            headers={'xi-api-key': ELEVENLABS_KEY, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg'},
+            json={'text': text, 'model_id': ELEVEN_MODEL,
+                  'voice_settings': {'stability': 0.45, 'similarity_boost': 0.8, 'style': 0.3}},
+            timeout=30)
+        if r.status_code < 300 and r.content:
+            return Response(r.content, mimetype='audio/mpeg', headers={'Cache-Control': 'no-store'})
+        print(f'[tts] elevenlabs status={r.status_code} body={r.text[:200]}')
+    except Exception as e:
+        print(f'[tts] {e}')
+    return ('', 204)
 
 @app.route('/api/tz', methods=['POST'])
 def api_tz():

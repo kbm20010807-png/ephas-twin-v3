@@ -43,18 +43,29 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 .ax-mic.listening{background:var(--gold);border-color:var(--gold);animation:micPulse 1.2s infinite;}
 .ax-mic.listening svg{stroke:#000;}
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(200,164,90,.55);}50%{box-shadow:0 0 0 9px rgba(200,164,90,0);}}
-/* Immersive voice mode */
-.vm-ov{position:fixed;inset:0;background:radial-gradient(circle at 50% 38%,#15110a 0%,#070707 70%);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px;}
-.vm-ov.on{display:flex;}
-.vm-orb{width:170px;height:170px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 60px rgba(200,164,90,.45);transition:transform .15s;}
-.vm-orb img{width:58%;height:58%;object-fit:contain;}
-.vm-orb.listening{animation:vmPulse 1.5s infinite;}
-.vm-orb.speaking{animation:vmSpeak .55s infinite;}
-@keyframes vmPulse{0%,100%{box-shadow:0 0 45px rgba(200,164,90,.4);}50%{box-shadow:0 0 95px rgba(200,164,90,.8);}}
-@keyframes vmSpeak{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+/* VOICE MODE */
+.vm-ov{position:fixed;inset:0;background:radial-gradient(circle at 50% 42%,#13100a 0%,#060606 72%);z-index:10000;display:none;}
+.vm-ov.on{display:block;}
+.vm-pick,.vm-talk{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:30px;}
+.vm-pick-ttl{font-family:'Arpubes',sans-serif;font-size:24px;color:#fff;letter-spacing:-1px;}
+.vm-pick-sub{font-size:12px;color:#888;margin-bottom:10px;}
+.vm-cards{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 30px;max-width:100%;scrollbar-width:none;}
+.vm-cards::-webkit-scrollbar{display:none;}
+.vm-card{scroll-snap-align:center;flex:0 0 230px;background:rgba(255,255,255,.05);border:1.5px solid rgba(216,186,114,.22);border-radius:22px;padding:26px 20px;text-align:center;cursor:pointer;transition:all .15s;}
+.vm-card.sel{border-color:var(--gold);background:rgba(216,186,114,.12);}
+.vm-card-orb{width:84px;height:84px;border-radius:50%;background:var(--grad);margin:0 auto 16px;box-shadow:0 0 34px rgba(216,186,114,.45);}
+.vm-card-name{font-size:19px;font-weight:800;color:#fff;margin-bottom:7px;}
+.vm-card-desc{font-size:12px;color:#aaa;line-height:1.5;}
+/* blinking golden aura — only animates when listening or speaking */
+.vm-aura{width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(216,186,114,.6) 0%,rgba(216,186,114,.1) 58%,transparent 72%);opacity:.22;transition:opacity .4s;}
+.vm-aura.listening{animation:auraBlink 1.4s ease-in-out infinite;}
+.vm-aura.speaking{animation:auraBlink .7s ease-in-out infinite;}
+@keyframes auraBlink{0%,100%{opacity:.28;transform:scale(.9);}50%{opacity:.95;transform:scale(1.1);}}
 .vm-status{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
-.vm-caption{font-size:16px;color:#e2e2e2;line-height:1.6;text-align:center;max-width:340px;min-height:70px;}
-.vm-end{position:absolute;bottom:54px;width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.vm-caption{font-size:16px;color:#e2e2e2;line-height:1.6;text-align:center;max-width:340px;min-height:60px;}
+.vm-mini{position:absolute;top:54px;right:22px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.vm-mini svg{width:18px;height:18px;stroke:#bbb;fill:none;stroke-width:2;}
+.vm-end{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .vm-end svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;}
 </style>
 {% endblock %}
@@ -67,17 +78,26 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
     <div class="ax-name">AXON</div>
     <div class="ax-status">● Online</div>
   </div>
-  <button class="tb-btn" id="axVm" onclick="voiceModeStart()" title="Voice conversation"><i data-lucide="audio-lines"></i></button>
-  <button class="tb-btn" id="axSpk" onclick="toggleVoice()" title="AXON voice"><i data-lucide="volume-x"></i></button>
   <button class="tb-btn" onclick="clearChat()"><i data-lucide="trash-2"></i></button>
 </div>
 
-<!-- IMMERSIVE VOICE MODE -->
+<!-- VOICE MODE (carousel picker + live conversation) -->
 <div class="vm-ov" id="vmOv">
-  <div class="vm-orb" id="vmOrb"><img src="/static/axon_logo.png" alt="AXON"></div>
-  <div class="vm-status" id="vmStatus">Listening…</div>
-  <div class="vm-caption" id="vmCaption">Say hi to AXON…</div>
-  <button class="vm-end" onclick="voiceModeEnd()" title="End"><i data-lucide="x"></i></button>
+  <!-- voice picker (shown first time / when changing) -->
+  <div class="vm-pick" id="vmPick">
+    <div class="vm-pick-ttl">Choose AXON's voice</div>
+    <div class="vm-pick-sub">Swipe to explore · tap one to start talking</div>
+    <div class="vm-cards" id="vmCards"></div>
+    <button class="vm-end" onclick="voiceModeEnd()" title="Close"><i data-lucide="x"></i></button>
+  </div>
+  <!-- live conversation -->
+  <div class="vm-talk" id="vmTalk" style="display:none;">
+    <div class="vm-aura" id="vmAura"></div>
+    <div class="vm-status" id="vmStatus">Listening…</div>
+    <div class="vm-caption" id="vmCaption"></div>
+    <button class="vm-mini" id="vmChange" onclick="vmOpenPick()" title="Change voice"><i data-lucide="sliders-horizontal"></i></button>
+    <button class="vm-end" onclick="voiceModeEnd()" title="End"><i data-lucide="x"></i></button>
+  </div>
 </div>
 
 <div class="ax-msgs" id="axMsgs">
@@ -105,7 +125,8 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 </div>
 
 <div class="ax-input-bar">
-  <button class="ax-mic" id="axMic" onclick="toggleMic()" title="Talk to AXON"><i data-lucide="mic"></i></button>
+  <button class="ax-mic" id="axVm" onclick="voiceModeStart()" title="Talk live with AXON"><i data-lucide="audio-lines"></i></button>
+  <button class="ax-mic" id="axMic" onclick="toggleMic()" title="Voice to text"><i data-lucide="mic"></i></button>
   <textarea class="ax-input" id="axInput" rows="1" placeholder="Message AXON..." autocomplete="off" oninput="axGrow(this)" onkeydown="axKey(event)"></textarea>
   <button class="ax-send" onclick="send()"><i data-lucide="arrow-up"></i></button>
 </div>
@@ -166,11 +187,10 @@ let axCurBubble = null;
 
 function axGrow(el){ el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 130) + 'px'; }
 function axKey(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } }
-function send(fromVoice){
+function send(){
   const inp = document.getElementById('axInput');
   const text = inp.value.trim();
   if(!text) return;
-  lastVoice = !!fromVoice;
   inp.value = '';
   inp.style.height = 'auto';   // reset the grown box after sending
   addMsg('user', text);
@@ -205,7 +225,9 @@ function fireAxon(){
       let acc = '';
       (function read(){
         reader.read().then(({done, value}) => {
-          if(done){ axStreaming = false; axCurBubble = null; speak(acc); return; }
+          if(done){ axStreaming = false; axCurBubble = null;
+            if(vmActive){ vmCaption(acc.replace(/[*_•#>]/g,'').slice(0,240)); ttsPlay(acc, function(){ if(vmActive) startListen(); }); }
+            return; }
           acc += dec.decode(value, {stream:true});
           bubble.innerHTML = mdFormat(acc);
           scrollDown();
@@ -222,81 +244,109 @@ function fireAxon(){
 }
 function quick(el){ document.getElementById('axInput').value = el.textContent; send(false); }
 
-// ---------- VOICE (browser-native: free, no extra tokens; the daily limit still caps usage) ----------
+// ---------- VOICE ----------
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recog = null, listening = false, voiceOut = false, lastVoice = false;
+let recog = null, listening = false, vmActive = false, vmAudio = null;
+let EL_ENABLED = false, EL_VOICES = [], curVoice = localStorage.getItem('axon_el_voice') || '';
 const micBtn = document.getElementById('axMic');
-const spkBtn = document.getElementById('axSpk');
-if(!SR && micBtn){ micBtn.style.display = 'none'; }  // hide mic if speech input unsupported
+if(!SR){ const m = document.getElementById('axMic'), v = document.getElementById('axVm'); if(m) m.style.display='none'; if(v) v.style.display='none'; }
+fetch('/api/axon/voices').then(r=>r.json()).then(d=>{ EL_ENABLED = d.enabled; EL_VOICES = d.voices || []; }).catch(()=>{});
 
-function toggleVoice(){
-  voiceOut = !voiceOut;
-  spkBtn.innerHTML = voiceOut ? '<i data-lucide="volume-2"></i>' : '<i data-lucide="volume-x"></i>';
-  if(window.lucide) lucide.createIcons();
-  if(voiceOut && window.speechSynthesis){
-    // unlock audio on iOS with a tiny silent utterance triggered by this tap
-    const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u);
-  } else if(window.speechSynthesis){
-    speechSynthesis.cancel();
-  }
-}
+/* bottom mic = voice-to-text (dictation only) */
 function startListen(){
   if(!SR) return;
   if(window.speechSynthesis) speechSynthesis.cancel();
-  recog = new SR(); recog.lang = 'en-US'; recog.interimResults = false; recog.maxAlternatives = 1;
-  listening = true; micBtn.classList.add('listening'); vmSet('Listening…','listening');
+  recog = new SR(); recog.lang='en-US'; recog.interimResults=false; recog.maxAlternatives=1;
+  listening = true; if(micBtn) micBtn.classList.add('listening'); vmSet('Listening…','listening');
   recog.onresult = e => {
     const t = e.results[0][0].transcript;
     document.getElementById('axInput').value = t;
     vmSet('Thinking…',''); vmCaption(t);
     stopListen();
-    send(true);
+    send();
   };
   recog.onerror = () => stopListen();
-  recog.onend = () => { listening = false; micBtn.classList.remove('listening'); };
+  recog.onend = () => { listening = false; if(micBtn) micBtn.classList.remove('listening'); };
   try { recog.start(); } catch(e) {}
 }
-function stopListen(){ listening = false; micBtn.classList.remove('listening'); if(recog){ try{ recog.stop(); }catch(e){} } }
+function stopListen(){ listening = false; if(micBtn) micBtn.classList.remove('listening'); if(recog){ try{ recog.stop(); }catch(e){} } }
 function toggleMic(){ listening ? stopListen() : startListen(); }
 
-function speak(text){
-  if(!voiceOut || !window.speechSynthesis || !text) return;
-  const clean = text.replace(/\*\*/g,'').replace(/[_•#>]/g,'').replace(/\s+/g,' ').trim();
-  if(!clean) return;
-  const u = new SpeechSynthesisUtterance(clean);
-  const vn = localStorage.getItem('axon_voice');
-  if(vn){ const v = speechSynthesis.getVoices().find(x => x.name === vn); if(v) u.voice = v; }
-  u.rate = parseFloat(localStorage.getItem('axon_rate') || '1.03');
-  u.pitch = parseFloat(localStorage.getItem('axon_pitch') || '1');
-  vmSet('Speaking…','speaking'); vmCaption(clean.slice(0,240));
-  // hands-free: after AXON finishes speaking a voice reply, listen again
-  u.onend = () => { if(voiceOut && lastVoice && !listening){ lastVoice = false; setTimeout(startListen, 350); } };
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-// ---------- IMMERSIVE VOICE MODE (ChatGPT-style) ----------
-let vmActive = false;
-function vmSet(status, orbClass){
+/* ---- VOICE MODE (live conversation) ---- */
+function vmSet(status, state){
   if(!vmActive) return;
   const s = document.getElementById('vmStatus'); if(s) s.textContent = status;
-  const orb = document.getElementById('vmOrb'); if(orb) orb.className = 'vm-orb ' + (orbClass || '');
+  const a = document.getElementById('vmAura'); if(a) a.className = 'vm-aura ' + (state || '');
 }
 function vmCaption(t){ if(!vmActive) return; const c = document.getElementById('vmCaption'); if(c) c.textContent = t; }
+function buildCards(){
+  const wrap = document.getElementById('vmCards'); wrap.innerHTML = '';
+  const list = EL_VOICES.length ? EL_VOICES : [{id:'', name:'Default', desc:"Your device's built-in voice"}];
+  list.forEach(v => {
+    const c = document.createElement('div');
+    c.className = 'vm-card' + (v.id === curVoice ? ' sel' : '');
+    c.innerHTML = '<div class="vm-card-orb"></div><div class="vm-card-name">'+v.name+'</div><div class="vm-card-desc">'+v.desc+'</div>';
+    c.onclick = () => { curVoice = v.id; localStorage.setItem('axon_el_voice', v.id); startTalk(); };
+    wrap.appendChild(c);
+  });
+}
 function voiceModeStart(){
   if(!SR){ alert('Voice mode needs speech support — try Chrome or a recent Safari.'); return; }
-  vmActive = true; voiceOut = true;
-  spkBtn.innerHTML = '<i data-lucide="volume-2"></i>';
-  if(window.speechSynthesis){ const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
   document.getElementById('vmOv').classList.add('on');
+  if(window.speechSynthesis){ const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }  // unlock iOS audio
+  if(!curVoice && EL_VOICES.length){ vmOpenPick(); } else { startTalk(); }
   if(window.lucide) lucide.createIcons();
+}
+function vmOpenPick(){
+  buildCards();
+  document.getElementById('vmPick').style.display = 'flex';
+  document.getElementById('vmTalk').style.display = 'none';
+  if(window.lucide) lucide.createIcons();
+}
+function startTalk(){
+  document.getElementById('vmPick').style.display = 'none';
+  document.getElementById('vmTalk').style.display = 'flex';
+  vmActive = true;
   vmCaption('Say hi to AXON…');
+  if(window.lucide) lucide.createIcons();
   startListen();
 }
 function voiceModeEnd(){
   vmActive = false; stopListen();
   if(window.speechSynthesis) speechSynthesis.cancel();
+  if(vmAudio){ try{ vmAudio.pause(); }catch(e){} vmAudio = null; }
   document.getElementById('vmOv').classList.remove('on');
+}
+
+/* ---- speak AXON's reply: ElevenLabs if available, else device voice ---- */
+function ttsPlay(text, onend){
+  const clean = text.replace(/\*\*/g,'').replace(/[_•#>]/g,'').replace(/\s+/g,' ').trim();
+  if(!clean){ onend && onend(); return; }
+  vmSet('Speaking…','speaking');
+  if(EL_ENABLED && curVoice){
+    fetch('/api/axon/tts', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({text:clean, voice_id:curVoice})})
+      .then(r => r.status === 200 ? r.blob() : null)
+      .then(blob => {
+        if(!blob){ deviceSpeak(clean, onend); return; }
+        const url = URL.createObjectURL(blob); vmAudio = new Audio(url);
+        vmAudio.onended = () => { URL.revokeObjectURL(url); onend && onend(); };
+        vmAudio.onerror = () => deviceSpeak(clean, onend);
+        vmAudio.play().catch(() => deviceSpeak(clean, onend));
+      }).catch(() => deviceSpeak(clean, onend));
+  } else {
+    deviceSpeak(clean, onend);
+  }
+}
+function deviceSpeak(clean, onend){
+  if(!window.speechSynthesis){ onend && onend(); return; }
+  const u = new SpeechSynthesisUtterance(clean);
+  const vn = localStorage.getItem('axon_voice');
+  if(vn){ const v = speechSynthesis.getVoices().find(x => x.name === vn); if(v) u.voice = v; }
+  u.rate = parseFloat(localStorage.getItem('axon_rate') || '1.03');
+  u.pitch = parseFloat(localStorage.getItem('axon_pitch') || '1');
+  u.onend = () => onend && onend();
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
 }
 function clearChat(){ fetch('/api/axon/clear', {method:'POST'}).then(() => location.reload()); }
 // Render markdown in existing (history) AXON messages on load
