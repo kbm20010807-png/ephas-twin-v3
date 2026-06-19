@@ -149,6 +149,7 @@ class Profile(db.Model):
     bad_habits = db.Column(db.String(400), default='')   # habits the user wants to stop (comma-sep)
     focus = db.Column(db.String(200), default='')        # focus areas (comma-sep)
     onboarded = db.Column(db.Boolean, default=False)
+    private_account = db.Column(db.Boolean, default=False)
 
 class Habit(db.Model):
     __tablename__ = 'habits'
@@ -447,6 +448,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
+        "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
     ):
         try:
             db.session.execute(text(stmt))
@@ -552,6 +554,9 @@ def get_profile(user):
         db.session.add(p)
         db.session.commit()
     return p
+
+def reauthed():
+    return session.get('reauth_until', 0) > datetime.utcnow().timestamp()
 
 def habit_streak(habit_id):
     rows = db.session.query(HabitLog.date).filter_by(habit_id=habit_id).distinct().all()
@@ -1167,6 +1172,75 @@ def axon_checkin_coach():
 def settings():
     if not auth(): return redirect('/login')
     return render_template('settings.html', u=user_ctx(), accounts=session_accounts(), active='settings')
+
+@app.route('/reauth', methods=['GET', 'POST'])
+def reauth():
+    if not auth(): return redirect('/login')
+    nxt = request.args.get('next') or request.form.get('next') or '/settings'
+    if not nxt.startswith('/'):
+        nxt = '/settings'
+    if request.method == 'POST':
+        if current_user().check_password(request.form.get('password') or ''):
+            session['reauth_until'] = (datetime.utcnow() + timedelta(minutes=10)).timestamp()
+            return redirect(nxt)
+        return render_template('reauth.html', auth_page=True, next=nxt, error='Incorrect password.')
+    return render_template('reauth.html', auth_page=True, next=nxt)
+
+@app.route('/account')
+def account():
+    if not auth(): return redirect('/login')
+    if not reauthed(): return redirect('/reauth?next=/account')
+    return render_template('account.html', u=user_ctx(), active='settings')
+
+@app.route('/account/password', methods=['POST'])
+def account_password():
+    if not auth(): return redirect('/login')
+    if not reauthed(): return redirect('/reauth?next=/account')
+    cu = current_user()
+    cur, new, confirm = request.form.get('current') or '', request.form.get('new') or '', request.form.get('confirm') or ''
+    err = success = None
+    if not cu.check_password(cur):
+        err = 'Your current password is incorrect.'
+    elif len(new) < 8 or not any(c.isupper() for c in new) or not any(not c.isalnum() for c in new):
+        err = 'New password needs 8+ characters, a capital letter, and a symbol.'
+    elif new != confirm:
+        err = "New passwords don't match."
+    else:
+        cu.set_password(new)
+        db.session.commit()
+        if RESEND_KEY:
+            send_email(cu.email, 'Your TWIN password was changed',
+                       code_email_html('—', 'Your password was just changed. If this wasn\'t you, reset it immediately and contact support.'))
+        success = 'Password updated. A confirmation was sent to your email.'
+    return render_template('account.html', u=user_ctx(), active='settings', pw_error=err, pw_success=success)
+
+@app.route('/personal', methods=['GET', 'POST'])
+def personal():
+    if not auth(): return redirect('/login')
+    if not reauthed(): return redirect('/reauth?next=/personal')
+    cu = current_user()
+    p = get_profile(cu)
+    saved = False
+    if request.method == 'POST':
+        p.height = (request.form.get('height') or '').strip()[:20]
+        p.weight = (request.form.get('weight') or '').strip()[:20]
+        p.age = (request.form.get('age') or '').strip()[:10]
+        p.primary_goal = (request.form.get('primary_goal') or '').strip()[:300]
+        p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
+        p.focus = (request.form.get('focus') or '').strip()[:200]
+        db.session.commit()
+        saved = True
+    return render_template('personal.html', u=user_ctx(), p=p, saved=saved, active='settings')
+
+@app.route('/privacy', methods=['GET', 'POST'])
+def privacy():
+    if not auth(): return redirect('/login')
+    p = get_profile(current_user())
+    if request.method == 'POST':
+        p.private_account = request.form.get('private_account') == '1'
+        db.session.commit()
+        return {'ok': True, 'private': p.private_account}
+    return render_template('privacy.html', u=user_ctx(), p=p, active='settings')
 
 @app.route('/calendar')
 def calendar():

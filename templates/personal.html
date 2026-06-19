@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Personal{% endblock %}
+{% block head %}
+<style>
+.pl-note{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--sub);line-height:1.5;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:12px 14px;margin:16px 20px;}
+.pl-note svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px;}
+.pl-wrap{padding:0 20px 40px;}
+.pl-lbl{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-bottom:8px;display:block;}
+.pl-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.ob-chip{padding:8px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s;}
+.ob-chip.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Personal</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="pl-note"><i data-lucide="lock"></i><div>This is your <b>private</b> data. Only AXON uses it to coach you and tailor your feed — it's never shown to anyone.</div></div>
+
+{% if saved %}<div style="margin:0 20px 8px;background:var(--green-dim);border:1px solid var(--green-b);color:var(--green);font-size:12px;padding:10px 12px;border-radius:10px;text-align:center;">Saved.</div>{% endif %}
+
+<form method="POST" action="/personal" id="plForm" onsubmit="collect()" class="pl-wrap">
+  <div class="form-group">
+    <label class="pl-lbl">About you</label>
+    <div class="pl-row">
+      <input name="age" class="form-input" placeholder="Age" inputmode="numeric" value="{{ p.age }}">
+      <input name="height" class="form-input" placeholder="Height" value="{{ p.height }}">
+      <input name="weight" class="form-input" placeholder="Weight" value="{{ p.weight }}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="pl-lbl">Your #1 goal</label>
+    <input name="primary_goal" class="form-input" placeholder="What you're working toward" value="{{ p.primary_goal }}">
+  </div>
+  <div class="form-group">
+    <label class="pl-lbl">Habits you want to quit</label>
+    <div class="chip-wrap" id="badChips">
+      {% for h in ['Smoking','Vaping','Junk food','Doomscrolling','Alcohol','Procrastination','Overspending','Porn'] %}
+      <div class="ob-chip {% if h in p.bad_habits %}on{% endif %}" onclick="this.classList.toggle('on')">{{ h }}</div>
+      {% endfor %}
+    </div>
+    <input class="form-input" id="badCustom" placeholder="Add your own + Enter" onkeydown="addCustom(event,'badChips','badCustom')">
+    <input type="hidden" name="bad_habits" id="badHidden">
+  </div>
+  <div class="form-group">
+    <label class="pl-lbl">Focus areas</label>
+    <div class="chip-wrap" id="focusChips">
+      {% for f in ['Mind','Body','Wealth','Purpose','Social','Wellbeing'] %}
+      <div class="ob-chip {% if f in p.focus %}on{% endif %}" onclick="this.classList.toggle('on')">{{ f }}</div>
+      {% endfor %}
+    </div>
+    <input type="hidden" name="focus" id="focusHidden">
+  </div>
+  <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);"><i data-lucide="check"></i> SAVE</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+function chipText(id){ return [...document.querySelectorAll('#'+id+' .ob-chip.on')].map(c=>c.textContent.trim()).join(','); }
+function collect(){ document.getElementById('badHidden').value = chipText('badChips'); document.getElementById('focusHidden').value = chipText('focusChips'); }
+function addCustom(e, wrapId, inpId){
+  if(e.key !== 'Enter') return; e.preventDefault();
+  const inp = document.getElementById(inpId); const v = inp.value.trim(); if(!v) return;
+  const chip = document.createElement('div'); chip.className='ob-chip on'; chip.textContent=v;
+  chip.onclick = function(){ this.classList.toggle('on'); };
+  document.getElementById(wrapId).appendChild(chip); inp.value='';
+}
+</script>
+{% endblock %}

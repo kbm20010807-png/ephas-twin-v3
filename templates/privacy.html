@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Privacy{% endblock %}
+{% block head %}
+<style>
+.pv-block{margin:18px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:0 16px;box-shadow:var(--sh);}
+.pv-row{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--border);}
+.pv-row:last-child{border-bottom:none;}
+.pv-ico{width:34px;height:34px;border-radius:10px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pv-ico svg{width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.pv-info{flex:1;}
+.pv-title{font-size:13px;font-weight:700;color:var(--black);}
+.pv-sub{font-size:11px;color:var(--sub);margin-top:1px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Privacy</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="block-label">Visibility</div>
+<div class="pv-block">
+  <div class="pv-row">
+    <div class="pv-ico"><i data-lucide="lock"></i></div>
+    <div class="pv-info"><div class="pv-title">Private account</div><div class="pv-sub">Only people you approve can see your posts & stats</div></div>
+    <label class="toggle">
+      <input type="checkbox" id="privToggle" {% if p.private_account %}checked{% endif %} onchange="setPrivate(this)">
+      <div class="toggle-track"></div><div class="toggle-thumb"></div>
+    </label>
+  </div>
+  <div class="pv-row">
+    <div class="pv-ico"><i data-lucide="eye-off"></i></div>
+    <div class="pv-info"><div class="pv-title">Hide my stats</div><div class="pv-sub">Keep your streak & domains private</div></div>
+    <span style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 8px;">SOON</span>
+  </div>
+</div>
+
+<div class="block-label">Your data</div>
+<div class="pv-block">
+  <a href="/personal" class="pv-row" style="text-decoration:none;cursor:pointer;">
+    <div class="pv-ico"><i data-lucide="shield"></i></div>
+    <div class="pv-info"><div class="pv-title">Personal data (private)</div><div class="pv-sub">View & edit what only AXON can see</div></div>
+    <i data-lucide="chevron-right" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.75;"></i>
+  </a>
+  <div class="pv-row" style="cursor:pointer;">
+    <div class="pv-ico"><i data-lucide="download"></i></div>
+    <div class="pv-info"><div class="pv-title">Download my data</div></div>
+    <span style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 8px;">SOON</span>
+  </div>
+</div>
+<div style="height:30px;"></div>
+{% endblock %}
+{% block scripts %}
+<script>
+function setPrivate(el){
+  fetch('/privacy',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({private_account: el.checked ? '1':'0'})}).catch(()=>{});
+}
+</script>
+{% endblock %}

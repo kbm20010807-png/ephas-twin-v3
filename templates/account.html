@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Account & Security{% endblock %}
+{% block head %}
+<style>
+.ac-block{margin:18px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh);}
+.ac-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);}
+.ac-row:last-child{border-bottom:none;}
+.ac-ico{width:34px;height:34px;border-radius:10px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ac-ico svg{width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.ac-info{flex:1;min-width:0;}
+.ac-title{font-size:13px;font-weight:700;color:var(--black);}
+.ac-sub{font-size:11px;color:var(--sub);margin-top:1px;word-break:break-all;}
+.ac-badge{font-size:8px;font-weight:700;letter-spacing:.5px;padding:3px 8px;border-radius:var(--r-full);text-transform:uppercase;}
+.ac-badge.ok{background:var(--green-dim);border:1px solid var(--green-b);color:var(--green);}
+.ac-badge.no{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;}
+.ac-soon{font-size:8px;font-weight:700;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 8px;text-transform:uppercase;}
+.pw-form input{margin-bottom:10px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Account</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="block-label">Login & verification</div>
+<div class="ac-block">
+  <div class="ac-row">
+    <div class="ac-ico"><i data-lucide="mail"></i></div>
+    <div class="ac-info"><div class="ac-title">Email</div><div class="ac-sub">{{ u.email }}</div></div>
+    {% if u.email_verified %}<span class="ac-badge ok">Verified</span>{% else %}<a href="/verify-email"><span class="ac-badge no">Verify</span></a>{% endif %}
+  </div>
+  <div class="ac-row">
+    <div class="ac-ico"><i data-lucide="at-sign"></i></div>
+    <div class="ac-info"><div class="ac-title">Username</div><div class="ac-sub">@{{ u.username }}</div></div>
+    <a href="/edit-profile" class="ac-soon" style="color:var(--gold);border-color:var(--gold-b);">Change</a>
+  </div>
+  <div class="ac-row">
+    <div class="ac-ico"><i data-lucide="smartphone"></i></div>
+    <div class="ac-info"><div class="ac-title">Phone number</div><div class="ac-sub">Add a phone for 2FA & recovery</div></div>
+    <span class="ac-soon">Soon</span>
+  </div>
+  <div class="ac-row">
+    <div class="ac-ico"><i data-lucide="chrome"></i></div>
+    <div class="ac-info"><div class="ac-title">Google</div><div class="ac-sub">Sign in with Google</div></div>
+    <span class="ac-soon">Soon</span>
+  </div>
+</div>
+
+<div class="block-label">Change password</div>
+<div class="ac-block">
+  {% if pw_error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:12px;text-align:center;">{{ pw_error }}</div>{% endif %}
+  {% if pw_success %}<div style="background:var(--green-dim);border:1px solid var(--green-b);color:var(--green);font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:12px;text-align:center;">{{ pw_success }}</div>{% endif %}
+  <form method="POST" action="/account/password" class="pw-form">
+    <input type="password" name="current" class="form-input" placeholder="Current password" autocomplete="current-password" required>
+    <input type="password" name="new" class="form-input" placeholder="New password (8+ chars, capital & symbol)" autocomplete="new-password" required>
+    <input type="password" name="confirm" class="form-input" placeholder="Confirm new password" autocomplete="new-password" required>
+    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-top:4px;"><i data-lucide="lock"></i> UPDATE PASSWORD</button>
+  </form>
+  <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;">We'll email you a confirmation whenever your password changes.</div>
+</div>
+<div style="height:30px;"></div>
+{% endblock %}

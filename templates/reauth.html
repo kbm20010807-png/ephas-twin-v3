@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Confirm it's you{% endblock %}
+{% block head %}
+<style>
+body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;}
+.auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 28px;max-width:430px;margin:0 auto;width:100%;}
+.ra-ico{width:60px;height:60px;border-radius:18px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+.ra-ico svg{width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.ra-title{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);text-align:center;}
+.ra-sub{font-size:13px;color:var(--sub);text-align:center;margin:10px 0 26px;line-height:1.5;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="ra-ico"><i data-lucide="shield-check"></i></div>
+  <div class="ra-title">Confirm it's you</div>
+  <div class="ra-sub">For your security, enter your password<br>to access these settings.</div>
+  {% if error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:11px 14px;border-radius:12px;margin-bottom:14px;text-align:center;">{{ error }}</div>{% endif %}
+  <form method="POST" action="/reauth">
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="form-group">
+      <input type="password" name="password" class="form-input" placeholder="Your password" autocomplete="current-password" autofocus required>
+    </div>
+    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
+  </form>
+  <div style="text-align:center;padding-top:18px;"><a href="/settings" style="font-size:12px;color:var(--sub);text-decoration:none;">Cancel</a></div>
+</div>
+{% endblock %}
