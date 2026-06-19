@@ -1207,13 +1207,23 @@ def stories_ctx(cu):
             break
     return out
 
+def quest_teasers(cu):
+    """Flat list of quest one-liners (period + action) for the rotating home card."""
+    q = quests_ctx(cu)
+    out = []
+    for period, key in (('DAILY', 'daily'), ('WEEKLY', 'weekly'), ('MONTHLY', 'monthly'), ('SEASONAL', 'seasonal')):
+        for it in q.get(key, []):
+            out.append({'period': period, 'text': it.get('desc') or it.get('title', ''), 'done': it.get('done', False)})
+    return out
+
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
     cu = current_user()
     community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
-                           habits=serialize_habits(cu), stories=stories_ctx(cu), active='home')
+                           habits=serialize_habits(cu), stories=stories_ctx(cu),
+                           qteasers=quest_teasers(cu), active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():

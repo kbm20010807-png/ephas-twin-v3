@@ -98,7 +98,8 @@
 .qc-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .qc-body{flex:1;}
 .qc-title{font-size:13px;font-weight:800;color:var(--black);margin-bottom:3px;}
-.qc-sub{font-size:11px;color:var(--sub);}
+.qc-sub{font-size:11px;color:var(--sub);transition:opacity .35s ease;min-height:14px;}
+.qc-per{color:var(--gold);font-weight:800;letter-spacing:.5px;}
 .qc-tag{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);white-space:nowrap;}
 .hm-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);}
 .hm-row:last-child{border-bottom:none;}
@@ -205,8 +206,8 @@
 <!-- QUESTS CARD -->
 <a href="/quests" class="quests-card">
   <div class="qc-body">
-    <div class="qc-title">Daily Quests</div>
-    <div class="qc-sub">0 of 3 complete · Start earning XP today</div>
+    <div class="qc-title">Quests</div>
+    <div class="qc-sub" id="qcSub">Start earning XP today</div>
   </div>
   <div class="qc-tag">VIEW ALL</div>
 </a>
@@ -320,6 +321,22 @@ const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+
+// Rotating quest teaser on the Quests card (changes every 5s)
+const QTEASERS = {{ qteasers|tojson }};
+(function(){
+  const el = document.getElementById('qcSub');
+  if(!el || !QTEASERS.length) return;
+  function render(q){ el.innerHTML = '<span class="qc-per">' + q.period + '</span> · ' + q.text; }
+  render(QTEASERS[Math.floor(Math.random()*QTEASERS.length)]);
+  setInterval(function(){
+    el.style.opacity = '0';
+    setTimeout(function(){
+      render(QTEASERS[Math.floor(Math.random()*QTEASERS.length)]);
+      el.style.opacity = '1';
+    }, 350);
+  }, 5000);
+})();
 
 const STORIES = {{ stories|tojson }};
 function openStory(i) {
