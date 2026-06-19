@@ -128,32 +128,63 @@ function addBotBubble(){
   scrollDown();
   return row.querySelector('.ax-msg');
 }
+let axPending = [];      // user messages typed but not yet generated (batched)
+let axCtrl = null;       // AbortController for the in-flight stream
+let axTimer = null;      // 1s debounce timer
+let axStreaming = false;
+let axCurBubble = null;
+
 function send(){
   const inp = document.getElementById('axInput');
   const text = inp.value.trim();
   if(!text) return;
   inp.value = '';
   addMsg('user', text);
+  axPending.push(text);
+  // If AXON is mid-reply, interrupt it and we'll regenerate with this new message included
+  if(axStreaming && axCtrl){
+    try { axCtrl.abort(); } catch(e){}
+    axStreaming = false;
+    if(axCurBubble){ const r = axCurBubble.closest('.ax-row'); if(r) r.remove(); axCurBubble = null; }
+  }
+  const t = document.getElementById('axTyping'); if(t) t.remove();
   showTyping();
-  fetch('/api/axon/stream', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({message:text})})
+  // Wait ~1s of quiet before generating, so rapid follow-ups are answered together
+  clearTimeout(axTimer);
+  axTimer = setTimeout(fireAxon, 1000);
+}
+
+function fireAxon(){
+  if(!axPending.length) return;
+  const message = axPending.join('\n');
+  axPending = [];
+  axCtrl = new AbortController();
+  axStreaming = true;
+  fetch('/api/axon/stream', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({message}), signal:axCtrl.signal})
     .then(resp => {
       const t = document.getElementById('axTyping'); if(t) t.remove();
-      if(!resp.ok || !resp.body){ addMsg('bot', 'Something went wrong — give me a sec and try again.'); return; }
+      if(!resp.ok || !resp.body){ axStreaming = false; addMsg('bot', 'Something went wrong — give me a sec and try again.'); return; }
       const bubble = addBotBubble();
+      axCurBubble = bubble;
       const reader = resp.body.getReader();
       const dec = new TextDecoder();
       let acc = '';
       (function read(){
         reader.read().then(({done, value}) => {
-          if(done) return;
+          if(done){ axStreaming = false; axCurBubble = null; return; }
           acc += dec.decode(value, {stream:true});
           bubble.innerHTML = mdFormat(acc);
           scrollDown();
           read();
-        }).catch(() => {});
+        }).catch(() => { axStreaming = false; });
       })();
     })
-    .catch(() => { const t = document.getElementById('axTyping'); if(t) t.remove(); addMsg('bot', 'Something went wrong — give me a sec and try again.'); });
+    .catch(err => {
+      const t = document.getElementById('axTyping'); if(t) t.remove();
+      axStreaming = false;
+      if(err && err.name === 'AbortError') return;   // interrupted on purpose — already handled
+      addMsg('bot', 'Something went wrong — give me a sec and try again.');
+    });
 }
 function quick(el){ document.getElementById('axInput').value = el.textContent; send(); }
 function clearChat(){ fetch('/api/axon/clear', {method:'POST'}).then(() => location.reload()); }

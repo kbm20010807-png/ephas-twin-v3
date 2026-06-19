@@ -289,6 +289,17 @@ def axon_today_messages(user, limit=40):
             .order_by(AxonMessage.created_at).all())
     return rows[-limit:]
 
+def _merge_roles(msgs):
+    """Collapse consecutive same-role messages into one turn (e.g. when a user fires several
+    quick messages / interrupts mid-reply) so the Anthropic API gets clean alternating turns."""
+    out = []
+    for m in msgs:
+        if out and out[-1]['role'] == m['role']:
+            out[-1]['content'] = (out[-1]['content'] + '\n' + m['content'])[:6000]
+        else:
+            out.append({'role': m['role'], 'content': m['content']})
+    return out
+
 def roll_axon_memory(user):
     """Once per new day: distill previous days' un-summarized messages into the long-term memory."""
     if not ANTHROPIC_KEY:
@@ -1316,13 +1327,14 @@ def api_axon_stream():
     # Save the user's message, then build the request inside the request context.
     db.session.add(AxonMessage(user_id=uid, role='user', content=_safe(msg, 2000)))
     db.session.commit()
-    messages = [{"role": r.role, "content": r.content} for r in axon_today_messages(cu)]
+    messages = _merge_roles([{"role": r.role, "content": r.content} for r in axon_today_messages(cu)])
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(cu),
             "messages": messages, "stream": True}
 
     def generate():
         full = []
+        completed = False  # only persist the reply if the stream finished (not if the user interrupted)
         try:
             with requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=60, stream=True) as r:
                 if r.status_code >= 300:
@@ -1343,14 +1355,19 @@ def api_axon_stream():
                             if piece:
                                 full.append(piece)
                                 yield piece
+            completed = True
             LAST_AXON_ERROR.update(status=200, body='ok', note='ok')
-        except Exception as e:
-            LAST_AXON_ERROR.update(status=None, body=str(e)[:700], note='stream exception')
+        except (GeneratorExit, Exception) as e:
+            # client interrupted (GeneratorExit / broken pipe) or API error — don't save a partial reply
+            LAST_AXON_ERROR.update(status=None, body=str(e)[:700], note='stream interrupted/exception')
             if not full:
-                yield "I had trouble responding just now — give me a second and try again."
-                return
+                try:
+                    yield "I had trouble responding just now — give me a second and try again."
+                except Exception:
+                    pass
+            return
         reply = ''.join(full).strip()
-        if reply:
+        if completed and reply:
             try:
                 with app.app_context():
                     db.session.add(AxonMessage(user_id=uid, role='assistant', content=reply))
