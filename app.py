@@ -274,7 +274,18 @@ AXON_DAILY_BETA = int(os.environ.get('AXON_DAILY_BETA', '80'))            # beta
 AXON_TIERS_ENABLED = os.environ.get('AXON_TIERS_ENABLED', '0') == '1'
 LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
 
-# ElevenLabs realistic voices (optional — set ELEVENLABS_API_KEY to enable; falls back to device voices)
+# --- Realistic AXON voices. Engine priority: OpenAI TTS (cheap) > ElevenLabs (premium) > device (free) ---
+OPENAI_KEY = os.environ.get('OPENAI_API_KEY', '')
+OPENAI_TTS_MODEL = os.environ.get('OPENAI_TTS_MODEL', 'tts-1')  # 'tts-1' cheap, 'tts-1-hd' nicer (2x)
+OPENAI_VOICES = [
+    {'id': 'onyx',    'name': 'Onyx',    'desc': 'Deep, authoritative — strong mentor'},
+    {'id': 'nova',    'name': 'Nova',    'desc': 'Bright, friendly — easy morning chat'},
+    {'id': 'echo',    'name': 'Echo',    'desc': 'Warm, calm, steady — grounded coach'},
+    {'id': 'shimmer', 'name': 'Shimmer', 'desc': 'Soft, gentle, kind — gentle encourager'},
+    {'id': 'fable',   'name': 'Fable',   'desc': 'Expressive, storyteller — engaging'},
+    {'id': 'alloy',   'name': 'Alloy',   'desc': 'Neutral, balanced — all-purpose'},
+]
+
 ELEVENLABS_KEY = os.environ.get('ELEVENLABS_API_KEY', '')
 ELEVEN_MODEL = os.environ.get('ELEVEN_MODEL', 'eleven_turbo_v2_5')  # fast + cheaper
 ELEVEN_VOICES = [
@@ -1565,33 +1576,46 @@ def api_axon_stream():
     return Response(generate(), mimetype='text/plain',
                     headers={'X-Accel-Buffering': 'no', 'Cache-Control': 'no-cache'})
 
+def tts_engine():
+    """Pick the active voice engine + its voice list. OpenAI preferred (cheap), then ElevenLabs."""
+    if OPENAI_KEY:
+        return 'openai', OPENAI_VOICES
+    if ELEVENLABS_KEY:
+        return 'elevenlabs', ELEVEN_VOICES
+    return None, []
+
 @app.route('/api/axon/voices')
 def axon_voices():
     if not auth(): return ('', 401)
-    return {'enabled': bool(ELEVENLABS_KEY), 'voices': ELEVEN_VOICES}
+    engine, voices = tts_engine()
+    return {'enabled': bool(engine), 'engine': engine, 'voices': voices}
 
 @app.route('/api/axon/tts', methods=['POST'])
 def axon_tts():
-    """Realistic AXON speech via ElevenLabs (if configured). Returns mp3, or 204 to fall back to device voice."""
+    """Realistic AXON speech. Returns mp3 from the active engine, or 204 to fall back to the device voice."""
     if not auth(): return ('', 401)
-    if not ELEVENLABS_KEY:
-        return ('', 204)
+    engine, voices = tts_engine()
     text = (request.form.get('text') or '').strip()[:1200]
-    voice_id = (request.form.get('voice_id') or ELEVEN_VOICES[0]['id']).strip()
-    if not any(v['id'] == voice_id for v in ELEVEN_VOICES):
-        voice_id = ELEVEN_VOICES[0]['id']
-    if not text:
+    if not engine or not text:
         return ('', 204)
+    voice_id = (request.form.get('voice_id') or voices[0]['id']).strip()
+    if not any(v['id'] == voice_id for v in voices):
+        voice_id = voices[0]['id']
     try:
-        r = requests.post(
-            f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}',
-            headers={'xi-api-key': ELEVENLABS_KEY, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg'},
-            json={'text': text, 'model_id': ELEVEN_MODEL,
-                  'voice_settings': {'stability': 0.45, 'similarity_boost': 0.8, 'style': 0.3}},
-            timeout=30)
+        if engine == 'openai':
+            r = requests.post('https://api.openai.com/v1/audio/speech',
+                              headers={'Authorization': 'Bearer ' + OPENAI_KEY, 'Content-Type': 'application/json'},
+                              json={'model': OPENAI_TTS_MODEL, 'voice': voice_id, 'input': text, 'response_format': 'mp3'},
+                              timeout=30)
+        else:  # elevenlabs
+            r = requests.post(f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}',
+                              headers={'xi-api-key': ELEVENLABS_KEY, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg'},
+                              json={'text': text, 'model_id': ELEVEN_MODEL,
+                                    'voice_settings': {'stability': 0.45, 'similarity_boost': 0.8, 'style': 0.3}},
+                              timeout=30)
         if r.status_code < 300 and r.content:
             return Response(r.content, mimetype='audio/mpeg', headers={'Cache-Control': 'no-store'})
-        print(f'[tts] elevenlabs status={r.status_code} body={r.text[:200]}')
+        print(f'[tts] {engine} status={r.status_code} body={r.text[:200]}')
     except Exception as e:
         print(f'[tts] {e}')
     return ('', 204)
