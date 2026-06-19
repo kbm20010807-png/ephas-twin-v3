@@ -134,6 +134,19 @@ class EmailCode(db.Model):
     expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Profile(db.Model):
+    # PRIVATE onboarding data — only AXON & the algorithm use this; never shown publicly.
+    __tablename__ = 'profiles'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, index=True, nullable=False)
+    height = db.Column(db.String(20), default='')
+    weight = db.Column(db.String(20), default='')
+    age = db.Column(db.String(10), default='')
+    primary_goal = db.Column(db.String(300), default='')
+    bad_habits = db.Column(db.String(400), default='')   # habits the user wants to stop (comma-sep)
+    focus = db.Column(db.String(200), default='')        # focus areas (comma-sep)
+    onboarded = db.Column(db.Boolean, default=False)
+
 
 LEVEL_TITLES = [
     (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
@@ -219,6 +232,17 @@ def axon_system_prompt(user):
         if c.reflection: notes.append('Intention: ' + _safe(c.reflection, 120))
         if c.note: notes.append(_safe(c.note, 150))
     notes_txt = ' | '.join(notes[:6]) or 'nothing logged yet'
+    # Private onboarding profile (AXON-only)
+    prof = Profile.query.filter_by(user_id=user.id).first()
+    prof_bits = []
+    if prof:
+        if prof.height: prof_bits.append(f"height {_safe(prof.height, 20)}")
+        if prof.weight: prof_bits.append(f"weight {_safe(prof.weight, 20)}")
+        if prof.age: prof_bits.append(f"age {_safe(prof.age, 10)}")
+        if prof.primary_goal: prof_bits.append(f"main goal: {_safe(prof.primary_goal, 150)}")
+        if prof.bad_habits: prof_bits.append(f"trying to quit: {_safe(prof.bad_habits, 150)}")
+        if prof.focus: prof_bits.append(f"focus areas: {_safe(prof.focus, 120)}")
+    prof_txt = '; '.join(prof_bits) or 'not shared yet'
     # Courses AXON can recommend from inside the app
     courses = Post.query.filter_by(kind='course').order_by(Post.created_at.desc()).limit(12).all()
     course_txt = ', '.join(f"{_safe(p.title, 60)} [{_safe(p.category, 24)}]" for p in courses) or 'none published yet'
@@ -239,6 +263,7 @@ def axon_system_prompt(user):
         f"Current streak: {u['streak']} days (best: {u['best_streak']}), total check-ins: {u['total_checkins']}\n"
         f"Recent averages - sleep: {s['avg_sleep']}h, energy: {s['avg_energy']}/10, mood: {s['avg_mood']}/10\n"
         f"Life domains: {_safe(dom, 200)}\n"
+        f"Private profile (they shared this with you only): {prof_txt}\n"
         f"What they're working on (their own recent words): {notes_txt}\n"
         f"TWIN courses you can recommend: {course_txt}\n"
         "[END USER DATA]\n\n"
@@ -298,6 +323,20 @@ def user_interests(user):
     for sl in SearchLog.query.filter_by(user_id=user.id).order_by(SearchLog.id.desc()).limit(20).all():
         if sl.term:
             interests[sl.term.lower()] += 1
+    # Private onboarding: the bad habits they want to quit + their goal/focus drive the feed hard
+    prof = Profile.query.filter_by(user_id=user.id).first()
+    if prof:
+        for h in (prof.bad_habits or '').split(','):
+            h = h.strip().lower()
+            if h:
+                interests[h] += 3  # strong: surface content to help quit this
+        for fcat in (prof.focus or '').split(','):
+            fcat = fcat.strip().lower()
+            if fcat:
+                interests[fcat] += 1.5
+        for w in (prof.primary_goal or '').lower().split():
+            if len(w) > 4:
+                interests[w] += 0.5
 
     # ===== THE DIGITAL-TWIN EDGE: rank content to fix what the user's TRACKER DATA shows =====
     s = stats_ctx()
@@ -479,6 +518,14 @@ def current_user():
 
 def auth():
     return current_user() is not None
+
+def get_profile(user):
+    p = Profile.query.filter_by(user_id=user.id).first()
+    if not p:
+        p = Profile(user_id=user.id)
+        db.session.add(p)
+        db.session.commit()
+    return p
 
 def _set_active(user_id):
     """Make user_id the active account, keeping it in the multi-account list (cap 5)."""
@@ -730,14 +777,41 @@ def signup():
         session['accounts'] = accounts
         _set_active(user.id)
         if RESEND_KEY:
-            code = issue_code(email, 'verify')
             send_email(email, 'Verify your TWIN account',
-                       code_email_html(code, 'Welcome to TWIN. Enter this code to verify your email:'))
-            return redirect('/verify-email')
-        return redirect('/home')
+                       code_email_html(issue_code(email, 'verify'), 'Welcome to TWIN. Enter this code to verify your email:'))
+        return redirect('/onboarding')
     if auth() and not request.args.get('add'):
         return redirect('/home')
     return render_template('signup.html', auth_page=True)
+
+@app.route('/onboarding', methods=['GET', 'POST'])
+def onboarding():
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    p = get_profile(cu)
+    if request.method == 'POST':
+        p.height = (request.form.get('height') or '').strip()[:20]
+        p.weight = (request.form.get('weight') or '').strip()[:20]
+        p.age = (request.form.get('age') or '').strip()[:10]
+        p.primary_goal = (request.form.get('primary_goal') or '').strip()[:300]
+        p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
+        p.focus = (request.form.get('focus') or '').strip()[:200]
+        p.onboarded = True
+        db.session.commit()
+        if RESEND_KEY and not cu.email_verified:
+            return redirect('/verify-email')
+        return redirect('/home')
+    return render_template('onboarding.html', u=user_ctx(), p=p, auth_page=True)
+
+@app.route('/onboarding/skip')
+def onboarding_skip():
+    if not auth(): return redirect('/login')
+    p = get_profile(current_user())
+    p.onboarded = True
+    db.session.commit()
+    if RESEND_KEY and not current_user().email_verified:
+        return redirect('/verify-email')
+    return redirect('/home')
 
 @app.route('/api/check-username')
 def check_username():

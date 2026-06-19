@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Set up your twin{% endblock %}
+{% block head %}
+<style>
+body{background:var(--bg);min-height:100vh;}
+.ob-wrap{padding:60px 24px 40px;max-width:480px;margin:0 auto;}
+.ob-logo{font-family:'Arpubes',sans-serif;font-size:38px;letter-spacing:-2px;color:var(--black);text-align:center;line-height:1;}
+.ob-title{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:var(--black);text-align:center;margin-top:18px;}
+.ob-sub{display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--sub);line-height:1.5;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:11px 13px;margin:14px 0 24px;}
+.ob-sub svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px;}
+.ob-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.ob-lbl{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-bottom:8px;display:block;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.ob-chip{padding:8px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s;}
+.ob-chip.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
+</style>
+{% endblock %}
+{% block content %}
+<div class="ob-wrap">
+  <div class="ob-logo">TWIN</div>
+  <div class="ob-title">Let's build your twin</div>
+  <div class="ob-sub">
+    <i data-lucide="lock"></i>
+    <div>These answers are <b>private</b> — only AXON uses them to coach you and tailor your feed. They're never shown to anyone else.</div>
+  </div>
+
+  <form method="POST" action="/onboarding" id="obForm" onsubmit="collect()">
+    <div class="form-group">
+      <label class="ob-lbl">About you</label>
+      <div class="ob-row">
+        <input name="age" class="form-input" placeholder="Age" inputmode="numeric" value="{{ p.age }}">
+        <input name="height" class="form-input" placeholder="Height" value="{{ p.height }}">
+        <input name="weight" class="form-input" placeholder="Weight" value="{{ p.weight }}">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="ob-lbl">Your #1 goal right now</label>
+      <input name="primary_goal" class="form-input" placeholder="e.g. Build discipline, lose 10kg, launch my business" value="{{ p.primary_goal }}">
+    </div>
+
+    <div class="form-group">
+      <label class="ob-lbl">Habits you want to quit</label>
+      <div class="chip-wrap" id="badChips">
+        {% for h in ['Smoking','Vaping','Junk food','Doomscrolling','Alcohol','Procrastination','Overspending','Porn'] %}
+        <div class="ob-chip {% if h in p.bad_habits %}on{% endif %}" onclick="this.classList.toggle('on')">{{ h }}</div>
+        {% endfor %}
+      </div>
+      <input class="form-input" id="badCustom" placeholder="Add your own + press Enter" onkeydown="addCustom(event,'badChips','badCustom')">
+      <input type="hidden" name="bad_habits" id="badHidden">
+    </div>
+
+    <div class="form-group">
+      <label class="ob-lbl">What do you want to focus on?</label>
+      <div class="chip-wrap" id="focusChips">
+        {% for f in ['Mind','Body','Wealth','Purpose','Social','Wellbeing'] %}
+        <div class="ob-chip {% if f in p.focus %}on{% endif %}" onclick="this.classList.toggle('on')">{{ f }}</div>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="focus" id="focusHidden">
+    </div>
+
+    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-top:6px;">
+      <i data-lucide="check"></i> SAVE & CONTINUE
+    </button>
+  </form>
+  <div style="text-align:center;padding-top:18px;">
+    <a href="/onboarding/skip" style="font-size:12px;color:var(--sub);text-decoration:none;">Skip for now</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function chipText(wrapId){
+  return [...document.querySelectorAll('#'+wrapId+' .ob-chip.on')].map(c=>c.textContent.trim()).join(',');
+}
+function collect(){
+  document.getElementById('badHidden').value = chipText('badChips');
+  document.getElementById('focusHidden').value = chipText('focusChips');
+}
+function addCustom(e, wrapId, inpId){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const inp = document.getElementById(inpId);
+  const v = inp.value.trim();
+  if(!v) return;
+  const chip = document.createElement('div');
+  chip.className = 'ob-chip on';
+  chip.textContent = v;
+  chip.onclick = function(){ this.classList.toggle('on'); };
+  document.getElementById(wrapId).appendChild(chip);
+  inp.value = '';
+}
+</script>
+{% endblock %}
