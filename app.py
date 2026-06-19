@@ -43,6 +43,9 @@ class User(db.Model):
     city = db.Column(db.String(120), default='')
     job = db.Column(db.String(120), default='')
     email_verified = db.Column(db.Boolean, default=False)
+    avatar = db.Column(db.Text, default='')   # base64 data URL (resized small)
+    banner = db.Column(db.Text, default='')   # base64 data URL (resized)
+    last_username_change = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -437,13 +440,19 @@ def serialize_posts(posts, viewer=None):
 
 with app.app_context():
     db.create_all()
-    # Lightweight migration: add email_verified to existing Postgres tables (no-op on fresh/SQLite)
-    try:
-        from sqlalchemy import text
-        db.session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE"))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
+    # Lightweight migrations: add new columns to existing Postgres tables (no-op on fresh/SQLite)
+    from sqlalchemy import text
+    for stmt in (
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
+    ):
+        try:
+            db.session.execute(text(stmt))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 DEMO_USER = {
     "name": "You",
@@ -636,7 +645,12 @@ def user_ctx():
         'total_checkins': total,
         'followers': Follow.query.filter_by(following_id=cu.id).count(),
         'following': Follow.query.filter_by(follower_id=cu.id).count(),
+        'avatar': cu.avatar or '',
+        'banner': cu.banner or '',
     })
+    locked = bool(cu.last_username_change) and (datetime.utcnow() - cu.last_username_change).days < 30
+    u['username_locked'] = locked
+    u['username_next'] = (cu.last_username_change + timedelta(days=30)).strftime('%b %d, %Y') if locked else ''
     return u
 
 def stats_ctx():
@@ -1170,9 +1184,20 @@ def edit_profile():
         if first:
             cu.name = (first + ' ' + last).strip()
         cu.bio = (request.form.get('bio') or '').strip()[:300]
-        uname = (request.form.get('username') or '').strip().lower()[:24]
-        if uname and uname != cu.username and not User.query.filter(User.username == uname, User.id != cu.id).first():
-            cu.username = uname
+        # Username: change allowed only once every 30 days
+        uname = ''.join(c for c in (request.form.get('username') or '').strip().lower() if c.isalnum() or c in '_.')[:24]
+        if uname and uname != cu.username and len(uname) >= 3:
+            can_change = (not cu.last_username_change) or (datetime.utcnow() - cu.last_username_change).days >= 30
+            if can_change and not User.query.filter(User.username == uname, User.id != cu.id).first():
+                cu.username = uname
+                cu.last_username_change = datetime.utcnow()
+        # Avatar / banner — base64 data URLs (resized client-side); only overwrite if a new image was sent
+        av = request.form.get('avatar')
+        if av:
+            cu.avatar = av[:2000000]
+        bn = request.form.get('banner')
+        if bn:
+            cu.banner = bn[:3000000]
         db.session.commit()
         return ('', 204)
     return render_template('edit_profile.html', u=user_ctx(), active='profile')

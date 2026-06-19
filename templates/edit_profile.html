@@ -30,21 +30,23 @@
 
 <!-- BANNER -->
 <div class="ep-banner" id="bannerWrap" onclick="document.getElementById('bannerFile').click()">
-  <img class="ep-banner-img" id="bannerPreview" src="" style="display:none;" alt="">
-  <div class="ep-banner-overlay" id="bannerOverlay">
+  <img class="ep-banner-img" id="bannerPreview" src="{{ u.banner }}" style="{% if not u.banner %}display:none;{% endif %}" alt="">
+  <div class="ep-banner-overlay" id="bannerOverlay" {% if u.banner %}style="background:rgba(0,0,0,.35);"{% endif %}>
     <i data-lucide="camera"></i> Change Banner
   </div>
 </div>
 <input type="file" id="bannerFile" style="display:none;" accept="image/*">
+<input type="hidden" id="bannerData">
 
 <!-- AVATAR -->
 <div class="ep-av-wrap">
-  <div class="ep-av" id="avCircle">{{ u.name[0]|upper }}</div>
+  <div class="ep-av" id="avCircle">{% if u.avatar %}<img src="{{ u.avatar }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
   <div class="ep-av-btn" onclick="document.getElementById('avatarFile').click()">
     <i data-lucide="camera"></i>
   </div>
 </div>
 <input type="file" id="avatarFile" style="display:none;" accept="image/*">
+<input type="hidden" id="avatarData">
 
 <!-- FIELDS -->
 <div class="ep-fields">
@@ -66,10 +68,10 @@
   <!-- Username -->
   <div class="form-group">
     <label class="form-label">Username</label>
-    <input class="form-input" id="username" placeholder="@username" value="{{ u.username }}" maxlength="24" oninput="onUsernameInput(this)">
-    <div id="usernameLock" class="username-lock" style="display:none;">
+    <input class="form-input" id="username" placeholder="@username" value="{{ u.username }}" maxlength="24" oninput="onUsernameInput(this)" {% if u.username_locked %}disabled style="opacity:.5;"{% endif %}>
+    <div id="usernameLock" class="username-lock" style="{% if not u.username_locked %}display:none;{% endif %}">
       <i data-lucide="lock" style="stroke:var(--sub);"></i>
-      <div class="username-lock-txt" id="lockMsg"></div>
+      <div class="username-lock-txt" id="lockMsg">{% if u.username_locked %}Username can be changed once a month. Next change available {{ u.username_next }}.{% else %}You can change your username once every 30 days.{% endif %}</div>
     </div>
   </div>
 
@@ -96,65 +98,48 @@
 
 {% block scripts %}
 <script>
-const USERNAME_KEY = 'twin_username_change';
-const USERNAME_LAST_KEY = 'twin_username_last_change';
-
 function count(inputId, countId, max) {
   const len = document.getElementById(inputId).value.length;
   document.getElementById(countId).textContent = len + '/' + max;
 }
-
-/* username once-per-month lock */
-function initUsername() {
-  const stored = localStorage.getItem(USERNAME_KEY);
-  if (stored) document.getElementById('username').value = stored;
-
-  const lastChange = localStorage.getItem(USERNAME_LAST_KEY);
-  if (lastChange) {
-    const last = new Date(lastChange);
-    const now = new Date();
-    const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
-    if (diffDays < 30) {
-      const nextDate = new Date(last);
-      nextDate.setDate(nextDate.getDate() + 30);
-      const opts = { month: 'short', day: 'numeric' };
-      const formatted = nextDate.toLocaleDateString('en-US', opts);
-      document.getElementById('username').disabled = true;
-      document.getElementById('username').style.opacity = '.5';
-      document.getElementById('usernameLock').style.display = 'flex';
-      document.getElementById('lockMsg').textContent = 'Username can only be changed once per month. Next change available: ' + formatted + '.';
-    }
-  }
-}
-
 function onUsernameInput(el) {
   el.value = el.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase();
 }
 
-/* avatar preview */
+/* Resize an image client-side -> small JPEG data URL (keeps the DB light) */
+function resizeImage(file, maxW, quality, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 document.getElementById('avatarFile').addEventListener('change', function() {
   if (!this.files.length) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const circle = document.getElementById('avCircle');
-    circle.innerHTML = '<img src="' + e.target.result + '" alt="">';
-  };
-  reader.readAsDataURL(this.files[0]);
+  resizeImage(this.files[0], 256, 0.85, dataUrl => {
+    document.getElementById('avCircle').innerHTML = '<img src="' + dataUrl + '" alt="">';
+    document.getElementById('avatarData').value = dataUrl;
+  });
 });
 
-/* banner preview */
 document.getElementById('bannerFile').addEventListener('change', function() {
   if (!this.files.length) return;
-  const reader = new FileReader();
-  reader.onload = e => {
+  resizeImage(this.files[0], 900, 0.8, dataUrl => {
     const prev = document.getElementById('bannerPreview');
-    prev.src = e.target.result;
-    prev.style.display = 'block';
+    prev.src = dataUrl; prev.style.display = 'block';
+    document.getElementById('bannerData').value = dataUrl;
     document.getElementById('bannerOverlay').style.background = 'rgba(0,0,0,.35)';
-    document.getElementById('bannerOverlay').innerHTML = '<i data-lucide="camera" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:1.75;"></i> Change Banner';
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  };
-  reader.readAsDataURL(this.files[0]);
+  });
 });
 
 function saveProfile() {
@@ -165,19 +150,14 @@ function saveProfile() {
     return;
   }
   document.getElementById('firstName').style.borderColor = '';
-
-  const uname = document.getElementById('username').value.trim();
-  const stored = localStorage.getItem(USERNAME_KEY) || '{{ u.username }}';
-  if (uname && uname !== stored && !document.getElementById('username').disabled) {
-    localStorage.setItem(USERNAME_KEY, uname);
-    localStorage.setItem(USERNAME_LAST_KEY, new Date().toISOString());
-  }
-
+  const unameEl = document.getElementById('username');
   const body = new URLSearchParams({
     first: fn,
     last: document.getElementById('lastName').value.trim(),
-    username: document.getElementById('username').disabled ? '' : uname,
-    bio: document.getElementById('bioInput').value.trim()
+    username: unameEl.disabled ? '' : unameEl.value.trim(),
+    bio: document.getElementById('bioInput').value.trim(),
+    avatar: document.getElementById('avatarData').value,
+    banner: document.getElementById('bannerData').value
   });
   fetch('/edit-profile', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body})
     .then(()=>{
@@ -189,11 +169,9 @@ function saveProfile() {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => { window.location.href = '/profile'; }, 280);
-      }, 1200);
+      }, 1100);
     })
     .catch(()=>alert('Could not save. Please try again.'));
 }
-
-initUsername();
 </script>
 {% endblock %}

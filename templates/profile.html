@@ -7,7 +7,8 @@
 .cover-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:32px 32px;opacity:.07;}
 .cover-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(212,170,53,.18),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);}
 .prof-zone{padding:0 20px;margin-top:-44px;display:flex;align-items:flex-end;justify-content:space-between;}
-.prof-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:30px;font-weight:900;color:var(--gold);position:relative;box-shadow:var(--sh-md);flex-shrink:0;}
+.prof-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-size:30px;font-weight:900;color:var(--gold);position:relative;box-shadow:var(--sh-md);flex-shrink:0;overflow:visible;}
+.prof-av img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
 .prof-av-lv{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);font-family:'Inter',sans-serif;font-size:10px;font-weight:800;color:#000;display:flex;align-items:center;justify-content:center;}
 .edit-prof-btn{background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 18px;font-size:11px;font-weight:700;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:4px;text-decoration:none;}
 .edit-prof-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
@@ -130,13 +131,12 @@
   <a href="/settings" class="tb-btn"><i data-lucide="settings"></i></a>
 </div>
 
-<div class="cover">
-  <div class="cover-grid"></div>
-  <div class="cover-glow"></div>
+<div class="cover" {% if u.banner %}style="background-image:url('{{ u.banner }}');background-size:cover;background-position:center;"{% endif %}>
+  {% if not u.banner %}<div class="cover-grid"></div><div class="cover-glow"></div>{% endif %}
 </div>
 
 <div class="prof-zone">
-  <div class="prof-av">{{ u.name[0]|upper }}<div class="prof-av-lv">{{ u.level }}</div></div>
+  <div class="prof-av">{% if u.avatar %}<img src="{{ u.avatar }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}<div class="prof-av-lv">{{ u.level }}</div></div>
   <a href="/edit-profile" class="edit-prof-btn"><i data-lucide="edit-2"></i> Edit Profile</a>
 </div>
 
