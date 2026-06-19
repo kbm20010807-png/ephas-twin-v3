@@ -1397,9 +1397,11 @@ def admin_reset_all():
     if not admin_key or request.args.get('key', '') != admin_key:
         return ('Forbidden', 403)
     counts = {}
+    # Delete children before parents (FK order); User last.
     for name, model in [('email_codes', EmailCode), ('search_logs', SearchLog), ('axon_messages', AxonMessage),
                         ('likes', Like), ('comments', Comment), ('bookmarks', Bookmark),
-                        ('follows', Follow), ('posts', Post), ('checkins', CheckIn), ('users', User)]:
+                        ('follows', Follow), ('posts', Post), ('checkins', CheckIn),
+                        ('habit_logs', HabitLog), ('habits', Habit), ('profiles', Profile), ('users', User)]:
         counts[name] = model.query.delete()
     db.session.commit()
     session.clear()
