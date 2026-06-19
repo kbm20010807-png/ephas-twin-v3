@@ -5,7 +5,7 @@
 <style>
 .greet{padding:16px 20px 0;}
 .greet-time{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;font-family:'Arpubes',sans-serif;}
-.greet-name{font-family:'Arpubes',sans-serif;font-size:30px;letter-spacing:-1.5px;color:var(--black);margin-bottom:2px;}
+.greet-name{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;letter-spacing:-1px;color:var(--black);margin-bottom:2px;}
 .greet-date{font-size:12px;color:var(--sub);}
 .rings-wrap{padding:22px 20px 0;}
 .rings-row{display:flex;justify-content:space-around;}
@@ -25,8 +25,9 @@
 [data-theme="dark"] .axon-card{background:#0F0F0F;}
 .axon-glow{position:absolute;top:-50px;right:-50px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(200,164,90,.1),transparent 70%);}
 .axon-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.axon-ico{width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.1);border:1px solid rgba(200,164,90,.18);display:flex;align-items:center;justify-content:center;}
+.axon-ico{width:30px;height:30px;border-radius:9px;background:#F0EBDF;border:1px solid rgba(200,164,90,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .axon-ico svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.axon-ico img{width:82%;height:82%;object-fit:contain;}
 .axon-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;margin-left:auto;}
 .axon-txt{font-size:13px;color:#C0C0C0;line-height:1.6;margin-bottom:14px;}
 .axon-txt b{color:#E8E8E8;}
@@ -195,7 +196,6 @@
 
 <!-- QUESTS CARD -->
 <a href="/quests" class="quests-card">
-  <div class="qc-ico"><i data-lucide="shield"></i></div>
   <div class="qc-body">
     <div class="qc-title">Daily Quests</div>
     <div class="qc-sub">0 of 3 complete · Start earning XP today</div>
@@ -228,7 +228,7 @@
 <a href="/axon" class="axon-card">
   <div class="axon-glow"></div>
   <div class="axon-top">
-    <div class="axon-ico"><i data-lucide="zap"></i></div>
+    <div class="axon-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:1px;color:#666;">AXON AI COACH</div>
     <div class="axon-dot"></div>
   </div>
