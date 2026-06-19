@@ -1135,6 +1135,34 @@ def api_axon_clear():
     db.session.commit()
     return {'ok': True}
 
+@app.route('/api/axon/checkin-coach', methods=['POST'])
+def axon_checkin_coach():
+    if not auth(): return ('', 401)
+    cu = current_user()
+    kind = request.form.get('kind', 'morning')
+    if not ANTHROPIC_KEY:
+        return {'message': "Logged. Small reps compound — show up again tomorrow. I'm here whenever you want to talk it through.",
+                'habit': None}
+    prompt = (f"The user just finished their {kind} check-in. In 1-2 punchy sentences, respond as their coach AXON — "
+              "motivating and specific to their real data. Then on a NEW line write exactly 'HABIT: <short habit name>' "
+              "if there's ONE clear habit they'd benefit from tracking based on their data/goals, otherwise 'HABIT: none'.")
+    headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    body = {"model": AXON_MODEL, "max_tokens": 220, "system": axon_system_prompt(cu),
+            "messages": [{"role": "user", "content": prompt}]}
+    try:
+        text = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=30).json()['content'][0]['text']
+    except Exception:
+        return {'message': "Logged. Keep showing up — that's the whole game.", 'habit': None}
+    habit, msg_lines = None, []
+    for line in text.splitlines():
+        if line.strip().upper().startswith('HABIT:'):
+            h = line.split(':', 1)[1].strip()
+            if h and h.lower() != 'none':
+                habit = h[:80]
+        else:
+            msg_lines.append(line)
+    return {'message': '\n'.join(msg_lines).strip() or text, 'habit': habit}
+
 @app.route('/settings')
 def settings():
     if not auth(): return redirect('/login')

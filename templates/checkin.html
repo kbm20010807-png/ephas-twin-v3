@@ -174,7 +174,17 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <div class="so-check"><i data-lucide="check"></i></div>
   <div class="t-label mb-2">Check-in complete</div>
   <div class="so-xp">+50 XP</div>
-  <div style="font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:260px;margin-bottom:24px;">Logged. AXON is analyzing your patterns and is ready to fire you up for the day.</div>
+  <div style="font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:260px;margin-bottom:20px;">Logged. AXON is reading your day…</div>
+
+  <!-- AXON interactive coach -->
+  <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
+    <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(212,170,53,.2);border-radius:16px;padding:14px;text-align:left;">
+      <div style="width:30px;height:30px;border-radius:9px;background:rgba(212,170,53,.12);border:1px solid rgba(212,170,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div style="flex:1;"><div style="font-family:'Arpubes',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
+    </div>
+    <button id="axonHabitBtn" onclick="addCoachHabit()" style="display:none;width:100%;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-xl);padding:12px;font-size:12px;font-weight:700;cursor:pointer;"></button>
+    <a href="/axon" class="btn btn-secondary btn-full" style="margin-top:8px;border-radius:var(--r-xl);"><i data-lucide="message-circle"></i> Talk to AXON</a>
+  </div>
 
   <div class="motiv-player" id="motivPlayer">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -216,8 +226,27 @@ function submit(){
   const btn=event&&event.target?event.target.closest('button'):null;
   if(btn){btn.disabled=true;btn.style.opacity='.7';}
   fetch('/checkin',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
-    .then(r=>{ if(!r.ok) throw 0; document.getElementById('successOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); })
+    .then(r=>{ if(!r.ok) throw 0; document.getElementById('successOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); coachCheckin('morning'); })
     .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not save check-in. Please try again.'); });
+}
+function coachCheckin(kind){
+  fetch('/api/axon/checkin-coach',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({kind})})
+    .then(r=>r.json()).then(d=>{
+      document.getElementById('axonCoachMsg').textContent = d.message;
+      document.getElementById('axonCoach').style.display='block';
+      if(d.habit){
+        const b=document.getElementById('axonHabitBtn');
+        b.textContent='+ Track "'+d.habit+'" on your home';
+        b.dataset.habit=d.habit;
+        b.style.display='block';
+      }
+      if(typeof lucide!=='undefined')lucide.createIcons();
+    }).catch(()=>{});
+}
+function addCoachHabit(){
+  const b=document.getElementById('axonHabitBtn');
+  fetch('/api/habit/add',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({name:b.dataset.habit})})
+    .then(()=>{ b.textContent='✓ Added to your habits'; b.disabled=true; b.style.opacity='.7'; });
 }
 function playMotivation(){
   document.getElementById('motivPlayer').style.display='block';
