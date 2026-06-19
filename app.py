@@ -1,10 +1,11 @@
 import os
+import json
 import random
 import requests
 from datetime import datetime, timedelta
 from collections import Counter
 from sqlalchemy import func
-from flask import Flask, render_template, redirect, session, request, jsonify
+from flask import Flask, render_template, redirect, session, request, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -1215,6 +1216,66 @@ def api_axon():
     if not msg:
         return ('', 400)
     return {'reply': axon_reply(current_user(), msg)}
+
+@app.route('/api/axon/stream', methods=['POST'])
+def api_axon_stream():
+    if not auth(): return ('', 401)
+    msg = (request.form.get('message') or '').strip()
+    if not msg:
+        return ('', 400)
+    cu = current_user()
+    uid = cu.id
+    if not ANTHROPIC_KEY:
+        return Response("AXON isn't connected yet. Add your ANTHROPIC_API_KEY in Railway and I'll come online.",
+                        mimetype='text/plain')
+    # Save the user's message, then build the request inside the request context.
+    db.session.add(AxonMessage(user_id=uid, role='user', content=_safe(msg, 2000)))
+    db.session.commit()
+    rows = AxonMessage.query.filter_by(user_id=uid).order_by(AxonMessage.created_at.desc()).limit(40).all()
+    messages = [{"role": r.role, "content": r.content} for r in reversed(rows)]
+    headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(cu),
+            "messages": messages, "stream": True}
+
+    def generate():
+        full = []
+        try:
+            with requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=60, stream=True) as r:
+                if r.status_code >= 300:
+                    LAST_AXON_ERROR.update(status=r.status_code, body=r.text[:700], note='stream rejected')
+                    yield "I had trouble responding just now — give me a second and try again."
+                    return
+                for line in r.iter_lines():
+                    if not line:
+                        continue
+                    line = line.decode('utf-8', 'ignore')
+                    if line.startswith('data: '):
+                        try:
+                            ev = json.loads(line[6:])
+                        except Exception:
+                            continue
+                        if ev.get('type') == 'content_block_delta':
+                            piece = ev.get('delta', {}).get('text', '')
+                            if piece:
+                                full.append(piece)
+                                yield piece
+            LAST_AXON_ERROR.update(status=200, body='ok', note='ok')
+        except Exception as e:
+            LAST_AXON_ERROR.update(status=None, body=str(e)[:700], note='stream exception')
+            if not full:
+                yield "I had trouble responding just now — give me a second and try again."
+                return
+        reply = ''.join(full).strip()
+        if reply:
+            try:
+                with app.app_context():
+                    db.session.add(AxonMessage(user_id=uid, role='assistant', content=reply))
+                    db.session.commit()
+            except Exception:
+                pass
+
+    return Response(generate(), mimetype='text/plain',
+                    headers={'X-Accel-Buffering': 'no', 'Cache-Control': 'no-cache'})
 
 @app.route('/api/axon/clear', methods=['POST'])
 def api_axon_clear():
