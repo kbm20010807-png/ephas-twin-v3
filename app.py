@@ -247,7 +247,8 @@ def check_code(email, purpose, code):
 # --- AXON (AI coach) — Anthropic API via direct requests (NOT the SDK; key only from env) ---
 ANTHROPIC_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
-AXON_MODEL = 'claude-sonnet-4-6'
+AXON_MODEL = os.environ.get('AXON_MODEL', 'claude-sonnet-4-6')
+LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
 
 def _safe(v, limit=200):
     if v is None:
@@ -331,8 +332,16 @@ def axon_reply(user, message):
     body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(user), "messages": msgs}
     try:
         r = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=40)
-        reply = r.json()['content'][0]['text']
-    except Exception:
+        data = r.json()
+        if r.status_code >= 300 or 'content' not in data:
+            LAST_AXON_ERROR.update(status=r.status_code, body=r.text[:700], note='Anthropic rejected the request')
+            print(f'[axon] error status={r.status_code} body={r.text[:400]}')
+            return "I had trouble responding just now — give me a second and try again."
+        reply = data['content'][0]['text']
+        LAST_AXON_ERROR.update(status=r.status_code, body='ok', note='ok')
+    except Exception as e:
+        LAST_AXON_ERROR.update(status=None, body=str(e)[:700], note='request threw an exception')
+        print(f'[axon] exception: {e}')
         return "I had trouble responding just now — give me a second and try again."
     db.session.add(AxonMessage(user_id=user.id, role='assistant', content=reply))
     db.session.commit()
@@ -1426,6 +1435,31 @@ def admin_email_test():
         info['resend_response'] = dict(LAST_EMAIL_ERROR)
     else:
         info['hint'] = 'add &to=youremail@example.com to actually send a test'
+    return info
+
+@app.route('/admin/axon-test')
+def admin_axon_test():
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if not admin_key or request.args.get('key', '') != admin_key:
+        return ('Forbidden', 403)
+    info = {
+        'ANTHROPIC_API_KEY_present': bool(ANTHROPIC_KEY),
+        'ANTHROPIC_API_KEY_prefix': (ANTHROPIC_KEY[:10] + '...') if ANTHROPIC_KEY else None,
+        'model': AXON_MODEL,
+    }
+    if not ANTHROPIC_KEY:
+        info['note'] = 'ANTHROPIC_API_KEY is not set in Railway'
+        return info
+    headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    body = {"model": AXON_MODEL, "max_tokens": 50, "messages": [{"role": "user", "content": "Reply with the single word: OK"}]}
+    try:
+        r = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=30)
+        info['status'] = r.status_code
+        info['raw_response'] = r.text[:900]
+        info['working'] = (r.status_code == 200 and 'content' in r.json())
+    except Exception as e:
+        info['exception'] = str(e)[:700]
+        info['working'] = False
     return info
 
 @app.route('/api/like/<int:post_id>', methods=['POST'])
