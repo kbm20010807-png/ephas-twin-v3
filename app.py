@@ -120,6 +120,16 @@ class AxonMessage(db.Model):
     content = db.Column(db.Text, default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
+class AxonMemory(db.Model):
+    # Compact long-term memory of the user — distilled from past days' chats so AXON
+    # remembers key points without re-sending the whole history (token-efficient).
+    __tablename__ = 'axon_memory'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, index=True, nullable=False)
+    summary = db.Column(db.Text, default='')
+    last_summarized_at = db.Column(db.DateTime)  # messages before this are already folded into summary
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class SearchLog(db.Model):
     # Every search is an interest signal that feeds the recommendation algorithm.
     __tablename__ = 'search_logs'
@@ -250,6 +260,59 @@ ANTHROPIC_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 AXON_MODEL = os.environ.get('AXON_MODEL', 'claude-sonnet-4-6')
 LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
+TZ_OFFSET = timedelta(hours=int(os.environ.get('TZ_OFFSET_HOURS', '3')))  # user's day boundary (Qatar = +3)
+
+def _day_start_utc():
+    """UTC instant of the user's local midnight today — defines the 'today' chat window."""
+    local_now = datetime.utcnow() + TZ_OFFSET
+    local_midnight = datetime(local_now.year, local_now.month, local_now.day)
+    return local_midnight - TZ_OFFSET
+
+def get_axon_memory(user):
+    m = AxonMemory.query.filter_by(user_id=user.id).first()
+    if not m:
+        m = AxonMemory(user_id=user.id, summary='', last_summarized_at=None)
+        db.session.add(m)
+        db.session.commit()
+    return m
+
+def axon_today_messages(uid, limit=40):
+    """Just today's conversation (token-efficient) — older days live in AxonMemory."""
+    rows = (AxonMessage.query
+            .filter(AxonMessage.user_id == uid, AxonMessage.created_at >= _day_start_utc())
+            .order_by(AxonMessage.created_at).all())
+    return rows[-limit:]
+
+def roll_axon_memory(user):
+    """Once per new day: distill previous days' un-summarized messages into the long-term memory."""
+    if not ANTHROPIC_KEY:
+        return
+    mem = get_axon_memory(user)
+    start = _day_start_utc()
+    q = AxonMessage.query.filter(AxonMessage.user_id == user.id, AxonMessage.created_at < start)
+    if mem.last_summarized_at:
+        q = q.filter(AxonMessage.created_at > mem.last_summarized_at)
+    old = q.order_by(AxonMessage.created_at).all()
+    if not old:
+        return
+    convo = '\n'.join(f"{'User' if r.role == 'user' else 'AXON'}: {_safe(r.content, 400)}" for r in old)[:6000]
+    sys = ("You maintain a compact long-term memory of a coaching client for their AI coach AXON. "
+           "Merge the existing memory with the new conversation below. Keep ONLY durable, useful facts: "
+           "goals, commitments, recurring struggles/triggers, wins, preferences, key life context, and anything "
+           "they asked AXON to remember. Tight bullet points, max ~180 words. Drop small talk. Output ONLY the updated memory.")
+    msg = f"EXISTING MEMORY:\n{mem.summary or '(none yet)'}\n\nNEW CONVERSATION (before today):\n{convo}"
+    try:
+        headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+        body = {"model": AXON_MODEL, "max_tokens": 400, "system": sys, "messages": [{"role": "user", "content": msg}]}
+        r = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=40)
+        data = r.json()
+        if r.status_code < 300 and 'content' in data:
+            mem.summary = data['content'][0]['text'].strip()[:4000]
+            mem.last_summarized_at = start
+            mem.updated_at = datetime.utcnow()
+            db.session.commit()
+    except Exception as e:
+        print(f'[axon-memory] {e}')
 
 def _safe(v, limit=200):
     if v is None:
@@ -297,6 +360,9 @@ def axon_system_prompt(user):
     # Courses AXON can recommend from inside the app
     courses = Post.query.filter_by(kind='course').order_by(Post.created_at.desc()).limit(12).all()
     course_txt = ', '.join(f"{_safe(p.title, 60)} [{_safe(p.category, 24)}]" for p in courses) or 'none published yet'
+    # Long-term memory distilled from past days' chats (so AXON remembers without re-sending everything)
+    mem = AxonMemory.query.filter_by(user_id=user.id).first()
+    memory_txt = (mem.summary if mem and mem.summary else 'nothing remembered yet — this is an early conversation')
     return (
         "You are AXON, the personal AI coach inside TWIN (a self-improvement app by EPHAS). "
         "You are a real, adaptive coach — direct, perceptive, and grounded in this user's OWN data. "
@@ -327,6 +393,7 @@ def axon_system_prompt(user):
         f"Life domains: {_safe(dom, 200)}\n"
         f"Private profile (they shared this with you only): {prof_txt}\n"
         f"What they're working on (their own recent words): {notes_txt}\n"
+        f"Long-term memory (key points you've learned about them over past days): {_safe(memory_txt, 1600)}\n"
         f"TWIN courses you can recommend: {course_txt}\n"
         "[END USER DATA]\n\n"
         f"{sex_rule} {rel_rule}\n"
@@ -338,8 +405,7 @@ def axon_reply(user, message):
         return "AXON isn't connected yet. Add your ANTHROPIC_API_KEY in Railway and I'll come online to coach you."
     db.session.add(AxonMessage(user_id=user.id, role='user', content=_safe(message, 2000)))
     db.session.commit()
-    rows = AxonMessage.query.filter_by(user_id=user.id).order_by(AxonMessage.created_at.desc()).limit(40).all()
-    msgs = [{"role": r.role, "content": r.content} for r in reversed(rows)]
+    msgs = [{"role": r.role, "content": r.content} for r in axon_today_messages(user.id)]
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(user), "messages": msgs}
     try:
@@ -1216,7 +1282,8 @@ def habit_toggle(hid):
 def axon():
     if not auth(): return redirect('/login')
     cu = current_user()
-    rows = AxonMessage.query.filter_by(user_id=cu.id).order_by(AxonMessage.created_at).all()
+    roll_axon_memory(cu)  # fold any previous days into long-term memory (runs ~once/day)
+    rows = axon_today_messages(cu.id, limit=200)  # fresh chat each day; past days live in memory
     history = [{'role': r.role, 'content': r.content} for r in rows]
     return render_template('axon.html', u=user_ctx(), history=history, active='messages')
 
@@ -1242,8 +1309,7 @@ def api_axon_stream():
     # Save the user's message, then build the request inside the request context.
     db.session.add(AxonMessage(user_id=uid, role='user', content=_safe(msg, 2000)))
     db.session.commit()
-    rows = AxonMessage.query.filter_by(user_id=uid).order_by(AxonMessage.created_at.desc()).limit(40).all()
-    messages = [{"role": r.role, "content": r.content} for r in reversed(rows)]
+    messages = [{"role": r.role, "content": r.content} for r in axon_today_messages(uid)]
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(cu),
             "messages": messages, "stream": True}
@@ -1479,7 +1545,8 @@ def admin_reset_all():
         return ('Forbidden', 403)
     counts = {}
     # Delete children before parents (FK order); User last.
-    for name, model in [('email_codes', EmailCode), ('search_logs', SearchLog), ('axon_messages', AxonMessage),
+    for name, model in [('email_codes', EmailCode), ('search_logs', SearchLog),
+                        ('axon_messages', AxonMessage), ('axon_memory', AxonMemory),
                         ('likes', Like), ('comments', Comment), ('bookmarks', Bookmark),
                         ('follows', Follow), ('posts', Post), ('checkins', CheckIn),
                         ('habit_logs', HabitLog), ('habits', Habit), ('profiles', Profile), ('users', User)]:
