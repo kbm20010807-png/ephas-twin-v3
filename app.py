@@ -964,13 +964,15 @@ def stats_ctx():
         {'name': 'Wellbeing', 'pct': wellbeing, 'trend': '+0'},
     ]
 
-    today = datetime.utcnow().date()
-    last7 = [today - timedelta(days=6 - i) for i in range(7)]
+    # This week, Sunday -> Saturday, in the user's own timezone (resets each Sunday)
+    today = (datetime.utcnow() + timedelta(minutes=user_tz_offset(cu))).date()
+    week_start = today - timedelta(days=(today.weekday() + 1) % 7)  # this week's Sunday
+    week_days = [week_start + timedelta(days=i) for i in range(7)]
     mood_by_date = {r.date: r.mood for r in morn if r.mood is not None}
-    checked_dates = {r.date for r in rows}
-    s['days'] = [d.strftime('%a')[0] for d in last7]
-    s['checked'] = [d in checked_dates for d in last7]
-    s['weekly'] = [mood_by_date.get(d, 0) for d in last7]
+    checked_dates = {r.date for r in rows}  # any check-in (morning OR evening) counts
+    s['days'] = [d.strftime('%a')[0] for d in week_days]
+    s['checked'] = [d in checked_dates for d in week_days]
+    s['weekly'] = [mood_by_date.get(d, 0) for d in week_days]
     return s
 
 def quest_periods():
