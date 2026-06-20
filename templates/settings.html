@@ -62,7 +62,7 @@
 </div>
 
 <div class="prof-banner">
-  <div class="av av-52">{{ u.name[0]|upper }}</div>
+  <div class="av av-52">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
   <div class="pb-info">
     <div class="pb-name">{{ u.name }}</div>
     <div class="pb-meta">{{ u.email }}</div>
