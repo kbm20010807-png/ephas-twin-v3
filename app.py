@@ -1353,7 +1353,8 @@ def avatar_img(uid):
     return ('', 404)
 
 def stories_ctx(cu):
-    """Recent check-in 'stories' from people the user FOLLOWS (last 2 days)."""
+    """Stories are manual-only — check-ins no longer auto-post as stories."""
+    return []
     following = {f.following_id for f in Follow.query.filter_by(follower_id=cu.id).all()}
     if not following:
         return []
@@ -1513,6 +1514,14 @@ def search():
         like = f'%{q}%'
         people_rows = User.query.filter(
             db.or_(User.name.ilike(like), User.username.ilike(like))).limit(20).all()
+        ql = q.lower()
+
+        def _rank(u):
+            nm = (u.name or '').lower(); un = (u.username or '').lower()
+            if un == ql or nm == ql: return 0          # exact match first
+            if un.startswith(ql) or nm.startswith(ql): return 1
+            return 2
+        people_rows.sort(key=_rank)
         people = [{'name': u.name or u.username, 'username': u.username,
                    'init': (u.name or u.username or 'U')[0].upper(), 'id': u.id,
                    'has_avatar': bool(u.avatar)} for u in people_rows]

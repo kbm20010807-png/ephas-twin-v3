@@ -125,40 +125,6 @@
   <a href="/messages" class="tb-btn"><i data-lucide="message-circle"></i></a>
 </div>
 
-<!-- STORIES STRIP -->
-<div class="stories-strip">
-  <a href="/checkin" class="story-item" style="text-decoration:none;">
-    <div class="story-ring yours"><div class="story-inner" style="font-size:20px;">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.first[0]|upper }}{% endif %}</div></div>
-    <div class="story-lbl">Your story</div>
-  </a>
-  {% for s in stories %}
-  <div class="story-item" onclick="openStory({{ loop.index0 }})">
-    <div class="story-ring active"><div class="story-inner">{% if s.has_avatar %}<img src="/avatar/{{ s.id }}" alt="">{% else %}{{ s.init }}{% endif %}</div></div>
-    <div class="story-lbl">{{ s.first }}</div>
-  </div>
-  {% endfor %}
-</div>
-
-<!-- STORY OVERLAY -->
-<div class="story-ov" id="storyOv" onclick="closeStory()">
-  <button class="story-ov-close" onclick="closeStory();event.stopPropagation();"><i data-lucide="x"></i></button>
-  <div class="story-bar" style="width:100%;max-width:360px;"><div class="story-bar-fill" id="storyBarFill"></div></div>
-  <div class="story-card" onclick="event.stopPropagation()">
-    <div class="story-av" id="storyAv"></div>
-    <div class="story-username" id="storyName"></div>
-    <div class="story-subtitle">CHECK-IN STORY · TODAY</div>
-    <div class="story-metrics">
-      <div class="sm-item"><div class="sm-val" id="storySleep"></div><div class="sm-lbl">Sleep</div></div>
-      <div class="sm-item"><div class="sm-val" id="storyEnergy"></div><div class="sm-lbl">Energy</div></div>
-      <div class="sm-item"><div class="sm-val" id="storyMood"></div><div class="sm-lbl">Mood</div></div>
-    </div>
-    <div class="story-streak">
-      <i data-lucide="flame"></i>
-      <div class="story-streak-txt" id="storyStreak"></div>
-    </div>
-    <a id="storyProfileLink" href="#" style="display:block;margin-top:18px;background:var(--grad);color:#241D10;border-radius:var(--r-full);padding:11px;font-size:13px;font-weight:800;text-decoration:none;">View profile</a>
-  </div>
-</div>
 
 <div class="greet">
   <div class="greet-time" id="gTime">Good morning</div>

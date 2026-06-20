@@ -33,6 +33,7 @@
 .srch-tabs::-webkit-scrollbar{display:none;}
 .srch-tab{flex-shrink:0;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:7px 16px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;}
 .srch-tab.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
+.find-more{display:block;width:calc(100% - 40px);margin:6px 20px 4px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:10px;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;font-family:inherit;}
 .srch-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin:0 20px 10px;box-shadow:var(--sh);}
 .srch-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
 .srch-act svg{width:14px;height:14px;stroke:var(--sub);fill:none;stroke-width:1.75;}
@@ -69,27 +70,30 @@
 </div>
 {% else %}
 
+<!-- FILTER TABS (top) -->
+<div class="srch-tabs">
+  <button class="srch-tab on" data-f="all" onclick="filterTab('all',this)">All</button>
+  <button class="srch-tab" data-f="accounts" onclick="filterTab('accounts',this)">Accounts</button>
+  <button class="srch-tab" data-f="post" onclick="filterTab('post',this)">Posts</button>
+  <button class="srch-tab" data-f="reel" onclick="filterTab('reel',this)">Reels</button>
+  <button class="srch-tab" data-f="thread" onclick="filterTab('thread',this)">Threads</button>
+  <button class="srch-tab" data-f="course" onclick="filterTab('course',this)">Courses</button>
+</div>
+
 {% if people %}
-<div class="sect-lbl">People</div>
+<div class="sect-lbl acc-lbl">Accounts</div>
 {% for p in people %}
-<a href="/u/{{ p.username }}" class="srch-person">
+<a href="/u/{{ p.username }}" class="srch-person result-item{% if loop.index > 10 %} acc-extra{% endif %}" data-kind="accounts"{% if loop.index > 10 %} style="display:none;"{% endif %}>
   <div class="av av-40" style="font-weight:900;color:#241D10;">{% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
   <div><div class="sp-name">{{ p.name }}</div><div class="sp-user">@{{ p.username }}</div></div>
   {% if p.id != u_id %}<button class="sp-follow" onclick="event.preventDefault();event.stopPropagation();toggleFollow(this,{{ p.id }})">Follow</button>{% endif %}
 </a>
 {% endfor %}
+{% if people|length > 10 %}<button class="find-more" id="findMore" onclick="showMoreAccounts()">Find more accounts</button>{% endif %}
 {% endif %}
 
-<!-- FILTER TABS -->
-<div class="srch-tabs">
-  <button class="srch-tab on" data-f="all" onclick="filterTab('all',this)">All</button>
-  <button class="srch-tab" data-f="thread" onclick="filterTab('thread',this)">Threads</button>
-  <button class="srch-tab" data-f="posts" onclick="filterTab('posts',this)">Posts &amp; Reels</button>
-  <button class="srch-tab" data-f="course" onclick="filterTab('course',this)">Courses</button>
-</div>
-
 {% for p in posts %}
-<div class="srch-post result-item" data-kind="{{ 'thread' if p.kind == 'thread' else 'posts' }}" data-id="{{ p.id }}">
+<div class="srch-post result-item" data-kind="{{ p.kind }}" data-id="{{ p.id }}">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
     <div class="av av-32" style="font-weight:900;color:#241D10;">{{ p.init }}</div>
     <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div><div style="font-size:10px;color:var(--sub);">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div></div>
@@ -147,15 +151,25 @@ function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repla
 function runSearch(){ document.querySelector('.srch-bar').submit(); }
 document.addEventListener('click',e=>{ if(!e.target.closest('.srch-bar')){ const b=document.getElementById('srchSugg'); if(b) b.classList.remove('on'); }});
 
+let accExpanded=false;
 function filterTab(f, btn){
   document.querySelectorAll('.srch-tab').forEach(t=>t.classList.toggle('on', t===btn));
   let shown=0;
   document.querySelectorAll('.result-item').forEach(el=>{
-    const ok = (f==='all' || el.dataset.kind===f);
+    let ok = (f==='all' || el.dataset.kind===f);
+    // accounts beyond the first 10 stay hidden until 'Find more' (except on the Accounts tab)
+    if(ok && el.classList.contains('acc-extra') && !accExpanded && f!=='accounts') ok=false;
     el.style.display = ok ? '' : 'none';
     if(ok) shown++;
   });
+  const al=document.querySelector('.acc-lbl'); if(al) al.style.display = (f==='all'||f==='accounts') ? 'block' : 'none';
+  const fm=document.getElementById('findMore'); if(fm) fm.style.display = (f==='all' && !accExpanded) ? 'block' : 'none';
   const nf=document.getElementById('noFilter'); if(nf) nf.style.display = shown ? 'none' : 'block';
+}
+function showMoreAccounts(){
+  accExpanded=true;
+  document.querySelectorAll('.acc-extra').forEach(el=>el.style.display='');
+  const fm=document.getElementById('findMore'); if(fm) fm.style.display='none';
 }
 function toggleLike(btn, id){
   const n = btn.querySelector('.like-n');
