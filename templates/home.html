@@ -3,6 +3,7 @@
 
 {% block head %}
 <style>
+.notif-badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#EF4444;color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg);font-family:'Inter',sans-serif;}
 .greet{padding:16px 20px 0;}
 .greet-time{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;font-family:'Inter',sans-serif;}
 .greet-name{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;letter-spacing:-1px;color:var(--black);margin-bottom:2px;}
@@ -119,7 +120,7 @@
 
 {% block content %}
 <div class="topbar">
-  <a href="/notifications" class="tb-btn"><i data-lucide="bell"></i></a>
+  <a href="/notifications" class="tb-btn" style="position:relative;"><i data-lucide="bell"></i>{% if notif_count %}<span class="notif-badge">{{ notif_count if notif_count < 100 else '99+' }}</span>{% endif %}</a>
   <div class="tb-brand"><div class="tb-twin">TWIN</div></div>
   <a href="/messages" class="tb-btn"><i data-lucide="message-circle"></i></a>
 </div>

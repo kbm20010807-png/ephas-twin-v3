@@ -54,6 +54,7 @@ class User(db.Model):
     is_pro = db.Column(db.Boolean, default=False)  # TWIN Pro subscriber
     axon_personality = db.Column(db.String(20), default='mentor')  # how AXON talks
     show_profile_views = db.Column(db.Boolean, default=True)  # reciprocal "who viewed your profile"
+    notifs_seen_at = db.Column(db.DateTime)  # last time the notifications page was opened (for unread count)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -719,6 +720,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS axon_personality VARCHAR(20) DEFAULT 'mentor'",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS show_profile_views BOOLEAN DEFAULT TRUE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS notifs_seen_at TIMESTAMP",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1120,6 +1122,19 @@ def notifications_ctx(user):
     notifs.sort(key=lambda x: x['sort'], reverse=True)
     return notifs
 
+def unread_notif_count(user):
+    """Lightweight count of NEW social events (likes/comments/follows/views) since last opened."""
+    seen = user.notifs_seen_at or datetime(2000, 1, 1)
+    n = 0
+    my_post_ids = [p.id for p in Post.query.filter_by(user_id=user.id).all()]
+    if my_post_ids:
+        n += Like.query.filter(Like.post_id.in_(my_post_ids), Like.user_id != user.id, Like.created_at > seen).count()
+        n += Comment.query.filter(Comment.post_id.in_(my_post_ids), Comment.user_id != user.id, Comment.created_at > seen).count()
+    n += Follow.query.filter(Follow.following_id == user.id, Follow.created_at > seen).count()
+    if getattr(user, 'show_profile_views', True):
+        n += ProfileView.query.filter(ProfileView.viewed_id == user.id, ProfileView.created_at > seen).count()
+    return n
+
 @app.route('/')
 def index():
     return redirect('/home' if auth() else '/login')
@@ -1398,7 +1413,8 @@ def home():
     community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
-                           qteasers=quest_teasers(cu), today=today_metrics(cu), active='home')
+                           qteasers=quest_teasers(cu), today=today_metrics(cu),
+                           notif_count=unread_notif_count(cu), active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
@@ -1962,7 +1978,11 @@ def quests():
 @app.route('/notifications')
 def notifications():
     if not auth(): return redirect('/login')
-    return render_template('notifications.html', u=user_ctx(), notifs=notifications_ctx(current_user()), active='home')
+    cu = current_user()
+    notifs = notifications_ctx(cu)
+    cu.notifs_seen_at = datetime.utcnow()  # opening marks everything read
+    db.session.commit()
+    return render_template('notifications.html', u=user_ctx(), notifs=notifs, active='home')
 
 @app.route('/admin/reset-all')
 def admin_reset_all():
