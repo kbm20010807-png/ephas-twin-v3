@@ -88,8 +88,5 @@ function readNotif(el) {
   const dot = el.querySelector('.notif-dot');
   if (dot) dot.remove();
 }
-function markAllRead() {
-  document.querySelectorAll('.notif-item.unread').forEach(el => readNotif(el));
-}
 </script>
 {% endblock %}
