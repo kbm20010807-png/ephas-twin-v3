@@ -25,6 +25,16 @@
 .h-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:flex-end;justify-content:center;}
 .h-modal.on{display:flex;}
 .h-modal-box{background:var(--bg);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:430px;padding:24px 20px 32px;}
+.add-habit-top{width:calc(100% - 40px);margin:14px 20px 0;background:var(--card);border:1.5px dashed var(--gold-b);border-radius:var(--r-lg);padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--gold);cursor:pointer;}
+.add-habit-top svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2.5;}
+.habit-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:calc(100vh - 230px);padding:0 28px;}
+.add-habit-center{margin-top:24px;background:var(--grad);color:#241D10;border:none;border-radius:var(--r-full);padding:15px 30px;font-size:14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:9px;box-shadow:0 6px 18px rgba(200,164,90,.28);}
+.add-habit-center svg{width:18px;height:18px;stroke:#241D10;fill:none;stroke-width:2.5;}
+.ha-label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-bottom:8px;}
+.ha-type{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+.ha-type-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 10px;border:1.5px solid var(--border);background:var(--bg-2);border-radius:var(--r);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;}
+.ha-type-btn.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.ha-type-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
 </style>
 {% endblock %}
 {% block content %}
@@ -34,16 +44,8 @@
   <div style="width:36px;"></div>
 </div>
 
-<form action="/api/habit/add" method="post" class="habit-add">
-  <input type="text" name="name" placeholder="New habit — e.g. Workout, or Quit smoking" required maxlength="80">
-  <div class="ha-opts">
-    <label class="ha-toggle"><input type="checkbox" id="isBad" name="is_bad" value="1" onchange="syncBad()"> Habit to quit</label>
-    <label class="ha-toggle"><input type="checkbox" id="isPriv" name="private" value="1" checked> Private</label>
-  </div>
-  <button type="submit" class="btn btn-gold btn-sm" style="border-radius:var(--r-xl);"><i data-lucide="plus"></i> Add habit</button>
-</form>
-
 {% if habits %}
+<button class="add-habit-top" onclick="openAdd()"><i data-lucide="plus"></i> Add another habit</button>
 {% for h in habits %}
 <div class="habit-card">
   <button class="habit-check {% if h.done_today %}on{% endif %}" onclick="toggleHabit(this,{{ h.id }})"><i data-lucide="check"></i></button>
@@ -58,12 +60,32 @@
 </div>
 {% endfor %}
 {% else %}
-<div style="text-align:center;padding:50px 28px;">
-  <i data-lucide="repeat" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
-  <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;">No habits yet</div>
-  <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;">Add a habit above — build a streak,<br>or track a habit you want to quit.</div>
+<div class="habit-empty">
+  <i data-lucide="repeat" style="width:34px;height:34px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="font-size:15px;font-weight:800;color:var(--black);margin-top:14px;">No habits yet</div>
+  <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Start tracking — build a good habit,<br>or quit a bad one.</div>
+  <button class="add-habit-center" onclick="openAdd()"><i data-lucide="plus"></i> Track your first habit</button>
 </div>
 {% endif %}
+
+<!-- ADD HABIT PANEL -->
+<div class="h-modal" id="addModal" onclick="closeAdd()">
+  <div class="h-modal-box" onclick="event.stopPropagation()">
+    <div class="t-lg mb-4">New habit</div>
+    <form action="/api/habit/add" method="post">
+      <div class="ha-label">Name</div>
+      <input type="text" name="name" id="addName" class="form-input" placeholder="e.g. Workout, Read, Quit smoking" required maxlength="80" style="margin-bottom:18px;">
+      <div class="ha-label">Type</div>
+      <div class="ha-type">
+        <button type="button" class="ha-type-btn on" data-type="keep" onclick="setType('keep')"><i data-lucide="trending-up"></i> Keep / build</button>
+        <button type="button" class="ha-type-btn" data-type="quit" onclick="setType('quit')"><i data-lucide="x-circle"></i> Quit / bad</button>
+      </div>
+      <input type="hidden" name="is_bad" id="addBad" value="">
+      <label class="ha-toggle" style="margin:18px 0;"><input type="checkbox" name="private" value="1" id="addPriv" checked> Private</label>
+      <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);"><i data-lucide="plus"></i> Add habit</button>
+    </form>
+  </div>
+</div>
 
 <!-- EDIT MODAL -->
 <div class="h-modal" id="hModal" onclick="closeEdit()">
@@ -86,9 +108,13 @@
 {% endblock %}
 {% block scripts %}
 <script>
-function syncBad(){
-  const bad = document.getElementById('isBad').checked;
-  const priv = document.getElementById('isPriv');
+function openAdd(){ document.getElementById('addName').value=''; setType('keep'); document.getElementById('addModal').classList.add('on'); if(window.lucide)lucide.createIcons(); setTimeout(()=>document.getElementById('addName').focus(),50); }
+function closeAdd(){ document.getElementById('addModal').classList.remove('on'); }
+function setType(t){
+  document.querySelectorAll('#addModal .ha-type-btn').forEach(b=>b.classList.toggle('on', b.dataset.type===t));
+  const bad = (t === 'quit');
+  document.getElementById('addBad').value = bad ? '1' : '';
+  const priv = document.getElementById('addPriv');
   if(bad){ priv.checked = true; priv.disabled = true; } else { priv.disabled = false; }
 }
 function toggleHabit(btn, id){
