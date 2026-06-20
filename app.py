@@ -1503,7 +1503,10 @@ def habit_edit(hid):
     name = (request.form.get('name') or '').strip()[:80]
     if name:
         h.name = name
-    if not h.is_bad:  # bad habits stay private
+    h.is_bad = request.form.get('is_bad') == '1'   # let the user reclassify good <-> bad
+    if h.is_bad:
+        h.private = True                            # bad habits stay private
+    else:
         h.private = request.form.get('private') == '1'
     db.session.commit()
     return redirect('/habits')

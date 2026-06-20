@@ -74,7 +74,8 @@
         <label class="form-label">Name</label>
         <input type="text" name="name" id="editName" class="form-input" maxlength="80">
       </div>
-      <label class="ha-toggle" id="editPrivWrap" style="margin:10px 0 18px;"><input type="checkbox" name="private" value="1" id="editPriv"> Private</label>
+      <label class="ha-toggle" style="margin:10px 0 6px;"><input type="checkbox" name="is_bad" value="1" id="editBad" onchange="syncEditBad()"> Habit to quit (bad habit)</label>
+      <label class="ha-toggle" id="editPrivWrap" style="margin:4px 0 18px;"><input type="checkbox" name="private" value="1" id="editPriv"> Private</label>
       <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-bottom:10px;"><i data-lucide="check"></i> Save</button>
     </form>
     <form action="/api/habit/delete/0" method="post" id="deleteForm">
@@ -98,14 +99,18 @@ function toggleHabit(btn, id){
     if(st) st.textContent = d.streak;
   }).catch(()=>{});
 }
+function syncEditBad(){
+  const bad = document.getElementById('editBad').checked;
+  const priv = document.getElementById('editPriv');
+  if(bad){ priv.checked = true; priv.disabled = true; } else { priv.disabled = false; }
+}
 function openEdit(id, btn){
   document.getElementById('editForm').action = '/api/habit/edit/'+id;
   document.getElementById('deleteForm').action = '/api/habit/delete/'+id;
   document.getElementById('editName').value = btn.dataset.name;
-  const isBad = btn.dataset.bad === '1';
-  const priv = document.getElementById('editPriv');
-  priv.checked = btn.dataset.priv === '1';
-  document.getElementById('editPrivWrap').style.display = isBad ? 'none' : 'flex';
+  document.getElementById('editBad').checked = btn.dataset.bad === '1';
+  document.getElementById('editPriv').checked = btn.dataset.priv === '1';
+  syncEditBad();
   document.getElementById('hModal').classList.add('on');
 }
 function closeEdit(){ document.getElementById('hModal').classList.remove('on'); }
