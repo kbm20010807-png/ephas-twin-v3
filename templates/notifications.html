@@ -7,7 +7,8 @@
 .notif-sep{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--sub);text-transform:uppercase;padding:16px 0 8px;font-family:'Inter',sans-serif;}
 .notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);position:relative;cursor:pointer;}
 .notif-item:last-child{border-bottom:none;}
-.notif-ico{width:40px;height:40px;border-radius:12px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notif-ico{width:40px;height:40px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.notif-ico img{width:100%;height:100%;object-fit:cover;}
 .notif-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
 .notif-item.unread .notif-ico{background:var(--gold-dim);border-color:var(--gold-b);}
 .notif-item.unread .notif-ico svg{stroke:var(--gold);}
@@ -48,27 +49,19 @@
     <div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;">Follows, likes, quests and milestones<br>will show up here.</div>
   </div>
   {% else %}
-  <!-- TODAY -->
-  <div class="notif-sep">Today</div>
   {% for n in notifs %}
-    {% if n.time in ['2m','1h','3h','5h'] %}
-    <div class="notif-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" onclick="readNotif(this)">
-      <div class="notif-ico"><i data-lucide="{{ n.icon }}"></i></div>
+    {% if n.username %}
+    <a href="/u/{{ n.username }}" class="notif-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" style="text-decoration:none;">
+      <div class="notif-ico">{% if n.avatar_id and n.has_avatar %}<img src="/avatar/{{ n.avatar_id }}" alt="">{% else %}<i data-lucide="{{ n.icon }}"></i>{% endif %}</div>
       <div class="notif-body">
         <div class="notif-text">{{ n.text }}</div>
-        <div class="notif-time">{{ n.time }} ago</div>
+        <div class="notif-time">{{ n.time }}</div>
       </div>
       {% if n.unread %}<div class="notif-dot"></div>{% endif %}
-    </div>
-    {% endif %}
-  {% endfor %}
-
-  <!-- EARLIER -->
-  <div class="notif-sep">Earlier</div>
-  {% for n in notifs %}
-    {% if n.time not in ['2m','1h','3h','5h'] %}
+    </a>
+    {% else %}
     <div class="notif-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" onclick="readNotif(this)">
-      <div class="notif-ico"><i data-lucide="{{ n.icon }}"></i></div>
+      <div class="notif-ico">{% if n.avatar_id and n.has_avatar %}<img src="/avatar/{{ n.avatar_id }}" alt="">{% else %}<i data-lucide="{{ n.icon }}"></i>{% endif %}</div>
       <div class="notif-body">
         <div class="notif-text">{{ n.text }}</div>
         <div class="notif-time">{{ n.time }}</div>

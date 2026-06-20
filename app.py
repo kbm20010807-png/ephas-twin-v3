@@ -1087,18 +1087,25 @@ def notifications_ctx(user):
     if getattr(user, 'show_profile_views', True):
         views = ProfileView.query.filter_by(viewed_id=user.id).order_by(ProfileView.id.desc()).limit(15).all()
         actor_ids |= {v.viewer_id for v in views}
-    names = {u.id: (u.name or u.username) for u in User.query.filter(User.id.in_(actor_ids or [0])).all()}
+    actors = {u.id: u for u in User.query.filter(User.id.in_(actor_ids or [0])).all()}
+    names = {uid: (u.name or u.username) for uid, u in actors.items()}
+    avatars = {uid: bool(u.avatar) for uid, u in actors.items()}
+    unames = {uid: u.username for uid, u in actors.items()}
     for f in follows:
         notifs.append({'type': 'follow', 'icon': 'user-plus', 'sort': 'b' + str(f.id),
+                       'avatar_id': f.follower_id, 'has_avatar': avatars.get(f.follower_id, False), 'username': unames.get(f.follower_id),
                        'text': f"{names.get(f.follower_id, 'Someone')} started following you", 'time': 'recently', 'unread': False})
     for c in comments:
         notifs.append({'type': 'comment', 'icon': 'message-circle', 'sort': 'c' + str(c.id),
+                       'avatar_id': c.user_id, 'has_avatar': avatars.get(c.user_id, False), 'username': unames.get(c.user_id),
                        'text': f"{names.get(c.user_id, 'Someone')} commented on your post", 'time': time_ago(c.created_at), 'unread': False})
     for l in likes:
         notifs.append({'type': 'like', 'icon': 'heart', 'sort': 'a' + str(l.id),
+                       'avatar_id': l.user_id, 'has_avatar': avatars.get(l.user_id, False), 'username': unames.get(l.user_id),
                        'text': f"{names.get(l.user_id, 'Someone')} liked your post", 'time': 'recently', 'unread': False})
     for v in views:
         notifs.append({'type': 'view', 'icon': 'eye', 'sort': 'd' + str(v.id),
+                       'avatar_id': v.viewer_id, 'has_avatar': avatars.get(v.viewer_id, False), 'username': unames.get(v.viewer_id),
                        'text': f"{names.get(v.viewer_id, 'Someone')} viewed your profile", 'time': time_ago(v.created_at), 'unread': True})
     # Quest completions
     q = quests_ctx(user)
