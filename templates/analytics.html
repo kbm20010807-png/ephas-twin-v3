@@ -46,11 +46,11 @@
 
 {% block content %}
 <div class="topbar">
-  <a href="/calendar" class="tb-btn"><i data-lucide="calendar"></i></a>
+  <div style="width:36px;"></div>
   <div class="tb-brand">
     <div class="tb-twin">Analytics</div>
   </div>
-  <a href="/profile" class="tb-btn"><i data-lucide="user"></i></a>
+  <a href="/calendar" class="tb-btn" title="Calendar"><i data-lucide="calendar"></i></a>
 </div>
 
 {% if not stats.total_checkins %}
