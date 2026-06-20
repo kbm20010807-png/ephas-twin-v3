@@ -1485,6 +1485,22 @@ def grow():
     return render_template('grow.html', u=user_ctx(), gposts=posts, gthreads=threads,
                            gcourses=courses, gexplore=explore, active='grow')
 
+@app.route('/api/search/suggest')
+def search_suggest():
+    if not auth(): return ('', 401)
+    q = (request.args.get('q') or '').strip()
+    if len(q) < 1:
+        return {'users': [], 'items': []}
+    like = f'%{q}%'
+    users = [{'name': u.name or u.username, 'username': u.username, 'id': u.id,
+              'init': (u.name or u.username or 'U')[0].upper(), 'has_avatar': bool(u.avatar)}
+             for u in User.query.filter(db.or_(User.name.ilike(like), User.username.ilike(like))).limit(5).all()]
+    items = []
+    for p in (Post.query.filter(db.or_(Post.title.ilike(like), Post.text.ilike(like), Post.category.ilike(like)))
+              .order_by(Post.created_at.desc()).limit(6).all()):
+        items.append({'kind': p.kind, 'text': ((p.title or p.text or '')[:60])})
+    return {'users': users, 'items': items}
+
 @app.route('/search')
 def search():
     if not auth(): return redirect('/login')
@@ -1498,7 +1514,8 @@ def search():
         people_rows = User.query.filter(
             db.or_(User.name.ilike(like), User.username.ilike(like))).limit(20).all()
         people = [{'name': u.name or u.username, 'username': u.username,
-                   'init': (u.name or u.username or 'U')[0].upper(), 'id': u.id} for u in people_rows]
+                   'init': (u.name or u.username or 'U')[0].upper(), 'id': u.id,
+                   'has_avatar': bool(u.avatar)} for u in people_rows]
         post_rows = Post.query.filter(
             Post.kind.in_(['post', 'thread', 'reel']),
             db.or_(Post.text.ilike(like), Post.title.ilike(like), Post.category.ilike(like))

@@ -9,11 +9,30 @@
 .srch-inp::placeholder{color:var(--muted);}
 .srch-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);}
 .srch-ico svg{width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:1.75;}
-.srch-person{display:flex;align-items:center;gap:12px;padding:11px 20px;}
+/* live suggestions dropdown */
+.srch-sugg{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden;z-index:300;display:none;max-height:60vh;overflow-y:auto;}
+.srch-sugg.on{display:block;}
+.sgi{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;text-decoration:none;border-bottom:1px solid var(--border);}
+.sgi:last-child{border-bottom:none;}
+.sgi:active{background:var(--bg-2);}
+.sgi-av{width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:900;color:#241D10;font-size:13px;overflow:hidden;flex-shrink:0;}
+.sgi-av img{width:100%;height:100%;object-fit:cover;}
+.sgi-k{width:32px;height:32px;border-radius:9px;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sgi-k svg{width:15px;height:15px;stroke:var(--sub);fill:none;stroke-width:1.75;}
+.sgi-txt{font-size:13px;color:var(--black);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.sgi-sub{font-size:11px;color:var(--sub);}
+/* people */
+.srch-person{display:flex;align-items:center;gap:12px;padding:11px 20px;text-decoration:none;}
+.srch-person:active{background:var(--bg-2);}
 .sp-name{font-size:13px;font-weight:700;color:var(--black);}
 .sp-user{font-size:11px;color:var(--sub);}
-.sp-follow{margin-left:auto;background:var(--gold);color:#000;border:none;border-radius:var(--r-full);padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;}
+.sp-follow{margin-left:auto;background:var(--gold);color:#000;border:none;border-radius:var(--r-full);padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;}
 .sp-follow.following{background:var(--bg-2);color:var(--sub);border:1px solid var(--border);}
+/* tabs */
+.srch-tabs{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;scrollbar-width:none;}
+.srch-tabs::-webkit-scrollbar{display:none;}
+.srch-tab{flex-shrink:0;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:7px 16px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;}
+.srch-tab.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
 .srch-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin:0 20px 10px;box-shadow:var(--sh);}
 .srch-act{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;}
 .srch-act svg{width:14px;height:14px;stroke:var(--sub);fill:none;stroke-width:1.75;}
@@ -22,15 +41,17 @@
 .srch-act.bm-btn.saved{color:var(--gold);}
 .srch-act.bm-btn.saved svg{stroke:var(--gold);}
 .srch-empty{text-align:center;padding:64px 28px;}
+.reel-tag{font-size:8px;font-weight:700;letter-spacing:1px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:2px 7px;text-transform:uppercase;}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="topbar">
   <a href="/grow" class="tb-btn"><i data-lucide="arrow-left"></i></a>
-  <form action="/search" method="get" class="srch-bar">
+  <form action="/search" method="get" class="srch-bar" autocomplete="off">
     <div class="srch-ico"><i data-lucide="search"></i></div>
-    <input name="q" value="{{ q }}" class="srch-inp" placeholder="Search posts, people, courses..." autocomplete="off" autofocus>
+    <input name="q" id="srchInp" value="{{ q }}" class="srch-inp" placeholder="Search people, posts, courses..." autocomplete="off" autofocus oninput="onSuggest()">
+    <div class="srch-sugg" id="srchSugg"></div>
   </form>
 </div>
 
@@ -51,21 +72,28 @@
 {% if people %}
 <div class="sect-lbl">People</div>
 {% for p in people %}
-<div class="srch-person">
-  <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+<a href="/u/{{ p.username }}" class="srch-person">
+  <div class="av av-40" style="font-weight:900;color:#241D10;">{% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
   <div><div class="sp-name">{{ p.name }}</div><div class="sp-user">@{{ p.username }}</div></div>
-  {% if p.id != u_id %}<button class="sp-follow" onclick="toggleFollow(this,{{ p.id }})">Follow</button>{% endif %}
-</div>
+  {% if p.id != u_id %}<button class="sp-follow" onclick="event.preventDefault();event.stopPropagation();toggleFollow(this,{{ p.id }})">Follow</button>{% endif %}
+</a>
 {% endfor %}
 {% endif %}
 
-{% if posts %}
-<div class="sect-lbl">Posts & Threads</div>
+<!-- FILTER TABS -->
+<div class="srch-tabs">
+  <button class="srch-tab on" data-f="all" onclick="filterTab('all',this)">All</button>
+  <button class="srch-tab" data-f="thread" onclick="filterTab('thread',this)">Threads</button>
+  <button class="srch-tab" data-f="posts" onclick="filterTab('posts',this)">Posts &amp; Reels</button>
+  <button class="srch-tab" data-f="course" onclick="filterTab('course',this)">Courses</button>
+</div>
+
 {% for p in posts %}
-<div class="srch-post" data-id="{{ p.id }}">
+<div class="srch-post result-item" data-kind="{{ 'thread' if p.kind == 'thread' else 'posts' }}" data-id="{{ p.id }}">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-    <div class="av av-32" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
-    <div><div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div><div style="font-size:10px;color:var(--sub);">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div></div>
+    <div class="av av-32" style="font-weight:900;color:#241D10;">{{ p.init }}</div>
+    <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div><div style="font-size:10px;color:var(--sub);">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div></div>
+    {% if p.kind == 'reel' %}<span class="reel-tag">Reel</span>{% elif p.kind == 'thread' %}<span class="reel-tag" style="color:var(--sub);background:var(--bg-2);border-color:var(--border);">Thread</span>{% endif %}
   </div>
   <div style="font-size:13px;color:var(--text);line-height:1.5;">{% if p.title %}<b>{{ p.title }}</b> {% endif %}{{ p.text }}</div>
   <div style="display:flex;gap:16px;margin-top:10px;align-items:center;">
@@ -75,36 +103,65 @@
   </div>
 </div>
 {% endfor %}
-{% endif %}
 
-{% if courses %}
-<div class="sect-lbl">Courses</div>
 {% for p in courses %}
-<div class="srch-post" data-id="{{ p.id }}">
+<div class="srch-post result-item" data-kind="course" data-id="{{ p.id }}">
   <div style="display:flex;align-items:center;gap:12px;">
     <div style="width:40px;height:40px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="graduation-cap" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
     <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--black);">{{ p.title }}</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">{{ p.category }} · By {{ p.user }}</div></div>
   </div>
 </div>
 {% endfor %}
-{% endif %}
 
+<div id="noFilter" style="display:none;text-align:center;color:var(--sub);font-size:13px;padding:40px 20px;">Nothing here for this filter.</div>
 <div style="height:20px;"></div>
 {% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
+let suggTimer=null;
+function onSuggest(){
+  const q=document.getElementById('srchInp').value.trim();
+  const box=document.getElementById('srchSugg');
+  clearTimeout(suggTimer);
+  if(!q){ box.classList.remove('on'); box.innerHTML=''; return; }
+  suggTimer=setTimeout(()=>{
+    fetch('/api/search/suggest?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{
+      let html='';
+      (d.users||[]).forEach(u=>{
+        const av = u.has_avatar ? '<img src="/avatar/'+u.id+'" alt="">' : u.init;
+        html+='<a class="sgi" href="/u/'+u.username+'"><div class="sgi-av">'+av+'</div><div class="sgi-txt">'+esc(u.name)+'<div class="sgi-sub">@'+esc(u.username)+'</div></div></a>';
+      });
+      (d.items||[]).forEach(it=>{
+        const ic = it.kind==='course'?'graduation-cap':(it.kind==='thread'?'align-left':(it.kind==='reel'?'play-circle':'image'));
+        html+='<div class="sgi" onclick="runSearch()"><div class="sgi-k"><i data-lucide="'+ic+'"></i></div><div class="sgi-txt">'+esc(it.text)+'</div></div>';
+      });
+      html+='<div class="sgi" onclick="runSearch()"><div class="sgi-k"><i data-lucide="search"></i></div><div class="sgi-txt">Search for "'+esc(q)+'"</div></div>';
+      box.innerHTML=html; box.classList.add('on');
+      if(window.lucide) lucide.createIcons();
+    }).catch(()=>{});
+  },220);
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function runSearch(){ document.querySelector('.srch-bar').submit(); }
+document.addEventListener('click',e=>{ if(!e.target.closest('.srch-bar')){ const b=document.getElementById('srchSugg'); if(b) b.classList.remove('on'); }});
+
+function filterTab(f, btn){
+  document.querySelectorAll('.srch-tab').forEach(t=>t.classList.toggle('on', t===btn));
+  let shown=0;
+  document.querySelectorAll('.result-item').forEach(el=>{
+    const ok = (f==='all' || el.dataset.kind===f);
+    el.style.display = ok ? '' : 'none';
+    if(ok) shown++;
+  });
+  const nf=document.getElementById('noFilter'); if(nf) nf.style.display = shown ? 'none' : 'block';
+}
 function toggleLike(btn, id){
   const n = btn.querySelector('.like-n');
-  fetch('/api/like/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{
-    btn.classList.toggle('liked', d.liked); if(n) n.textContent=d.count;
-  }).catch(()=>{});
+  fetch('/api/like/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{ btn.classList.toggle('liked', d.liked); if(n) n.textContent=d.count; }).catch(()=>{});
 }
-function toggleBookmark(btn, id){
-  btn.classList.toggle('saved');
-  fetch('/api/bookmark/'+id,{method:'POST'}).catch(()=>{});
-}
+function toggleBookmark(btn, id){ btn.classList.toggle('saved'); fetch('/api/bookmark/'+id,{method:'POST'}).catch(()=>{}); }
 function toggleFollow(btn, id){
   fetch('/api/follow/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{
     btn.classList.toggle('following', d.following);
