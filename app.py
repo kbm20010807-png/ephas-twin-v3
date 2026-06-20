@@ -1353,10 +1353,13 @@ def avatar_img(uid):
     return ('', 404)
 
 def stories_ctx(cu):
-    """Recent check-in 'stories' from other users (last 2 days) — avatar, name, metrics."""
+    """Recent check-in 'stories' from people the user FOLLOWS (last 2 days)."""
+    following = {f.following_id for f in Follow.query.filter_by(follower_id=cu.id).all()}
+    if not following:
+        return []
     today = datetime.utcnow().date()
     cutoff = today - timedelta(days=2)
-    rows = (CheckIn.query.filter(CheckIn.kind == 'morning', CheckIn.date >= cutoff, CheckIn.user_id != cu.id)
+    rows = (CheckIn.query.filter(CheckIn.kind == 'morning', CheckIn.date >= cutoff, CheckIn.user_id.in_(following))
             .order_by(CheckIn.date.desc(), CheckIn.id.desc()).all())
     seen, out = set(), []
     for ci in rows:
