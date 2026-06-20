@@ -3,7 +3,14 @@
 
 {% block head %}
 <style>
-.notif-badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#EF4444;color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg);font-family:'Inter',sans-serif;}
+.bell-dot{position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 6px rgba(200,164,90,.7);}
+.notif-pop{position:fixed;top:92px;left:50%;transform:translateX(-50%);background:var(--grad);color:#241D10;border-radius:var(--r-full);padding:9px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 28px rgba(200,164,90,.45);z-index:500;text-decoration:none;transition:opacity .4s,transform .4s;max-width:92%;animation:popIn .35s ease;}
+@keyframes popIn{from{opacity:0;transform:translateX(-50%) translateY(-10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.np-bell{width:16px;height:16px;stroke:#241D10;fill:none;stroke-width:2.2;flex-shrink:0;}
+.np-counts{display:flex;gap:11px;}
+.np-c{display:flex;align-items:center;gap:3px;font-size:13px;font-weight:800;}
+.np-c svg{width:13px;height:13px;stroke:#241D10;fill:none;stroke-width:2.3;}
+.np-txt{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.65;}
 .greet{padding:16px 20px 0;}
 .greet-time{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;font-family:'Inter',sans-serif;}
 .greet-name{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;letter-spacing:-1px;color:var(--black);margin-bottom:2px;}
@@ -120,11 +127,24 @@
 
 {% block content %}
 <div class="topbar">
-  <a href="/notifications" class="tb-btn" style="position:relative;"><i data-lucide="bell"></i>{% if notif_count %}<span class="notif-badge">{{ notif_count if notif_count < 100 else '99+' }}</span>{% endif %}</a>
+  <a href="/notifications" class="tb-btn" style="position:relative;"><i data-lucide="bell"></i>{% if nsum.total %}<span class="bell-dot"></span>{% endif %}</a>
   <div class="tb-brand"><div class="tb-twin">TWIN</div></div>
   <a href="/messages" class="tb-btn"><i data-lucide="message-circle"></i></a>
 </div>
 
+{% if nsum.total %}
+<a href="/notifications" class="notif-pop" id="notifPop">
+  <i data-lucide="bell" class="np-bell"></i>
+  <div class="np-counts">
+    {% if nsum.followers %}<span class="np-c"><i data-lucide="user-plus"></i>{{ nsum.followers }}</span>{% endif %}
+    {% if nsum.comments %}<span class="np-c"><i data-lucide="message-circle"></i>{{ nsum.comments }}</span>{% endif %}
+    {% if nsum.likes %}<span class="np-c"><i data-lucide="heart"></i>{{ nsum.likes }}</span>{% endif %}
+    {% if nsum.views %}<span class="np-c"><i data-lucide="eye"></i>{{ nsum.views }}</span>{% endif %}
+    {% if nsum.quests %}<span class="np-c"><i data-lucide="award"></i>{{ nsum.quests }}</span>{% endif %}
+  </div>
+  <span class="np-txt">New</span>
+</a>
+{% endif %}
 
 <div class="greet">
   <div class="greet-time" id="gTime">Good morning</div>
@@ -305,6 +325,13 @@ const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+
+// Golden notification pop — show for 5s, then fade (the bell dot stays)
+(function(){
+  const pop=document.getElementById('notifPop');
+  if(!pop) return;
+  setTimeout(function(){ pop.style.opacity='0'; pop.style.transform='translateX(-50%) translateY(-10px)'; setTimeout(()=>pop.style.display='none',450); }, 5000);
+})();
 
 function toggleDomains(){
   const extras = document.querySelectorAll('.domain-extra');

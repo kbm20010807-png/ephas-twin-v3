@@ -1129,18 +1129,21 @@ def notifications_ctx(user):
     notifs.sort(key=lambda x: x['sort'], reverse=True)
     return notifs
 
-def unread_notif_count(user):
-    """Lightweight count of NEW social events (likes/comments/follows/views) since last opened."""
+def notif_summary(user):
+    """Breakdown of NEW notifications since last opened — for the home golden pop + dot."""
     seen = user.notifs_seen_at or datetime(2000, 1, 1)
-    n = 0
+    s = {'followers': 0, 'comments': 0, 'likes': 0, 'views': 0, 'quests': 0}
     my_post_ids = [p.id for p in Post.query.filter_by(user_id=user.id).all()]
     if my_post_ids:
-        n += Like.query.filter(Like.post_id.in_(my_post_ids), Like.user_id != user.id, Like.created_at > seen).count()
-        n += Comment.query.filter(Comment.post_id.in_(my_post_ids), Comment.user_id != user.id, Comment.created_at > seen).count()
-    n += Follow.query.filter(Follow.following_id == user.id, Follow.created_at > seen).count()
+        s['likes'] = Like.query.filter(Like.post_id.in_(my_post_ids), Like.user_id != user.id, Like.created_at > seen).count()
+        s['comments'] = Comment.query.filter(Comment.post_id.in_(my_post_ids), Comment.user_id != user.id, Comment.created_at > seen).count()
+    s['followers'] = Follow.query.filter(Follow.following_id == user.id, Follow.created_at > seen).count()
     if getattr(user, 'show_profile_views', True):
-        n += ProfileView.query.filter(ProfileView.viewed_id == user.id, ProfileView.created_at > seen).count()
-    return n
+        s['views'] = ProfileView.query.filter(ProfileView.viewed_id == user.id, ProfileView.created_at > seen).count()
+    q = quests_ctx(user)
+    s['quests'] = sum(1 for k in ('daily', 'weekly', 'monthly', 'seasonal') for it in q.get(k, []) if it.get('done'))
+    s['total'] = s['followers'] + s['comments'] + s['likes'] + s['views']  # social events drive the dot/pop
+    return s
 
 @app.route('/')
 def index():
@@ -1425,7 +1428,7 @@ def home():
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
-                           notif_count=unread_notif_count(cu), active='home')
+                           nsum=notif_summary(cu), active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
@@ -1496,19 +1499,24 @@ def grow():
 @app.route('/api/search/suggest')
 def search_suggest():
     if not auth(): return ('', 401)
+    cu = current_user()
     q = (request.args.get('q') or '').strip()
+    # recent distinct searches (most recent first), excluding the current query
+    recent, seen = [], set()
+    for r in SearchLog.query.filter_by(user_id=cu.id).order_by(SearchLog.id.desc()).limit(25).all():
+        t = (r.term or '').strip()
+        if t and t.lower() not in seen and t.lower() != q.lower():
+            seen.add(t.lower()); recent.append(t)
+        if len(recent) >= 4:
+            break
     if len(q) < 1:
-        return {'users': [], 'items': []}
+        return {'users': [], 'recent': recent}
     like = f'%{q}%'
     users = [{'name': u.name or u.username, 'username': u.username, 'id': u.id,
               'init': (u.name or u.username or 'U')[0].upper(), 'has_avatar': bool(u.avatar)}
-             for u in User.query.filter(User.id != current_user().id,
+             for u in User.query.filter(User.id != cu.id,
                                         db.or_(User.name.ilike(like), User.username.ilike(like))).limit(5).all()]
-    items = []
-    for p in (Post.query.filter(db.or_(Post.title.ilike(like), Post.text.ilike(like), Post.category.ilike(like)))
-              .order_by(Post.created_at.desc()).limit(6).all()):
-        items.append({'kind': p.kind, 'text': ((p.title or p.text or '')[:60])})
-    return {'users': users, 'items': items}
+    return {'users': users, 'recent': recent}
 
 @app.route('/search')
 def search():
@@ -2033,7 +2041,9 @@ def notifications():
     if not auth(): return redirect('/login')
     cu = current_user()
     notifs = notifications_ctx(cu)
-    cu.notifs_seen_at = datetime.utcnow()  # opening marks everything read
+    for n in notifs:
+        n['unread'] = False  # opening the page marks everything read (no leftover gold dots)
+    cu.notifs_seen_at = datetime.utcnow()
     db.session.commit()
     return render_template('notifications.html', u=user_ctx(), notifs=notifs, active='home')
 
