@@ -178,7 +178,7 @@ class Habit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
     name = db.Column(db.String(80), default='')
     is_bad = db.Column(db.Boolean, default=False)   # a habit to QUIT -> streak = days clean
-    private = db.Column(db.Boolean, default=False)  # bad habits are forced private
+    private = db.Column(db.Boolean, default=True)  # habits are private by default
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class HabitLog(db.Model):
@@ -370,7 +370,7 @@ def ensure_habit(user, name, is_bad, source='axon'):
     exists = Habit.query.filter(Habit.user_id == user.id, func.lower(Habit.name) == name.lower()).first()
     if exists:
         return False
-    db.session.add(Habit(user_id=user.id, name=name, is_bad=is_bad, private=is_bad))  # bad habits auto-private
+    db.session.add(Habit(user_id=user.id, name=name, is_bad=is_bad, private=True))  # habits are private by default
     db.session.commit()
     return True
 
