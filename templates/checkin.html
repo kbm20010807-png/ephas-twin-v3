@@ -10,7 +10,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .ci-close svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
 .step-view{flex:1;display:none;flex-direction:column;padding:28px 24px;}
 .step-view.active{display:flex;}
-.step-q{font-family:'Arpubes',sans-serif;font-size:26px;letter-spacing:-1.5px;color:var(--black);line-height:1.2;margin-bottom:8px;}
+.step-q{font-family:'Inter',sans-serif;font-size:26px;letter-spacing:-1.5px;color:var(--black);line-height:1.2;margin-bottom:8px;}
 .step-hint{font-size:13px;color:var(--sub);margin-bottom:36px;line-height:1.5;}
 .step-big-val{font-family:'Inter',sans-serif;font-weight:800;font-size:72px;letter-spacing:-4px;color:var(--black);text-align:center;margin-bottom:8px;line-height:1;}
 .step-range-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:10px;letter-spacing:.5px;}
@@ -65,7 +65,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- STEP 1: Sleep -->
   <div class="step-view active" id="s1">
-    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 1 of 6</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 1 of 6</div>
     <div class="step-q">How many hours did you sleep?</div>
     <div class="step-hint">Quality rest is the foundation of everything else.</div>
     <div class="step-big-val" id="sleepDisp">7</div>
@@ -80,7 +80,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- STEP 2: Energy -->
   <div class="step-view" id="s2">
-    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 2 of 6</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 2 of 6</div>
     <div class="step-q">How's your energy this morning?</div>
     <div class="step-hint">Rate from 1 (drained) to 10 (fully charged).</div>
     <div class="step-big-val" style="color:#22C55E" id="energyDisp">7</div>
@@ -100,7 +100,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- STEP 3: Mood -->
   <div class="step-view" id="s3">
-    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 3 of 6</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 3 of 6</div>
     <div class="step-q">How are you feeling, waking up?</div>
     <div class="step-hint">Be honest with yourself — this is your data.</div>
     <div class="step-big-val" style="color:#8B5CF6" id="moodDisp">7</div>
@@ -120,7 +120,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- STEP 4: Today's plan -->
   <div class="step-view" id="s4">
-    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 4 of 6</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 4 of 6</div>
     <div class="step-q">What will you tackle today?</div>
     <div class="step-hint" style="margin-bottom:20px;">Tap what you're committing to. AXON will hold you to it.</div>
     <div class="habit-grid">
@@ -145,7 +145,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- STEP 5: Looking forward -->
   <div class="step-view" id="s5">
-    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 5 of 6</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 5 of 6</div>
     <div class="step-q">What are you looking forward to?</div>
     <div class="step-hint">Name one thing that'll make today good.</div>
     <textarea class="form-input form-textarea" id="winTxt" placeholder="Today I'm looking forward to..." style="flex:1;min-height:120px;"></textarea>
@@ -161,7 +161,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
   <!-- STEP 6: Today's priority -->
   <div class="step-view" id="s6">
-    <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 6 of 6</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 6 of 6</div>
     <div class="step-q">Your #1 priority today?</div>
     <div class="step-hint">One clear intention beats ten vague goals.</div>
     <textarea class="form-input form-textarea" id="refTxt" placeholder="Today I will focus on..." style="flex:1;min-height:120px;"></textarea>
@@ -186,7 +186,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
     <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:16px;padding:14px;text-align:left;">
       <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
-      <div style="flex:1;"><div style="font-family:'Arpubes',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
+      <div style="flex:1;"><div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
     </div>
     <button id="axonHabitBtn" onclick="addCoachHabit()" style="display:none;width:100%;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-xl);padding:12px;font-size:12px;font-weight:700;cursor:pointer;"></button>
     <a href="/axon" class="btn btn-secondary btn-full" style="margin-top:8px;border-radius:var(--r-xl);"><i data-lucide="message-circle"></i> Talk to AXON</a>

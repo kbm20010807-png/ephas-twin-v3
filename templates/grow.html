@@ -13,7 +13,7 @@
 /* TABS */
 .main-tabs{display:flex;border-bottom:1.5px solid var(--border);margin:14px 0 0;overflow-x:auto;scrollbar-width:none;padding:0 20px;gap:0;}
 .main-tabs::-webkit-scrollbar{display:none;}
-.mt-btn{flex:0 0 auto;padding:12px 14px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Arpubes',sans-serif;text-transform:uppercase;white-space:nowrap;}
+.mt-btn{flex:0 0 auto;padding:12px 14px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Inter',sans-serif;text-transform:uppercase;white-space:nowrap;}
 .mt-btn.on{color:var(--black);border-bottom-color:var(--gold);}
 .tab-pane{display:none;}
 .tab-pane.on{display:block;}
@@ -70,7 +70,7 @@
 .rv-playicon svg{width:26px;height:26px;stroke:#fff;fill:#fff;stroke-width:1;margin-left:3px;}
 .rv-close{position:fixed;top:50px;left:16px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.4);border:none;display:flex;align-items:center;justify-content:center;z-index:3;cursor:pointer;}
 .rv-close svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
-.rv-top{position:fixed;top:52px;left:50%;transform:translateX(-50%);font-family:'Arpubes',sans-serif;font-size:13px;letter-spacing:1px;color:#fff;z-index:3;}
+.rv-top{position:fixed;top:52px;left:50%;transform:translateX(-50%);font-family:'Inter',sans-serif;font-size:13px;letter-spacing:1px;color:#fff;z-index:3;}
 .rv-rail{position:absolute;right:12px;bottom:96px;display:flex;flex-direction:column;gap:20px;align-items:center;z-index:2;}
 .rv-act{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
 .rv-act-ico{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;}
@@ -78,7 +78,7 @@
 .rv-act.liked .rv-act-ico svg{stroke:#EF4444;fill:#EF4444;}
 .rv-act.saved .rv-act-ico svg{stroke:var(--gold);fill:var(--gold);}
 .rv-act-num{font-size:11px;font-weight:700;color:#fff;}
-.rv-avatar{width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Arpubes',sans-serif;font-weight:900;font-size:18px;color:var(--gold);}
+.rv-avatar{width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:#09090B;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:18px;color:var(--gold);}
 .rv-info{position:absolute;left:16px;right:80px;bottom:96px;z-index:2;}
 .rv-user{font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
 .rv-follow{font-size:10px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:var(--r-full);padding:3px 12px;cursor:pointer;}
@@ -93,7 +93,7 @@
 .post-detail.on{display:flex;}
 .pd-top{display:flex;align-items:center;gap:12px;padding:52px 20px 14px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;}
 .pd-top .tb-btn{width:36px;height:36px;}
-.pd-title{font-family:'Arpubes',sans-serif;font-size:16px;letter-spacing:-.5px;color:var(--black);}
+.pd-title{font-family:'Inter',sans-serif;font-size:16px;letter-spacing:-.5px;color:var(--black);}
 .pd-body{flex:1;overflow-y:auto;}
 .pd-comments{padding:0 20px 16px;}
 .pd-comment{display:flex;gap:10px;padding:13px 0;border-top:1px solid var(--border);}
@@ -130,7 +130,7 @@
 .fc-content{position:relative;padding:20px;}
 .fc-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);border-radius:var(--r-full);padding:4px 11px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;text-transform:uppercase;}
 .fc-tag svg{width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:2;}
-.fc-title{font-family:'Arpubes',sans-serif;font-size:20px;letter-spacing:-1px;color:#fff;line-height:1.2;margin-bottom:6px;}
+.fc-title{font-family:'Inter',sans-serif;font-size:20px;letter-spacing:-1px;color:#fff;line-height:1.2;margin-bottom:6px;}
 .fc-meta{font-size:11px;color:#666;}
 .course-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0;}
 .cg-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh);cursor:pointer;}
@@ -216,7 +216,7 @@
   {% for p in gexplore %}
   <div class="post-card" data-id="{{ p.id }}" data-kind="{{ p.kind }}" onclick="openPost(this,event)">
     <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
@@ -248,7 +248,7 @@
   {% for p in gposts %}
   <div class="post-card" data-id="{{ p.id }}" data-kind="{{ p.kind }}" onclick="openPost(this,event)">
     <div class="pc-head">
-      <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
@@ -280,7 +280,7 @@
   {% for p in gthreads %}
   <div class="thread-card" data-id="{{ p.id }}" data-kind="thread" onclick="openPost(this,event)">
     <div class="tc-head">
-      <div class="av av-36" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{{ p.init }}</div>
+      <div class="av av-36" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{{ p.init }}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="tc-meta">{{ p.time }}{% if p.category %} · #{{ p.category|lower }}{% endif %}</div></div>
     </div>
     {% if p.title %}<div class="tc-title">{{ p.title }}</div>{% endif %}
@@ -331,7 +331,7 @@
 </div>
 
 <div class="tw-foot">
-  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
+  <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
 
@@ -364,7 +364,7 @@
     </div>
   </div>
   <div class="pd-input">
-    <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ u.name[0]|upper }}</div>
+    <div class="av av-32" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ u.name[0]|upper }}</div>
     <input id="pdInput" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')pdSend()">
     <button class="pd-send" onclick="pdSend()"><i data-lucide="send"></i></button>
   </div>
@@ -465,7 +465,7 @@ function closePost() {
 function commentRow(user, text) {
   const c = document.createElement('div');
   c.className = 'pd-comment';
-  c.innerHTML = '<div class="av av-32" style="font-family:\'Arpubes\',sans-serif;font-weight:900;color:var(--gold);"></div><div class="pdc-body"><div class="pdc-user"></div><div class="pdc-text"></div><div class="pdc-meta"><span>now</span></div></div>';
+  c.innerHTML = '<div class="av av-32" style="font-family:\'Inter\',sans-serif;font-weight:900;color:var(--gold);"></div><div class="pdc-body"><div class="pdc-user"></div><div class="pdc-text"></div><div class="pdc-meta"><span>now</span></div></div>';
   c.querySelector('.av').textContent = (user||'U')[0].toUpperCase();
   c.querySelector('.pdc-user').textContent = user||'User';
   c.querySelector('.pdc-text').textContent = text;

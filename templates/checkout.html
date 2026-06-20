@@ -10,7 +10,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .ci-close svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
 .step-view{flex:1;display:none;flex-direction:column;padding:28px 24px;}
 .step-view.active{display:flex;}
-.step-q{font-family:'Arpubes',sans-serif;font-size:26px;letter-spacing:-1.5px;color:var(--black);line-height:1.2;margin-bottom:8px;}
+.step-q{font-family:'Inter',sans-serif;font-size:26px;letter-spacing:-1.5px;color:var(--black);line-height:1.2;margin-bottom:8px;}
 .step-hint{font-size:13px;color:var(--sub);margin-bottom:32px;line-height:1.5;}
 .step-big-val{font-family:'Inter',sans-serif;font-weight:800;font-size:72px;letter-spacing:-4px;text-align:center;margin-bottom:8px;line-height:1;}
 .step-range-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:10px;}
@@ -31,7 +31,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .grat-ico svg{width:12px;height:12px;stroke:var(--gold);fill:none;stroke-width:2;}
 .success-ov{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .3s;}
 .success-ov.show{opacity:1;pointer-events:all;}
-.so-word{font-family:'Arpubes',sans-serif;font-size:42px;letter-spacing:-3px;color:#fff;text-align:center;margin-bottom:10px;}
+.so-word{font-family:'Inter',sans-serif;font-size:42px;letter-spacing:-3px;color:#fff;text-align:center;margin-bottom:10px;}
 .so-sub{font-size:13px;color:#555;text-align:center;line-height:1.6;max-width:260px;margin-bottom:24px;}
 .motiv-player{display:none;width:100%;max-width:320px;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:18px;padding:18px;margin-bottom:14px;}
 .motiv-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:18px;}
@@ -154,7 +154,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 </div>
 
 <div class="success-ov" id="sOv">
-  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:16px;">Day closed</div>
+  <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:16px;">Day closed</div>
   <div class="so-word">Rest well,<br>{{ u.first }}.</div>
   <div class="so-sub">Another day of intentional living. AXON has read your day.</div>
 
@@ -162,7 +162,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
     <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:16px;padding:14px;text-align:left;">
       <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
-      <div style="flex:1;"><div style="font-family:'Arpubes',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
+      <div style="flex:1;"><div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
     </div>
     <button id="axonHabitBtn" onclick="addCoachHabit()" style="display:none;width:100%;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-xl);padding:12px;font-size:12px;font-weight:700;cursor:pointer;"></button>
     <a href="/axon" class="btn btn-secondary btn-full" style="margin-top:8px;border-radius:var(--r-xl);"><i data-lucide="message-circle"></i> Talk to AXON</a>
@@ -181,7 +181,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <button class="btn btn-gold btn-full" onclick="playMotivation()" id="motivBtn" style="border-radius:var(--r-xl);margin-bottom:10px;">
     <i data-lucide="play"></i> PLAY YOUR REFLECTION
   </button>
-  <button class="btn btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);background:#111;color:#fff;padding:17px;font-family:'Arpubes',sans-serif;font-size:13px;letter-spacing:1px;">
+  <button class="btn btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);background:#111;color:#fff;padding:17px;font-family:'Inter',sans-serif;font-size:13px;letter-spacing:1px;">
     <i data-lucide="home"></i> HOME
   </button>
 </div>

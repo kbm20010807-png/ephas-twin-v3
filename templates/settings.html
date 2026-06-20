@@ -5,7 +5,7 @@
 <style>
 .prof-banner{padding:24px 20px 0;display:flex;align-items:center;gap:14px;}
 .pb-info{flex:1;}
-.pb-name{font-family:'Arpubes',sans-serif;font-size:18px;letter-spacing:-1px;color:var(--black);}
+.pb-name{font-family:'Inter',sans-serif;font-size:18px;letter-spacing:-1px;color:var(--black);}
 .pb-meta{font-size:11px;color:var(--sub);margin-top:2px;}
 .pb-lv{display:inline-flex;align-items:center;gap:4px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:4px 10px;font-size:10px;font-weight:700;color:var(--gold);margin-top:6px;}
 .pb-lv svg{width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:2;}
@@ -19,11 +19,11 @@
 .s-sub{font-size:10px;color:var(--sub);margin-top:1px;}
 .s-arrow{display:flex;align-items:center;}
 .s-arrow svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:1.75;}
-.block-label{padding:20px 20px 8px;font-family:'Arpubes',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--sub);text-transform:uppercase;}
-.sign-out-btn{margin:20px 20px 0;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:'Arpubes',sans-serif;letter-spacing:.5px;}
+.block-label{padding:20px 20px 8px;font-family:'Inter',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--sub);text-transform:uppercase;}
+.sign-out-btn{margin:20px 20px 0;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.5px;}
 .sign-out-btn svg{width:16px;height:16px;stroke:var(--red);fill:none;stroke-width:2;}
 .app-info{padding:24px 20px;text-align:center;}
-.ai-twin{font-family:'Arpubes',sans-serif;font-size:14px;letter-spacing:-1px;color:var(--muted);margin-bottom:4px;}
+.ai-twin{font-family:'Inter',sans-serif;font-size:14px;letter-spacing:-1px;color:var(--muted);margin-bottom:4px;}
 .ai-ver{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;}
 .ai-elogo{height:7px;width:auto;margin:0 auto;display:block;opacity:.2;}
 [data-theme="dark"] .ai-elogo{filter:invert(1);opacity:.15;}
@@ -32,7 +32,7 @@
 .pac-glow{position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(200,164,90,.08),transparent 70%);}
 .pac-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(200,164,90,.1);border:1px solid rgba(200,164,90,.2);border-radius:var(--r-full);padding:3px 10px;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;text-transform:uppercase;}
 .pac-tag svg{width:10px;height:10px;stroke:var(--gold);fill:none;stroke-width:2;}
-.pac-title{font-family:'Arpubes',sans-serif;font-size:16px;letter-spacing:-0.5px;color:#fff;margin-bottom:6px;}
+.pac-title{font-family:'Inter',sans-serif;font-size:16px;letter-spacing:-0.5px;color:#fff;margin-bottom:6px;}
 .pac-desc{font-size:11px;color:#888;line-height:1.6;margin-bottom:14px;}
 .pac-steps{display:flex;gap:8px;margin-bottom:16px;}
 .pac-step{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:8px;text-align:center;}
@@ -46,7 +46,7 @@
 .tpc-ico{width:44px;height:44px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
 .tpc-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .tpc-body{flex:1;position:relative;}
-.tpc-title{font-family:'Arpubes',sans-serif;font-size:15px;letter-spacing:-.5px;color:#fff;margin-bottom:2px;}
+.tpc-title{font-family:'Inter',sans-serif;font-size:15px;letter-spacing:-.5px;color:#fff;margin-bottom:2px;}
 .tpc-sub{font-size:11px;color:#999;line-height:1.4;}
 .tpc-arrow{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;position:relative;flex-shrink:0;}
 </style>
@@ -220,7 +220,7 @@
   {% for a in accounts %}
   <a href="{% if not a.active %}/switch/{{ a.id }}{% else %}#{% endif %}" class="s-row" style="text-decoration:none;{% if a.active %}cursor:default;{% endif %}">
     <div class="s-left">
-      <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ a.name[0]|upper }}</div>
+      <div class="av av-32" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ a.name[0]|upper }}</div>
       <div>
         <div class="s-title">{{ a.name }}</div>
         <div class="s-sub">@{{ a.username }}{% if a.active %} · Active{% endif %}</div>

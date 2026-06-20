@@ -52,7 +52,7 @@
 <div class="sect-lbl">People</div>
 {% for p in people %}
 <div class="srch-person">
-  <div class="av av-40" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+  <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
   <div><div class="sp-name">{{ p.name }}</div><div class="sp-user">@{{ p.username }}</div></div>
   {% if p.id != u_id %}<button class="sp-follow" onclick="toggleFollow(this,{{ p.id }})">Follow</button>{% endif %}
 </div>
@@ -64,7 +64,7 @@
 {% for p in posts %}
 <div class="srch-post" data-id="{{ p.id }}">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-    <div class="av av-32" style="font-family:'Arpubes',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+    <div class="av av-32" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
     <div><div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div><div style="font-size:10px;color:var(--sub);">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div></div>
   </div>
   <div style="font-size:13px;color:var(--text);line-height:1.5;">{% if p.title %}<b>{{ p.title }}</b> {% endif %}{{ p.text }}</div>

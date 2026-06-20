@@ -4,12 +4,12 @@
 {% block head %}
 <style>
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0;}
-.cal-month{font-family:'Arpubes',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);}
+.cal-month{font-family:'Inter',sans-serif;font-size:22px;letter-spacing:-1px;color:var(--black);}
 .cal-arrow{width:34px;height:34px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .cal-arrow svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
 .cal-grid{padding:16px 20px 0;}
 .dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;}
-.dow{text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--sub);padding:4px 0;font-family:'Arpubes',sans-serif;}
+.dow{text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--sub);padding:4px 0;font-family:'Inter',sans-serif;}
 .days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
 .day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;position:relative;transition:background .12s;}
 .day.has-checkin{background:var(--gold);color:#000;font-weight:800;}
@@ -24,7 +24,7 @@
 .stats-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:20px 20px 0;}
 .ss-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;text-align:center;box-shadow:var(--sh);}
 .ss-val{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;letter-spacing:-1.5px;color:var(--black);}
-.ss-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:3px;font-family:'Arpubes',sans-serif;}
+.ss-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:3px;font-family:'Inter',sans-serif;}
 .history-list{padding:20px 20px 0;}
 .hist-day{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
 .hist-day:last-child{border-bottom:none;}
@@ -98,7 +98,7 @@
 </div>
 
 <div class="tw-foot">
-  <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
+  <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN · Powered by EPHAS</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
 {% endblock %}
