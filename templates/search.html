@@ -10,8 +10,9 @@
 .srch-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);}
 .srch-ico svg{width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:1.75;}
 /* live suggestions dropdown */
-.srch-sugg{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden;z-index:300;display:none;max-height:60vh;overflow-y:auto;}
+.srch-sugg{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden;z-index:300;display:none;max-height:46vh;overflow-y:auto;}
 .srch-sugg.on{display:block;}
+.sgi-hd{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;padding:9px 14px 5px;font-family:'Inter',sans-serif;background:var(--bg-2);border-bottom:1px solid var(--border);}
 .sgi{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;text-decoration:none;border-bottom:1px solid var(--border);}
 .sgi:last-child{border-bottom:none;}
 .sgi:active{background:var(--bg-2);}
@@ -51,7 +52,7 @@
   <a href="/grow" class="tb-btn"><i data-lucide="arrow-left"></i></a>
   <form action="/search" method="get" class="srch-bar" autocomplete="off">
     <div class="srch-ico"><i data-lucide="search"></i></div>
-    <input name="q" id="srchInp" value="{{ q }}" class="srch-inp" placeholder="Search people, posts, courses..." autocomplete="off" autofocus oninput="onSuggest()">
+    <input name="q" id="srchInp" value="{{ q }}" class="srch-inp" placeholder="Search people, posts, courses..." autocomplete="off" autofocus oninput="onSuggest()" onfocus="onSuggest()" onblur="srchHide()">
     <div class="srch-sugg" id="srchSugg"></div>
   </form>
 </div>
@@ -129,24 +130,27 @@ function onSuggest(){
   const q=document.getElementById('srchInp').value.trim();
   const box=document.getElementById('srchSugg');
   clearTimeout(suggTimer);
-  if(!q){ box.classList.remove('on'); box.innerHTML=''; return; }
   suggTimer=setTimeout(()=>{
     fetch('/api/search/suggest?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{
       let html='';
-      (d.users||[]).forEach(u=>{
+      (d.users||[]).slice(0,8).forEach(u=>{
         const av = u.has_avatar ? '<img src="/avatar/'+u.id+'" alt="">' : u.init;
         html+='<a class="sgi" href="/u/'+u.username+'"><div class="sgi-av">'+av+'</div><div class="sgi-txt">'+esc(u.name)+'<div class="sgi-sub">@'+esc(u.username)+'</div></div></a>';
       });
-      (d.items||[]).forEach(it=>{
-        const ic = it.kind==='course'?'graduation-cap':(it.kind==='thread'?'align-left':(it.kind==='reel'?'play-circle':'image'));
-        html+='<div class="sgi" onclick="runSearch()"><div class="sgi-k"><i data-lucide="'+ic+'"></i></div><div class="sgi-txt">'+esc(it.text)+'</div></div>';
-      });
-      html+='<div class="sgi" onclick="runSearch()"><div class="sgi-k"><i data-lucide="search"></i></div><div class="sgi-txt">Search for "'+esc(q)+'"</div></div>';
+      if(q){ html+='<div class="sgi" onclick="runSearch()"><div class="sgi-k"><i data-lucide="search"></i></div><div class="sgi-txt">Search for "'+esc(q)+'"</div></div>'; }
+      if((d.recent||[]).length){
+        html+='<div class="sgi-hd">Recent</div>';
+        (d.recent||[]).slice(0,4).forEach(t=>{
+          html+='<a class="sgi" href="/search?q='+encodeURIComponent(t)+'"><div class="sgi-k"><i data-lucide="clock"></i></div><div class="sgi-txt">'+esc(t)+'</div></a>';
+        });
+      }
+      if(!html){ box.classList.remove('on'); box.innerHTML=''; return; }
       box.innerHTML=html; box.classList.add('on');
       if(window.lucide) lucide.createIcons();
     }).catch(()=>{});
-  },220);
+  },200);
 }
+function srchHide(){ setTimeout(()=>{ const b=document.getElementById('srchSugg'); if(b) b.classList.remove('on'); }, 180); }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function runSearch(){ document.querySelector('.srch-bar').submit(); }
 document.addEventListener('click',e=>{ if(!e.target.closest('.srch-bar')){ const b=document.getElementById('srchSugg'); if(b) b.classList.remove('on'); }});

@@ -9,8 +9,9 @@
 .search-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px 12px 44px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;box-sizing:border-box;}
 .search-inp:focus{border-color:var(--gold);}
 .search-inp::placeholder{color:var(--muted);}
-.search-sugg{position:absolute;top:calc(100% + 6px);left:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden;z-index:300;display:none;max-height:60vh;overflow-y:auto;}
+.search-sugg{position:absolute;top:calc(100% + 6px);left:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden;z-index:300;display:none;max-height:46vh;overflow-y:auto;}
 .search-sugg.on{display:block;}
+.gsi-hd{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;padding:9px 14px 5px;font-family:'Inter',sans-serif;background:var(--bg-2);border-bottom:1px solid var(--border);}
 .gsi{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;text-decoration:none;border-bottom:1px solid var(--border);}
 .gsi:last-child{border-bottom:none;}
 .gsi:active{background:var(--bg-2);}
@@ -190,7 +191,7 @@
 
 <form class="search-wrap" id="growSearch" action="/search" method="get" autocomplete="off">
   <div class="search-ico"><i data-lucide="search"></i></div>
-  <input type="text" name="q" id="growQ" class="search-inp" placeholder="Search people, posts, courses..." autocomplete="off" oninput="growSuggest()">
+  <input type="text" name="q" id="growQ" class="search-inp" placeholder="Search people, posts, courses..." autocomplete="off" oninput="growSuggest()" onfocus="growSuggest()" onblur="growHide()">
   <div class="search-sugg" id="growSugg"></div>
 </form>
 
@@ -392,24 +393,27 @@ function growSuggest(){
   const q=document.getElementById('growQ').value.trim();
   const box=document.getElementById('growSugg');
   clearTimeout(growTimer);
-  if(!q){ box.classList.remove('on'); box.innerHTML=''; return; }
   growTimer=setTimeout(()=>{
     fetch('/api/search/suggest?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{
       let html='';
-      (d.users||[]).forEach(u=>{
+      (d.users||[]).slice(0,5).forEach(u=>{
         const av=u.has_avatar?'<img src="/avatar/'+u.id+'" alt="">':u.init;
         html+='<a class="gsi" href="/u/'+u.username+'"><div class="gsi-av">'+av+'</div><div class="gsi-txt">'+gesc(u.name)+'<div class="gsi-sub">@'+gesc(u.username)+'</div></div></a>';
       });
-      (d.items||[]).forEach(it=>{
-        const ic=it.kind==='course'?'graduation-cap':(it.kind==='thread'?'align-left':(it.kind==='reel'?'play-circle':'image'));
-        html+='<div class="gsi" onclick="document.getElementById(\'growSearch\').submit()"><div class="gsi-k"><i data-lucide="'+ic+'"></i></div><div class="gsi-txt">'+gesc(it.text)+'</div></div>';
-      });
-      html+='<div class="gsi" onclick="document.getElementById(\'growSearch\').submit()"><div class="gsi-k"><i data-lucide="search"></i></div><div class="gsi-txt">Search for "'+gesc(q)+'"</div></div>';
+      if(q){ html+='<a class="gsi" href="/search?q='+encodeURIComponent(q)+'"><div class="gsi-k"><i data-lucide="search"></i></div><div class="gsi-txt">Search for "'+gesc(q)+'"</div></a>'; }
+      if((d.recent||[]).length){
+        html+='<div class="gsi-hd">Recent</div>';
+        (d.recent||[]).slice(0,4).forEach(t=>{
+          html+='<a class="gsi" href="/search?q='+encodeURIComponent(t)+'"><div class="gsi-k"><i data-lucide="clock"></i></div><div class="gsi-txt">'+gesc(t)+'</div></a>';
+        });
+      }
+      if(!html){ box.classList.remove('on'); box.innerHTML=''; return; }
       box.innerHTML=html; box.classList.add('on');
       if(window.lucide) lucide.createIcons();
     }).catch(()=>{});
-  },200);
+  },180);
 }
+function growHide(){ setTimeout(()=>{ const b=document.getElementById('growSugg'); if(b) b.classList.remove('on'); }, 180); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#growSearch')){ const b=document.getElementById('growSugg'); if(b) b.classList.remove('on'); }});
 
 function switchTab(tab, el) {
