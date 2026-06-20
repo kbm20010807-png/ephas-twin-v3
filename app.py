@@ -1882,7 +1882,7 @@ def privacy():
 @app.route('/calendar')
 def calendar():
     if not auth(): return redirect('/login')
-    return render_template('calendar.html', u=user_ctx(), stats=stats_ctx(), active='analytics')
+    return render_template('calendar.html', u=user_ctx(), stats=stats_ctx(), active='calendar')
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
