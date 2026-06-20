@@ -1502,7 +1502,8 @@ def search_suggest():
     like = f'%{q}%'
     users = [{'name': u.name or u.username, 'username': u.username, 'id': u.id,
               'init': (u.name or u.username or 'U')[0].upper(), 'has_avatar': bool(u.avatar)}
-             for u in User.query.filter(db.or_(User.name.ilike(like), User.username.ilike(like))).limit(5).all()]
+             for u in User.query.filter(User.id != current_user().id,
+                                        db.or_(User.name.ilike(like), User.username.ilike(like))).limit(5).all()]
     items = []
     for p in (Post.query.filter(db.or_(Post.title.ilike(like), Post.text.ilike(like), Post.category.ilike(like)))
               .order_by(Post.created_at.desc()).limit(6).all()):
@@ -1520,6 +1521,7 @@ def search():
         db.session.commit()
         like = f'%{q}%'
         people_rows = User.query.filter(
+            User.id != cu.id,
             db.or_(User.name.ilike(like), User.username.ilike(like))).limit(20).all()
         ql = q.lower()
 
