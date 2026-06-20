@@ -8,9 +8,10 @@
 .pp-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.18));}
 /* Avatar overlapping banner */
 .pp-avwrap{position:relative;margin-top:-46px;padding:0 20px;display:flex;align-items:flex-end;justify-content:space-between;}
-.pp-av{position:relative;width:92px;height:92px;border-radius:50%;border:4px solid var(--bg);background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:32px;font-weight:900;color:#241D10;overflow:hidden;flex-shrink:0;box-shadow:var(--sh-md);}
+.pp-avbox{position:relative;flex-shrink:0;}
+.pp-av{width:92px;height:92px;border-radius:50%;border:4px solid var(--bg);background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:32px;font-weight:900;color:#241D10;overflow:hidden;box-shadow:var(--sh-md);}
 .pp-av img{width:100%;height:100%;object-fit:cover;}
-.pp-lvl{position:absolute;right:-2px;bottom:-2px;min-width:26px;height:26px;padding:0 4px;border-radius:var(--r-full);background:var(--grad);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:12px;color:#241D10;box-shadow:var(--sh);}
+.pp-lvl{position:absolute;right:0;bottom:2px;min-width:27px;height:27px;padding:0 5px;border-radius:var(--r-full);background:var(--grad);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:12px;color:#241D10;box-shadow:var(--sh);z-index:2;}
 /* Action buttons (next to follow) */
 .pp-acts{display:flex;align-items:center;gap:8px;padding-bottom:4px;}
 .pp-follow{border:none;border-radius:var(--r-full);padding:9px 20px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;}
@@ -30,9 +31,9 @@
 .pp-cnt{display:flex;flex-direction:column;}
 .pp-cnt .v{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;color:var(--black);line-height:1;}
 .pp-cnt .l{font-size:10px;color:var(--sub);letter-spacing:.4px;margin-top:3px;}
-/* Rare badges (Discord-style) */
-.pp-badges{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:16px 20px 0;}
-.pp-badges-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;width:100%;font-family:'Inter',sans-serif;margin-bottom:-4px;}
+/* Rare badges (Discord-style) — sits with a comfortable gap below the counts */
+.pp-badges{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:22px 20px 4px;}
+.pp-badges-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;width:100%;font-family:'Inter',sans-serif;margin-bottom:2px;}
 .pp-badge{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;transition:transform .12s;flex-shrink:0;}
 .pp-badge:active{transform:scale(.92);}
 .pp-badge img{width:100%;height:100%;object-fit:cover;}
@@ -76,8 +77,8 @@
 <div class="pp-banner">{% if p.has_banner %}<img src="/banner/{{ p.id }}" alt="">{% endif %}</div>
 
 <div class="pp-avwrap">
-  <div class="pp-av">
-    {% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.name[0]|upper }}{% endif %}
+  <div class="pp-avbox">
+    <div class="pp-av">{% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.name[0]|upper }}{% endif %}</div>
     <span class="pp-lvl" title="Level {{ p.level }}">{{ p.level }}</span>
   </div>
   <div class="pp-acts">
