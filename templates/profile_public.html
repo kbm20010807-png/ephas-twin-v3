@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}{% if notfound %}Not found{% else %}{{ p.name }}{% endif %}{% endblock %}
+{% block head %}
+<style>
+.pp-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:30px;font-weight:900;color:#241D10;overflow:hidden;flex-shrink:0;box-shadow:var(--sh-md);}
+.pp-av img{width:100%;height:100%;object-fit:cover;}
+.pp-zone{display:flex;align-items:flex-end;justify-content:space-between;padding:18px 20px 0;}
+.pp-name{font-family:'Inter',sans-serif;font-weight:800;font-size:23px;letter-spacing:-.8px;color:var(--black);}
+.pp-handle{font-size:12px;color:var(--sub);margin-top:1px;}
+.pp-title{font-size:12px;color:var(--gold);font-weight:700;margin-top:6px;}
+.pp-meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;}
+.pp-meta div{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:4px;}
+.pp-meta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.75;}
+.pp-bio{font-size:13px;color:var(--text);line-height:1.55;padding:14px 20px 0;}
+.pp-stats{display:flex;gap:24px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.pp-stat .v{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--black);}
+.pp-stat .l{font-size:10px;color:var(--sub);letter-spacing:.5px;}
+.pp-follow{flex:1;border:none;border-radius:var(--r-full);padding:11px;font-size:13px;font-weight:800;cursor:pointer;}
+.pp-follow.no{background:var(--grad);color:#241D10;}
+.pp-follow.yes{background:var(--bg-2);color:var(--black);border:1.5px solid var(--border);}
+.pp-actions{display:flex;gap:10px;padding:14px 20px 0;}
+.pp-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:12px 20px 0;box-shadow:var(--sh);}
+.pp-post-txt{font-size:13px;color:var(--text);line-height:1.55;}
+.pp-empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 20px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="javascript:history.back()" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">{% if notfound %}Profile{% else %}{{ p.first }}{% endif %}</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+{% if notfound %}
+<div class="pp-empty" style="padding-top:80px;">
+  <i data-lucide="user-x" style="width:34px;height:34px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
+  <div style="margin-top:14px;font-weight:700;color:var(--black);">User not found</div>
+  <div style="margin-top:4px;">That profile doesn't exist.</div>
+</div>
+{% else %}
+<div class="pp-zone">
+  <div class="pp-av">{% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.name[0]|upper }}{% endif %}</div>
+</div>
+<div style="padding:12px 20px 0;">
+  <div class="pp-name">{{ p.name }}</div>
+  <div class="pp-handle">@{{ p.username }}</div>
+  <div class="pp-title">{{ p.level_title }} · Level {{ p.level }}</div>
+  <div class="pp-meta">
+    {% if p.city %}<div><i data-lucide="map-pin"></i> {{ p.city }}</div>{% endif %}
+    {% if p.job %}<div><i data-lucide="briefcase"></i> {{ p.job }}</div>{% endif %}
+    <div><i data-lucide="calendar"></i> Since {{ p.member_since }}</div>
+  </div>
+</div>
+
+{% if p.bio %}<div class="pp-bio">{{ p.bio }}</div>{% endif %}
+
+<div class="pp-actions">
+  <button class="pp-follow {% if p.is_following %}yes{% else %}no{% endif %}" id="followBtn" onclick="toggleFollow()">{% if p.is_following %}Following{% else %}+ Follow{% endif %}</button>
+</div>
+
+<div class="pp-stats" style="margin-top:16px;">
+  <div class="pp-stat"><div class="v" id="followerN">{{ p.followers }}</div><div class="l">Followers</div></div>
+  <div class="pp-stat"><div class="v">{{ p.following }}</div><div class="l">Following</div></div>
+  <div class="pp-stat"><div class="v">{{ p.level }}</div><div class="l">Level</div></div>
+</div>
+
+{% if posts %}
+  {% for post in posts %}
+  <div class="pp-post"><div class="pp-post-txt">{{ post.text }}</div></div>
+  {% endfor %}
+{% else %}
+<div class="pp-empty">No posts yet.</div>
+{% endif %}
+<div style="height:30px;"></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if not notfound %}
+<script>
+function toggleFollow(){
+  fetch('/api/follow/{{ p.id }}',{method:'POST'}).then(r=>r.json()).then(d=>{
+    const b=document.getElementById('followBtn');
+    b.textContent = d.following ? 'Following' : '+ Follow';
+    b.className = 'pp-follow ' + (d.following ? 'yes' : 'no');
+    const n=document.getElementById('followerN'); if(n && typeof d.count!=='undefined') n.textContent=d.count;
+  }).catch(()=>{});
+}
+</script>
+{% endif %}
+{% endblock %}

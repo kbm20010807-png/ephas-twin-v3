@@ -155,6 +155,7 @@
       <i data-lucide="flame"></i>
       <div class="story-streak-txt" id="storyStreak"></div>
     </div>
+    <a id="storyProfileLink" href="#" style="display:block;margin-top:18px;background:var(--grad);color:#241D10;border-radius:var(--r-full);padding:11px;font-size:13px;font-weight:800;text-decoration:none;">View profile</a>
   </div>
 </div>
 
@@ -372,6 +373,7 @@ function openStory(i) {
   document.getElementById('storyEnergy').textContent = s.energy;
   document.getElementById('storyMood').textContent = s.mood;
   document.getElementById('storyStreak').textContent = s.streak + '-Day Streak';
+  document.getElementById('storyProfileLink').href = '/u/' + s.username;
   const fill = document.getElementById('storyBarFill');
   fill.style.animation = 'none';
   fill.offsetHeight;

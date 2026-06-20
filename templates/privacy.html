@@ -30,6 +30,14 @@
     </label>
   </div>
   <div class="pv-row">
+    <div class="pv-ico"><i data-lucide="eye"></i></div>
+    <div class="pv-info"><div class="pv-title">Profile views</div><div class="pv-sub">See who viewed your profile — and let others see when you view theirs</div></div>
+    <label class="toggle">
+      <input type="checkbox" id="viewsToggle" {% if show_views %}checked{% endif %} onchange="setViews(this)">
+      <div class="toggle-track"></div><div class="toggle-thumb"></div>
+    </label>
+  </div>
+  <div class="pv-row">
     <div class="pv-ico"><i data-lucide="eye-off"></i></div>
     <div class="pv-info"><div class="pv-title">Hide my stats</div><div class="pv-sub">Keep your streak & domains private</div></div>
     <span style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 8px;">SOON</span>
@@ -55,6 +63,9 @@
 <script>
 function setPrivate(el){
   fetch('/privacy',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({private_account: el.checked ? '1':'0'})}).catch(()=>{});
+}
+function setViews(el){
+  fetch('/privacy',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({show_views: el.checked ? '1':'0'})}).catch(()=>{});
 }
 </script>
 {% endblock %}

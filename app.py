@@ -53,6 +53,7 @@ class User(db.Model):
     tz_offset = db.Column(db.Integer, default=0)  # minutes east of UTC (from the user's device)
     is_pro = db.Column(db.Boolean, default=False)  # TWIN Pro subscriber
     axon_personality = db.Column(db.String(20), default='mentor')  # how AXON talks
+    show_profile_views = db.Column(db.Boolean, default=True)  # reciprocal "who viewed your profile"
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -117,6 +118,14 @@ class Follow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
     following_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ProfileView(db.Model):
+    # Recorded only when BOTH viewer and viewed have show_profile_views on (reciprocal, LinkedIn-style)
+    __tablename__ = 'profile_views'
+    id = db.Column(db.Integer, primary_key=True)
+    viewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    viewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class AxonMessage(db.Model):
@@ -709,6 +718,7 @@ with app.app_context():
         "ALTER TABLE follows ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS axon_personality VARCHAR(20) DEFAULT 'mentor'",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS show_profile_views BOOLEAN DEFAULT TRUE",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1070,6 +1080,11 @@ def notifications_ctx(user):
         actor_ids |= {x.user_id for x in likes} | {x.user_id for x in comments}
     follows = Follow.query.filter_by(following_id=user.id).order_by(Follow.id.desc()).limit(15).all()
     actor_ids |= {f.follower_id for f in follows}
+    # Profile views (only if the user opted in)
+    views = []
+    if getattr(user, 'show_profile_views', True):
+        views = ProfileView.query.filter_by(viewed_id=user.id).order_by(ProfileView.id.desc()).limit(15).all()
+        actor_ids |= {v.viewer_id for v in views}
     names = {u.id: (u.name or u.username) for u in User.query.filter(User.id.in_(actor_ids or [0])).all()}
     for f in follows:
         notifs.append({'type': 'follow', 'icon': 'user-plus', 'sort': 'b' + str(f.id),
@@ -1080,6 +1095,9 @@ def notifications_ctx(user):
     for l in likes:
         notifs.append({'type': 'like', 'icon': 'heart', 'sort': 'a' + str(l.id),
                        'text': f"{names.get(l.user_id, 'Someone')} liked your post", 'time': 'recently', 'unread': False})
+    for v in views:
+        notifs.append({'type': 'view', 'icon': 'eye', 'sort': 'd' + str(v.id),
+                       'text': f"{names.get(v.viewer_id, 'Someone')} viewed your profile", 'time': time_ago(v.created_at), 'unread': True})
     # Quest completions
     q = quests_ctx(user)
     for period, key in (('Daily', 'daily'), ('Weekly', 'weekly'), ('Monthly', 'monthly'), ('Seasonal', 'seasonal')):
@@ -1336,7 +1354,7 @@ def stories_ctx(cu):
         streak, _ = _streaks(_checkin_dates(u))
         nm = u.name or u.username
         out.append({
-            'id': u.id, 'name': nm, 'first': nm.split(' ')[0][:14],
+            'id': u.id, 'name': nm, 'first': nm.split(' ')[0][:14], 'username': u.username,
             'init': (nm[:1] or 'U').upper(), 'has_avatar': bool(u.avatar),
             'sleep': ci.sleep if ci.sleep is not None else '—',
             'energy': ci.energy if ci.energy is not None else '—',
@@ -1474,6 +1492,43 @@ def search():
         courses = serialize_posts(course_rows, cu)
     return render_template('search.html', u=user_ctx(), q=q, u_id=cu.id,
                            people=people, posts=posts, courses=courses, active='grow')
+
+def public_profile_ctx(target, viewer):
+    dates = _checkin_dates(target)
+    total = len(dates); xp = total * 50; level = xp // 200 + 1
+    nm = target.name or target.username
+    return {
+        'id': target.id, 'name': nm, 'first': nm.split(' ')[0], 'username': target.username,
+        'has_avatar': bool(target.avatar), 'has_banner': bool(target.banner), 'bio': target.bio or '',
+        'level': level, 'level_title': level_title_for(level), 'xp': xp,
+        'followers': Follow.query.filter_by(following_id=target.id).count(),
+        'following': Follow.query.filter_by(follower_id=target.id).count(),
+        'member_since': target.created_at.strftime('%b %Y') if target.created_at else 'Just now',
+        'city': target.city or '', 'job': target.job or '',
+        'is_following': Follow.query.filter_by(follower_id=viewer.id, following_id=target.id).first() is not None,
+        'views': ProfileView.query.filter_by(viewed_id=target.id).count(),
+    }
+
+@app.route('/u/<username>')
+def public_profile(username):
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    target = User.query.filter(func.lower(User.username) == username.lower()).first()
+    if not target:
+        return render_template('profile_public.html', u=user_ctx(), notfound=True, active='home'), 404
+    if target.id == cu.id:
+        return redirect('/profile')
+    # Reciprocal view recording: only when BOTH have it on; throttle to once / 6h per viewer
+    if cu.show_profile_views and target.show_profile_views:
+        recent = ProfileView.query.filter(ProfileView.viewer_id == cu.id, ProfileView.viewed_id == target.id,
+                                           ProfileView.created_at >= datetime.utcnow() - timedelta(hours=6)).first()
+        if not recent:
+            db.session.add(ProfileView(viewer_id=cu.id, viewed_id=target.id))
+            db.session.commit()
+    posts = serialize_posts(Post.query.filter(Post.user_id == target.id, Post.kind.in_(['post', 'thread', 'reel']))
+                            .order_by(Post.created_at.desc()).limit(12).all(), cu)
+    return render_template('profile_public.html', u=user_ctx(), p=public_profile_ctx(target, cu),
+                           posts=posts, active='home')
 
 @app.route('/profile')
 def profile():
@@ -1812,12 +1867,17 @@ def personal():
 @app.route('/privacy', methods=['GET', 'POST'])
 def privacy():
     if not auth(): return redirect('/login')
-    p = get_profile(current_user())
+    cu = current_user()
+    p = get_profile(cu)
     if request.method == 'POST':
-        p.private_account = request.form.get('private_account') == '1'
+        if 'private_account' in request.form:
+            p.private_account = request.form.get('private_account') == '1'
+        if 'show_views' in request.form:
+            cu.show_profile_views = request.form.get('show_views') == '1'
         db.session.commit()
-        return {'ok': True, 'private': p.private_account}
-    return render_template('privacy.html', u=user_ctx(), p=p, active='settings')
+        return {'ok': True}
+    return render_template('privacy.html', u=user_ctx(), p=p,
+                           show_views=cu.show_profile_views, active='settings')
 
 @app.route('/calendar')
 def calendar():
