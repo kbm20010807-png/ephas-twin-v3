@@ -1316,6 +1316,23 @@ def quest_teasers(cu):
             out.append({'period': period, 'text': it.get('desc') or it.get('title', ''), 'done': it.get('done', False)})
     return out
 
+def today_metrics(cu):
+    """Today's check-in sleep/energy/mood for the home rings (in the user's own day)."""
+    start = _day_start_utc(user_tz_offset(cu))
+    ci = (CheckIn.query.filter(CheckIn.user_id == cu.id, CheckIn.kind == 'morning', CheckIn.created_at >= start)
+          .order_by(CheckIn.id.desc()).first())
+    if not ci:
+        ci = CheckIn.query.filter_by(user_id=cu.id, kind='morning', date=datetime.utcnow().date()).first()
+    if not ci:
+        return {'has': False}
+    pct = lambda v, mx: max(0, min(100, round((v or 0) / mx * 100)))
+    return {
+        'has': True,
+        'sleep': (int(ci.sleep) if ci.sleep == int(ci.sleep) else ci.sleep) if ci.sleep is not None else None,
+        'sleep_pct': pct(ci.sleep, 9), 'energy': ci.energy, 'energy_pct': pct(ci.energy, 10),
+        'mood': ci.mood, 'mood_pct': pct(ci.mood, 10),
+    }
+
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
@@ -1323,7 +1340,7 @@ def home():
     community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
-                           qteasers=quest_teasers(cu), active='home')
+                           qteasers=quest_teasers(cu), today=today_metrics(cu), active='home')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():

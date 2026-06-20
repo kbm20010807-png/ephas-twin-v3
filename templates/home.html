@@ -164,32 +164,24 @@
 <div class="rings-wrap">
   <div class="t-label mb-3">Today</div>
   <div class="rings-row">
+    {% set rings = [
+      {'lbl':'SLEEP','val': today.sleep if today.has else None,'unit':'h','pct': today.sleep_pct if today.has else 0,'color':'#C8A45A'},
+      {'lbl':'ENERGY','val': today.energy if today.has else None,'unit':'','pct': today.energy_pct if today.has else 0,'color':'#22C55E'},
+      {'lbl':'MOOD','val': today.mood if today.has else None,'unit':'','pct': today.mood_pct if today.has else 0,'color':'#8B5CF6'}
+    ] %}
+    {% for r in rings %}
     <div class="ring-item">
       <svg class="ring-svg" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--muted)">—</text>
-        <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">SLEEP</text>
+        {% if today.has and r.val is not none %}<circle cx="50" cy="50" r="42" class="ring-p" stroke="{{ r.color }}" stroke-dasharray="264" stroke-dashoffset="{{ (264 * (1 - r.pct/100))|round(1) }}"/>{% endif %}
+        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:{% if today.has and r.val is not none %}var(--black){% else %}var(--muted){% endif %}">{% if today.has and r.val is not none %}{{ r.val }}{{ r.unit }}{% else %}—{% endif %}</text>
+        <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">{{ r.lbl }}</text>
       </svg>
-      <div class="ring-name" style="color:var(--sub)">No data</div>
+      <div class="ring-name" style="color:{% if today.has %}var(--gold){% else %}var(--sub){% endif %}">{% if today.has %}Today{% else %}No data{% endif %}</div>
     </div>
-    <div class="ring-item">
-      <svg class="ring-svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--muted)">—</text>
-        <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">ENERGY</text>
-      </svg>
-      <div class="ring-name" style="color:var(--sub)">No data</div>
-    </div>
-    <div class="ring-item">
-      <svg class="ring-svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:var(--muted)">—</text>
-        <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">MOOD</text>
-      </svg>
-      <div class="ring-name" style="color:var(--sub)">No data</div>
-    </div>
+    {% endfor %}
   </div>
-  <a href="/checkin" style="display:block;text-align:center;margin-top:14px;font-size:12px;font-weight:700;color:var(--gold);">Check in to see your day →</a>
+  {% if not today.has %}<a href="/checkin" style="display:block;text-align:center;margin-top:14px;font-size:12px;font-weight:700;color:var(--gold);">Check in to see your day →</a>{% endif %}
 </div>
 
 <div class="streak-card">
