@@ -25,6 +25,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .h-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);margin-left:auto;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
 .h-btn.on .h-check{background:var(--gold);border-color:var(--gold);}
 .h-btn.on .h-check::after{content:'';display:block;width:5px;height:9px;border-right:2px solid #000;border-bottom:2px solid #000;transform:rotate(45deg);margin-top:-2px;}
+.ci-skip{display:block;width:100%;background:none;border:none;color:var(--sub);font-size:12px;font-weight:600;padding:12px 0 2px;cursor:pointer;text-align:center;}
+.ci-skip:active{opacity:.6;}
 .success-ov{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .3s;}
 .success-ov.show{opacity:1;pointer-events:all;}
 .so-check{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:pop .4s ease;}
@@ -79,7 +81,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 2: Energy -->
   <div class="step-view" id="s2">
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 2 of 6</div>
-    <div class="step-q">How's your energy level today?</div>
+    <div class="step-q">How's your energy this morning?</div>
     <div class="step-hint">Rate from 1 (drained) to 10 (fully charged).</div>
     <div class="step-big-val" style="color:#22C55E" id="energyDisp">7</div>
     <input type="range" class="range-input" min="1" max="10" value="7" id="energyR" oninput="document.getElementById('energyDisp').textContent=this.value">
@@ -99,7 +101,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 3: Mood -->
   <div class="step-view" id="s3">
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 3 of 6</div>
-    <div class="step-q">How's your mood right now?</div>
+    <div class="step-q">How are you feeling, waking up?</div>
     <div class="step-hint">Be honest with yourself — this is your data.</div>
     <div class="step-big-val" style="color:#8B5CF6" id="moodDisp">7</div>
     <input type="range" class="range-input" min="1" max="10" value="7" id="moodR" oninput="document.getElementById('moodDisp').textContent=this.value">
@@ -116,55 +118,59 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </div>
   </div>
 
-  <!-- STEP 4: Habits -->
+  <!-- STEP 4: Today's plan -->
   <div class="step-view" id="s4">
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 4 of 6</div>
-    <div class="step-q">What did you complete today?</div>
-    <div class="step-hint" style="margin-bottom:20px;">Tap everything you did.</div>
+    <div class="step-q">What will you tackle today?</div>
+    <div class="step-hint" style="margin-bottom:20px;">Tap what you're committing to. AXON will hold you to it.</div>
     <div class="habit-grid">
       <div class="h-btn" onclick="tog(this)"><i data-lucide="dumbbell"></i><div class="h-name">Workout</div><div class="h-check"></div></div>
-      <div class="h-btn" onclick="tog(this)"><i data-lucide="wind"></i><div class="h-name">Cold Shower</div><div class="h-check"></div></div>
-      <div class="h-btn" onclick="tog(this)"><i data-lucide="book-open"></i><div class="h-name">Reading</div><div class="h-check"></div></div>
       <div class="h-btn" onclick="tog(this)"><i data-lucide="laptop"></i><div class="h-name">Deep Work</div><div class="h-check"></div></div>
-      <div class="h-btn" onclick="tog(this)"><i data-lucide="pen-tool"></i><div class="h-name">Journaling</div><div class="h-check"></div></div>
-      <div class="h-btn" onclick="tog(this)"><i data-lucide="droplets"></i><div class="h-name">Hydration</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="book-open"></i><div class="h-name">Reading</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="wind"></i><div class="h-name">Cold Shower</div><div class="h-check"></div></div>
       <div class="h-btn" onclick="tog(this)"><i data-lucide="brain"></i><div class="h-name">Meditation</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="droplets"></i><div class="h-name">Hydration</div><div class="h-check"></div></div>
+      <div class="h-btn" onclick="tog(this)"><i data-lucide="salad"></i><div class="h-name">Eat Clean</div><div class="h-check"></div></div>
       <div class="h-btn" onclick="tog(this)"><i data-lucide="smartphone-off"></i><div class="h-name">No Screens</div><div class="h-check"></div></div>
     </div>
+    <input class="form-input" id="planCustom" placeholder="Other… type it and press Enter" onkeydown="addPlan(event)" style="margin-top:10px;">
     <div class="step-footer" style="padding-top:16px;">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(4)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
         <button class="btn btn-primary btn-full" onclick="next(4)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
       </div>
+      <button class="ci-skip" onclick="next(4)">Skip</button>
     </div>
   </div>
 
-  <!-- STEP 5: Win -->
+  <!-- STEP 5: Looking forward -->
   <div class="step-view" id="s5">
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 5 of 6</div>
-    <div class="step-q">What was your win today?</div>
-    <div class="step-hint">Even a small win counts. Write it down.</div>
-    <textarea class="form-input form-textarea" id="winTxt" placeholder="My biggest win today was..." style="flex:1;min-height:120px;"></textarea>
+    <div class="step-q">What are you looking forward to?</div>
+    <div class="step-hint">Name one thing that'll make today good.</div>
+    <textarea class="form-input form-textarea" id="winTxt" placeholder="Today I'm looking forward to..." style="flex:1;min-height:120px;"></textarea>
     <div style="text-align:right;font-size:10px;color:var(--sub);margin-top:5px;" id="winCt">0/200</div>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(5)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
         <button class="btn btn-primary btn-full" onclick="next(5)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
       </div>
+      <button class="ci-skip" onclick="next(5)">Skip</button>
     </div>
   </div>
 
-  <!-- STEP 6: Reflection -->
+  <!-- STEP 6: Today's priority -->
   <div class="step-view" id="s6">
     <div style="font-family:'Arpubes',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 6 of 6</div>
-    <div class="step-q">Tomorrow's one priority?</div>
-    <div class="step-hint">One clear intention is more powerful than ten vague goals.</div>
-    <textarea class="form-input form-textarea" id="refTxt" placeholder="Tomorrow I will focus on..." style="flex:1;min-height:120px;"></textarea>
+    <div class="step-q">Your #1 priority today?</div>
+    <div class="step-hint">One clear intention beats ten vague goals.</div>
+    <textarea class="form-input form-textarea" id="refTxt" placeholder="Today I will focus on..." style="flex:1;min-height:120px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(6)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
         <button class="btn btn-gold btn-full" onclick="submit()" style="border-radius:var(--r-xl);"><i data-lucide="check"></i> COMPLETE CHECK-IN</button>
       </div>
+      <button class="ci-skip" onclick="submit()">Skip &amp; finish</button>
     </div>
   </div>
 </div>
@@ -213,6 +219,15 @@ function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.
 function next(n){show(n+1);}
 function prev(n){show(n-1);}
 function tog(el){el.classList.toggle('on');}
+function addPlan(e){
+  if(e.key!=='Enter') return; e.preventDefault();
+  const inp=document.getElementById('planCustom'); const v=inp.value.trim(); if(!v) return;
+  const el=document.createElement('div'); el.className='h-btn on';
+  el.innerHTML='<i data-lucide="plus"></i><div class="h-name">'+v.replace(/</g,'&lt;')+'</div><div class="h-check"></div>';
+  el.onclick=function(){ this.classList.toggle('on'); };
+  document.querySelector('.habit-grid').appendChild(el);
+  inp.value=''; if(typeof lucide!=='undefined')lucide.createIcons();
+}
 function submit(){
   const habits=[...document.querySelectorAll('.h-btn.on .h-name')].map(e=>e.textContent.trim()).join(',');
   const body=new URLSearchParams({
