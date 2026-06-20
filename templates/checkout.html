@@ -25,6 +25,15 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .yn-btn.sel-n span{color:var(--red);}
 .yn-lbl{font-size:13px;font-weight:700;color:var(--sub);transition:color .15s;}
 .step-footer{margin-top:auto;padding:20px 0 0;}
+.co-habits{display:flex;flex-direction:column;gap:8px;margin-bottom:auto;}
+.co-habit{display:flex;align-items:center;gap:10px;border:1.5px solid var(--border);background:var(--bg-2);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .15s;}
+.co-habit.on{border-color:var(--gold);background:var(--gold-dim);}
+.co-h-name{font-size:13px;font-weight:700;color:var(--black);flex:1;}
+.co-h-tag{font-size:10px;color:var(--sub);}
+.co-h-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.co-habit.on .co-h-check{background:var(--gold);border-color:var(--gold);}
+.co-h-check svg{width:13px;height:13px;stroke:#000;fill:none;stroke-width:3;opacity:0;}
+.co-habit.on .co-h-check svg{opacity:1;}
 .gratitude-list{display:flex;flex-direction:column;gap:8px;}
 .gratitude-item{display:flex;align-items:center;gap:10px;}
 .grat-ico{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -60,11 +69,12 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="step-seg" id="p3"></div>
     <div class="step-seg" id="p4"></div>
     <div class="step-seg" id="p5"></div>
+    <div class="step-seg" id="p6"></div>
   </div>
 
   <!-- STEP 1: Overall day -->
   <div class="step-view active" id="s1">
-    <div class="t-label mb-3">Step 1 of 5</div>
+    <div class="t-label mb-3">Step 1 of 6</div>
     <div class="step-q">Overall, how was today?</div>
     <div class="step-hint">Be honest. Growth starts with clarity.</div>
     <div class="step-big-val" id="dayDisp" style="color:var(--gold);">7</div>
@@ -77,9 +87,35 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </div>
   </div>
 
-  <!-- STEP 2: Goal hit -->
+  <!-- STEP 2: Habits -->
   <div class="step-view" id="s2">
-    <div class="t-label mb-3">Step 2 of 5</div>
+    <div class="t-label mb-3">Step 2 of 6</div>
+    <div class="step-q">Did you stick to your habits?</div>
+    <div class="step-hint" style="margin-bottom:20px;">Tap the ones you did today.</div>
+    {% if habits %}
+    <div class="co-habits">
+      {% for h in habits %}
+      <div class="co-habit {% if h.done_today %}on{% endif %}" data-id="{{ h.id }}" onclick="this.classList.toggle('on')">
+        <div class="co-h-name">{{ h.name }}</div>
+        <div class="co-h-tag">{% if h.is_bad %}stayed clean{% else %}did it{% endif %}</div>
+        <div class="co-h-check"><i data-lucide="check"></i></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="color:var(--sub);font-size:13px;text-align:center;padding:24px 0;margin-bottom:auto;">No habits yet — add some on your home and they'll show up here.</div>
+    {% endif %}
+    <div class="step-footer">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(2)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
+        <button class="btn btn-primary btn-full" onclick="next(2)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Goal hit -->
+  <div class="step-view" id="s3">
+    <div class="t-label mb-3">Step 3 of 6</div>
     <div class="step-q">Did you hit your #1 goal today?</div>
     <div class="step-hint" style="margin-bottom:24px;">Accountability is the engine of growth.</div>
     <div class="y-n-grid">
@@ -94,32 +130,18 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </div>
     <div class="step-footer">
       <div class="flex gap-2">
-        <button class="btn btn-secondary" onclick="prev(2)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
-        <button class="btn btn-primary btn-full" onclick="next(2)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3: What blocked -->
-  <div class="step-view" id="s3">
-    <div class="t-label mb-3">Step 3 of 5</div>
-    <div class="step-q">What got in the way today?</div>
-    <div class="step-hint">Identifying blockers is how you eliminate them.</div>
-    <textarea class="form-input form-textarea" id="blockTxt" placeholder="What slowed me down was..." style="flex:1;min-height:100px;"></textarea>
-    <div class="step-footer">
-      <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(3)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
         <button class="btn btn-primary btn-full" onclick="next(3)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
       </div>
     </div>
   </div>
 
-  <!-- STEP 4: Tomorrow -->
+  <!-- STEP 4: What blocked -->
   <div class="step-view" id="s4">
-    <div class="t-label mb-3">Step 4 of 5</div>
-    <div class="step-q">Tomorrow's one non-negotiable.</div>
-    <div class="step-hint">Set it tonight so your morning is clear.</div>
-    <textarea class="form-input form-textarea" id="tmrTxt" placeholder="Tomorrow I must..." style="flex:1;min-height:100px;"></textarea>
+    <div class="t-label mb-3">Step 4 of 6</div>
+    <div class="step-q">What got in the way today?</div>
+    <div class="step-hint">Identifying blockers is how you eliminate them.</div>
+    <textarea class="form-input form-textarea" id="blockTxt" placeholder="What slowed me down was..." style="flex:1;min-height:100px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(4)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
@@ -128,9 +150,23 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     </div>
   </div>
 
-  <!-- STEP 5: Gratitude -->
+  <!-- STEP 5: Tomorrow -->
   <div class="step-view" id="s5">
-    <div class="t-label mb-3">Step 5 of 5</div>
+    <div class="t-label mb-3">Step 5 of 6</div>
+    <div class="step-q">Tomorrow's one non-negotiable.</div>
+    <div class="step-hint">Set it tonight so your morning is clear.</div>
+    <textarea class="form-input form-textarea" id="tmrTxt" placeholder="Tomorrow I must..." style="flex:1;min-height:100px;"></textarea>
+    <div class="step-footer">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="prev(5)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
+        <button class="btn btn-primary btn-full" onclick="next(5)" style="border-radius:var(--r-xl);"><i data-lucide="arrow-right"></i> CONTINUE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6: Gratitude -->
+  <div class="step-view" id="s6">
+    <div class="t-label mb-3">Step 6 of 6</div>
     <div class="step-q">Three things you're grateful for.</div>
     <div class="step-hint" style="margin-bottom:20px;">End every day anchored in what you have.</div>
     <div class="gratitude-list">
@@ -190,7 +226,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 {% block scripts %}
 <script>
 let step=1;
-function updateProg(){for(let i=1;i<=5;i++){const s=document.getElementById('p'+i);if(i<step)s.style.background='var(--gold)';else if(i===step)s.style.background='rgba(200,164,90,.35)';else s.style.background='var(--border)';}}
+function updateProg(){for(let i=1;i<=6;i++){const s=document.getElementById('p'+i);if(i<step)s.style.background='var(--gold)';else if(i===step)s.style.background='rgba(200,164,90,.35)';else s.style.background='var(--border)';}}
 function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.remove('active'));document.getElementById('s'+n).classList.add('active');step=n;updateProg();}
 function next(n){show(n+1);}
 function prev(n){show(n-1);}
@@ -204,7 +240,8 @@ function submit(){
     document.getElementById('tmrTxt').value.trim() ? 'Tomorrow: '+document.getElementById('tmrTxt').value.trim() : '',
     grats.length ? 'Grateful: '+grats.join('; ') : ''
   ].filter(Boolean).join(' | ');
-  const body=new URLSearchParams({day_rating:document.getElementById('dayR').value, goal_hit:goal, note:note});
+  const habitsDone=[...document.querySelectorAll('.co-habit.on')].map(e=>e.dataset.id).join(',');
+  const body=new URLSearchParams({day_rating:document.getElementById('dayR').value, goal_hit:goal, note:note, habits_done:habitsDone});
   const btn=event&&event.target?event.target.closest('button'):null;
   if(btn){btn.disabled=true;btn.style.opacity='.7';}
   fetch('/checkout',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})

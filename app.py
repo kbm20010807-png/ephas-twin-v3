@@ -1398,8 +1398,18 @@ def checkout():
         ci.goal_hit = (gh == 'yes') if gh else None
         ci.note = (request.form.get('note') or '')[:800]
         db.session.commit()
+        # Log the habits the user marked as done/clean today
+        done_ids = [int(x) for x in (request.form.get('habits_done') or '').split(',') if x.strip().isdigit()]
+        today = datetime.utcnow().date()
+        for h in Habit.query.filter_by(user_id=cu.id).all():
+            already = HabitLog.query.filter_by(habit_id=h.id, date=today).first()
+            if h.id in done_ids and not already:
+                db.session.add(HabitLog(habit_id=h.id, user_id=cu.id, date=today))
+            elif h.id not in done_ids and already:
+                db.session.delete(already)
+        db.session.commit()
         return ('', 204)
-    return render_template('checkout.html', u=user_ctx(), active='checkout')
+    return render_template('checkout.html', u=user_ctx(), habits=serialize_habits(cu), active='checkout')
 
 @app.route('/analytics')
 def analytics():
