@@ -55,6 +55,7 @@ class User(db.Model):
     axon_personality = db.Column(db.String(20), default='mentor')  # how AXON talks
     show_profile_views = db.Column(db.Boolean, default=True)  # reciprocal "who viewed your profile"
     notifs_seen_at = db.Column(db.DateTime)  # last time the notifications page was opened (for unread count)
+    badges = db.Column(db.String(300), default='')  # comma-separated badge slugs (pro, verified, ephas_team, ...)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -212,6 +213,32 @@ def level_title_for(level):
         if level >= lv:
             title = name
     return title
+
+# --- Rare profile badges (Discord-style). Custom art lives in static/badges/<slug>.png.
+# Assign to a user via their comma-separated User.badges field. ---
+BADGE_DEFS = {
+    'verified':   {'label': 'Verified',   'desc': 'Identity confirmed by EPHAS — this is a real, authentic account.', 'icon': 'badge-check', 'color': '#3B82F6'},
+    'pro':        {'label': 'TWIN Pro',    'desc': 'An active TWIN Pro member supporting the journey.',               'icon': 'star',        'color': '#E8B23A'},
+    'ephas_team': {'label': 'EPHAS Team',  'desc': 'Official member of the EPHAS team.',                              'icon': 'shield',      'color': '#8B5CF6'},
+    'founder':    {'label': 'Founder',     'desc': 'Founder of EPHAS & TWIN.',                                        'icon': 'crown',       'color': '#E8B23A'},
+    'og':         {'label': 'OG',          'desc': 'One of the earliest members of the community.',                   'icon': 'sparkles',    'color': '#22C55E'},
+}
+
+def resolve_badges(user):
+    """Return ordered list of badge dicts for a user, with a custom image URL when one exists."""
+    slugs = [s.strip() for s in (user.badges or '').split(',') if s.strip()]
+    out = []
+    for s in slugs:
+        d = BADGE_DEFS.get(s)
+        if not d:
+            continue
+        img = None
+        path = os.path.join(app.static_folder or 'static', 'badges', s + '.png')
+        if os.path.exists(path):
+            img = '/static/badges/' + s + '.png'
+        out.append({'slug': s, 'label': d['label'], 'desc': d['desc'],
+                    'icon': d['icon'], 'color': d['color'], 'img': img})
+    return out
 
 def _i(v):
     try: return int(float(v))
@@ -721,6 +748,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS axon_personality VARCHAR(20) DEFAULT 'mentor'",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS show_profile_views BOOLEAN DEFAULT TRUE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS notifs_seen_at TIMESTAMP",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS badges VARCHAR(300) DEFAULT ''",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1362,6 +1390,20 @@ def avatar_img(uid):
             pass
     return ('', 404)
 
+@app.route('/banner/<int:uid>')
+def banner_img(uid):
+    """Serve a user's profile banner as a real image (cached)."""
+    u = User.query.get(uid)
+    if u and u.banner and u.banner.startswith('data:') and ',' in u.banner:
+        header, b64 = u.banner.split(',', 1)
+        mime = header[5:].split(';')[0] or 'image/jpeg'
+        try:
+            return Response(base64.b64decode(b64), mimetype=mime,
+                            headers={'Cache-Control': 'public, max-age=300'})
+        except Exception:
+            pass
+    return ('', 404)
+
 def stories_ctx(cu):
     """Stories are manual-only — check-ins no longer auto-post as stories."""
     return []
@@ -1559,10 +1601,13 @@ def public_profile_ctx(target, viewer):
     dates = _checkin_dates(target)
     total = len(dates); xp = total * 50; level = xp // 200 + 1
     nm = target.name or target.username
+    _, best_streak = _streaks(dates)
+    achievements = max(0, level - 1) + sum(1 for m in (3, 7, 14, 30, 60, 90, 100) if best_streak >= m)
     return {
         'id': target.id, 'name': nm, 'first': nm.split(' ')[0], 'username': target.username,
         'has_avatar': bool(target.avatar), 'has_banner': bool(target.banner), 'bio': target.bio or '',
-        'level': level, 'level_title': level_title_for(level), 'xp': xp,
+        'level': level, 'level_title': level_title_for(level), 'xp': xp, 'achievements': achievements,
+        'badges': resolve_badges(target),
         'followers': Follow.query.filter_by(following_id=target.id).count(),
         'following': Follow.query.filter_by(follower_id=target.id).count(),
         'member_since': target.created_at.strftime('%b %Y') if target.created_at else 'Just now',
@@ -2063,6 +2108,32 @@ def admin_reset_all():
     db.session.commit()
     session.clear()
     return f'Wiped all data — {counts}. Every account is deleted.'
+
+@app.route('/admin/badges')
+def admin_badges():
+    """Grant / revoke rare badges. e.g. /admin/badges?key=KEY&username=khalid&set=founder,verified
+    Params: set=a,b (replace) | add=a (grant) | remove=b (revoke). Omit all to just view."""
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if not admin_key or request.args.get('key', '') != admin_key:
+        return ('Forbidden', 403)
+    uname = (request.args.get('username') or '').strip()
+    u = User.query.filter(func.lower(User.username) == uname.lower()).first()
+    if not u:
+        return (f'No user @{uname}. Known badges: {", ".join(BADGE_DEFS)}', 404)
+    current = [s.strip() for s in (u.badges or '').split(',') if s.strip()]
+    if request.args.get('set') is not None:
+        current = [s.strip() for s in request.args['set'].split(',') if s.strip() in BADGE_DEFS]
+    if request.args.get('add'):
+        for s in request.args['add'].split(','):
+            s = s.strip()
+            if s in BADGE_DEFS and s not in current:
+                current.append(s)
+    if request.args.get('remove'):
+        rm = {s.strip() for s in request.args['remove'].split(',')}
+        current = [s for s in current if s not in rm]
+    u.badges = ','.join(current)
+    db.session.commit()
+    return {'username': u.username, 'badges': current, 'available': list(BADGE_DEFS.keys())}
 
 @app.route('/admin/email-test')
 def admin_email_test():

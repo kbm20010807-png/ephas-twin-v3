@@ -2,26 +2,61 @@
 {% block title %}{% if notfound %}Not found{% else %}{{ p.name }}{% endif %}{% endblock %}
 {% block head %}
 <style>
-.pp-av{width:84px;height:84px;border-radius:50%;border:4px solid var(--bg);background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:30px;font-weight:900;color:#241D10;overflow:hidden;flex-shrink:0;box-shadow:var(--sh-md);}
+/* Banner / cover */
+.pp-banner{position:relative;height:150px;background:var(--grad);overflow:hidden;}
+.pp-banner img{width:100%;height:100%;object-fit:cover;display:block;}
+.pp-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.18));}
+/* Avatar overlapping banner */
+.pp-avwrap{position:relative;margin-top:-46px;padding:0 20px;display:flex;align-items:flex-end;justify-content:space-between;}
+.pp-av{position:relative;width:92px;height:92px;border-radius:50%;border:4px solid var(--bg);background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:32px;font-weight:900;color:#241D10;overflow:hidden;flex-shrink:0;box-shadow:var(--sh-md);}
 .pp-av img{width:100%;height:100%;object-fit:cover;}
-.pp-zone{display:flex;align-items:flex-end;justify-content:space-between;padding:18px 20px 0;}
+.pp-lvl{position:absolute;right:-2px;bottom:-2px;min-width:26px;height:26px;padding:0 4px;border-radius:var(--r-full);background:var(--grad);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:12px;color:#241D10;box-shadow:var(--sh);}
+/* Action buttons (next to follow) */
+.pp-acts{display:flex;align-items:center;gap:8px;padding-bottom:4px;}
+.pp-follow{border:none;border-radius:var(--r-full);padding:9px 20px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.pp-follow.no{background:var(--grad);color:#241D10;}
+.pp-follow.yes{background:var(--bg-2);color:var(--black);border:1.5px solid var(--border);}
+.pp-ibtn{width:38px;height:38px;border-radius:50%;background:var(--bg-2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.pp-ibtn svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
+.pp-ibtn:active{background:var(--border);}
+/* Identity */
+.pp-id{padding:12px 20px 0;}
 .pp-name{font-family:'Inter',sans-serif;font-weight:800;font-size:23px;letter-spacing:-.8px;color:var(--black);}
 .pp-handle{font-size:12px;color:var(--sub);margin-top:1px;}
-.pp-title{font-size:12px;color:var(--gold);font-weight:700;margin-top:6px;}
-.pp-meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;}
+.pp-title{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--gold);font-weight:700;margin-top:7px;}
+.pp-title svg{width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:2;}
+/* Counts row next to name */
+.pp-counts{display:flex;gap:22px;padding:14px 20px 0;}
+.pp-cnt{display:flex;flex-direction:column;}
+.pp-cnt .v{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;color:var(--black);line-height:1;}
+.pp-cnt .l{font-size:10px;color:var(--sub);letter-spacing:.4px;margin-top:3px;}
+/* Rare badges (Discord-style) */
+.pp-badges{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:16px 20px 0;}
+.pp-badges-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;width:100%;font-family:'Inter',sans-serif;margin-bottom:-4px;}
+.pp-badge{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;transition:transform .12s;flex-shrink:0;}
+.pp-badge:active{transform:scale(.92);}
+.pp-badge img{width:100%;height:100%;object-fit:cover;}
+.pp-badge svg{width:19px;height:19px;fill:none;stroke-width:2;}
+/* Badge detail modal */
+.pp-bd-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:30px;}
+.pp-bd-ov.on{display:flex;}
+.pp-bd-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:300px;width:100%;text-align:center;padding:26px 24px;}
+.pp-bd-ic{width:72px;height:72px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;}
+.pp-bd-ic img{width:100%;height:100%;object-fit:cover;}
+.pp-bd-ic svg{width:34px;height:34px;fill:none;stroke-width:2;}
+.pp-bd-name{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--black);}
+.pp-bd-desc{font-size:13px;color:var(--sub);line-height:1.55;margin-top:8px;}
+.pp-bd-x{margin-top:18px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 22px;font-size:12px;font-weight:700;color:var(--black);cursor:pointer;}
+.pp-meta{display:flex;flex-wrap:wrap;gap:14px;padding:14px 20px 0;}
 .pp-meta div{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:4px;}
 .pp-meta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.75;}
 .pp-bio{font-size:13px;color:var(--text);line-height:1.55;padding:14px 20px 0;}
-.pp-stats{display:flex;gap:24px;padding:16px 20px;border-bottom:1px solid var(--border);}
-.pp-stat .v{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--black);}
-.pp-stat .l{font-size:10px;color:var(--sub);letter-spacing:.5px;}
-.pp-follow{flex:1;border:none;border-radius:var(--r-full);padding:11px;font-size:13px;font-weight:800;cursor:pointer;}
-.pp-follow.no{background:var(--grad);color:#241D10;}
-.pp-follow.yes{background:var(--bg-2);color:var(--black);border:1.5px solid var(--border);}
-.pp-actions{display:flex;gap:10px;padding:14px 20px 0;}
+.pp-divider{height:1px;background:var(--border);margin:18px 20px 0;}
 .pp-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:12px 20px 0;box-shadow:var(--sh);}
 .pp-post-txt{font-size:13px;color:var(--text);line-height:1.55;}
 .pp-empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 20px;}
+.pp-toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--black);color:var(--bg);font-size:12px;font-weight:700;padding:10px 18px;border-radius:var(--r-full);box-shadow:var(--sh-md);opacity:0;transition:all .25s;z-index:500;pointer-events:none;}
+.pp-toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 {% endblock %}
 {% block content %}
@@ -38,31 +73,52 @@
   <div style="margin-top:4px;">That profile doesn't exist.</div>
 </div>
 {% else %}
-<div class="pp-zone">
-  <div class="pp-av">{% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.name[0]|upper }}{% endif %}</div>
+<div class="pp-banner">{% if p.has_banner %}<img src="/banner/{{ p.id }}" alt="">{% endif %}</div>
+
+<div class="pp-avwrap">
+  <div class="pp-av">
+    {% if p.has_avatar %}<img src="/avatar/{{ p.id }}" alt="">{% else %}{{ p.name[0]|upper }}{% endif %}
+    <span class="pp-lvl" title="Level {{ p.level }}">{{ p.level }}</span>
+  </div>
+  <div class="pp-acts">
+    <button class="pp-follow {% if p.is_following %}yes{% else %}no{% endif %}" id="followBtn" onclick="toggleFollow()">{% if p.is_following %}Following{% else %}+ Follow{% endif %}</button>
+    <a class="pp-ibtn" href="/messages" title="Message"><i data-lucide="send"></i></a>
+    <button class="pp-ibtn" type="button" onclick="shareProfile()" title="Share"><i data-lucide="share-2"></i></button>
+  </div>
 </div>
-<div style="padding:12px 20px 0;">
+
+<div class="pp-id">
   <div class="pp-name">{{ p.name }}</div>
   <div class="pp-handle">@{{ p.username }}</div>
-  <div class="pp-title">{{ p.level_title }} · Level {{ p.level }}</div>
-  <div class="pp-meta">
-    {% if p.city %}<div><i data-lucide="map-pin"></i> {{ p.city }}</div>{% endif %}
-    {% if p.job %}<div><i data-lucide="briefcase"></i> {{ p.job }}</div>{% endif %}
-    <div><i data-lucide="calendar"></i> Since {{ p.member_since }}</div>
+  <div class="pp-title"><i data-lucide="award"></i> {{ p.level_title }} · Level {{ p.level }}</div>
+</div>
+
+<div class="pp-counts">
+  <div class="pp-cnt"><div class="v" id="followerN">{{ p.followers }}</div><div class="l">Followers</div></div>
+  <div class="pp-cnt"><div class="v">{{ p.following }}</div><div class="l">Following</div></div>
+  <div class="pp-cnt"><div class="v">{{ p.achievements }}</div><div class="l">Achievements</div></div>
+</div>
+
+{% if p.badges %}
+<div class="pp-badges">
+  <div class="pp-badges-lbl">Badges</div>
+  {% for b in p.badges %}
+  <div class="pp-badge" style="border-color:{{ b.color }}55;" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
+    {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
   </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="pp-meta">
+  {% if p.city %}<div><i data-lucide="map-pin"></i> {{ p.city }}</div>{% endif %}
+  {% if p.job %}<div><i data-lucide="briefcase"></i> {{ p.job }}</div>{% endif %}
+  <div><i data-lucide="calendar"></i> Since {{ p.member_since }}</div>
 </div>
 
 {% if p.bio %}<div class="pp-bio">{{ p.bio }}</div>{% endif %}
 
-<div class="pp-actions">
-  <button class="pp-follow {% if p.is_following %}yes{% else %}no{% endif %}" id="followBtn" onclick="toggleFollow()">{% if p.is_following %}Following{% else %}+ Follow{% endif %}</button>
-</div>
-
-<div class="pp-stats" style="margin-top:16px;">
-  <div class="pp-stat"><div class="v" id="followerN">{{ p.followers }}</div><div class="l">Followers</div></div>
-  <div class="pp-stat"><div class="v">{{ p.following }}</div><div class="l">Following</div></div>
-  <div class="pp-stat"><div class="v">{{ p.level }}</div><div class="l">Level</div></div>
-</div>
+<div class="pp-divider"></div>
 
 {% if posts %}
   {% for post in posts %}
@@ -72,6 +128,17 @@
 <div class="pp-empty">No posts yet.</div>
 {% endif %}
 <div style="height:30px;"></div>
+
+<div class="pp-bd-ov" id="bdOv" onclick="if(event.target===this)closeBadge()">
+  <div class="pp-bd-card">
+    <div class="pp-bd-ic" id="bdIc"></div>
+    <div class="pp-bd-name" id="bdName"></div>
+    <div class="pp-bd-desc" id="bdDesc"></div>
+    <button class="pp-bd-x" onclick="closeBadge()">Close</button>
+  </div>
+</div>
+
+<div class="pp-toast" id="ppToast">Link copied</div>
 {% endif %}
 {% endblock %}
 {% block scripts %}
@@ -85,6 +152,28 @@ function toggleFollow(){
     const n=document.getElementById('followerN'); if(n && typeof d.count!=='undefined') n.textContent=d.count;
   }).catch(()=>{});
 }
+function ppToast(msg){ const t=document.getElementById('ppToast'); if(!t) return; t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1800); }
+function shareProfile(){
+  const url=location.origin+'/u/{{ p.username }}';
+  const data={title:'{{ p.name }} on TWIN', text:'Check out @{{ p.username }} on TWIN', url:url};
+  if(navigator.share){ navigator.share(data).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(()=>ppToast('Link copied')).catch(()=>ppToast(url)); }
+  else { ppToast(url); }
+}
+const BADGES={
+{% for b in p.badges %}'{{ b.slug }}':{label:'{{ b.label }}',desc:{{ b.desc|tojson }},icon:'{{ b.icon }}',color:'{{ b.color }}',img:{{ (b.img or '')|tojson }}},
+{% endfor %}};
+function openBadge(slug){
+  const b=BADGES[slug]; if(!b) return;
+  document.getElementById('bdName').textContent=b.label;
+  document.getElementById('bdDesc').textContent=b.desc;
+  const ic=document.getElementById('bdIc');
+  ic.style.borderColor=b.color+'55';
+  ic.innerHTML = b.img ? '<img src="'+b.img+'" alt="">' : '<i data-lucide="'+b.icon+'" style="stroke:'+b.color+';"></i>';
+  document.getElementById('bdOv').classList.add('on');
+  if(window.lucide) lucide.createIcons();
+}
+function closeBadge(){ document.getElementById('bdOv').classList.remove('on'); }
 </script>
 {% endif %}
 {% endblock %}
