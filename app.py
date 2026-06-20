@@ -1559,10 +1559,25 @@ def profile():
                            my_posts=my_posts, my_threads=my_threads, my_courses=my_courses,
                            saved=saved, active='profile')
 
+def people_suggestions(cu, limit=8):
+    """People you may know — community members you don't already follow."""
+    following = {f.following_id for f in Follow.query.filter_by(follower_id=cu.id).all()}
+    following.add(cu.id)
+    users = (User.query.filter(~User.id.in_(following or [0]))
+             .order_by(User.created_at.desc()).limit(limit).all())
+    out = []
+    for u in users:
+        nm = u.name or u.username
+        out.append({'id': u.id, 'name': nm, 'username': u.username, 'init': (nm[:1] or 'U').upper(),
+                    'has_avatar': bool(u.avatar), 'followers': Follow.query.filter_by(following_id=u.id).count()})
+    return out
+
 @app.route('/messages')
 def messages():
     if not auth(): return redirect('/login')
-    return render_template('messages.html', u=user_ctx(), threads=DEMO_THREADS, active='messages')
+    cu = current_user()
+    return render_template('messages.html', u=user_ctx(), threads=DEMO_THREADS,
+                           suggestions=people_suggestions(cu), active='messages')
 
 @app.route('/habits')
 def habits():
