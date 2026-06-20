@@ -167,6 +167,20 @@ class EmailCode(db.Model):
     expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class VerificationRequest(db.Model):
+    # Instagram-style "apply to get verified" — reviewed by admin, approval grants the verified badge.
+    __tablename__ = 'verification_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True, nullable=False)
+    full_name = db.Column(db.String(120), default='')   # legal / real name
+    known_as = db.Column(db.String(120), default='')    # how they're publicly known
+    category = db.Column(db.String(60), default='')     # creator, business, athlete, etc.
+    links = db.Column(db.String(500), default='')       # supporting links (website / socials / press)
+    note = db.Column(db.String(600), default='')        # why they should be verified
+    status = db.Column(db.String(12), default='pending', index=True)  # pending | approved | rejected
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime)
+
 class Profile(db.Model):
     # PRIVATE onboarding data — only AXON & the algorithm use this; never shown publicly.
     __tablename__ = 'profiles'
@@ -239,6 +253,18 @@ def resolve_badges(user):
         out.append({'slug': s, 'label': d['label'], 'desc': d['desc'],
                     'icon': d['icon'], 'color': d['color'], 'img': img})
     return out
+
+def has_badge(user, slug):
+    return slug in [s.strip() for s in (user.badges or '').split(',') if s.strip()]
+
+def verification_ctx(user):
+    """State for the 'Request verification' setting: verified / pending / rejected / none."""
+    verified = has_badge(user, 'verified')
+    latest = (VerificationRequest.query.filter_by(user_id=user.id)
+              .order_by(VerificationRequest.created_at.desc()).first())
+    state = 'verified' if verified else (latest.status if latest else 'none')
+    return {'verified': verified, 'state': state,
+            'submitted_at': latest.created_at.strftime('%b %d, %Y') if latest else None}
 
 def _i(v):
     try: return int(float(v))
@@ -1926,7 +1952,67 @@ def axon_checkin_coach():
 @app.route('/settings')
 def settings():
     if not auth(): return redirect('/login')
-    return render_template('settings.html', u=user_ctx(), accounts=session_accounts(), active='settings')
+    return render_template('settings.html', u=user_ctx(), accounts=session_accounts(),
+                           verify=verification_ctx(current_user()), active='settings')
+
+@app.route('/api/verify/apply', methods=['POST'])
+def verify_apply():
+    if not auth(): return jsonify({'ok': False}), 401
+    cu = current_user()
+    if has_badge(cu, 'verified'):
+        return jsonify({'ok': False, 'error': 'already_verified'})
+    # one open request at a time
+    pending = VerificationRequest.query.filter_by(user_id=cu.id, status='pending').first()
+    if pending:
+        return jsonify({'ok': False, 'error': 'pending'})
+    d = request.get_json(silent=True) or request.form
+    full_name = (d.get('full_name') or '').strip()[:120]
+    if not full_name:
+        return jsonify({'ok': False, 'error': 'name_required'})
+    req = VerificationRequest(
+        user_id=cu.id, full_name=full_name,
+        known_as=(d.get('known_as') or '').strip()[:120],
+        category=(d.get('category') or '').strip()[:60],
+        links=(d.get('links') or '').strip()[:500],
+        note=(d.get('note') or '').strip()[:600],
+        status='pending')
+    db.session.add(req)
+    db.session.commit()
+    return jsonify({'ok': True, 'state': 'pending'})
+
+@app.route('/admin/verify')
+def admin_verify():
+    """Review verification requests. View: /admin/verify?key=KEY
+    Act:  /admin/verify?key=KEY&id=<req_id>&action=approve|reject"""
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if not admin_key or request.args.get('key', '') != admin_key:
+        return ('Forbidden', 403)
+    rid = request.args.get('id')
+    action = request.args.get('action')
+    if rid and action in ('approve', 'reject'):
+        req = VerificationRequest.query.get(int(rid))
+        if not req:
+            return ('No such request', 404)
+        req.status = 'approved' if action == 'approve' else 'rejected'
+        req.reviewed_at = datetime.utcnow()
+        if action == 'approve':
+            u = User.query.get(req.user_id)
+            if u:
+                cur = [s.strip() for s in (u.badges or '').split(',') if s.strip()]
+                if 'verified' not in cur:
+                    cur.append('verified')
+                u.badges = ','.join(cur)
+        db.session.commit()
+        return jsonify({'ok': True, 'id': req.id, 'status': req.status})
+    # list pending
+    out = []
+    for r in VerificationRequest.query.order_by(VerificationRequest.created_at.desc()).limit(100).all():
+        u = User.query.get(r.user_id)
+        out.append({'id': r.id, 'user': u.username if u else '?', 'status': r.status,
+                    'full_name': r.full_name, 'known_as': r.known_as, 'category': r.category,
+                    'links': r.links, 'note': r.note,
+                    'submitted': r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else ''})
+    return jsonify({'requests': out})
 
 @app.route('/reauth', methods=['GET', 'POST'])
 def reauth():

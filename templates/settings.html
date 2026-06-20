@@ -49,6 +49,39 @@
 .tpc-title{font-family:'Inter',sans-serif;font-size:15px;letter-spacing:-.5px;color:var(--black);margin-bottom:2px;}
 .tpc-sub{font-size:11px;color:var(--sub);line-height:1.4;}
 .tpc-arrow{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;position:relative;flex-shrink:0;}
+/* Verification */
+.vf-card{margin:20px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh);}
+.vf-head{display:flex;align-items:center;gap:12px;}
+.vf-ico{width:44px;height:44px;border-radius:14px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.vf-ico svg{width:22px;height:22px;fill:none;stroke-width:2;stroke:#3B82F6;}
+.vf-body{flex:1;min-width:0;}
+.vf-title{font-family:'Inter',sans-serif;font-size:15px;letter-spacing:-.4px;color:var(--black);}
+.vf-sub{font-size:11px;color:var(--sub);line-height:1.5;margin-top:2px;}
+.vf-btn{width:100%;margin-top:14px;background:var(--grad);color:#241D10;border:none;border-radius:var(--r-full);padding:11px;font-size:13px;font-weight:800;cursor:pointer;}
+.vf-status{margin-top:12px;border-radius:var(--r);padding:10px 12px;font-size:11px;font-weight:600;line-height:1.5;display:flex;align-items:center;gap:8px;}
+.vf-status svg{width:15px;height:15px;fill:none;stroke-width:2;flex-shrink:0;}
+.vf-status.pending{background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);}
+.vf-status.pending svg{stroke:var(--gold);}
+.vf-status.rejected{background:var(--red-dim);border:1px solid rgba(239,68,68,.2);color:var(--red);}
+.vf-status.rejected svg{stroke:var(--red);}
+.vf-status.verified{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#3B82F6;}
+.vf-status.verified svg{stroke:#3B82F6;}
+/* Apply modal */
+.vf-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:600;}
+.vf-ov.on{display:flex;}
+.vf-sheet{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:22px 20px 30px;box-shadow:var(--sh-md);}
+.vf-sheet h3{font-family:'Inter',sans-serif;font-size:19px;letter-spacing:-.5px;color:var(--black);margin:0 0 4px;}
+.vf-sheet p.vf-intro{font-size:12px;color:var(--sub);line-height:1.55;margin:0 0 18px;}
+.vf-field{margin-bottom:14px;}
+.vf-field label{display:block;font-size:11px;font-weight:700;color:var(--black);margin-bottom:6px;letter-spacing:.2px;}
+.vf-field input,.vf-field select,.vf-field textarea{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 13px;font-size:13px;color:var(--black);font-family:'Inter',sans-serif;}
+.vf-field input:focus,.vf-field select:focus,.vf-field textarea:focus{border-color:var(--gold);outline:none;}
+.vf-field textarea{resize:vertical;min-height:74px;line-height:1.5;}
+.vf-field .hint{font-size:10px;color:var(--muted);margin-top:5px;}
+.vf-actions{display:flex;gap:10px;margin-top:8px;}
+.vf-cancel{flex:1;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px;font-size:13px;font-weight:700;color:var(--black);cursor:pointer;}
+.vf-submit{flex:2;background:var(--grad);color:#241D10;border:none;border-radius:var(--r-full);padding:12px;font-size:13px;font-weight:800;cursor:pointer;}
+.vf-submit:disabled{opacity:.6;cursor:default;}
 </style>
 {% endblock %}
 
@@ -110,6 +143,29 @@
     </div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
   </a>
+</div>
+
+<!-- VERIFICATION -->
+<div class="block-label">Verification</div>
+<div class="vf-card">
+  <div class="vf-head">
+    <div class="vf-ico"><i data-lucide="badge-check"></i></div>
+    <div class="vf-body">
+      <div class="vf-title">Get Verified</div>
+      <div class="vf-sub">Apply for the verified badge so people know your account is authentic.</div>
+    </div>
+  </div>
+
+  {% if verify.state == 'verified' %}
+  <div class="vf-status verified"><i data-lucide="badge-check"></i> Your account is verified.</div>
+  {% elif verify.state == 'pending' %}
+  <div class="vf-status pending"><i data-lucide="clock"></i> Application under review{% if verify.submitted_at %} — submitted {{ verify.submitted_at }}{% endif %}. We'll let you know.</div>
+  {% elif verify.state == 'rejected' %}
+  <div class="vf-status rejected"><i data-lucide="x-circle"></i> Your last application wasn't approved. You can apply again.</div>
+  <button class="vf-btn" onclick="openVerify()">Apply again</button>
+  {% else %}
+  <button class="vf-btn" onclick="openVerify()">Apply for verification</button>
+  {% endif %}
 </div>
 
 <!-- ACCOUNT & SECURITY -->
@@ -252,4 +308,72 @@
   <div class="ai-ver">VERSION 3.0.0</div>
   <img src="/static/ephas_logo2.png" class="ai-elogo elogo" alt="">
 </div>
+
+<!-- Verification apply sheet -->
+<div class="vf-ov" id="vfOv" onclick="if(event.target===this)closeVerify()">
+  <div class="vf-sheet">
+    <h3>Apply for verification</h3>
+    <p class="vf-intro">Verification confirms your account is the authentic presence of a real person or brand. Tell us who you are — we review every request manually.</p>
+    <form id="vfForm" onsubmit="return submitVerify(event)">
+      <div class="vf-field">
+        <label>Full name <span style="color:var(--red)">*</span></label>
+        <input name="full_name" maxlength="120" placeholder="Your real / legal name" value="{{ u.name }}" required>
+      </div>
+      <div class="vf-field">
+        <label>Known as</label>
+        <input name="known_as" maxlength="120" placeholder="How people know you publicly (optional)">
+      </div>
+      <div class="vf-field">
+        <label>Category</label>
+        <select name="category">
+          <option value="">Select a category</option>
+          <option>Creator / Influencer</option>
+          <option>Business / Brand</option>
+          <option>Athlete / Fitness</option>
+          <option>Coach / Mentor</option>
+          <option>Public figure</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="vf-field">
+        <label>Supporting links</label>
+        <input name="links" maxlength="500" placeholder="Website, other socials, press, etc.">
+        <div class="hint">Helps us confirm your identity faster.</div>
+      </div>
+      <div class="vf-field">
+        <label>Why should you be verified?</label>
+        <textarea name="note" maxlength="600" placeholder="Tell us a bit about who you are and why you're notable."></textarea>
+      </div>
+      <div class="vf-actions">
+        <button type="button" class="vf-cancel" onclick="closeVerify()">Cancel</button>
+        <button type="submit" class="vf-submit" id="vfSubmit">Submit application</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openVerify(){ const o=document.getElementById('vfOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeVerify(){ const o=document.getElementById('vfOv'); if(o) o.classList.remove('on'); }
+function submitVerify(e){
+  e.preventDefault();
+  const btn=document.getElementById('vfSubmit'); btn.disabled=true; btn.textContent='Submitting…';
+  const fd=new FormData(document.getElementById('vfForm'));
+  const body={}; fd.forEach((v,k)=>body[k]=v);
+  fetch('/api/verify/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){ location.reload(); }
+      else {
+        const msg = d.error==='pending' ? 'You already have an application under review.'
+                  : d.error==='already_verified' ? "You're already verified."
+                  : d.error==='name_required' ? 'Please enter your full name.'
+                  : 'Something went wrong. Try again.';
+        alert(msg); btn.disabled=false; btn.textContent='Submit application';
+      }
+    }).catch(()=>{ btn.disabled=false; btn.textContent='Submit application'; alert('Network error. Try again.'); });
+  return false;
+}
+</script>
 {% endblock %}
