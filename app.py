@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import base64
 import random
@@ -360,15 +361,33 @@ def _merge_roles(msgs):
             out.append({'role': m['role'], 'content': m['content']})
     return out
 
+_HABIT_FILLER = {'log', 'logs', 'check', 'checks', 'track', 'tracking', 'tracker', 'daily', 'habit', 'habits',
+                 'quit', 'quitting', 'stop', 'stopping', 'no', 'my', 'the', 'a', 'of', 'to', 'every', 'day'}
+
+def _habit_key(name):
+    """Normalized core of a habit name (drops filler words) so 'Junk food log' == 'Junk food check'."""
+    toks = [t for t in re.findall(r'[a-z0-9]+', (name or '').lower()) if t not in _HABIT_FILLER]
+    return ' '.join(sorted(toks))
+
+def habit_exists(user, name):
+    """True if the user already tracks a habit with the same core meaning (fuzzy)."""
+    key = _habit_key(name)
+    if not key:
+        return False
+    for h in Habit.query.filter_by(user_id=user.id).all():
+        hk = _habit_key(h.name)
+        if hk == key or (hk and (hk in key or key in hk)):  # exact or one contains the other
+            return True
+    return False
+
 def ensure_habit(user, name, is_bad, source='axon'):
-    """Auto-create a habit if the user doesn't already have one by that name (case-insensitive)."""
+    """Auto-create a habit unless the user already tracks something equivalent (fuzzy dedup)."""
     name = (name or '').strip().strip('.').strip()[:80]
     if not name or len(name) < 2:
         return False
     if Habit.query.filter_by(user_id=user.id).count() >= 25:
         return False
-    exists = Habit.query.filter(Habit.user_id == user.id, func.lower(Habit.name) == name.lower()).first()
-    if exists:
+    if habit_exists(user, name):
         return False
     db.session.add(Habit(user_id=user.id, name=name, is_bad=is_bad, private=True))  # habits are private by default
     db.session.commit()
@@ -1456,9 +1475,12 @@ def habit_add():
     name = (request.form.get('name') or '').strip()[:80]
     if not name:
         return ('', 400)
+    cu = current_user()
+    if habit_exists(cu, name):  # don't create a near-duplicate
+        return redirect('/habits')
     is_bad = request.form.get('is_bad') == '1'
     private = is_bad or request.form.get('private') == '1'  # bad habits are always private
-    db.session.add(Habit(user_id=current_user().id, name=name, is_bad=is_bad, private=private))
+    db.session.add(Habit(user_id=cu.id, name=name, is_bad=is_bad, private=private))
     db.session.commit()
     return redirect('/habits')
 
@@ -1668,9 +1690,13 @@ def axon_checkin_coach():
     if not ANTHROPIC_KEY:
         return {'message': "Logged. Small reps compound — show up again tomorrow. I'm here whenever you want to talk it through.",
                 'habit': None}
+    existing = [h.name for h in Habit.query.filter_by(user_id=cu.id).all()]
+    existing_txt = ', '.join(existing) if existing else 'none yet'
     prompt = (f"The user just finished their {kind} check-in. In 1-2 punchy sentences, respond as their coach AXON — "
               "motivating and specific to their real data. Then on a NEW line write exactly 'HABIT: <short habit name>' "
-              "if there's ONE clear habit they'd benefit from tracking based on their data/goals, otherwise 'HABIT: none'.")
+              "if there's ONE clear NEW habit they'd benefit from tracking, otherwise 'HABIT: none'.\n"
+              f"They ALREADY track these habits: {existing_txt}. Do NOT suggest any habit similar to those — only suggest "
+              "something genuinely new, or 'HABIT: none'.")
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL, "max_tokens": 220, "system": axon_system_prompt(cu),
             "messages": [{"role": "user", "content": prompt}]}
@@ -1682,7 +1708,7 @@ def axon_checkin_coach():
     for line in text.splitlines():
         if line.strip().upper().startswith('HABIT:'):
             h = line.split(':', 1)[1].strip()
-            if h and h.lower() != 'none':
+            if h and h.lower() != 'none' and not habit_exists(cu, h):  # skip if they already track it
                 habit = h[:80]
         else:
             msg_lines.append(line)

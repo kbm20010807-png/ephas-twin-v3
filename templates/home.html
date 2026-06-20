@@ -21,16 +21,15 @@
 .streak-dots{display:flex;gap:5px;margin:5px 0;}
 .sd{width:8px;height:8px;border-radius:50%;background:var(--border);}
 .sd.on{background:var(--gold);}
-.axon-card{margin:14px 20px 0;background:#09090B;border:1px solid #1C1C1C;border-radius:var(--r-lg);padding:18px;position:relative;overflow:hidden;cursor:pointer;display:block;text-decoration:none;}
-[data-theme="dark"] .axon-card{background:#0F0F0F;}
+.axon-card{margin:14px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;position:relative;overflow:hidden;cursor:pointer;display:block;text-decoration:none;box-shadow:var(--sh);}
 .axon-glow{position:absolute;top:-50px;right:-50px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(200,164,90,.1),transparent 70%);}
 .axon-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .axon-ico{width:30px;height:30px;border-radius:9px;background:#F0EBDF;border:1px solid rgba(200,164,90,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .axon-ico svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .axon-ico img{width:82%;height:82%;object-fit:contain;}
 .axon-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;margin-left:auto;}
-.axon-txt{font-size:13px;color:#C0C0C0;line-height:1.6;margin-bottom:14px;}
-.axon-txt b{color:#E8E8E8;}
+.axon-txt{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:14px;}
+.axon-txt b{color:var(--black);}
 .axon-link{display:flex;align-items:center;justify-content:space-between;}
 .axon-link svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
 .week-bars{display:flex;align-items:flex-end;gap:4px;height:56px;}
@@ -93,7 +92,7 @@
 .story-streak-txt{font-size:12px;font-weight:700;color:var(--gold);}
 
 /* QUESTS SHORTCUT CARD */
-.quests-card{margin:14px 20px 0;background:linear-gradient(135deg,#0A0A0A,#0F0800);border:1px solid rgba(200,164,90,.12);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer;}
+.quests-card{margin:14px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer;box-shadow:var(--sh);}
 .qc-ico{width:44px;height:44px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .qc-ico svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .qc-body{flex:1;}
@@ -101,16 +100,20 @@
 .qc-sub{font-size:11px;color:var(--sub);transition:opacity .35s ease;min-height:14px;}
 .qc-per{color:var(--gold);font-weight:800;letter-spacing:.5px;}
 .qc-tag{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:3px 10px;font-size:9px;font-weight:700;color:var(--gold);white-space:nowrap;}
-.hm-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);}
-.hm-row:last-child{border-bottom:none;}
-.hm-check{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);background:var(--bg-2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
-.hm-check svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;}
-.hm-check.on{background:var(--gold);border-color:var(--gold);}
-.hm-check.on svg{stroke:#000;}
-.hm-name{flex:1;font-size:13px;font-weight:600;color:var(--black);display:flex;align-items:center;gap:5px;}
-.hm-name svg{stroke:var(--muted);fill:none;stroke-width:2;}
-.hm-streak{font-size:11px;color:var(--sub);}
-.hm-streak .hstreak{font-family:'Inter',sans-serif;font-weight:800;color:var(--gold);font-size:14px;}
+.hb-cat{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin:4px 0 9px;}
+.hb-scroll{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:14px;}
+.hb-scroll::-webkit-scrollbar{display:none;}
+.hb-item{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;width:66px;}
+.hb-circle{width:60px;height:60px;border-radius:50%;border:2.5px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);transition:all .15s;position:relative;}
+.hb-circle.done{border-color:var(--gold);background:var(--gold-dim);}
+.hb-circle.bad{border-color:#3A3A42;}
+.hb-circle.bad.done{border-color:#22C55E;background:rgba(34,197,94,.1);}
+.hb-num{font-family:'Inter',sans-serif;font-size:21px;font-weight:800;color:var(--black);line-height:1;}
+.hb-circle.done .hb-num{color:var(--gold);}
+.hb-circle.bad.done .hb-num{color:#22C55E;}
+.hb-unit{font-size:7px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-top:1px;}
+.hb-ttl{font-size:10px;font-weight:600;color:var(--sub);text-align:center;max-width:66px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hb-lock{width:8px;height:8px;vertical-align:-1px;}
 </style>
 {% endblock %}
 
@@ -211,13 +214,30 @@
     <a href="/habits" style="font-size:11px;color:var(--gold);font-weight:700;text-decoration:none;">Manage →</a>
   </div>
   {% if habits %}
-  {% for h in habits %}
-  <div class="hm-row">
-    <button class="hm-check {% if h.done_today %}on{% endif %}" onclick="hToggle(this,{{ h.id }})"><i data-lucide="check"></i></button>
-    <div class="hm-name">{{ h.name }}{% if h.private %} <i data-lucide="lock" style="width:11px;height:11px;"></i>{% endif %}</div>
-    <div class="hm-streak"><span class="hstreak">{{ h.streak }}</span> {% if h.is_bad %}clean{% else %}d{% endif %}</div>
+  {% set goods = habits|rejectattr('is_bad')|list %}
+  {% set bads = habits|selectattr('is_bad')|list %}
+  {% if goods %}
+  <div class="hb-cat">Build</div>
+  <div class="hb-scroll">
+    {% for h in goods %}
+    <div class="hb-item" onclick="hToggle2(this,{{ h.id }})">
+      <div class="hb-circle {% if h.done_today %}done{% endif %}"><span class="hb-num">{{ h.streak }}</span><span class="hb-unit">days</span></div>
+      <div class="hb-ttl">{{ h.name }}{% if h.private %} <i data-lucide="lock" class="hb-lock"></i>{% endif %}</div>
+    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
+  {% endif %}
+  {% if bads %}
+  <div class="hb-cat">Quitting</div>
+  <div class="hb-scroll">
+    {% for h in bads %}
+    <div class="hb-item" onclick="hToggle2(this,{{ h.id }})">
+      <div class="hb-circle bad {% if h.done_today %}done{% endif %}"><span class="hb-num">{{ h.streak }}</span><span class="hb-unit">clean</span></div>
+      <div class="hb-ttl">{{ h.name }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
   {% else %}
   <a href="/habits" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px dashed var(--border);border-radius:var(--r-lg);padding:14px;text-decoration:none;">
     <div class="qc-ico" style="width:36px;height:36px;"><i data-lucide="plus" style="stroke:var(--gold);"></i></div>
@@ -230,7 +250,7 @@
   <div class="axon-glow"></div>
   <div class="axon-top">
     <div class="axon-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
-    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;color:#666;">AXON AI COACH</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;color:var(--sub);">AXON AI COACH</div>
     <div class="axon-dot"></div>
   </div>
   <div class="axon-txt">Welcome to TWIN. Complete your first <b>check-in</b> and I'll start learning your patterns and coaching you.</div>
@@ -369,10 +389,18 @@ function hLike(btn, id) {
     if (n) n.textContent = d.count;
   }).catch(()=>{});
 }
+function hToggle2(item, id) {
+  fetch('/api/habit/toggle/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    const circle = item.querySelector('.hb-circle');
+    const num = item.querySelector('.hb-num');
+    if (circle) circle.classList.toggle('done', d.done);
+    if (num) num.textContent = d.streak;
+  }).catch(()=>{});
+}
 function hToggle(btn, id) {
   fetch('/api/habit/toggle/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
     btn.classList.toggle('on', d.done);
-    const st = btn.closest('.hm-row').querySelector('.hstreak');
+    const row = btn.closest('.hm-row'); const st = row && row.querySelector('.hstreak');
     if (st) st.textContent = d.streak;
   }).catch(()=>{});
 }
