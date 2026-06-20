@@ -1080,6 +1080,25 @@ def notifications_ctx(user):
     for l in likes:
         notifs.append({'type': 'like', 'icon': 'heart', 'sort': 'a' + str(l.id),
                        'text': f"{names.get(l.user_id, 'Someone')} liked your post", 'time': 'recently', 'unread': False})
+    # Quest completions
+    q = quests_ctx(user)
+    for period, key in (('Daily', 'daily'), ('Weekly', 'weekly'), ('Monthly', 'monthly'), ('Seasonal', 'seasonal')):
+        for it in q.get(key, []):
+            if it.get('done'):
+                notifs.append({'type': 'quest', 'icon': 'award', 'sort': 'y_' + key + str(it.get('title', '')),
+                               'text': f"{period} quest complete — {it.get('title', '')} (+{it.get('xp', 0)} XP)",
+                               'time': 'this ' + period.lower(), 'unread': True})
+    # Achievements / milestones (level + streak)
+    dates = _checkin_dates(user)
+    streak, _ = _streaks(dates)
+    level = (len(dates) * 50) // 200 + 1
+    if level >= 2:
+        notifs.append({'type': 'achv', 'icon': 'trophy', 'sort': 'z_level',
+                       'text': f"Achievement unlocked — Level {level}: {level_title_for(level)}", 'time': 'recently', 'unread': True})
+    hit = next((m for m in (100, 90, 60, 30, 14, 7, 3) if streak >= m), None)
+    if hit:
+        notifs.append({'type': 'achv', 'icon': 'flame', 'sort': 'z_streak',
+                       'text': f"Achievement unlocked — {hit}-day streak! Keep the fire going.", 'time': 'recently', 'unread': True})
     notifs.sort(key=lambda x: x['sort'], reverse=True)
     return notifs
 
