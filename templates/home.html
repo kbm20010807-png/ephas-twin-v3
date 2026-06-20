@@ -260,14 +260,17 @@
 
 <div style="padding:18px 20px 0;">
   <div class="t-label mb-3">Life domains</div>
-  {% for d in stats.domains[:4] %}
-  <div class="domain-row">
+  {% for d in stats.domains %}
+  <div class="domain-row{% if loop.index > 4 %} domain-extra{% endif %}"{% if loop.index > 4 %} style="display:none;"{% endif %}>
     <div class="domain-nm">{{ d.name }}</div>
     <div class="domain-bar-bg"><div class="domain-bar-fg" style="width:{{ d.pct }}%"></div></div>
     <div class="domain-val">{{ d.pct }}%</div>
   </div>
   {% endfor %}
-  <a href="/analytics" style="font-size:11px;color:var(--gold);font-weight:700;display:block;margin-top:8px;">View all →</a>
+  {% if stats.domains|length > 4 %}
+  <button id="domToggle" onclick="toggleDomains()" style="font-size:11px;color:var(--gold);font-weight:700;background:none;border:none;padding:0;margin-top:6px;cursor:pointer;">View all →</button>
+  {% endif %}
+  <a href="/analytics" style="font-size:11px;color:var(--sub);font-weight:600;display:block;margin-top:10px;">See details in Analytics →</a>
 </div>
 
 <div class="sect-lbl">Community</div>
@@ -313,6 +316,14 @@ const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+
+function toggleDomains(){
+  const extras = document.querySelectorAll('.domain-extra');
+  const btn = document.getElementById('domToggle');
+  const open = extras.length && extras[0].style.display !== 'none';
+  extras.forEach(e => e.style.display = open ? 'none' : 'flex');
+  btn.textContent = open ? 'View all →' : 'Show less ↑';
+}
 
 // Rotating quest teaser on the Quests card (changes every 5s)
 const QTEASERS = {{ qteasers|tojson }};
