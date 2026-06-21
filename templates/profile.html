@@ -55,6 +55,35 @@
 .xp-mid{font-size:11px;font-weight:700;color:var(--sub);}
 .xp-strip-bar{height:8px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);overflow:hidden;}
 .xp-strip-fill{height:100%;background:var(--grad);border-radius:var(--r-full);transition:width .5s ease;}
+/* Instagram-style 3-col post grid */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px 0 0;}
+.pcell{position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;background:var(--bg-2);}
+.pcell img{width:100%;height:100%;object-fit:cover;display:block;}
+.pcell-txt{padding:10px;font-size:11px;color:var(--text);line-height:1.4;height:100%;overflow:hidden;display:flex;align-items:center;}
+.pcell-badge{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;}
+.pcell-badge svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;}
+/* TikTok-style fullscreen swipe viewer */
+.reel-viewer{position:fixed;inset:0;background:#000;z-index:2000;display:none;}
+.reel-viewer.on{display:block;}
+.reel-close{position:fixed;top:16px;left:16px;z-index:2002;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.45);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.reel-close svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
+.reel-scroll{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:500px;margin:0 auto;}
+.reel-scroll::-webkit-scrollbar{display:none;}
+.reel-slide{height:100%;scroll-snap-align:start;position:relative;display:flex;align-items:center;justify-content:center;background:#000;}
+.reel-media{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.reel-media img{max-width:100%;max-height:100%;object-fit:contain;}
+.reel-textcard{padding:40px 28px;font-size:19px;line-height:1.5;color:#fff;font-weight:600;text-align:center;}
+.reel-overlay{position:absolute;left:0;right:0;bottom:0;padding:18px 18px 34px;background:linear-gradient(0deg,rgba(0,0,0,.78),rgba(0,0,0,0));}
+.reel-user{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.reel-user .av{width:34px;height:34px;font-size:13px;}
+.reel-uname{font-size:13px;font-weight:700;color:#fff;}
+.reel-utime{font-size:11px;color:rgba(255,255,255,.6);}
+.reel-cap{font-size:13px;color:#fff;line-height:1.5;margin-bottom:10px;}
+.reel-cap .htag{color:#fff;font-weight:700;}
+.reel-acts{display:flex;gap:20px;align-items:center;}
+.reel-act{display:flex;align-items:center;gap:6px;font-size:13px;color:#fff;cursor:pointer;}
+.reel-act svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;}
+.reel-act.liked svg{stroke:#EF4444;fill:#EF4444;}
 .stat-c:last-child{border-right:none;}
 .stat-v{font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:-1px;color:var(--black);}
 .stat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;font-family:'Inter',sans-serif;}
@@ -239,21 +268,16 @@
 
 <!-- ===== TWIN: POSTS ===== -->
 <div class="tab-pane on" id="pane-twin-posts">
-  <div style="height:16px;"></div>
   {% if my_posts %}
-  {% for p in my_posts %}
-  <div class="prof-post" data-id="{{ p.id }}">
-    <div class="pp-meta">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div>
-    {% if p.has_image %}<div class="pp-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
-    <div class="pp-caption">{{ p.text|hashtags }}</div>
-    <div class="pp-ft">
-      <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
-      <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
-      <div class="pp-act bm-btn {% if p.bookmarked %}saved{% endif %}" style="margin-left:auto;" onclick="toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
-      <div class="pp-act"><i data-lucide="share-2"></i></div>
+  <div class="pgrid">
+    {% for p in my_posts %}
+    <div class="pcell" onclick="openReel({{ loop.index0 }})">
+      {% if p.has_image %}<img src="/post-image/{{ p.id }}" alt="">
+      {% else %}<div class="pcell-txt">{{ p.text[:90] }}</div>{% endif %}
+      {% if p.tag %}<div class="pcell-badge"><i data-lucide="{{ 'target' if p.tag=='goal' else 'award' }}"></i></div>{% endif %}
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
   {% else %}
   <div style="text-align:center;padding:48px 24px;">
     <i data-lucide="image" style="width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.5;"></i>
@@ -263,6 +287,35 @@
   </div>
   {% endif %}
 </div>
+
+<!-- Fullscreen TikTok-style swipe viewer -->
+{% if my_posts %}
+<div class="reel-viewer" id="reelViewer">
+  <button class="reel-close" onclick="closeReel()"><i data-lucide="x"></i></button>
+  <div class="reel-scroll" id="reelScroll">
+    {% for p in my_posts %}
+    <div class="reel-slide" data-idx="{{ loop.index0 }}">
+      <div class="reel-media">
+        {% if p.has_image %}<img src="/post-image/{{ p.id }}" alt="">
+        {% else %}<div class="reel-textcard">{{ p.text }}</div>{% endif %}
+      </div>
+      <div class="reel-overlay">
+        <div class="reel-user">
+          <div class="av">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
+          <div><div class="reel-uname">{{ u.name }}</div><div class="reel-utime">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div></div>
+        </div>
+        {% if p.has_image and p.text %}<div class="reel-cap">{{ p.text|hashtags }}</div>{% endif %}
+        <div class="reel-acts">
+          <div class="reel-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
+          <div class="reel-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
+          <div class="reel-act bm-btn {% if p.bookmarked %}saved{% endif %}" onclick="toggleBookmark(this,{{ p.id }})"><i data-lucide="bookmark"></i></div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 
 <!-- ===== TWIN: STATS ===== -->
 <div class="tab-pane" id="pane-twin-stats">
@@ -617,6 +670,21 @@ function shareProfile() {
 }
 
 document.addEventListener('DOMContentLoaded', () => applyAcct(acctType));
+
+function openReel(idx){
+  const v=document.getElementById('reelViewer'); if(!v) return;
+  v.classList.add('on');
+  document.body.style.overflow='hidden';
+  const slide=v.querySelector('.reel-slide[data-idx="'+idx+'"]');
+  if(slide) slide.scrollIntoView({behavior:'instant',block:'start'});
+  if(window.lucide) lucide.createIcons();
+}
+function closeReel(){
+  const v=document.getElementById('reelViewer'); if(!v) return;
+  v.classList.remove('on');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReel(); });
 
 {% if badges %}
 const BADGES={
