@@ -180,7 +180,10 @@ function pickType(type, tab){
     const cfg=PLACEHOLDERS[type]||PLACEHOLDERS.post;
     document.getElementById('postKindLbl').textContent=cfg.lbl;
     document.getElementById('postTxt').placeholder=cfg.ph;
-    // photo only really makes sense on a 'post'; keep it available but optional for all
+    // Photo upload is only for Post — Thread/Goal/Achievement are text-only.
+    const sq=document.getElementById('upSquare');
+    if(type==='post'){ sq.style.display='flex'; }
+    else { sq.style.display='none'; postImage=''; }
     show('pane-post');
   }
   if(window.lucide) lucide.createIcons();
