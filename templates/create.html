@@ -5,35 +5,52 @@
 <style>
 body{min-height:100vh;display:flex;flex-direction:column;}
 .cr-wrap{flex:1;display:flex;flex-direction:column;}
-.cr-top{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.cr-top{padding:54px 20px 14px;display:flex;align-items:center;justify-content:space-between;}
 .cr-close{width:34px;height:34px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-decoration:none;}
 .cr-close svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
-.type-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:20px;}
-.type-btn{border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;transition:all .15s;background:var(--card);box-shadow:var(--sh);}
-.type-btn.sel{border-color:var(--gold);background:var(--gold-dim);}
-.type-ico{width:38px;height:38px;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.type-ico svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:1.75;transition:stroke .15s;}
-.type-btn.sel .type-ico{background:var(--gold-dim);border-color:var(--gold-b);}
-.type-btn.sel .type-ico svg{stroke:var(--gold);}
-.type-name{font-size:12px;font-weight:800;color:var(--black);letter-spacing:-.3px;}
-.type-desc{font-size:10px;color:var(--sub);margin-top:1px;line-height:1.4;}
-.composer{padding:0 20px;flex:1;display:flex;flex-direction:column;gap:14px;}
-.vis-row{display:flex;gap:8px;}
-.vis-btn{padding:7px 16px;border-radius:var(--r-full);border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;background:var(--bg-2);display:flex;align-items:center;gap:5px;transition:all .15s;}
-.vis-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;}
-.vis-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+/* type tabs — scroll between what you're posting */
+.cr-tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 20px 14px;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.cr-tabs::-webkit-scrollbar{display:none;}
+.cr-tab{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.cr-tab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+.cr-tab.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.cr-tab.soon{opacity:.55;cursor:default;}
+.cr-tab .soon-pill{font-size:7px;font-weight:800;letter-spacing:1px;background:var(--border);color:var(--sub);border-radius:var(--r-full);padding:2px 6px;}
+/* composer */
+.cr-pane{display:none;flex:1;flex-direction:column;gap:14px;padding:18px 20px 0;}
+.cr-pane.on{display:flex;}
+.cr-who{display:flex;align-items:center;gap:10px;}
+.cr-who .av{font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);}
+.cr-who-name{font-size:13px;font-weight:700;color:var(--black);}
+.cr-who-sub{font-size:11px;color:var(--sub);}
+/* image upload square */
+.up-square{position:relative;width:100%;aspect-ratio:1/1;border-radius:var(--r-lg);border:2px dashed var(--border);background:var(--bg-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;overflow:hidden;transition:border-color .15s;}
+.up-square:hover{border-color:var(--gold);}
+.up-square.filled{border-style:solid;}
+.up-square img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.up-ico{width:48px;height:48px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
+.up-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.up-lbl{font-size:13px;font-weight:700;color:var(--black);}
+.up-sub{font-size:11px;color:var(--sub);}
+.up-change{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:var(--r-full);padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:none;z-index:2;}
+.up-square.filled .up-change{display:block;}
+.cr-cap{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;font-size:14px;color:var(--black);font-family:'Inter',sans-serif;line-height:1.5;resize:vertical;min-height:90px;}
+.cr-cap:focus{border-color:var(--gold);outline:none;}
+.cr-count{text-align:right;font-size:10px;color:var(--sub);}
+.axon-note{display:flex;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--gold);line-height:1.45;}
+.axon-note svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;}
+.cr-field-lbl{font-size:11px;font-weight:700;color:var(--black);margin-bottom:6px;}
 .cat-chips{display:flex;gap:7px;flex-wrap:wrap;}
 .cat-chip{padding:6px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;background:var(--bg-2);white-space:nowrap;transition:all .15s;}
 .cat-chip.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
-.course-fields{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;}
-.cr-section{display:none;flex:1;flex-direction:column;gap:14px;padding:0 20px;}
-.cr-section.active{display:flex;}
-.media-row{display:flex;gap:8px;}
-.media-btn{flex:1;border:1.5px dashed var(--border);border-radius:var(--r-lg);padding:20px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;background:var(--surface);transition:border-color .15s;}
-.media-btn:hover{border-color:var(--gold);}
-.media-btn svg{width:22px;height:22px;stroke:var(--sub);fill:none;stroke-width:1.5;}
-.media-lbl{font-size:10px;font-weight:700;color:var(--sub);text-align:center;}
-.cr-footer{padding:16px 20px 28px;border-top:1px solid var(--border);margin-top:auto;}
+.cr-footer{padding:16px 20px 28px;margin-top:auto;}
+/* coming soon pane */
+.soon-pane{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 30px;gap:6px;}
+.soon-pane.on{display:flex;}
+.soon-ic{width:64px;height:64px;border-radius:20px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.soon-ic svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.soon-ttl{font-family:'Inter',sans-serif;font-size:19px;letter-spacing:-.5px;color:var(--black);}
+.soon-txt{font-size:13px;color:var(--sub);line-height:1.55;max-width:280px;}
 </style>
 {% endblock %}
 
@@ -41,163 +58,80 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="cr-wrap">
   <div class="cr-top">
     <a href="#" class="cr-close" onclick="goBack();return false;"><i data-lucide="x"></i></a>
-    <div class="tb-brand">
-      <div class="tb-twin">Create</div>
-    </div>
+    <div class="tb-brand"><div class="tb-twin">Create</div></div>
     <div style="width:34px;"></div>
   </div>
 
-  <!-- TYPE SELECTION -->
-  <div id="typeStep">
-    <div class="sect-lbl">What are you creating?</div>
-    <div class="type-select">
-      <div class="type-btn" onclick="selectType('post',this)">
-        <div class="type-ico"><i data-lucide="image"></i></div>
-        <div>
-          <div class="type-name">Post</div>
-          <div class="type-desc">Share a photo with a caption</div>
-        </div>
-      </div>
-      <div class="type-btn" onclick="selectType('thread',this)">
-        <div class="type-ico"><i data-lucide="align-left"></i></div>
-        <div>
-          <div class="type-name">Thread</div>
-          <div class="type-desc">Write a longer text post or story</div>
-        </div>
-      </div>
-      <div class="type-btn" onclick="selectType('goal',this)">
-        <div class="type-ico"><i data-lucide="target"></i></div>
-        <div>
-          <div class="type-name">Goal</div>
-          <div class="type-desc">Announce a goal and hold yourself accountable</div>
-        </div>
-      </div>
-      <div class="type-btn" onclick="selectType('achievement',this)">
-        <div class="type-ico"><i data-lucide="award"></i></div>
-        <div>
-          <div class="type-name">Achievement</div>
-          <div class="type-desc">Celebrate a win and inspire others</div>
-        </div>
-      </div>
-      <div class="type-btn" onclick="selectType('course',this)">
-        <div class="type-ico"><i data-lucide="graduation-cap"></i></div>
-        <div>
-          <div class="type-name">Course</div>
-          <div class="type-desc">Share knowledge — free or paid</div>
-        </div>
-      </div>
-      <div class="type-btn" onclick="selectType('reel',this)" style="opacity:.7;">
-        <div class="type-ico"><i data-lucide="video"></i></div>
-        <div>
-          <div class="type-name">Reel</div>
-          <div class="type-desc">Short video — coming soon</div>
-        </div>
-        <div class="pill pill-muted" style="font-size:8px;padding:2px 8px;">SOON</div>
-      </div>
-      <div class="type-btn" onclick="selectType('challenge',this)">
-        <div class="type-ico"><i data-lucide="zap"></i></div>
-        <div>
-          <div class="type-name">Challenge</div>
-          <div class="type-desc">Start a group challenge — 7d, 30d, 90d</div>
-        </div>
-      </div>
-    </div>
+  <!-- TYPE TABS -->
+  <div class="cr-tabs" id="crTabs">
+    <div class="cr-tab on" data-type="post" onclick="pickType('post',this)"><i data-lucide="image"></i> Post</div>
+    <div class="cr-tab" data-type="thread" onclick="pickType('thread',this)"><i data-lucide="align-left"></i> Thread</div>
+    <div class="cr-tab" data-type="goal" onclick="pickType('goal',this)"><i data-lucide="target"></i> Goal</div>
+    <div class="cr-tab" data-type="achievement" onclick="pickType('achievement',this)"><i data-lucide="award"></i> Achievement</div>
+    {% if can_course %}
+    <div class="cr-tab" data-type="course" onclick="pickType('course',this)"><i data-lucide="graduation-cap"></i> Course</div>
+    {% endif %}
+    <div class="cr-tab soon" onclick="pickType('reel',this)"><i data-lucide="video"></i> Reel <span class="soon-pill">SOON</span></div>
+    <div class="cr-tab soon" onclick="pickType('challenge',this)"><i data-lucide="zap"></i> Challenge <span class="soon-pill">SOON</span></div>
   </div>
 
-  <!-- POST / GOAL / ACHIEVEMENT COMPOSER -->
-  <div class="cr-section" id="composerStep">
-    <div class="flex items-c gap-2 mb-2">
-      <div class="av av-32">{{ u.name[0]|upper }}</div>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--black);">{{ u.name }}</div>
-        <div class="vis-row" id="visRow">
-          <div class="vis-btn on" onclick="setVis('public',this)"><i data-lucide="globe"></i> Public</div>
-          <div class="vis-btn" onclick="setVis('circle',this)"><i data-lucide="users"></i> Circle</div>
-          <div class="vis-btn" onclick="setVis('private',this)"><i data-lucide="lock"></i> Only me</div>
-        </div>
-      </div>
-    </div>
-    <textarea class="form-input form-textarea" id="postTxt" placeholder="What's on your mind?" style="min-height:140px;" oninput="document.getElementById('postCt').textContent=this.value.length+'/500'"></textarea>
-    <div style="text-align:right;font-size:10px;color:var(--sub);" id="postCt">0/500</div>
-
-    <div>
-      <div class="t-label mb-2">Category</div>
-      <div class="cat-chips">
-        <div class="cat-chip on" onclick="togCat(this)">Mindset</div>
-        <div class="cat-chip" onclick="togCat(this)">Fitness</div>
-        <div class="cat-chip" onclick="togCat(this)">Wealth</div>
-        <div class="cat-chip" onclick="togCat(this)">Entrepreneurship</div>
-        <div class="cat-chip" onclick="togCat(this)">Nutrition</div>
-        <div class="cat-chip" onclick="togCat(this)">Running</div>
-        <div class="cat-chip" onclick="togCat(this)">Savings</div>
-        <div class="cat-chip" onclick="togCat(this)">Relationships</div>
-        <div class="cat-chip" onclick="togCat(this)">Spirituality</div>
-        <div class="cat-chip" onclick="togCat(this)">Productivity</div>
-      </div>
+  <!-- POST / GOAL / ACHIEVEMENT -->
+  <div class="cr-pane on" id="pane-post">
+    <div class="cr-who">
+      <div class="av av-40">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
+      <div><div class="cr-who-name">{{ u.name }}</div><div class="cr-who-sub" id="postKindLbl">Sharing a photo</div></div>
     </div>
 
-    <div>
-      <div class="t-label mb-2">Add media</div>
-      <div class="media-row">
-        <div class="media-btn"><i data-lucide="image"></i><div class="media-lbl">Photo</div></div>
-        <div class="media-btn"><i data-lucide="bar-chart-2"></i><div class="media-lbl">My Stats</div></div>
-        <div class="media-btn"><i data-lucide="link"></i><div class="media-lbl">Link</div></div>
-      </div>
+    <div class="up-square" id="upSquare" onclick="document.getElementById('postFile').click()">
+      <img id="upPreview" alt="" style="display:none;">
+      <button type="button" class="up-change" onclick="event.stopPropagation();document.getElementById('postFile').click()">Change</button>
+      <div class="up-ico" id="upPlaceholder"><i data-lucide="image-plus"></i></div>
+      <div class="up-lbl" id="upLbl">Add a photo</div>
+      <div class="up-sub" id="upSub">Tap to upload — optional</div>
     </div>
+    <input type="file" id="postFile" accept="image/*" style="display:none;" onchange="onPick(this)">
+
+    <textarea class="cr-cap" id="postTxt" placeholder="Write a caption... use #hashtags to be found" oninput="capCount()"></textarea>
+    <div class="cr-count" id="postCt">0/500</div>
+
+    <div class="axon-note"><i data-lucide="sparkles"></i> AXON reads your post and files it under the right category automatically.</div>
 
     <div class="cr-footer">
-      <button class="btn btn-primary btn-full" onclick="submitPost()" style="border-radius:var(--r-xl);">
+      <button class="btn btn-primary btn-full" id="postBtn" onclick="submitPost('post')" style="border-radius:var(--r-xl);">
         <i data-lucide="send"></i> PUBLISH
       </button>
     </div>
   </div>
 
-  <!-- COURSE CREATOR -->
-  <div class="cr-section" id="courseStep">
-    <div class="course-fields">
-      <div class="form-group" style="margin-bottom:0;">
-        <label class="form-label">Course Title</label>
-        <input class="form-input" id="courseTitle" placeholder="e.g. My 90-Day Discipline System">
-      </div>
-      <div class="form-group" style="margin-bottom:0;">
-        <label class="form-label">Description</label>
-        <textarea class="form-input form-textarea" id="courseDesc" placeholder="What will members learn?" style="min-height:80px;"></textarea>
-      </div>
-      <div class="form-group" style="margin-bottom:0;">
-        <label class="form-label">Category</label>
-        <div class="cat-chips">
-          <div class="cat-chip on" onclick="togCat(this)">Fitness</div>
-          <div class="cat-chip" onclick="togCat(this)">Entrepreneurship</div>
-          <div class="cat-chip" onclick="togCat(this)">Finance</div>
-          <div class="cat-chip" onclick="togCat(this)">Mindset</div>
-          <div class="cat-chip" onclick="togCat(this)">Marathon</div>
-          <div class="cat-chip" onclick="togCat(this)">Savings</div>
-          <div class="cat-chip" onclick="togCat(this)">Coaching</div>
-        </div>
-      </div>
+  <!-- COURSE -->
+  {% if can_course %}
+  <div class="cr-pane" id="pane-course">
+    <div class="cr-who">
+      <div class="av av-40">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
+      <div><div class="cr-who-name">{{ u.name }}</div><div class="cr-who-sub">Publishing a course</div></div>
     </div>
-
     <div>
-      <div class="t-label mb-2">Pricing</div>
-      <div class="vis-row">
-        <div class="vis-btn on" onclick="setVis('free',this)"><i data-lucide="gift"></i> Free</div>
-        <div class="vis-btn" onclick="setVis('paid',this)"><i data-lucide="dollar-sign"></i> Paid</div>
-      </div>
+      <div class="cr-field-lbl">Course title</div>
+      <input class="cr-cap" id="courseTitle" style="min-height:0;" placeholder="e.g. My 90-Day Discipline System" maxlength="120">
     </div>
-
     <div>
-      <div class="t-label mb-2">Visibility</div>
-      <div class="vis-row">
-        <div class="vis-btn on" onclick="setVis('pub',this)"><i data-lucide="globe"></i> Public</div>
-        <div class="vis-btn" onclick="setVis('priv',this)"><i data-lucide="lock"></i> Private</div>
-      </div>
+      <div class="cr-field-lbl">What will members learn?</div>
+      <textarea class="cr-cap" id="courseDesc" placeholder="Describe the course..." style="min-height:110px;"></textarea>
     </div>
-
-    <div class="cr-footer" style="padding:16px 0 0;">
-      <button class="btn btn-primary btn-full" onclick="submitPost()" style="border-radius:var(--r-xl);">
-        <i data-lucide="upload-cloud"></i> CREATE COURSE
+    <div class="axon-note"><i data-lucide="sparkles"></i> AXON will categorize your course automatically.</div>
+    <div class="cr-footer">
+      <button class="btn btn-primary btn-full" onclick="submitPost('course')" style="border-radius:var(--r-xl);">
+        <i data-lucide="upload-cloud"></i> PUBLISH COURSE
       </button>
     </div>
+  </div>
+  {% endif %}
+
+  <!-- COMING SOON (Reel / Challenge) -->
+  <div class="soon-pane" id="pane-soon">
+    <div class="soon-ic"><i data-lucide="rocket" id="soonIc"></i></div>
+    <div class="soon-ttl" id="soonTtl">Coming soon</div>
+    <div class="soon-txt" id="soonTxt">This is on the way.</div>
   </div>
 </div>
 
@@ -207,7 +141,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <i data-lucide="check" style="width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:2;"></i>
   </div>
   <div class="t-xl mb-2">Published!</div>
-  <div style="font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:28px;">Your post is live. AXON will notify your circle.</div>
+  <div style="font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:28px;">Your post is live. AXON filed it in the right place.</div>
   <a href="/grow" class="btn btn-primary btn-full" style="border-radius:var(--r-xl);">
     <i data-lucide="compass"></i> VIEW IN GROW
   </a>
@@ -216,61 +150,84 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
 {% block scripts %}
 <script>
-let currentType = '';
-function goBack() {
-  if(document.getElementById('typeStep').style.display === 'none') {
-    document.getElementById('typeStep').style.display = '';
-    document.getElementById('composerStep').classList.remove('active');
-    document.getElementById('courseStep').classList.remove('active');
-    currentType = '';
-  } else {
-    document.getElementById('pt').classList.add('on');
-    setTimeout(() => { window.location.href = '/grow'; }, 180);
-  }
+let currentType = 'post';
+let postImage = '';
+const PLACEHOLDERS = {
+  post:{lbl:'Sharing a photo', ph:'Write a caption... use #hashtags to be found'},
+  thread:{lbl:'Writing a thread', ph:'Share your thoughts, a story, or a breakdown... #hashtags welcome'},
+  goal:{lbl:'Announcing a goal', ph:"I'm committing to... My deadline is... My why is..."},
+  achievement:{lbl:'Celebrating a win', ph:'I just hit a milestone: ...'}
+};
+const SOON = {
+  reel:{ic:'video', ttl:'Reels — coming soon', txt:'Short-form video is on the way. For now, share a photo or thread.'},
+  challenge:{ic:'zap', ttl:'Challenges — coming soon', txt:'Post a challenge with a prize, others go live to complete it, and AXON keeps it safe. Launching in a future update.'}
+};
+function show(id){
+  document.querySelectorAll('.cr-pane,.soon-pane').forEach(p=>p.classList.remove('on'));
+  const el=document.getElementById(id); if(el) el.classList.add('on');
 }
-function selectType(type, el) {
-  if(type === 'reel') return;
-  currentType = type;
-  document.getElementById('typeStep').style.display = 'none';
-  if(type === 'course') {
-    document.getElementById('courseStep').classList.add('active');
-  } else {
-    const ta = document.getElementById('postTxt');
-    const placeholders = {
-      post:'Write a caption for your photo...',
-      thread:'Share your thoughts, a story, or a breakdown...',
-      goal:'I am committing to... My deadline is... My why is...',
-      achievement:'I just hit a milestone: ...',
-      challenge:'Join my challenge: ...'
+function pickType(type, tab){
+  document.querySelectorAll('.cr-tab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+  if(type==='reel'||type==='challenge'){
+    const s=SOON[type]; document.getElementById('soonIc').setAttribute('data-lucide',s.ic);
+    document.getElementById('soonTtl').textContent=s.ttl; document.getElementById('soonTxt').textContent=s.txt;
+    show('pane-soon'); if(window.lucide) lucide.createIcons(); return;
+  }
+  currentType=type;
+  if(type==='course'){ show('pane-course'); }
+  else {
+    const cfg=PLACEHOLDERS[type]||PLACEHOLDERS.post;
+    document.getElementById('postKindLbl').textContent=cfg.lbl;
+    document.getElementById('postTxt').placeholder=cfg.ph;
+    // photo only really makes sense on a 'post'; keep it available but optional for all
+    show('pane-post');
+  }
+  if(window.lucide) lucide.createIcons();
+}
+function capCount(){ const t=document.getElementById('postTxt'); document.getElementById('postCt').textContent=t.value.length+'/500'; }
+function onPick(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1080; let {width:w,height:h}=img;
+      if(w>max||h>max){ if(w>h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      postImage=c.toDataURL('image/jpeg',0.82);
+      const pv=document.getElementById('upPreview');
+      pv.src=postImage; pv.style.display='block';
+      document.getElementById('upSquare').classList.add('filled');
+      document.getElementById('upPlaceholder').style.display='none';
+      document.getElementById('upLbl').style.display='none';
+      document.getElementById('upSub').style.display='none';
     };
-    ta.placeholder = placeholders[type] || 'Share something...';
-    document.getElementById('composerStep').classList.add('active');
-  }
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(f);
 }
-function togCat(el){el.classList.toggle('on');}
-function setVis(v,el){el.closest('.vis-row').querySelectorAll('.vis-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
-function submitPost(){
-  let kind='post', payload={};
-  if(currentType==='course'){
-    kind='course';
+function goBack(){ window.location.href='/grow'; }
+function submitPost(which){
+  const payload={};
+  if(which==='course'){
+    payload.kind='course';
     payload.title=document.getElementById('courseTitle').value.trim();
     payload.text=document.getElementById('courseDesc').value.trim();
-    const cc=document.querySelector('#courseStep .cat-chip.on');
-    payload.category=cc?cc.textContent.trim():'';
-    if(!payload.title){alert('Give your course a title.');return;}
+    if(!payload.title){ alert('Give your course a title.'); return; }
   } else {
-    kind=(currentType==='thread')?'thread':'post';
+    payload.kind=(currentType==='thread')?'thread':'post';
     payload.text=document.getElementById('postTxt').value.trim();
-    const cc=document.querySelector('#composerStep .cat-chip.on');
-    payload.category=cc?cc.textContent.trim():'';
-    if(!payload.text){alert('Write something first.');return;}
+    if(postImage) payload.image=postImage;
+    if(!payload.text && !postImage){ alert('Add a photo or write something first.'); return; }
   }
-  payload.kind=kind;
   const btn=event&&event.target?event.target.closest('button'):null;
-  if(btn){btn.disabled=true;btn.style.opacity='.7';}
+  if(btn){ btn.disabled=true; btn.style.opacity='.7'; }
   fetch('/create',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(payload)})
-    .then(r=>{ if(!r.ok) throw 0; document.getElementById('successOv').style.display='flex'; if(typeof lucide!=='undefined')lucide.createIcons(); })
-    .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not publish. Please try again.'); });
+    .then(r=>{ if(!r.ok) throw new Error(r.status); document.getElementById('successOv').style.display='flex'; if(window.lucide) lucide.createIcons(); })
+    .catch(err=>{ if(btn){ btn.disabled=false; btn.style.opacity='1'; }
+      alert(String(err).indexOf('403')>-1?'Only approved creators can publish courses.':'Could not publish. Please try again.'); });
 }
 </script>
 {% endblock %}

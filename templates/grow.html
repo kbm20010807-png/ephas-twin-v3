@@ -44,8 +44,9 @@
 .pc-time{font-size:10px;color:var(--sub);}
 .pc-cat{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-left:auto;background:var(--gold-dim);border:1px solid var(--gold-b);padding:3px 8px;border-radius:var(--r-full);}
 .pc-body{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:10px;}
-.pc-img{height:300px;border-radius:var(--r);margin-bottom:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);position:relative;}
-.pc-img svg{width:30px;height:30px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:1.5;}
+.pc-img{border-radius:var(--r);margin-bottom:10px;overflow:hidden;border:1px solid var(--border);position:relative;background:var(--bg-2);}
+.pc-img img{width:100%;max-height:420px;object-fit:cover;display:block;}
+.htag{color:var(--gold);font-weight:600;text-decoration:none;}
 .pc-caption{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:8px;}
 .pc-caption b{color:var(--black);font-weight:700;margin-right:5px;}
 .pc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
@@ -233,8 +234,8 @@
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
-    {% if p.kind != 'thread' %}<div class="pc-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
-    <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text }}</div>
+    {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
+    <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text|hashtags }}</div>
     <div class="pc-foot">
       <div class="pc-action like-btn {% if p.liked %}liked{% endif %}" onclick="event.stopPropagation();toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
       <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
@@ -265,8 +266,8 @@
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
-    {% if p.kind != 'thread' %}<div class="pc-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
-    <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text }}</div>
+    {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
+    <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text|hashtags }}</div>
     <div class="pc-foot">
       <div class="pc-action like-btn {% if p.liked %}liked{% endif %}" onclick="event.stopPropagation();toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
       <div class="pc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
@@ -297,7 +298,7 @@
       <div><div class="pc-user">{{ p.user }}</div><div class="tc-meta">{{ p.time }}{% if p.category %} · #{{ p.category|lower }}{% endif %}</div></div>
     </div>
     {% if p.title %}<div class="tc-title">{{ p.title }}</div>{% endif %}
-    <div class="tc-body">{{ p.text }}</div>
+    <div class="tc-body">{{ p.text|hashtags }}</div>
     <div class="tc-foot">
       <div class="tc-action like-btn {% if p.liked %}liked{% endif %}" onclick="event.stopPropagation();toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
       <div class="tc-action"><i data-lucide="message-circle"></i> {{ p.comments }}</div>

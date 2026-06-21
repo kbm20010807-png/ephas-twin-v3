@@ -92,7 +92,7 @@ class Post(db.Model):
     title = db.Column(db.String(200), default='')
     text = db.Column(db.Text, default='')
     category = db.Column(db.String(40), default='')
-    image = db.Column(db.String(300), default='')
+    image = db.Column(db.Text, default='')  # base64 data URL (resized) for photo posts
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 class Like(db.Model):
@@ -237,7 +237,12 @@ BADGE_DEFS = {
     'ephas_team': {'label': 'EPHAS Team',  'desc': 'Official member of the EPHAS team.',                              'icon': 'shield',      'color': '#8B5CF6'},
     'founder':    {'label': 'Founder',     'desc': 'Founder of EPHAS & TWIN.',                                        'icon': 'crown',       'color': '#E8B23A'},
     'og':         {'label': 'OG',          'desc': 'One of the earliest members of the community.',                   'icon': 'sparkles',    'color': '#22C55E'},
+    'course_creator': {'label': 'Course Creator', 'desc': 'Approved by EPHAS to publish courses on TWIN.',             'icon': 'graduation-cap', 'color': '#3B82F6'},
 }
+
+# Post categories AXON sorts content into automatically.
+POST_CATEGORIES = ['Mindset', 'Fitness', 'Wealth', 'Entrepreneurship', 'Nutrition',
+                   'Running', 'Savings', 'Relationships', 'Spirituality', 'Productivity']
 
 def resolve_badges(user):
     """Return ordered list of badge dicts for a user, with a custom image URL when one exists."""
@@ -257,6 +262,57 @@ def resolve_badges(user):
 
 def has_badge(user, slug):
     return slug in [s.strip() for s in (user.badges or '').split(',') if s.strip()]
+
+def can_post_courses(user):
+    """Only EPHAS-approved creators can publish courses (course_creator or founder badge)."""
+    return has_badge(user, 'course_creator') or has_badge(user, 'founder')
+
+def axon_categorize(text, image_data=None):
+    """AXON reads a post (caption + optional photo) and returns one POST_CATEGORIES label.
+    Falls back to keyword matching if the API is unavailable, then to 'Mindset'."""
+    text = (text or '').strip()
+    # cheap keyword fallback (also used when no API key)
+    def keyword_guess():
+        t = text.lower()
+        table = {
+            'Fitness': ['workout', 'gym', 'lift', 'run', 'training', 'muscle', 'cardio', 'fit'],
+            'Nutrition': ['diet', 'meal', 'protein', 'calorie', 'food', 'eat', 'nutrition'],
+            'Wealth': ['money', 'invest', 'stock', 'crypto', 'wealth', 'income', 'rich'],
+            'Savings': ['save', 'saving', 'budget', 'frugal'],
+            'Entrepreneurship': ['business', 'startup', 'founder', 'hustle', 'client', 'sales', 'brand'],
+            'Running': ['marathon', '5k', '10k', 'mile', 'jog', 'pace'],
+            'Productivity': ['focus', 'productive', 'deep work', 'discipline', 'routine', 'habit'],
+            'Relationships': ['relationship', 'family', 'friend', 'love', 'partner'],
+            'Spirituality': ['pray', 'faith', 'god', 'spirit', 'meditat', 'soul'],
+        }
+        for cat, words in table.items():
+            if any(w in t for w in words):
+                return cat
+        return 'Mindset'
+    if not ANTHROPIC_KEY:
+        return keyword_guess()
+    sys = ("You sort a social post into exactly ONE category. Reply with ONLY the category word, nothing else. "
+           "Allowed categories: " + ", ".join(POST_CATEGORIES) + ".")
+    content = [{"type": "text", "text": f"Post caption: {text[:600] or '(no caption)'}\nReturn one category."}]
+    if image_data and image_data.startswith('data:') and ',' in image_data:
+        try:
+            header, b64 = image_data.split(',', 1)
+            mime = header[5:].split(';')[0] or 'image/jpeg'
+            if mime in ('image/jpeg', 'image/png', 'image/webp', 'image/gif'):
+                content.insert(0, {"type": "image", "source": {"type": "base64", "media_type": mime, "data": b64}})
+        except Exception:
+            pass
+    headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    body = {"model": AXON_MODEL_FREE, "max_tokens": 12, "system": sys,
+            "messages": [{"role": "user", "content": content}]}
+    try:
+        raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=15).json()['content'][0]['text'].strip()
+        for cat in POST_CATEGORIES:
+            if cat.lower() in raw.lower():
+                return cat
+    except Exception:
+        pass
+    return keyword_guess()
 
 def verification_ctx(user):
     """State for the 'Request verification' setting: verified / pending / rejected / none."""
@@ -635,6 +691,15 @@ def time_ago(dt):
     if s < 604800: return f'{int(s // 86400)}d ago'
     return dt.strftime('%b %d')
 
+@app.template_filter('hashtags')
+def hashtags_filter(s):
+    """Escape post text, then turn #hashtags into clickable search links."""
+    from markupsafe import Markup, escape
+    out = str(escape(s or ''))
+    out = re.sub(r'(?<!\w)#(\w{1,40})',
+                 r'<a href="/search?q=%23\1" class="htag" onclick="event.stopPropagation()">#\1</a>', out)
+    return Markup(out)
+
 # --- Tier-1 recommendation algorithm: rank a feed to the user (interests + engagement + follows + growth gaps) ---
 DOMAIN_CATS = {
     'Mind': ['mindset', 'mental', 'reading', 'focus', 'productivity', 'discipline'],
@@ -747,7 +812,7 @@ def serialize_posts(posts, viewer=None):
         out.append({
             'id': p.id, 'kind': p.kind, 'user': name, 'init': (name[0].upper() if name else 'U'),
             'title': p.title or '', 'text': p.text or '', 'category': p.category or 'Growth',
-            'image': p.image or '', 'time': time_ago(p.created_at),
+            'has_image': bool(p.image), 'time': time_ago(p.created_at),
             'likes': Like.query.filter_by(post_id=p.id).count(),
             'comments': Comment.query.filter_by(post_id=p.id).count(),
             'liked': p.id in liked, 'bookmarked': p.id in booked,
@@ -776,6 +841,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS show_profile_views BOOLEAN DEFAULT TRUE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS notifs_seen_at TIMESTAMP",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS badges VARCHAR(300) DEFAULT ''",
+        "ALTER TABLE posts ALTER COLUMN image TYPE TEXT",
     ):
         try:
             db.session.execute(text(stmt))
@@ -1427,6 +1493,20 @@ def banner_img(uid):
         try:
             return Response(base64.b64decode(b64), mimetype=mime,
                             headers={'Cache-Control': 'public, max-age=300'})
+        except Exception:
+            pass
+    return ('', 404)
+
+@app.route('/post-image/<int:pid>')
+def post_img(pid):
+    """Serve a post's photo as a real image (cached)."""
+    p = Post.query.get(pid)
+    if p and p.image and p.image.startswith('data:') and ',' in p.image:
+        header, b64 = p.image.split(',', 1)
+        mime = header[5:].split(';')[0] or 'image/jpeg'
+        try:
+            return Response(base64.b64decode(b64), mimetype=mime,
+                            headers={'Cache-Control': 'public, max-age=600'})
         except Exception:
             pass
     return ('', 404)
@@ -2269,18 +2349,27 @@ def create():
     cu = current_user()
     if request.method == 'POST':
         kind = (request.form.get('kind') or 'post')[:20]
-        if kind not in ('post', 'thread', 'course', 'reel'):
+        if kind not in ('post', 'thread', 'course'):
             kind = 'post'
+        if kind == 'course' and not can_post_courses(cu):
+            return ('Only approved creators can publish courses.', 403)
         text = (request.form.get('text') or '').strip()[:2000]
         title = (request.form.get('title') or '').strip()[:200]
-        if not text and not title:
+        image = (request.form.get('image') or '')
+        if not image.startswith('data:'):
+            image = ''
+        image = image[:2800000]  # safety cap on the base64 payload
+        if not text and not title and not image:
             return ('Empty', 400)
-        p = Post(user_id=cu.id, kind=kind, title=title, text=text,
-                 category=(request.form.get('category') or '').strip()[:40])
+        # AXON auto-sorts the post into a category (reads caption + photo) when none is given.
+        category = (request.form.get('category') or '').strip()[:40]
+        if not category:
+            category = axon_categorize((title + '. ' + text).strip(), image)
+        p = Post(user_id=cu.id, kind=kind, title=title, text=text, image=image, category=category)
         db.session.add(p)
         db.session.commit()
         return ('', 204)
-    return render_template('create.html', u=user_ctx(), active='grow')
+    return render_template('create.html', u=user_ctx(), can_course=can_post_courses(cu), active='grow')
 
 @app.route('/axon-settings', methods=['GET', 'POST'])
 def axon_settings():

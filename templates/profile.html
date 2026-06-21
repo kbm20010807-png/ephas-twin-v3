@@ -71,7 +71,9 @@
 .pp-act.bm-btn.saved svg{stroke:var(--gold);}
 .pp-act.like-btn.liked{color:#EF4444;}
 .pp-act.like-btn.liked svg{stroke:#EF4444;fill:#EF4444;}
-.pp-img{height:280px;border-radius:var(--r);margin-bottom:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);}
+.pp-img{border-radius:var(--r);margin-bottom:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg-2);}
+.pp-img img{width:100%;max-height:420px;object-fit:cover;display:block;}
+.htag{color:var(--gold);font-weight:600;text-decoration:none;}
 .pp-img svg{width:28px;height:28px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:1.5;}
 .pp-caption{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:10px;}
 /* SUB-TABS (pro courses) */
@@ -204,8 +206,8 @@
   {% for p in my_posts %}
   <div class="prof-post" data-id="{{ p.id }}">
     <div class="pp-meta">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div>
-    {% if p.kind != 'thread' %}<div class="pp-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
-    <div class="pp-caption">{{ p.text }}</div>
+    {% if p.has_image %}<div class="pp-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
+    <div class="pp-caption">{{ p.text|hashtags }}</div>
     <div class="pp-ft">
       <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
       <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
@@ -308,8 +310,8 @@
   {% for p in my_posts %}
   <div class="prof-post" data-id="{{ p.id }}">
     <div class="pp-meta">{{ p.time }}{% if p.category %} · {{ p.category }}{% endif %}</div>
-    {% if p.kind != 'thread' %}<div class="pp-img" style="background:linear-gradient(150deg,#1a1206,#0d0d0d 60%,#1a1206);"><i data-lucide="image"></i></div>{% endif %}
-    <div class="pp-caption">{{ p.text }}</div>
+    {% if p.has_image %}<div class="pp-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
+    <div class="pp-caption">{{ p.text|hashtags }}</div>
     <div class="pp-ft">
       <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
       <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
@@ -336,7 +338,7 @@
   <div class="prof-post" data-id="{{ p.id }}">
     <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">THREAD · {{ p.time }}</div>
     {% if p.title %}<div style="font-size:13px;font-weight:700;color:var(--black);margin-bottom:6px;">{{ p.title }}</div>{% endif %}
-    <div class="pp-body">{{ p.text }}</div>
+    <div class="pp-body">{{ p.text|hashtags }}</div>
     <div class="pp-ft">
       <div class="pp-act like-btn {% if p.liked %}liked{% endif %}" onclick="toggleLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
       <div class="pp-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>

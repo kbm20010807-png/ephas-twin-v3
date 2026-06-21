@@ -293,7 +293,7 @@
       <div style="font-size:10px;color:var(--sub);">{{ p.time }}</div>
     </div>
   </div>
-  <div class="fc-bdy">{% if p.title %}<b>{{ p.title }}</b><br>{% endif %}{{ p.text }}</div>
+  <div class="fc-bdy">{% if p.title %}<b>{{ p.title }}</b><br>{% endif %}{{ p.text|hashtags }}</div>
   <div class="fc-ft">
     <div class="fc-act like-btn {% if p.liked %}liked{% endif %}" onclick="hLike(this,{{ p.id }})"><i data-lucide="heart"></i> <span class="like-n">{{ p.likes }}</span></div>
     <div class="fc-act"><i data-lucide="message-circle"></i> {{ p.comments }}</div>
