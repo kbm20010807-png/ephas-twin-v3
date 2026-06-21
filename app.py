@@ -1216,9 +1216,15 @@ def notifications_ctx(user):
     names = {uid: (u.name or u.username) for uid, u in actors.items()}
     avatars = {uid: bool(u.avatar) for uid, u in actors.items()}
     unames = {uid: u.username for uid, u in actors.items()}
+    i_follow = {x.following_id for x in Follow.query.filter_by(follower_id=user.id).all()}
+    seen_followers = set()
     for f in follows:
+        if f.follower_id in seen_followers:   # one notification per follower
+            continue
+        seen_followers.add(f.follower_id)
         notifs.append({'type': 'follow', 'icon': 'user-plus', 'sort': 'b' + str(f.id),
                        'avatar_id': f.follower_id, 'has_avatar': avatars.get(f.follower_id, False), 'username': unames.get(f.follower_id),
+                       'actor_id': f.follower_id, 'follows_back': f.follower_id in i_follow,
                        'text': f"{names.get(f.follower_id, 'Someone')} started following you", 'time': 'recently', 'unread': False})
     for c in comments:
         notifs.append({'type': 'comment', 'icon': 'message-circle', 'sort': 'c' + str(c.id),

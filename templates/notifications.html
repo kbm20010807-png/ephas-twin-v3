@@ -29,6 +29,8 @@
 .notif-item[data-type="milestone"] .notif-ico{background:var(--gold-dim);border-color:var(--gold-b);}
 .notif-item[data-type="milestone"] .notif-ico svg{stroke:var(--gold);}
 
+.fb-btn{flex-shrink:0;align-self:center;background:var(--grad);color:#241D10;border:none;border-radius:var(--r-full);padding:8px 16px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.fb-btn.following{background:var(--bg-2);color:var(--sub);border:1.5px solid var(--border);}
 .empty-notif{text-align:center;padding:40px 20px;}
 .mark-read-btn{display:block;text-align:right;padding:12px 20px 0;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.5px;background:none;border:none;}
 </style>
@@ -57,7 +59,12 @@
         <div class="notif-text">{{ n.text }}</div>
         <div class="notif-time">{{ n.time }}</div>
       </div>
-      {% if n.unread %}<div class="notif-dot"></div>{% endif %}
+      {% if n.type == 'follow' and n.actor_id %}
+      <button class="fb-btn {% if n.follows_back %}following{% endif %}" data-id="{{ n.actor_id }}"
+              onclick="event.preventDefault();event.stopPropagation();followBack(this)">
+        {% if n.follows_back %}Following{% else %}Follow back{% endif %}
+      </button>
+      {% elif n.unread %}<div class="notif-dot"></div>{% endif %}
     </a>
     {% else %}
     <div class="notif-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" onclick="readNotif(this)">
@@ -80,6 +87,15 @@ function readNotif(el) {
   el.classList.remove('unread');
   const dot = el.querySelector('.notif-dot');
   if (dot) dot.remove();
+}
+function followBack(btn) {
+  const id = btn.dataset.id;
+  btn.disabled = true;
+  fetch('/api/follow/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    btn.disabled = false;
+    if (d.following) { btn.textContent = 'Following'; btn.classList.add('following'); }
+    else { btn.textContent = 'Follow back'; btn.classList.remove('following'); }
+  }).catch(()=>{ btn.disabled = false; });
 }
 </script>
 {% endblock %}
