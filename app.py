@@ -2479,8 +2479,12 @@ def admin_badges():
     """Grant / revoke rare badges. e.g. /admin/badges?key=KEY&username=khalid&set=founder,verified
     Params: set=a,b (replace) | add=a (grant) | remove=b (revoke). Omit all to just view."""
     admin_key = os.environ.get('ADMIN_KEY', '')
-    if not admin_key or request.args.get('key', '') != admin_key:
-        return ('Forbidden', 403)
+    provided = request.args.get('key', '')
+    if not admin_key:
+        return ('ADMIN_KEY is not set on the server. Add it in Railway -> Variables, then redeploy.', 403)
+    if provided != admin_key:
+        return (f'Forbidden: key does not match ADMIN_KEY. (you sent {len(provided)} chars; '
+                f'server key is {len(admin_key)} chars)', 403)
     uname = (request.args.get('username') or '').strip()
     u = User.query.filter(func.lower(User.username) == uname.lower()).first()
     if not u:
