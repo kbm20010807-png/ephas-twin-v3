@@ -219,8 +219,8 @@ class HabitLog(db.Model):
 
 
 LEVEL_TITLES = [
-    (1, 'Newcomer'), (3, 'Initiate'), (5, 'Challenger'), (8, 'Discipline Seeker'),
-    (12, 'Warrior'), (20, 'Champion'), (35, 'Master'), (50, 'Legend'),
+    (1, 'Newcomer'), (2, 'Initiate'), (4, 'Challenger'), (7, 'Discipline Seeker'),
+    (11, 'Warrior'), (18, 'Champion'), (30, 'Master'), (45, 'Legend'),
 ]
 
 def level_title_for(level):
@@ -1919,10 +1919,16 @@ def public_profile(username):
         if not recent:
             db.session.add(ProfileView(viewer_id=cu.id, viewed_id=target.id))
             db.session.commit()
-    posts = serialize_posts(Post.query.filter(Post.user_id == target.id, Post.kind.in_(['post', 'thread', 'reel']))
-                            .order_by(Post.created_at.desc()).limit(12).all(), cu)
+    posts = serialize_posts(Post.query.filter(Post.user_id == target.id, Post.kind.in_(['post', 'reel']))
+                            .order_by(Post.created_at.desc()).limit(20).all(), cu)
+    threads = serialize_posts(Post.query.filter_by(user_id=target.id, kind='thread')
+                              .order_by(Post.created_at.desc()).limit(20).all(), cu)
+    target_can_course = can_post_courses(target)
+    courses = serialize_posts(Post.query.filter_by(user_id=target.id, kind='course')
+                              .order_by(Post.created_at.desc()).limit(20).all(), cu) if target_can_course else []
     return render_template('profile_public.html', u=user_ctx(), p=public_profile_ctx(target, cu),
-                           posts=posts, active='home')
+                           posts=posts, threads=threads, courses=courses,
+                           target_can_course=target_can_course, active='home')
 
 @app.route('/profile')
 def profile():
@@ -1935,7 +1941,7 @@ def profile():
         Post.query.join(Bookmark, Bookmark.post_id == Post.id).filter(Bookmark.user_id == cu.id).order_by(Post.created_at.desc()).all(), cu)
     return render_template('profile.html', u=user_ctx(), stats=stats_ctx(),
                            my_posts=my_posts, my_threads=my_threads, my_courses=my_courses,
-                           saved=saved, active='profile')
+                           badges=resolve_badges(current_user()), saved=saved, active='profile')
 
 def people_suggestions(cu, limit=8):
     """People you may know — community members you don't already follow."""

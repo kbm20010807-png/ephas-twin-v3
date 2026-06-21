@@ -53,8 +53,18 @@
 .pp-meta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.75;}
 .pp-bio{font-size:13px;color:var(--text);line-height:1.55;padding:14px 20px 0;}
 .pp-divider{height:1px;background:var(--border);margin:18px 20px 0;}
+.pp-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 20px;margin-top:4px;}
+.pp-tab{flex:1;text-align:center;padding:13px 8px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.5px;}
+.pp-tab.on{color:var(--black);border-bottom-color:var(--black);}
+.pp-pane{display:none;}
+.pp-pane.on{display:block;}
 .pp-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:12px 20px 0;box-shadow:var(--sh);}
 .pp-post-txt{font-size:13px;color:var(--text);line-height:1.55;}
+.pp-pimg{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);margin-bottom:8px;}
+.pp-pimg img{width:100%;max-height:420px;object-fit:cover;display:block;}
+.pp-ptag{display:inline-flex;font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--black);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 9px;margin-bottom:8px;}
+.pp-course-title{font-family:'Inter',sans-serif;font-weight:800;font-size:14px;color:var(--black);margin-bottom:4px;}
+.htag{color:var(--black);font-weight:700;text-decoration:none;}
 .pp-empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 20px;}
 .pp-toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--black);color:var(--bg);font-size:12px;font-weight:700;padding:10px 18px;border-radius:var(--r-full);box-shadow:var(--sh-md);opacity:0;transition:all .25s;z-index:500;pointer-events:none;}
 .pp-toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -121,12 +131,40 @@
 
 <div class="pp-divider"></div>
 
-{% if posts %}
-  {% for post in posts %}
-  <div class="pp-post"><div class="pp-post-txt">{{ post.text }}</div></div>
-  {% endfor %}
-{% else %}
-<div class="pp-empty">No posts yet.</div>
+<div class="pp-tabs">
+  <div class="pp-tab on" data-pane="pposts" onclick="ppTab(this)">Posts</div>
+  <div class="pp-tab" data-pane="pthreads" onclick="ppTab(this)">Threads</div>
+  {% if target_can_course %}<div class="pp-tab" data-pane="pcourses" onclick="ppTab(this)">Courses</div>{% endif %}
+</div>
+
+<div class="pp-pane on" id="pane-pposts">
+  {% if posts %}
+    {% for post in posts %}
+    <div class="pp-post">
+      {% if post.tag %}<div class="pp-ptag">{{ 'Goal' if post.tag=='goal' else 'Achievement' }}</div>{% endif %}
+      {% if post.has_image %}<div class="pp-pimg"><img src="/post-image/{{ post.id }}" alt=""></div>{% endif %}
+      {% if post.text %}<div class="pp-post-txt">{{ post.text|hashtags }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  {% else %}<div class="pp-empty">No posts yet.</div>{% endif %}
+</div>
+
+<div class="pp-pane" id="pane-pthreads">
+  {% if threads %}
+    {% for post in threads %}
+    <div class="pp-post"><div class="pp-post-txt">{{ post.text|hashtags }}</div></div>
+    {% endfor %}
+  {% else %}<div class="pp-empty">No threads yet.</div>{% endif %}
+</div>
+
+{% if target_can_course %}
+<div class="pp-pane" id="pane-pcourses">
+  {% if courses %}
+    {% for post in courses %}
+    <div class="pp-post">{% if post.title %}<div class="pp-course-title">{{ post.title }}</div>{% endif %}<div class="pp-post-txt">{{ post.text }}</div></div>
+    {% endfor %}
+  {% else %}<div class="pp-empty">No courses yet.</div>{% endif %}
+</div>
 {% endif %}
 <div style="height:30px;"></div>
 
@@ -175,6 +213,13 @@ function openBadge(slug){
   if(window.lucide) lucide.createIcons();
 }
 function closeBadge(){ document.getElementById('bdOv').classList.remove('on'); }
+function ppTab(el){
+  document.querySelectorAll('.pp-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.pp-pane').forEach(p=>p.classList.remove('on'));
+  const pane=document.getElementById('pane-'+el.dataset.pane); if(pane) pane.classList.add('on');
+  if(window.lucide) lucide.createIcons();
+}
 </script>
 {% endif %}
 {% endblock %}

@@ -15,16 +15,31 @@
 .prof-info{padding:12px 20px 0;}
 .prof-name{font-family:'Inter',sans-serif;font-weight:800;font-size:23px;letter-spacing:-.8px;color:var(--black);margin-bottom:2px;}
 .prof-title{font-size:12px;color:var(--gold);font-weight:700;letter-spacing:.5px;margin-bottom:6px;}
-.prof-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.prof-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;}
 .pm-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);}
 .pm-item svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:1.75;}
 
-/* SOCIAL STATS */
-.social-stats{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:14px 0 0;}
-.ss-item{flex:1;text-align:center;padding:12px 8px;border-right:1px solid var(--border);cursor:pointer;}
-.ss-item:last-child{border-right:none;}
-.ss-val{font-family:'Inter',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.5px;color:var(--black);}
-.ss-lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-top:2px;}
+/* compact follower/following counts under the name */
+.prof-counts{display:flex;gap:22px;margin:10px 0 0;}
+.pc-item{display:inline-flex;align-items:baseline;gap:5px;}
+.pc-v{font-family:'Inter',sans-serif;font-weight:800;font-size:16px;color:var(--black);}
+.pc-l{font-size:11px;color:var(--sub);font-weight:600;}
+
+/* badges section */
+.prof-badges-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin:16px 0 8px;}
+.prof-badges{display:flex;flex-wrap:wrap;gap:9px;}
+.prof-badge{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;flex-shrink:0;}
+.prof-badge img{width:100%;height:100%;object-fit:cover;}
+.prof-badge svg{width:18px;height:18px;fill:none;stroke-width:2;}
+.pb-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:30px;}
+.pb-ov.on{display:flex;}
+.pb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:300px;width:100%;text-align:center;padding:26px 24px;}
+.pb-ic{width:72px;height:72px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;}
+.pb-ic img{width:100%;height:100%;object-fit:cover;}
+.pb-ic svg{width:34px;height:34px;fill:none;stroke-width:2;}
+.pb-name{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--black);}
+.pb-desc{font-size:13px;color:var(--sub);line-height:1.55;margin-top:8px;}
+.pb-x{margin-top:18px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 22px;font-size:12px;font-weight:700;color:var(--black);cursor:pointer;}
 
 .acct-switch{display:flex;gap:8px;padding:14px 20px 0;}
 .acct-btn{flex:1;padding:10px 8px;border-radius:var(--r-lg);border:1.5px solid var(--border);background:var(--bg-2);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;text-align:center;transition:all .15s;line-height:1;}
@@ -145,18 +160,26 @@
 <div class="prof-info">
   <div class="prof-name">{{ u.name }}</div>
   <div class="prof-title">{{ u.level_title }}</div>
+  <div class="prof-counts">
+    <div class="pc-item"><span class="pc-v">{{ u.followers }}</span> <span class="pc-l">Followers</span></div>
+    <div class="pc-item"><span class="pc-v">{{ u.following }}</span> <span class="pc-l">Following</span></div>
+    <div class="pc-item" id="ssSubscribers" style="display:none;"><span class="pc-v">{{ u.subscribed }}</span> <span class="pc-l">Subscribers</span></div>
+  </div>
+  {% if badges %}
+  <div class="prof-badges-lbl">Badges</div>
+  <div class="prof-badges">
+    {% for b in badges %}
+    <div class="prof-badge" style="border-color:{{ b.color }}55;" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
+      {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
   <div class="prof-meta">
     {% if u.city %}<div class="pm-item"><i data-lucide="map-pin"></i> {{ u.city }}</div>{% endif %}
     {% if u.job %}<div class="pm-item"><i data-lucide="briefcase"></i> {{ u.job }}</div>{% endif %}
     <div class="pm-item"><i data-lucide="calendar"></i> Since {{ u.member_since }}</div>
   </div>
-</div>
-
-<!-- SOCIAL STATS -->
-<div class="social-stats">
-  <div class="ss-item"><div class="ss-val">{{ u.followers }}</div><div class="ss-lbl">Followers</div></div>
-  <div class="ss-item"><div class="ss-val">{{ u.following }}</div><div class="ss-lbl">Following</div></div>
-  <div class="ss-item" id="ssSubscribers" style="display:none;"><div class="ss-val">{{ u.subscribed }}</div><div class="ss-lbl">Subscribers</div></div>
 </div>
 
 <div class="acct-switch">
@@ -450,6 +473,17 @@
   <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
+
+{% if badges %}
+<div class="pb-ov" id="pbOv" onclick="if(event.target===this)closeBadge()">
+  <div class="pb-card">
+    <div class="pb-ic" id="pbIc"></div>
+    <div class="pb-name" id="pbName"></div>
+    <div class="pb-desc" id="pbDesc"></div>
+    <button class="pb-x" onclick="closeBadge()">Close</button>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -464,7 +498,7 @@ function applyAcct(type) {
   document.getElementById('proTabs').style.display = type === 'pro' ? 'flex' : 'none';
   const pa = document.getElementById('proActions');
   pa.style.display = type === 'pro' ? 'flex' : 'none';
-  document.getElementById('ssSubscribers').style.display = type === 'pro' ? 'block' : 'none';
+  document.getElementById('ssSubscribers').style.display = type === 'pro' ? 'inline-flex' : 'none';
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   if (type === 'twin') {
@@ -568,5 +602,21 @@ function shareProfile() {
 }
 
 document.addEventListener('DOMContentLoaded', () => applyAcct(acctType));
+
+{% if badges %}
+const BADGES={
+{% for b in badges %}'{{ b.slug }}':{label:'{{ b.label }}',desc:{{ b.desc|tojson }},icon:'{{ b.icon }}',color:'{{ b.color }}',img:{{ (b.img or '')|tojson }}},
+{% endfor %}};
+function openBadge(slug){
+  const b=BADGES[slug]; if(!b) return;
+  document.getElementById('pbName').textContent=b.label;
+  document.getElementById('pbDesc').textContent=b.desc;
+  const ic=document.getElementById('pbIc'); ic.style.borderColor=b.color+'55';
+  ic.innerHTML = b.img ? '<img src="'+b.img+'" alt="">' : '<i data-lucide="'+b.icon+'" style="stroke:'+b.color+';"></i>';
+  document.getElementById('pbOv').classList.add('on');
+  if(window.lucide) lucide.createIcons();
+}
+function closeBadge(){ document.getElementById('pbOv').classList.remove('on'); }
+{% endif %}
 </script>
 {% endblock %}
