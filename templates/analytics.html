@@ -9,7 +9,7 @@
 .hs-trend{display:inline-flex;align-items:center;gap:4px;background:var(--green-dim);border:1px solid var(--green-b);border-radius:var(--r-full);padding:4px 12px;font-size:11px;font-weight:700;color:var(--green);margin-top:8px;}
 .hs-trend svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:2;}
 .metric-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:20px 20px 0;}
-.metric-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.metric-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 16px;box-shadow:var(--sh);position:relative;overflow:hidden;text-align:center;display:flex;flex-direction:column;align-items:center;}
 .metric-c::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r-lg) var(--r-lg) 0 0;}
 .m-sleep::before{background:var(--grad);}
 .m-energy::before{background:var(--grad);}
@@ -17,9 +17,9 @@
 .m-prod::before{background:var(--grad);}
 .metric-ico{width:30px;height:30px;border-radius:9px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
 .metric-ico svg{width:14px;height:14px;stroke:var(--sub);fill:none;stroke-width:1.75;}
-.metric-val{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;letter-spacing:-1.5px;color:var(--black);line-height:1;}
-.metric-lbl{font-size:10px;font-weight:600;color:var(--sub);letter-spacing:.5px;margin-top:3px;}
-.metric-trend{font-size:10px;font-weight:700;margin-top:6px;}
+.metric-val{font-family:'Inter',sans-serif;font-weight:800;font-size:30px;letter-spacing:-1.5px;color:var(--black);line-height:1;}
+.metric-lbl{font-size:12px;font-weight:700;color:var(--black);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.metric-trend{font-size:10px;font-weight:700;margin-top:8px;}
 .t-up{color:var(--green);}
 .t-dn{color:var(--red);}
 .week-chart{padding:20px 20px 0;}
@@ -72,27 +72,23 @@
 
 <div class="metric-row">
   <div class="metric-c m-sleep">
-    <div class="metric-ico"><i data-lucide="moon"></i></div>
-    <div class="metric-val">{{ stats.avg_sleep }}h</div>
     <div class="metric-lbl">Sleep</div>
+    <div class="metric-val">{{ stats.avg_sleep }}h</div>
     <div class="metric-trend t-up">↑ +0.3h this week</div>
   </div>
   <div class="metric-c m-energy">
-    <div class="metric-ico"><i data-lucide="zap"></i></div>
-    <div class="metric-val">{{ stats.avg_energy }}</div>
     <div class="metric-lbl">Energy</div>
+    <div class="metric-val">{{ stats.avg_energy }}</div>
     <div class="metric-trend t-up">↑ +0.5 this week</div>
   </div>
   <div class="metric-c m-mood">
-    <div class="metric-ico"><i data-lucide="smile"></i></div>
-    <div class="metric-val">{{ stats.avg_mood }}</div>
     <div class="metric-lbl">Mood</div>
+    <div class="metric-val">{{ stats.avg_mood }}</div>
     <div class="metric-trend t-up">↑ +0.4 this week</div>
   </div>
   <div class="metric-c m-prod">
-    <div class="metric-ico"><i data-lucide="target"></i></div>
-    <div class="metric-val">{{ stats.avg_productivity }}</div>
     <div class="metric-lbl">Productivity</div>
+    <div class="metric-val">{{ stats.avg_productivity }}</div>
     <div class="metric-trend t-dn">↓ -0.2 this week</div>
   </div>
 </div>
