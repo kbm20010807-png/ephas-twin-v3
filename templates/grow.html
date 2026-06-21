@@ -232,7 +232,7 @@
   {% for p in gexplore %}
   <div class="post-card" data-id="{{ p.id }}" data-kind="{{ p.kind }}" onclick="openPost(this,event)">
     <div class="pc-head">
-      <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
@@ -265,7 +265,7 @@
   {% for p in gposts %}
   <div class="post-card" data-id="{{ p.id }}" data-kind="{{ p.kind }}" onclick="openPost(this,event)">
     <div class="pc-head">
-      <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ p.init }}</div>
+      <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
@@ -298,7 +298,7 @@
   {% for p in gthreads %}
   <div class="thread-card" data-id="{{ p.id }}" data-kind="thread" onclick="openPost(this,event)">
     <div class="tc-head">
-      <div class="av av-36" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{{ p.init }}</div>
+      <div class="av av-36" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="tc-meta">{{ p.time }}{% if p.category %} · #{{ p.category|lower }}{% endif %}</div></div>
     </div>
     {% if p.title %}<div class="tc-title">{{ p.title }}</div>{% endif %}

@@ -287,7 +287,7 @@
 {% for p in community %}
 <div class="feed-c">
   <div class="fc-hd">
-    <div class="av av-32">{{ p.init }}</div>
+    <div class="av av-32">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
     <div>
       <div style="font-size:12px;font-weight:700;color:var(--black);">{{ p.user }}</div>
       <div style="font-size:10px;color:var(--sub);">{{ p.time }}</div>

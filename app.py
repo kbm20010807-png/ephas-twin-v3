@@ -812,6 +812,8 @@ def serialize_posts(posts, viewer=None):
         name = (a.name or a.username) if a else 'User'
         out.append({
             'id': p.id, 'kind': p.kind, 'user': name, 'init': (name[0].upper() if name else 'U'),
+            'author_id': p.user_id, 'author_avatar': bool(a and a.avatar),
+            'username': (a.username if a else ''),
             'title': p.title or '', 'text': p.text or '', 'category': p.category or 'Growth',
             'has_image': bool(p.image), 'tag': p.tag or '', 'time': time_ago(p.created_at),
             'likes': Like.query.filter_by(post_id=p.id).count(),
