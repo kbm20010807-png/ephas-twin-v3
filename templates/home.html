@@ -208,7 +208,7 @@
   <div class="hb-cat">Build</div>
   <div class="hb-scroll">
     {% for h in goods %}
-    <div class="hb-item" onclick="hToggle2(this,{{ h.id }})">
+    <div class="hb-item" onclick="location.href='/checkout'">
       <div class="hb-circle {% if h.done_today %}done{% endif %}"><span class="hb-num">{{ h.streak }}</span><span class="hb-unit">days</span></div>
       <div class="hb-ttl">{{ h.name }}{% if h.private %} <i data-lucide="lock" class="hb-lock"></i>{% endif %}</div>
     </div>
@@ -219,7 +219,7 @@
   <div class="hb-cat">Quitting</div>
   <div class="hb-scroll">
     {% for h in bads %}
-    <div class="hb-item" onclick="hToggle2(this,{{ h.id }})">
+    <div class="hb-item" onclick="location.href='/checkout'">
       <div class="hb-circle bad {% if h.done_today %}done{% endif %}"><span class="hb-num">{{ h.streak }}</span><span class="hb-unit">clean</span></div>
       <div class="hb-ttl">{{ h.name }}</div>
     </div>
@@ -383,21 +383,6 @@ function hLike(btn, id) {
   fetch('/api/like/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
     btn.classList.toggle('liked', d.liked);
     if (n) n.textContent = d.count;
-  }).catch(()=>{});
-}
-function hToggle2(item, id) {
-  fetch('/api/habit/toggle/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
-    const circle = item.querySelector('.hb-circle');
-    const num = item.querySelector('.hb-num');
-    if (circle) circle.classList.toggle('done', d.done);
-    if (num) num.textContent = d.streak;
-  }).catch(()=>{});
-}
-function hToggle(btn, id) {
-  fetch('/api/habit/toggle/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
-    btn.classList.toggle('on', d.done);
-    const row = btn.closest('.hm-row'); const st = row && row.querySelector('.hstreak');
-    if (st) st.textContent = d.streak;
   }).catch(()=>{});
 }
 </script>

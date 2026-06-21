@@ -48,7 +48,7 @@
 <button class="add-habit-top" onclick="openAdd()"><i data-lucide="plus"></i> Add another habit</button>
 {% for h in habits %}
 <div class="habit-card">
-  <button class="habit-check {% if h.done_today %}on{% endif %}" onclick="toggleHabit(this,{{ h.id }})"><i data-lucide="check"></i></button>
+  <div class="habit-check {% if h.done_today %}on{% endif %}" title="{% if h.done_today %}Done today{% else %}Mark this in your check-out{% endif %}"><i data-lucide="check"></i></div>
   <div class="habit-body">
     <div class="habit-name">{{ h.name }}
       {% if h.is_bad %}<span class="habit-tag bad">QUIT</span>{% endif %}
@@ -116,14 +116,6 @@ function setType(t){
   document.getElementById('addBad').value = bad ? '1' : '';
   const priv = document.getElementById('addPriv');
   if(bad){ priv.checked = true; priv.disabled = true; } else { priv.disabled = false; }
-}
-function toggleHabit(btn, id){
-  fetch('/api/habit/toggle/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{
-    btn.classList.toggle('on', d.done);
-    const card = btn.closest('.habit-card');
-    const st = card.querySelector('.hstreak');
-    if(st) st.textContent = d.streak;
-  }).catch(()=>{});
 }
 function syncEditBad(){
   const bad = document.getElementById('editBad').checked;
