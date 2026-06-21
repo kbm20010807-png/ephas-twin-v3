@@ -46,8 +46,12 @@
 .acct-btn span{font-size:9px;font-weight:500;display:block;margin-top:3px;opacity:.7;}
 .acct-btn.on{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold);}
 
-.stats-row{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:14px 0;}
+.stats-row{display:flex;border-top:1px solid var(--border);margin:14px 0 0;}
 .stat-c{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
+.xp-strip{padding:13px 20px 14px;border-bottom:1px solid var(--border);}
+.xp-strip-top{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.3px;margin-bottom:7px;}
+.xp-strip-bar{height:5px;background:var(--border);border-radius:5px;overflow:hidden;}
+.xp-strip-fill{height:100%;background:var(--grad);border-radius:5px;transition:width .5s ease;}
 .stat-c:last-child{border-right:none;}
 .stat-v{font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:-1px;color:var(--black);}
 .stat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;font-family:'Inter',sans-serif;}
@@ -190,8 +194,15 @@
 <div class="stats-row">
   <div class="stat-c"><div class="stat-v">{{ u.total_checkins }}</div><div class="stat-l">Check-Ins</div></div>
   <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.streak }}</div><div class="stat-l">Streak</div></div>
-  <div class="stat-c"><div class="stat-v">{{ u.xp }}</div><div class="stat-l">XP</div></div>
   <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.level }}</div><div class="stat-l">Level</div></div>
+</div>
+
+<div class="xp-strip">
+  <div class="xp-strip-top">
+    <span>{{ u.xp % 200 }} / 200 XP</span>
+    <span>{{ u.xp_needed - u.xp }} XP to Level {{ u.level + 1 }}</span>
+  </div>
+  <div class="xp-strip-bar"><div class="xp-strip-fill" style="width:{{ u.progress_pct }}%"></div></div>
 </div>
 
 <!-- TWIN TABS -->
