@@ -48,10 +48,13 @@
 
 .stats-row{display:flex;border-top:1px solid var(--border);margin:14px 0 0;}
 .stat-c{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
-.xp-strip{padding:13px 20px 14px;border-bottom:1px solid var(--border);}
-.xp-strip-top{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.3px;margin-bottom:7px;}
-.xp-strip-bar{height:5px;background:var(--border);border-radius:5px;overflow:hidden;}
-.xp-strip-fill{height:100%;background:var(--grad);border-radius:5px;transition:width .5s ease;}
+.xp-strip{padding:16px 20px 18px;}
+.xp-strip-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.xp-chip{font-family:'Inter',sans-serif;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--black);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:4px 12px;}
+.xp-chip.next{color:var(--sub);}
+.xp-mid{font-size:11px;font-weight:700;color:var(--sub);}
+.xp-strip-bar{height:8px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);overflow:hidden;}
+.xp-strip-fill{height:100%;background:var(--grad);border-radius:var(--r-full);transition:width .5s ease;}
 .stat-c:last-child{border-right:none;}
 .stat-v{font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:-1px;color:var(--black);}
 .stat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin-top:2px;font-family:'Inter',sans-serif;}
@@ -199,8 +202,9 @@
 
 <div class="xp-strip">
   <div class="xp-strip-top">
-    <span>{{ u.xp % 200 }} / 200 XP</span>
-    <span>{{ u.xp_needed - u.xp }} XP to Level {{ u.level + 1 }}</span>
+    <span class="xp-chip">LEVEL {{ u.level }}</span>
+    <span class="xp-mid">{{ u.xp % 200 }} / 200 XP</span>
+    <span class="xp-chip next">LEVEL {{ u.level + 1 }}</span>
   </div>
   <div class="xp-strip-bar"><div class="xp-strip-fill" style="width:{{ u.progress_pct }}%"></div></div>
 </div>
