@@ -3,6 +3,7 @@ import re
 import json
 import base64
 import random
+import hashlib
 import requests
 from datetime import datetime, timedelta, timezone
 from collections import Counter
@@ -1498,6 +1499,175 @@ def home():
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
                            nsum=notif_summary(cu), active='home')
 
+# ── Dynamic check-in / check-out questions ──────────────────────────────
+# Each step has several AXON-voiced phrasings so the prompts look different every
+# day and per account; AXON can also generate a fresh personalized set on top.
+CHECKIN_STEPS = ['sleep', 'energy', 'mood', 'habits', 'win', 'reflection']
+CHECKOUT_STEPS = ['rating', 'habits', 'goal', 'blocker', 'tomorrow', 'gratitude']
+
+QUESTION_POOLS = {
+    'morning': {
+        'sleep': [
+            {'q': 'How many hours did you sleep?', 'hint': 'Quality rest is the foundation of everything else.'},
+            {'q': 'How much sleep did you get, {name}?', 'hint': 'Recovery is where the growth locks in.'},
+            {'q': 'How long were you out last night?', 'hint': 'Sleep sets the ceiling for your whole day.'},
+            {'q': "Rate last night's sleep in hours.", 'hint': 'Be honest — this is your baseline.'},
+        ],
+        'energy': [
+            {'q': "How's your energy this morning?", 'hint': 'Rate from 1 (drained) to 10 (fully charged).'},
+            {'q': "Where's your energy at, {name}?", 'hint': '1 is running on empty, 10 is unstoppable.'},
+            {'q': 'How charged do you feel right now?', 'hint': 'Name it from 1 to 10 — no overthinking.'},
+            {'q': "What's your battery this morning?", 'hint': '1 drained, 10 fully charged.'},
+        ],
+        'mood': [
+            {'q': 'How are you feeling, waking up?', 'hint': 'Be honest with yourself — this is your data.'},
+            {'q': "What's your mood as you start, {name}?", 'hint': 'Name it honestly, 1 to 10.'},
+            {'q': "How's your head this morning?", 'hint': 'Clarity comes from telling the truth here.'},
+            {'q': "Where's your mind at right now?", 'hint': '1 is heavy, 10 is clear and light.'},
+        ],
+        'habits': [
+            {'q': 'What will you tackle today?', 'hint': "Tap what you're committing to. AXON will hold you to it."},
+            {'q': 'What are you committing to, {name}?', 'hint': "Pick your moves for today — I'll hold the line."},
+            {'q': 'Which habits are you owning today?', 'hint': 'Tap them. Intentions become reps.'},
+            {'q': "What's the plan for today?", 'hint': "Choose what you'll show up for."},
+        ],
+        'win': [
+            {'q': 'What are you looking forward to?', 'hint': "Name one thing that'll make today good."},
+            {'q': "What's one thing you want today, {name}?", 'hint': 'A little anticipation fuels the day.'},
+            {'q': 'What would make today a win?', 'hint': 'Name it now so you aim at it.'},
+            {'q': "What's pulling you forward today?", 'hint': 'One thing worth showing up for.'},
+        ],
+        'reflection': [
+            {'q': 'Your #1 priority today?', 'hint': 'One clear intention beats ten vague goals.'},
+            {'q': "What's the one thing, {name}?", 'hint': 'If only one thing gets done — make it this.'},
+            {'q': 'What matters most today?', 'hint': 'Name the single priority that moves the needle.'},
+            {'q': "Today's non-negotiable?", 'hint': 'One focus. Protect it.'},
+        ],
+    },
+    'evening': {
+        'rating': [
+            {'q': 'Overall, how was today?', 'hint': 'Be honest. Growth starts with clarity.'},
+            {'q': 'How did today go, {name}?', 'hint': 'No judgment — just the truth.'},
+            {'q': 'Rate today as it really was.', 'hint': 'Clarity beats pretending.'},
+            {'q': 'Where did today land?', 'hint': 'Score it honestly, 1 to 10.'},
+        ],
+        'habits': [
+            {'q': 'Did you stick to your habits?', 'hint': 'Tap the ones you did today.'},
+            {'q': "How'd the habits go, {name}?", 'hint': 'Tap each one you stayed true to.'},
+            {'q': 'Which habits did you keep today?', 'hint': 'Mark the ones you hit.'},
+            {'q': 'Did you hold the line today?', 'hint': 'Tap everything you followed through on.'},
+        ],
+        'goal': [
+            {'q': 'Did you hit your #1 goal today?', 'hint': 'Accountability is the engine of growth.'},
+            {'q': 'Did you land your priority, {name}?', 'hint': 'The one thing — did it get done?'},
+            {'q': 'Your main goal — done?', 'hint': 'Own the answer either way.'},
+            {'q': 'Did the one thing get done?', 'hint': 'Honesty here builds momentum.'},
+        ],
+        'blocker': [
+            {'q': 'What got in the way today?', 'hint': 'Identifying blockers is how you eliminate them.'},
+            {'q': 'What slowed you down, {name}?', 'hint': 'Name it so we can remove it.'},
+            {'q': 'Where did today fight you?', 'hint': 'Spotting friction is half the fix.'},
+            {'q': 'What threw you off today?', 'hint': 'No shame — just intel for tomorrow.'},
+        ],
+        'tomorrow': [
+            {'q': "Tomorrow's one non-negotiable.", 'hint': 'Set it tonight so your morning is clear.'},
+            {'q': "What's tomorrow's one thing, {name}?", 'hint': 'Decide now, wake up with a target.'},
+            {'q': "Name tomorrow's main focus.", 'hint': 'Tomorrow-you will thank you.'},
+            {'q': 'One must-do for tomorrow?', 'hint': 'Set the aim before you sleep.'},
+        ],
+        'gratitude': [
+            {'q': "Three things you're grateful for.", 'hint': 'End every day anchored in what you have.'},
+            {'q': 'What are you grateful for, {name}?', 'hint': 'Name three — big or small.'},
+            {'q': 'Three good things from today.', 'hint': 'Gratitude rewires the day.'},
+            {'q': "What's worth being thankful for?", 'hint': 'Close the day on the good.'},
+        ],
+    },
+}
+
+def _first_name(user):
+    return (user.name or user.username or 'friend').split(' ')[0]
+
+def question_set(user, kind):
+    """Instant, varied fallback questions — rotates per account & per day."""
+    pools = QUESTION_POOLS['morning' if kind == 'morning' else 'evening']
+    dateiso = datetime.utcnow().date().isoformat()
+    name = _first_name(user)
+    out = {}
+    for step, pool in pools.items():
+        h = int(hashlib.md5(f"{user.id}:{dateiso}:{kind}:{step}".encode()).hexdigest(), 16)
+        choice = pool[h % len(pool)]
+        out[step] = {'q': choice['q'].replace('{name}', name),
+                     'hint': choice['hint'].replace('{name}', name)}
+    return out
+
+_QSET_CACHE = {}  # (uid, kind, dateiso) -> generated question set (one AXON call/day)
+
+def axon_generate_questions(user, kind):
+    """Ask AXON (fast model) for a fresh, personalized question set. Cached per day.
+    Returns dict {step: {q, hint}} or None on any failure (caller keeps the fallback)."""
+    dateiso = datetime.utcnow().date().isoformat()
+    key = (user.id, kind, dateiso)
+    if key in _QSET_CACHE:
+        return _QSET_CACHE[key]
+    if not ANTHROPIC_KEY:
+        return None
+    steps = CHECKIN_STEPS if kind == 'morning' else CHECKOUT_STEPS
+    name = _first_name(user)
+    # light personal context
+    recent = (CheckIn.query.filter_by(user_id=user.id)
+              .order_by(CheckIn.date.desc()).limit(5).all())
+    moods = [r.mood for r in recent if r.mood is not None]
+    energies = [r.energy for r in recent if r.energy is not None]
+    habit_names = [h.name for h in Habit.query.filter_by(user_id=user.id).limit(8).all()]
+    ctx = [f"User's first name: {name}.",
+           f"Time of day: {'morning, just woke up' if kind == 'morning' else 'evening, winding down'}."]
+    if moods: ctx.append(f"Recent mood avg: {round(sum(moods)/len(moods),1)}/10.")
+    if energies: ctx.append(f"Recent energy avg: {round(sum(energies)/len(energies),1)}/10.")
+    if habit_names: ctx.append("Their habits: " + ", ".join(habit_names) + ".")
+    if kind == 'morning':
+        meaning = ("sleep=hours slept last night; energy=energy 1-10; mood=mood 1-10; "
+                   "habits=what they'll commit to today; win=what they look forward to; "
+                   "reflection=their #1 priority today")
+    else:
+        meaning = ("rating=overall day 1-10; habits=did they keep their habits; goal=did they hit "
+                   "their #1 goal; blocker=what got in the way; tomorrow=tomorrow's one priority; "
+                   "gratitude=three things they're grateful for")
+    sys = ("You are AXON, a sharp, warm self-growth coach. Generate fresh check-in questions for the user. "
+           "Voice: direct, wise, motivating, never corny. Each question (q) <= 8 words. Each hint <= 14 words. "
+           "Make them feel personal and a little different from the usual. You MAY use their first name in at "
+           "most one or two questions, not all. Return ONLY valid minified JSON, no prose, no code fences.")
+    msg = (f"Context:\n{' '.join(ctx)}\n\nField meanings: {meaning}.\n\n"
+           f"Return JSON with EXACTLY these keys: {steps}. "
+           'Each value is an object {"q": "...", "hint": "..."}. JSON only.')
+    headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    body = {"model": AXON_MODEL_FREE, "max_tokens": 600, "system": sys,
+            "messages": [{"role": "user", "content": msg}]}
+    try:
+        raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=20).json()['content'][0]['text']
+        raw = raw.strip()
+        if raw.startswith('```'):
+            raw = raw.split('```')[1].lstrip('json').strip()
+        data = json.loads(raw)
+        out = {}
+        for step in steps:
+            v = data.get(step) or {}
+            q = (v.get('q') or '').strip()
+            hint = (v.get('hint') or '').strip()
+            if q:
+                out[step] = {'q': q[:90], 'hint': hint[:140]}
+        if len(out) >= max(3, len(steps) - 1):  # accept if it got most of them
+            _QSET_CACHE[key] = out
+            return out
+    except Exception:
+        pass
+    return None
+
+@app.route('/api/axon/questions')
+def axon_questions():
+    if not auth(): return jsonify({'questions': None}), 401
+    kind = 'morning' if request.args.get('kind') == 'morning' else 'evening'
+    return jsonify({'questions': axon_generate_questions(current_user(), kind)})
+
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
     if not auth(): return redirect('/login')
@@ -1516,7 +1686,7 @@ def checkin():
         ci.reflection = (request.form.get('reflection') or '')[:400]
         db.session.commit()
         return ('', 204)
-    return render_template('checkin.html', u=user_ctx(), active='checkin')
+    return render_template('checkin.html', u=user_ctx(), q=question_set(cu, 'morning'), active='checkin')
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -1544,7 +1714,8 @@ def checkout():
                 db.session.delete(already)
         db.session.commit()
         return ('', 204)
-    return render_template('checkout.html', u=user_ctx(), habits=serialize_habits(cu), active='checkout')
+    return render_template('checkout.html', u=user_ctx(), habits=serialize_habits(cu),
+                           q=question_set(cu, 'evening'), active='checkout')
 
 @app.route('/analytics')
 def analytics():

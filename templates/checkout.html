@@ -75,8 +75,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 1: Overall day -->
   <div class="step-view active" id="s1">
     <div class="t-label mb-3">Step 1 of 6</div>
-    <div class="step-q">Overall, how was today?</div>
-    <div class="step-hint">Be honest. Growth starts with clarity.</div>
+    <div class="step-q" data-q="rating">{{ q.rating.q }}</div>
+    <div class="step-hint" data-hint="rating">{{ q.rating.hint }}</div>
     <div class="step-big-val" id="dayDisp" style="color:var(--gold);">7</div>
     <input type="range" class="range-input" min="1" max="10" value="7" id="dayR" oninput="document.getElementById('dayDisp').textContent=this.value">
     <div class="step-range-lbl"><span>Rough</span><span>Perfect</span></div>
@@ -90,8 +90,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 2: Habits -->
   <div class="step-view" id="s2">
     <div class="t-label mb-3">Step 2 of 6</div>
-    <div class="step-q">Did you stick to your habits?</div>
-    <div class="step-hint" style="margin-bottom:20px;">Tap the ones you did today.</div>
+    <div class="step-q" data-q="habits">{{ q.habits.q }}</div>
+    <div class="step-hint" data-hint="habits" style="margin-bottom:20px;">{{ q.habits.hint }}</div>
     {% if habits %}
     <div class="co-habits">
       {% for h in habits %}
@@ -116,8 +116,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 3: Goal hit -->
   <div class="step-view" id="s3">
     <div class="t-label mb-3">Step 3 of 6</div>
-    <div class="step-q">Did you hit your #1 goal today?</div>
-    <div class="step-hint" style="margin-bottom:24px;">Accountability is the engine of growth.</div>
+    <div class="step-q" data-q="goal">{{ q.goal.q }}</div>
+    <div class="step-hint" data-hint="goal" style="margin-bottom:24px;">{{ q.goal.hint }}</div>
     <div class="y-n-grid">
       <div class="yn-btn" id="ynY" onclick="selectYN('y')">
         <i data-lucide="check-circle"></i>
@@ -139,8 +139,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 4: What blocked -->
   <div class="step-view" id="s4">
     <div class="t-label mb-3">Step 4 of 6</div>
-    <div class="step-q">What got in the way today?</div>
-    <div class="step-hint">Identifying blockers is how you eliminate them.</div>
+    <div class="step-q" data-q="blocker">{{ q.blocker.q }}</div>
+    <div class="step-hint" data-hint="blocker">{{ q.blocker.hint }}</div>
     <textarea class="form-input form-textarea" id="blockTxt" placeholder="What slowed me down was..." style="flex:1;min-height:100px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
@@ -153,8 +153,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 5: Tomorrow -->
   <div class="step-view" id="s5">
     <div class="t-label mb-3">Step 5 of 6</div>
-    <div class="step-q">Tomorrow's one non-negotiable.</div>
-    <div class="step-hint">Set it tonight so your morning is clear.</div>
+    <div class="step-q" data-q="tomorrow">{{ q.tomorrow.q }}</div>
+    <div class="step-hint" data-hint="tomorrow">{{ q.tomorrow.hint }}</div>
     <textarea class="form-input form-textarea" id="tmrTxt" placeholder="Tomorrow I must..." style="flex:1;min-height:100px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
@@ -167,8 +167,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 6: Gratitude -->
   <div class="step-view" id="s6">
     <div class="t-label mb-3">Step 6 of 6</div>
-    <div class="step-q">Three things you're grateful for.</div>
-    <div class="step-hint" style="margin-bottom:20px;">End every day anchored in what you have.</div>
+    <div class="step-q" data-q="gratitude">{{ q.gratitude.q }}</div>
+    <div class="step-hint" data-hint="gratitude" style="margin-bottom:20px;">{{ q.gratitude.hint }}</div>
     <div class="gratitude-list">
       <div class="gratitude-item">
         <div class="grat-ico"><i data-lucide="1"></i></div>
@@ -275,5 +275,13 @@ function playMotivation(){
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
 updateProg();
+// AXON personalizes the questions in the background, then swaps them in.
+fetch('/api/axon/questions?kind=evening').then(r=>r.json()).then(d=>{
+  const Q=d&&d.questions; if(!Q) return;
+  for(const k in Q){
+    const qe=document.querySelector('[data-q="'+k+'"]'); if(qe&&Q[k].q) qe.textContent=Q[k].q;
+    const he=document.querySelector('[data-hint="'+k+'"]'); if(he&&Q[k].hint) he.textContent=Q[k].hint;
+  }
+}).catch(()=>{});
 </script>
 {% endblock %}

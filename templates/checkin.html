@@ -66,8 +66,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 1: Sleep -->
   <div class="step-view active" id="s1">
     <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 1 of 6</div>
-    <div class="step-q">How many hours did you sleep?</div>
-    <div class="step-hint">Quality rest is the foundation of everything else.</div>
+    <div class="step-q" data-q="sleep">{{ q.sleep.q }}</div>
+    <div class="step-hint" data-hint="sleep">{{ q.sleep.hint }}</div>
     <div class="step-big-val" id="sleepDisp">7</div>
     <input type="range" class="range-input" min="3" max="12" step="0.5" value="7" id="sleepR" oninput="document.getElementById('sleepDisp').textContent=this.value">
     <div class="step-range-lbl"><span>3h</span><span>12h</span></div>
@@ -81,8 +81,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 2: Energy -->
   <div class="step-view" id="s2">
     <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 2 of 6</div>
-    <div class="step-q">How's your energy this morning?</div>
-    <div class="step-hint">Rate from 1 (drained) to 10 (fully charged).</div>
+    <div class="step-q" data-q="energy">{{ q.energy.q }}</div>
+    <div class="step-hint" data-hint="energy">{{ q.energy.hint }}</div>
     <div class="step-big-val" style="color:#22C55E" id="energyDisp">7</div>
     <input type="range" class="range-input" min="1" max="10" value="7" id="energyR" oninput="document.getElementById('energyDisp').textContent=this.value">
     <div class="step-range-lbl"><span>Drained</span><span>Charged</span></div>
@@ -101,8 +101,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 3: Mood -->
   <div class="step-view" id="s3">
     <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 3 of 6</div>
-    <div class="step-q">How are you feeling, waking up?</div>
-    <div class="step-hint">Be honest with yourself — this is your data.</div>
+    <div class="step-q" data-q="mood">{{ q.mood.q }}</div>
+    <div class="step-hint" data-hint="mood">{{ q.mood.hint }}</div>
     <div class="step-big-val" style="color:#8B5CF6" id="moodDisp">7</div>
     <input type="range" class="range-input" min="1" max="10" value="7" id="moodR" oninput="document.getElementById('moodDisp').textContent=this.value">
     <div class="step-range-lbl"><span>Low</span><span>Excellent</span></div>
@@ -121,8 +121,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 4: Today's plan -->
   <div class="step-view" id="s4">
     <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 4 of 6</div>
-    <div class="step-q">What will you tackle today?</div>
-    <div class="step-hint" style="margin-bottom:20px;">Tap what you're committing to. AXON will hold you to it.</div>
+    <div class="step-q" data-q="habits">{{ q.habits.q }}</div>
+    <div class="step-hint" data-hint="habits" style="margin-bottom:20px;">{{ q.habits.hint }}</div>
     <div class="habit-grid">
       <div class="h-btn" onclick="tog(this)"><i data-lucide="dumbbell"></i><div class="h-name">Workout</div><div class="h-check"></div></div>
       <div class="h-btn" onclick="tog(this)"><i data-lucide="laptop"></i><div class="h-name">Deep Work</div><div class="h-check"></div></div>
@@ -146,8 +146,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 5: Looking forward -->
   <div class="step-view" id="s5">
     <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 5 of 6</div>
-    <div class="step-q">What are you looking forward to?</div>
-    <div class="step-hint">Name one thing that'll make today good.</div>
+    <div class="step-q" data-q="win">{{ q.win.q }}</div>
+    <div class="step-hint" data-hint="win">{{ q.win.hint }}</div>
     <textarea class="form-input form-textarea" id="winTxt" placeholder="Today I'm looking forward to..." style="flex:1;min-height:120px;"></textarea>
     <div style="text-align:right;font-size:10px;color:var(--sub);margin-top:5px;" id="winCt">0/200</div>
     <div class="step-footer">
@@ -162,8 +162,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- STEP 6: Today's priority -->
   <div class="step-view" id="s6">
     <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:12px;">Step 6 of 6</div>
-    <div class="step-q">Your #1 priority today?</div>
-    <div class="step-hint">One clear intention beats ten vague goals.</div>
+    <div class="step-q" data-q="reflection">{{ q.reflection.q }}</div>
+    <div class="step-hint" data-hint="reflection">{{ q.reflection.hint }}</div>
     <textarea class="form-input form-textarea" id="refTxt" placeholder="Today I will focus on..." style="flex:1;min-height:120px;"></textarea>
     <div class="step-footer">
       <div class="flex gap-2">
@@ -273,5 +273,13 @@ function playMotivation(){
 const wt=document.getElementById('winTxt');
 if(wt)wt.addEventListener('input',()=>{document.getElementById('winCt').textContent=wt.value.length+'/200';});
 updateProg();
+// AXON personalizes the questions in the background, then swaps them in.
+fetch('/api/axon/questions?kind=morning').then(r=>r.json()).then(d=>{
+  const Q=d&&d.questions; if(!Q) return;
+  for(const k in Q){
+    const qe=document.querySelector('[data-q="'+k+'"]'); if(qe&&Q[k].q) qe.textContent=Q[k].q;
+    const he=document.querySelector('[data-hint="'+k+'"]'); if(he&&Q[k].hint) he.textContent=Q[k].hint;
+  }
+}).catch(()=>{});
 </script>
 {% endblock %}
