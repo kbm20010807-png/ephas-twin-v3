@@ -8,47 +8,46 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .cr-top{padding:54px 20px 14px;display:flex;align-items:center;justify-content:space-between;}
 .cr-close{width:34px;height:34px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-decoration:none;}
 .cr-close svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2;}
-/* type tabs — scroll between what you're posting */
 .cr-tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 20px 14px;scrollbar-width:none;border-bottom:1px solid var(--border);}
 .cr-tabs::-webkit-scrollbar{display:none;}
-.cr-tab{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.cr-tab{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r-full);border:1.5px solid var(--border);background:var(--bg-2);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s;}
 .cr-tab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
-.cr-tab.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.cr-tab.on{border-color:var(--sub);background:var(--card);color:var(--black);}
 .cr-tab.soon{opacity:.55;cursor:default;}
 .cr-tab .soon-pill{font-size:7px;font-weight:800;letter-spacing:1px;background:var(--border);color:var(--sub);border-radius:var(--r-full);padding:2px 6px;}
-/* composer */
 .cr-pane{display:none;flex:1;flex-direction:column;gap:14px;padding:18px 20px 0;}
 .cr-pane.on{display:flex;}
 .cr-who{display:flex;align-items:center;gap:10px;}
 .cr-who .av{font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);}
 .cr-who-name{font-size:13px;font-weight:700;color:var(--black);}
 .cr-who-sub{font-size:11px;color:var(--sub);}
-/* image upload square */
+/* media uploader (photo or video) */
 .up-square{position:relative;width:100%;aspect-ratio:1/1;border-radius:var(--r-lg);border:2px dashed var(--border);background:var(--bg-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;overflow:hidden;transition:border-color .15s;}
-.up-square:hover{border-color:var(--gold);}
+.up-square:hover{border-color:var(--sub);}
 .up-square.filled{border-style:solid;}
 .up-square img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
 .up-ico{width:48px;height:48px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
-.up-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.up-ico svg{width:22px;height:22px;stroke:var(--black);fill:none;stroke-width:1.75;}
 .up-lbl{font-size:13px;font-weight:700;color:var(--black);}
-.up-sub{font-size:11px;color:var(--sub);}
+.up-sub{font-size:11px;color:var(--sub);text-align:center;padding:0 16px;}
 .up-change{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:var(--r-full);padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:none;z-index:2;}
 .up-square.filled .up-change{display:block;}
 .cr-cap{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;font-size:14px;color:var(--black);font-family:'Inter',sans-serif;line-height:1.5;resize:vertical;min-height:90px;}
-.cr-cap:focus{border-color:var(--gold);outline:none;}
+.cr-cap:focus{border-color:var(--sub);outline:none;}
 .cr-count{text-align:right;font-size:10px;color:var(--sub);}
-.axon-note{display:flex;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--gold);line-height:1.45;}
-.axon-note svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;}
-.cr-field-lbl{font-size:11px;font-weight:700;color:var(--black);margin-bottom:6px;}
-.cat-chips{display:flex;gap:7px;flex-wrap:wrap;}
-.cat-chip{padding:6px 14px;border-radius:var(--r-full);border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;background:var(--bg-2);white-space:nowrap;transition:all .15s;}
-.cat-chip.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+/* tag selector (goal / achievement) */
+.cr-field-lbl{font-size:11px;font-weight:700;color:var(--black);margin-bottom:8px;}
+.tag-row{display:flex;gap:8px;}
+.tag-pill{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:var(--r-lg);border:1.5px solid var(--border);background:var(--bg-2);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;transition:all .15s;}
+.tag-pill svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+.tag-pill.on{border-color:var(--sub);background:var(--card);color:var(--black);}
+.axon-note{display:flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--sub);line-height:1.45;}
+.axon-note svg{width:14px;height:14px;stroke:var(--black);fill:none;stroke-width:2;flex-shrink:0;}
 .cr-footer{padding:16px 20px 28px;margin-top:auto;}
-/* coming soon pane */
 .soon-pane{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 30px;gap:6px;}
 .soon-pane.on{display:flex;}
 .soon-ic{width:64px;height:64px;border-radius:20px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
-.soon-ic svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:1.75;}
+.soon-ic svg{width:28px;height:28px;stroke:var(--black);fill:none;stroke-width:1.75;}
 .soon-ttl{font-family:'Inter',sans-serif;font-size:19px;letter-spacing:-.5px;color:var(--black);}
 .soon-txt{font-size:13px;color:var(--sub);line-height:1.55;max-width:280px;}
 </style>
@@ -62,42 +61,63 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div style="width:34px;"></div>
   </div>
 
-  <!-- TYPE TABS -->
   <div class="cr-tabs" id="crTabs">
     <div class="cr-tab on" data-type="post" onclick="pickType('post',this)"><i data-lucide="image"></i> Post</div>
     <div class="cr-tab" data-type="thread" onclick="pickType('thread',this)"><i data-lucide="align-left"></i> Thread</div>
-    <div class="cr-tab" data-type="goal" onclick="pickType('goal',this)"><i data-lucide="target"></i> Goal</div>
-    <div class="cr-tab" data-type="achievement" onclick="pickType('achievement',this)"><i data-lucide="award"></i> Achievement</div>
     {% if can_course %}
     <div class="cr-tab" data-type="course" onclick="pickType('course',this)"><i data-lucide="graduation-cap"></i> Course</div>
     {% endif %}
-    <div class="cr-tab soon" onclick="pickType('reel',this)"><i data-lucide="video"></i> Reel <span class="soon-pill">SOON</span></div>
     <div class="cr-tab soon" onclick="pickType('challenge',this)"><i data-lucide="zap"></i> Challenge <span class="soon-pill">SOON</span></div>
   </div>
 
-  <!-- POST / GOAL / ACHIEVEMENT -->
+  <!-- POST (photo or video) + optional Goal/Achievement tag -->
   <div class="cr-pane on" id="pane-post">
     <div class="cr-who">
       <div class="av av-40">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
-      <div><div class="cr-who-name">{{ u.name }}</div><div class="cr-who-sub" id="postKindLbl">Sharing a photo</div></div>
+      <div><div class="cr-who-name">{{ u.name }}</div><div class="cr-who-sub">Share a photo or video</div></div>
     </div>
 
     <div class="up-square" id="upSquare" onclick="document.getElementById('postFile').click()">
       <img id="upPreview" alt="" style="display:none;">
       <button type="button" class="up-change" onclick="event.stopPropagation();document.getElementById('postFile').click()">Change</button>
       <div class="up-ico" id="upPlaceholder"><i data-lucide="image-plus"></i></div>
-      <div class="up-lbl" id="upLbl">Add a photo</div>
+      <div class="up-lbl" id="upLbl">Add a photo or video</div>
       <div class="up-sub" id="upSub">Tap to upload — optional</div>
     </div>
-    <input type="file" id="postFile" accept="image/*" style="display:none;" onchange="onPick(this)">
+    <input type="file" id="postFile" accept="image/*,video/*" style="display:none;" onchange="onPick(this)">
 
     <textarea class="cr-cap" id="postTxt" placeholder="Write a caption... use #hashtags to be found" oninput="capCount()"></textarea>
     <div class="cr-count" id="postCt">0/500</div>
+
+    <div>
+      <div class="cr-field-lbl">Make it a…</div>
+      <div class="tag-row">
+        <div class="tag-pill on" data-tag="" onclick="setTag('',this)"><i data-lucide="message-square"></i> Post</div>
+        <div class="tag-pill" data-tag="goal" onclick="setTag('goal',this)"><i data-lucide="target"></i> Goal</div>
+        <div class="tag-pill" data-tag="achievement" onclick="setTag('achievement',this)"><i data-lucide="award"></i> Win</div>
+      </div>
+    </div>
 
     <div class="axon-note"><i data-lucide="sparkles"></i> AXON reads your post and files it under the right category automatically.</div>
 
     <div class="cr-footer">
       <button class="btn btn-primary btn-full" id="postBtn" onclick="submitPost('post')" style="border-radius:var(--r-xl);">
+        <i data-lucide="send"></i> PUBLISH
+      </button>
+    </div>
+  </div>
+
+  <!-- THREAD (text only) -->
+  <div class="cr-pane" id="pane-thread">
+    <div class="cr-who">
+      <div class="av av-40">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
+      <div><div class="cr-who-name">{{ u.name }}</div><div class="cr-who-sub">Writing a thread</div></div>
+    </div>
+    <textarea class="cr-cap" id="threadTxt" placeholder="Share your thoughts, a story, or a breakdown... #hashtags welcome" style="min-height:200px;" oninput="threadCount()"></textarea>
+    <div class="cr-count" id="threadCt">0/2000</div>
+    <div class="axon-note"><i data-lucide="sparkles"></i> AXON files your thread under the right topic automatically.</div>
+    <div class="cr-footer">
+      <button class="btn btn-primary btn-full" onclick="submitPost('thread')" style="border-radius:var(--r-xl);">
         <i data-lucide="send"></i> PUBLISH
       </button>
     </div>
@@ -127,11 +147,11 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   </div>
   {% endif %}
 
-  <!-- COMING SOON (Reel / Challenge) -->
+  <!-- COMING SOON (Challenge) -->
   <div class="soon-pane" id="pane-soon">
-    <div class="soon-ic"><i data-lucide="rocket" id="soonIc"></i></div>
-    <div class="soon-ttl" id="soonTtl">Coming soon</div>
-    <div class="soon-txt" id="soonTxt">This is on the way.</div>
+    <div class="soon-ic"><i data-lucide="zap"></i></div>
+    <div class="soon-ttl">Challenges — coming soon</div>
+    <div class="soon-txt">Post a challenge with a prize, others go live to complete it, and AXON keeps it safe. Launching in a future update.</div>
   </div>
 </div>
 
@@ -150,18 +170,8 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
 {% block scripts %}
 <script>
-let currentType = 'post';
 let postImage = '';
-const PLACEHOLDERS = {
-  post:{lbl:'Sharing a photo', ph:'Write a caption... use #hashtags to be found'},
-  thread:{lbl:'Writing a thread', ph:'Share your thoughts, a story, or a breakdown... #hashtags welcome'},
-  goal:{lbl:'Announcing a goal', ph:"I'm committing to... My deadline is... My why is..."},
-  achievement:{lbl:'Celebrating a win', ph:'I just hit a milestone: ...'}
-};
-const SOON = {
-  reel:{ic:'video', ttl:'Reels — coming soon', txt:'Short-form video is on the way. For now, share a photo or thread.'},
-  challenge:{ic:'zap', ttl:'Challenges — coming soon', txt:'Post a challenge with a prize, others go live to complete it, and AXON keeps it safe. Launching in a future update.'}
-};
+let postTag = '';
 function show(id){
   document.querySelectorAll('.cr-pane,.soon-pane').forEach(p=>p.classList.remove('on'));
   const el=document.getElementById(id); if(el) el.classList.add('on');
@@ -169,28 +179,28 @@ function show(id){
 function pickType(type, tab){
   document.querySelectorAll('.cr-tab').forEach(t=>t.classList.remove('on'));
   tab.classList.add('on');
-  if(type==='reel'||type==='challenge'){
-    const s=SOON[type]; document.getElementById('soonIc').setAttribute('data-lucide',s.ic);
-    document.getElementById('soonTtl').textContent=s.ttl; document.getElementById('soonTxt').textContent=s.txt;
-    show('pane-soon'); if(window.lucide) lucide.createIcons(); return;
-  }
-  currentType=type;
-  if(type==='course'){ show('pane-course'); }
-  else {
-    const cfg=PLACEHOLDERS[type]||PLACEHOLDERS.post;
-    document.getElementById('postKindLbl').textContent=cfg.lbl;
-    document.getElementById('postTxt').placeholder=cfg.ph;
-    // Photo upload is only for Post — Thread/Goal/Achievement are text-only.
-    const sq=document.getElementById('upSquare');
-    if(type==='post'){ sq.style.display='flex'; }
-    else { sq.style.display='none'; postImage=''; }
-    show('pane-post');
-  }
+  if(type==='challenge'){ show('pane-soon'); }
+  else if(type==='thread'){ show('pane-thread'); }
+  else if(type==='course'){ show('pane-course'); }
+  else { show('pane-post'); }
   if(window.lucide) lucide.createIcons();
 }
 function capCount(){ const t=document.getElementById('postTxt'); document.getElementById('postCt').textContent=t.value.length+'/500'; }
+function threadCount(){ const t=document.getElementById('threadTxt'); document.getElementById('threadCt').textContent=t.value.length+'/2000'; }
+function setTag(tag, el){
+  postTag=tag;
+  el.closest('.tag-row').querySelectorAll('.tag-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+}
 function onPick(input){
   const f=input.files&&input.files[0]; if(!f) return;
+  if(f.type && f.type.indexOf('video')===0){
+    // Reels (video) need video hosting — not live yet. Be honest instead of failing.
+    const sub=document.getElementById('upSub');
+    sub.textContent='🎬 Video reels are coming soon — for now, share a photo.';
+    sub.style.color='var(--gold)';
+    input.value=''; return;
+  }
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();
@@ -219,10 +229,15 @@ function submitPost(which){
     payload.title=document.getElementById('courseTitle').value.trim();
     payload.text=document.getElementById('courseDesc').value.trim();
     if(!payload.title){ alert('Give your course a title.'); return; }
+  } else if(which==='thread'){
+    payload.kind='thread';
+    payload.text=document.getElementById('threadTxt').value.trim();
+    if(!payload.text){ alert('Write something first.'); return; }
   } else {
-    payload.kind=(currentType==='thread')?'thread':'post';
+    payload.kind='post';
     payload.text=document.getElementById('postTxt').value.trim();
     if(postImage) payload.image=postImage;
+    if(postTag) payload.tag=postTag;
     if(!payload.text && !postImage){ alert('Add a photo or write something first.'); return; }
   }
   const btn=event&&event.target?event.target.closest('button'):null;

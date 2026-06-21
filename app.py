@@ -93,6 +93,7 @@ class Post(db.Model):
     text = db.Column(db.Text, default='')
     category = db.Column(db.String(40), default='')
     image = db.Column(db.Text, default='')  # base64 data URL (resized) for photo posts
+    tag = db.Column(db.String(20), default='')  # optional: 'goal' | 'achievement'
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 class Like(db.Model):
@@ -812,7 +813,7 @@ def serialize_posts(posts, viewer=None):
         out.append({
             'id': p.id, 'kind': p.kind, 'user': name, 'init': (name[0].upper() if name else 'U'),
             'title': p.title or '', 'text': p.text or '', 'category': p.category or 'Growth',
-            'has_image': bool(p.image), 'time': time_ago(p.created_at),
+            'has_image': bool(p.image), 'tag': p.tag or '', 'time': time_ago(p.created_at),
             'likes': Like.query.filter_by(post_id=p.id).count(),
             'comments': Comment.query.filter_by(post_id=p.id).count(),
             'liked': p.id in liked, 'bookmarked': p.id in booked,
@@ -842,6 +843,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS notifs_seen_at TIMESTAMP",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS badges VARCHAR(300) DEFAULT ''",
         "ALTER TABLE posts ALTER COLUMN image TYPE TEXT",
+        "ALTER TABLE posts ADD COLUMN IF NOT EXISTS tag VARCHAR(20) DEFAULT ''",
     ):
         try:
             db.session.execute(text(stmt))
@@ -2365,7 +2367,10 @@ def create():
         category = (request.form.get('category') or '').strip()[:40]
         if not category:
             category = axon_categorize((title + '. ' + text).strip(), image)
-        p = Post(user_id=cu.id, kind=kind, title=title, text=text, image=image, category=category)
+        tag = (request.form.get('tag') or '').strip().lower()
+        if tag not in ('goal', 'achievement'):
+            tag = ''
+        p = Post(user_id=cu.id, kind=kind, title=title, text=text, image=image, category=category, tag=tag)
         db.session.add(p)
         db.session.commit()
         return ('', 204)

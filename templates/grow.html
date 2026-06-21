@@ -26,7 +26,7 @@
 .main-tabs{display:flex;border-bottom:1.5px solid var(--border);margin:14px 0 0;overflow-x:auto;scrollbar-width:none;padding:0 20px;gap:0;}
 .main-tabs::-webkit-scrollbar{display:none;}
 .mt-btn{flex:0 0 auto;padding:12px 14px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Inter',sans-serif;text-transform:uppercase;white-space:nowrap;}
-.mt-btn.on{color:var(--black);border-bottom-color:var(--gold);}
+.mt-btn.on{color:var(--black);border-bottom-color:var(--black);}
 .tab-pane{display:none;}
 .tab-pane.on{display:block;}
 
@@ -46,7 +46,9 @@
 .pc-body{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:10px;}
 .pc-img{border-radius:var(--r);margin-bottom:10px;overflow:hidden;border:1px solid var(--border);position:relative;background:var(--bg-2);}
 .pc-img img{width:100%;max-height:420px;object-fit:cover;display:block;}
-.htag{color:var(--gold);font-weight:600;text-decoration:none;}
+.htag{color:var(--black);font-weight:700;text-decoration:none;}
+.ptag{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--black);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:4px 10px;margin-bottom:8px;}
+.ptag svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;}
 .pc-caption{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:8px;}
 .pc-caption b{color:var(--black);font-weight:700;margin-right:5px;}
 .pc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
@@ -234,6 +236,7 @@
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
+    {% if p.tag %}<div class="ptag {{ p.tag }}">{% if p.tag=='goal' %}<i data-lucide="target"></i> Goal{% else %}<i data-lucide="award"></i> Achievement{% endif %}</div>{% endif %}
     {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
     <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text|hashtags }}</div>
     <div class="pc-foot">
@@ -266,6 +269,7 @@
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
     </div>
+    {% if p.tag %}<div class="ptag {{ p.tag }}">{% if p.tag=='goal' %}<i data-lucide="target"></i> Goal{% else %}<i data-lucide="award"></i> Achievement{% endif %}</div>{% endif %}
     {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
     <div class="pc-caption"><b>{{ p.user }}</b> {{ p.text|hashtags }}</div>
     <div class="pc-foot">
