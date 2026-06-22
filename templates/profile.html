@@ -214,18 +214,7 @@
   </div>
 </div>
 
-<div class="acct-switch">
-  <div class="acct-btn on" id="btnTwin" onclick="switchAcct('twin')">TWIN Profile<span>Stats + Posts</span></div>
-  <div class="acct-btn" id="btnPro" onclick="switchAcct('pro')">Professional<span>Posts + Courses + Stats</span></div>
-</div>
-
-<div class="stats-row">
-  <div class="stat-c"><div class="stat-v">{{ u.total_checkins }}</div><div class="stat-l">Check-Ins</div></div>
-  <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.streak }}</div><div class="stat-l">Streak</div></div>
-  <div class="stat-c"><div class="stat-v" style="color:var(--gold);">{{ u.level }}</div><div class="stat-l">Level</div></div>
-</div>
-
-<div class="xp-strip">
+<div class="xp-strip" style="padding-top:18px;">
   <div class="xp-strip-top">
     <span class="xp-chip">LEVEL {{ u.level }}</span>
     <span class="xp-mid">{{ u.xp % 200 }} / 200 XP</span>
@@ -552,22 +541,15 @@ let acctType = localStorage.getItem('twinAcctType') || 'twin';
 let isSubscribed = false;
 
 function applyAcct(type) {
-  document.getElementById('btnTwin').classList.toggle('on', type === 'twin');
-  document.getElementById('btnPro').classList.toggle('on', type === 'pro');
-  document.getElementById('twinTabs').style.display = type === 'twin' ? 'flex' : 'none';
-  document.getElementById('proTabs').style.display = type === 'pro' ? 'flex' : 'none';
-  const pa = document.getElementById('proActions');
-  pa.style.display = type === 'pro' ? 'flex' : 'none';
-  document.getElementById('ssSubscribers').style.display = type === 'pro' ? 'inline-flex' : 'none';
+  // Professional view is now grant-based (a badge) — the profile always shows the TWIN view.
+  const tt = document.getElementById('twinTabs'); if (tt) tt.style.display = 'flex';
+  const pt = document.getElementById('proTabs'); if (pt) pt.style.display = 'none';
+  const pa = document.getElementById('proActions'); if (pa) pa.style.display = 'none';
+  const ss = document.getElementById('ssSubscribers'); if (ss) ss.style.display = 'none';
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
-  if (type === 'twin') {
-    document.getElementById('pane-twin-posts').classList.add('on');
-    document.querySelector('#twinTabs .tab-btn').classList.add('on');
-  } else {
-    document.getElementById('pane-pro-posts').classList.add('on');
-    document.querySelector('#proTabs .tab-btn').classList.add('on');
-  }
+  const fp = document.getElementById('pane-twin-posts'); if (fp) fp.classList.add('on');
+  const fb = document.querySelector('#twinTabs .tab-btn'); if (fb) fb.classList.add('on');
 }
 
 function switchAcct(type) {
