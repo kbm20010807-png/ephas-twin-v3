@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block head %}
+<style>
+.lg{padding:20px 20px 40px;max-width:620px;margin:0 auto;}
+.lg h2{font-family:'Inter',sans-serif;font-size:22px;letter-spacing:-.6px;color:var(--black);margin:0 0 4px;}
+.lg .upd{font-size:11px;color:var(--muted);margin-bottom:20px;}
+.lg h3{font-size:14px;font-weight:800;color:var(--black);margin:22px 0 8px;}
+.lg p{font-size:13px;color:var(--text);line-height:1.65;margin:0 0 12px;}
+.lg .draft{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r);padding:12px 14px;font-size:11px;color:var(--gold);line-height:1.55;margin-bottom:20px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">{{ title }}</div></div>
+  <div style="width:36px;"></div>
+</div>
+<div class="lg">
+  <h2>{{ title }}</h2>
+  <div class="upd">EPHAS / TWIN — placeholder draft</div>
+  <div class="draft"><b>Draft notice:</b> This is placeholder text. Before public launch, replace it with a lawyer-reviewed document. See your founder checklist.</div>
+
+  {% if doc == 'terms' %}
+  <p>Welcome to TWIN, operated by EPHAS. By creating an account and using TWIN you agree to these Terms of Service.</p>
+  <h3>1. Your account</h3>
+  <p>You must provide accurate information, keep your password secure, and are responsible for activity on your account. One account per person unless otherwise allowed.</p>
+  <h3>2. Acceptable use</h3>
+  <p>You agree not to misuse TWIN — no harassment, illegal content, spam, or attempts to break or abuse the platform. We may suspend accounts that violate these terms.</p>
+  <h3>3. Your content</h3>
+  <p>You own the content you post. By posting, you grant EPHAS a license to display and distribute it within the app. You are responsible for what you share.</p>
+  <h3>4. Paid features</h3>
+  <p>TWIN Pro, Professional, and any paid features are billed as described at purchase. Refund and cancellation terms will be specified at checkout.</p>
+  <h3>5. Disclaimer</h3>
+  <p>TWIN and AXON provide guidance for self-improvement and are not a substitute for professional medical, financial, or legal advice.</p>
+  {% elif doc == 'privacy-policy' %}
+  <p>This Privacy Policy explains what data TWIN collects, how it is used, and your rights.</p>
+  <h3>What we collect</h3>
+  <p>Account info (name, email, username), your check-ins and habits, content you post, and basic usage data. Your "Personal" data is private and used only by AXON and the recommendation engine.</p>
+  <h3>How we use it</h3>
+  <p>To run the app, personalize AXON's coaching and your feed, keep the platform safe, and improve the product.</p>
+  <h3>Sharing</h3>
+  <p>We do not sell your personal data. We use service providers (hosting, email, AI, payments) strictly to operate the app.</p>
+  <h3>Your rights</h3>
+  <p>You can edit your profile, control privacy settings, request a copy of your data, and delete your account.</p>
+  {% else %}
+  <p>TWIN is a community for human excellence. Keep it that way.</p>
+  <h3>Be real</h3>
+  <p>Authenticity over performance. Share your actual progress and struggles.</p>
+  <h3>Be respectful</h3>
+  <p>No harassment, hate, threats, or bullying. Disagree without attacking people.</p>
+  <h3>Keep it safe</h3>
+  <p>No dangerous, illegal, sexual, or graphically violent content. No spam or scams.</p>
+  <h3>Consequences</h3>
+  <p>Breaking these guidelines can lead to content removal, warnings, or account suspension.</p>
+  {% endif %}
+</div>
+{% endblock %}

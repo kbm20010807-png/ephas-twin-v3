@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Help & FAQ{% endblock %}
+{% block head %}
+<style>
+.faq{margin:14px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh);}
+.faq-q{padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid var(--border);}
+.faq:last-child .faq-q{border-bottom:none;}
+.faq-q.open{border-bottom:none;}
+.faq-q h4{font-size:13px;font-weight:700;color:var(--black);margin:0;flex:1;}
+.faq-q svg{width:16px;height:16px;stroke:var(--sub);fill:none;stroke-width:2;transition:transform .2s;flex-shrink:0;}
+.faq-q.open svg{transform:rotate(180deg);}
+.faq-a{font-size:12px;color:var(--sub);line-height:1.6;padding:0 16px;max-height:0;overflow:hidden;transition:max-height .25s,padding .25s;}
+.faq-a.open{max-height:300px;padding:0 16px 16px;}
+.help-hd{padding:20px 20px 4px;}
+.help-hd h2{font-family:'Inter',sans-serif;font-size:22px;letter-spacing:-.8px;color:var(--black);margin:0;}
+.help-hd p{font-size:12px;color:var(--sub);margin:6px 0 0;line-height:1.5;}
+.help-contact{margin:18px 20px 30px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;text-align:center;}
+.help-contact a{color:var(--gold);font-weight:700;text-decoration:none;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Help & FAQ</div></div>
+  <div style="width:36px;"></div>
+</div>
+<div class="help-hd">
+  <h2>How can we help?</h2>
+  <p>Answers to the most common questions about TWIN.</p>
+</div>
+
+{% set faqs = [
+  ('What is TWIN?', 'TWIN is your digital twin — it learns who you are from your daily check-ins and, with AXON (your AI coach), pushes you to grow across mind, body, and wealth.'),
+  ('What is AXON?', 'AXON is the AI coach inside TWIN. It reads your check-ins and habits, remembers what matters to you, and gives you direct, personalized guidance every day.'),
+  ('How do check-ins work?', 'Each morning you check in (sleep, energy, mood, plan) and each evening you check out (how the day went, habits, gratitude). This is the data that builds your twin.'),
+  ('How do I build a streak?', 'Check in daily. Your streak counts consecutive days — it lives on your home screen and your profile.'),
+  ('How do I get verified?', 'Go to Settings → Verification → Apply. The EPHAS team reviews every request manually and grants the verified badge to authentic accounts.'),
+  ('What is TWIN Professional?', 'Professional accounts can publish courses, coach members, and build their brand. It is hand-selected and reviewed by the EPHAS team.'),
+  ('Is my private data safe?', 'Your Personal data is private — only AXON and the recommendation engine use it. It is never shown publicly. Sensitive settings require your password.'),
+  ('How do I switch accounts?', 'Hold the profile tab in the bottom bar, or go to Settings → Accounts → Add account.'),
+] %}
+{% for q, a in faqs %}
+<div class="faq">
+  <div class="faq-q" onclick="toggleFaq(this)"><h4>{{ q }}</h4><i data-lucide="chevron-down"></i></div>
+  <div class="faq-a">{{ a }}</div>
+</div>
+{% endfor %}
+
+<div class="help-contact">
+  <div style="font-size:12px;color:var(--sub);line-height:1.6;">Still need help? <a href="/report">Report a problem</a> or email <a href="mailto:support@joinephas.com">support@joinephas.com</a></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleFaq(el){
+  el.classList.toggle('open');
+  const a=el.nextElementSibling; a.classList.toggle('open');
+}
+</script>
+{% endblock %}

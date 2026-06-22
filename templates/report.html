@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Report a Problem{% endblock %}
+{% block head %}
+<style>
+.rp-wrap{padding:20px;}
+.rp-wrap h2{font-family:'Inter',sans-serif;font-size:22px;letter-spacing:-.8px;color:var(--black);margin:0 0 6px;}
+.rp-wrap p.intro{font-size:12px;color:var(--sub);line-height:1.5;margin:0 0 18px;}
+.rp-field{margin-bottom:16px;}
+.rp-field label{display:block;font-size:11px;font-weight:700;color:var(--black);margin-bottom:7px;letter-spacing:.2px;}
+.rp-field select,.rp-field input,.rp-field textarea{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--black);font-family:'Inter',sans-serif;}
+.rp-field textarea{resize:vertical;min-height:130px;line-height:1.5;}
+.rp-field select:focus,.rp-field input:focus,.rp-field textarea:focus{border-color:var(--gold);outline:none;}
+.rp-submit{width:100%;background:var(--grad);color:#241D10;border:none;border-radius:var(--r-full);padding:14px;font-size:13px;font-weight:800;cursor:pointer;}
+.rp-submit:disabled{opacity:.6;}
+.rp-done{display:none;text-align:center;padding:50px 24px;}
+.rp-done.on{display:block;}
+.rp-done .ic{width:64px;height:64px;border-radius:50%;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.rp-done .ic svg{width:30px;height:30px;stroke:var(--green);fill:none;stroke-width:2;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/settings" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Report a Problem</div></div>
+  <div style="width:36px;"></div>
+</div>
+<div class="rp-wrap" id="rpForm">
+  <h2>Tell us what's wrong</h2>
+  <p class="intro">Bugs, broken things, inappropriate content, or ideas — the EPHAS team reads every report.</p>
+  <div class="rp-field">
+    <label>What kind of report?</label>
+    <select id="rpKind">
+      <option value="problem">Something isn't working</option>
+      <option value="bug">A bug / glitch</option>
+      <option value="content_report">Report content or a user</option>
+      <option value="idea">An idea / suggestion</option>
+    </select>
+  </div>
+  <div class="rp-field">
+    <label>Related to (optional)</label>
+    <input id="rpTarget" maxlength="120" placeholder="@username, a post, or a screen name">
+  </div>
+  <div class="rp-field">
+    <label>Details</label>
+    <textarea id="rpMsg" maxlength="2000" placeholder="Describe what happened, what you expected, and any steps to reproduce it."></textarea>
+  </div>
+  <button class="rp-submit" id="rpBtn" onclick="sendReport()">Send report</button>
+</div>
+<div class="rp-done" id="rpDone">
+  <div class="ic"><i data-lucide="check"></i></div>
+  <div style="font-size:16px;font-weight:800;color:var(--black);">Report sent</div>
+  <div style="font-size:13px;color:var(--sub);margin-top:6px;line-height:1.5;">Thank you — the EPHAS team will look into it.</div>
+  <a href="/settings" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:18px;border-radius:var(--r-xl);">Back to settings</a>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function sendReport(){
+  const msg=document.getElementById('rpMsg').value.trim();
+  if(!msg){ alert('Please describe the problem.'); return; }
+  const btn=document.getElementById('rpBtn'); btn.disabled=true; btn.textContent='Sending…';
+  fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({kind:document.getElementById('rpKind').value, target:document.getElementById('rpTarget').value.trim(), message:msg})})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){ document.getElementById('rpForm').style.display='none'; document.getElementById('rpDone').classList.add('on'); if(window.lucide) lucide.createIcons(); }
+      else { alert('Could not send. Try again.'); btn.disabled=false; btn.textContent='Send report'; }
+    }).catch(()=>{ alert('Network error.'); btn.disabled=false; btn.textContent='Send report'; });
+}
+</script>
+{% endblock %}

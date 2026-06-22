@@ -82,6 +82,19 @@
 .vf-cancel{flex:1;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px;font-size:13px;font-weight:700;color:var(--black);cursor:pointer;}
 .vf-submit{flex:2;background:var(--grad);color:#241D10;border:none;border-radius:var(--r-full);padding:12px;font-size:13px;font-weight:800;cursor:pointer;}
 .vf-submit:disabled{opacity:.6;cursor:default;}
+.s-soon{font-size:8px;font-weight:800;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:2px 7px;text-transform:uppercase;margin-left:6px;}
+.s-row.danger .s-title{color:var(--red);}
+.s-row.danger .s-ico-wrap svg{stroke:var(--red);}
+.del-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:28px;}
+.del-ov.on{display:flex;}
+.del-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:340px;width:100%;padding:24px 22px;}
+.del-card h3{font-family:'Inter',sans-serif;font-size:18px;color:var(--black);margin:0 0 8px;}
+.del-card p{font-size:12px;color:var(--sub);line-height:1.55;margin:0 0 16px;}
+.del-card input{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 13px;font-size:13px;color:var(--black);margin-bottom:14px;}
+.del-actions{display:flex;gap:10px;}
+.del-actions button{flex:1;border-radius:var(--r-full);padding:12px;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+.del-cancel{background:var(--bg-2);border:1.5px solid var(--border);color:var(--black);}
+.del-confirm{background:var(--red);color:#fff;}
 </style>
 {% endblock %}
 
@@ -103,25 +116,6 @@
   </div>
 </div>
 
-<!-- APPEARANCE -->
-<div class="block-label">Appearance</div>
-<div class="settings-block">
-  <div class="s-row">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="moon"></i></div>
-      <div>
-        <div class="s-title">Dark Mode</div>
-        <div class="s-sub">Switch between light and dark</div>
-      </div>
-    </div>
-    <label class="toggle">
-      <input type="checkbox" id="darkModeToggle">
-      <div class="toggle-track"></div>
-      <div class="toggle-thumb"></div>
-    </label>
-  </div>
-</div>
-
 <!-- TWIN PRO -->
 <a href="/twin-pro" class="twin-pro-card">
   <div class="tpc-glow"></div>
@@ -133,14 +127,22 @@
   <i data-lucide="chevron-right" class="tpc-arrow"></i>
 </a>
 
-<!-- PROFILE -->
-<div class="block-label">Profile</div>
+<!-- ACCOUNT -->
+<div class="block-label">Account</div>
 <div class="settings-block">
-  <a href="/edit-profile" class="s-row" style="cursor:pointer;text-decoration:none;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="user"></i></div>
-      <div><div class="s-title">Edit Profile</div><div class="s-sub">Name, photo, banner, bio, username</div></div>
-    </div>
+  <a href="/edit-profile" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="user"></i></div>
+      <div><div class="s-title">Edit Profile</div><div class="s-sub">Name, photo, banner, bio, username</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
+  <a href="/account" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="shield-check"></i></div>
+      <div><div class="s-title">Account & Security</div><div class="s-sub">Email, password, login · password required</div></div></div>
+    <div class="s-arrow"><i data-lucide="lock"></i></div>
+  </a>
+  <a href="/saved" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="bookmark"></i></div>
+      <div><div class="s-title">Saved</div><div class="s-sub">Posts you've bookmarked</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
   </a>
 </div>
@@ -155,7 +157,6 @@
       <div class="vf-sub">Apply for the verified badge so people know your account is authentic.</div>
     </div>
   </div>
-
   {% if verify.state == 'verified' %}
   <div class="vf-status verified"><i data-lucide="badge-check"></i> Your account is verified.</div>
   {% elif verify.state == 'pending' %}
@@ -166,32 +167,6 @@
   {% else %}
   <button class="vf-btn" onclick="openVerify()">Apply for verification</button>
   {% endif %}
-</div>
-
-<!-- ACCOUNT & SECURITY -->
-<div class="block-label">Account & Security</div>
-<div class="settings-block">
-  <a href="/account" class="s-row" style="cursor:pointer;text-decoration:none;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="shield-check"></i></div>
-      <div><div class="s-title">Account & Security</div><div class="s-sub">Email, password, phone, Google · password required</div></div>
-    </div>
-    <div class="s-arrow"><i data-lucide="lock"></i></div>
-  </a>
-  <a href="/personal" class="s-row" style="cursor:pointer;text-decoration:none;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="user-circle"></i></div>
-      <div><div class="s-title">Personal <span style="font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.5px;">PRIVATE</span></div><div class="s-sub">Your private data — only AXON sees it · password required</div></div>
-    </div>
-    <div class="s-arrow"><i data-lucide="lock"></i></div>
-  </a>
-  <a href="/privacy" class="s-row" style="cursor:pointer;text-decoration:none;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="eye-off"></i></div>
-      <div><div class="s-title">Privacy</div><div class="s-sub">Who can see your account & data</div></div>
-    </div>
-    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
-  </a>
 </div>
 
 <!-- PROFESSIONAL -->
@@ -214,34 +189,72 @@
   </div>
 </div>
 
+<!-- PRIVACY & SAFETY -->
+<div class="block-label">Privacy & Safety</div>
+<div class="settings-block">
+  <a href="/privacy" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="eye-off"></i></div>
+      <div><div class="s-title">Privacy</div><div class="s-sub">Who can see your account & data</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
+  <a href="/personal" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="user-circle"></i></div>
+      <div><div class="s-title">Personal <span style="font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.5px;">PRIVATE</span></div><div class="s-sub">Your private data — only AXON sees it · password required</div></div></div>
+    <div class="s-arrow"><i data-lucide="lock"></i></div>
+  </a>
+  <div class="s-row" onclick="comingSoon('Blocked accounts')" style="cursor:pointer;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="slash"></i></div>
+      <div><div class="s-title">Blocked accounts <span class="s-soon">Soon</span></div><div class="s-sub">Manage who you've blocked</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="block-label">Notifications</div>
+<div class="settings-block">
+  <a href="/notifications" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="bell"></i></div>
+      <div><div class="s-title">Your notifications</div><div class="s-sub">Follows, likes, comments, quests</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
+  <div class="s-row" onclick="comingSoon('Push notifications')" style="cursor:pointer;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="smartphone"></i></div>
+      <div><div class="s-title">Push notifications <span class="s-soon">Soon</span></div><div class="s-sub">Get notified on your phone</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
+<!-- APPEARANCE -->
+<div class="block-label">Appearance</div>
+<div class="settings-block">
+  <div class="s-row">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="moon"></i></div>
+      <div><div class="s-title">Dark Mode</div><div class="s-sub">Switch between light and dark</div></div></div>
+    <label class="toggle"><input type="checkbox" id="darkModeToggle"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="s-row" onclick="comingSoon('More languages')" style="cursor:pointer;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="globe"></i></div>
+      <div><div class="s-title">Language</div><div class="s-sub">English</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
 <!-- TWIN -->
 <div class="block-label">TWIN</div>
 <div class="settings-block">
-  <a href="/axon-settings" class="s-row" style="cursor:pointer;text-decoration:none;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="zap"></i></div>
-      <div>
-        <div class="s-title">AXON AI Coach</div>
-        <div class="s-sub">Customize what AXON monitors & tracks</div>
-      </div>
-    </div>
+  <a href="/axon-settings" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="zap"></i></div>
+      <div><div class="s-title">AXON AI Coach</div><div class="s-sub">Customize what AXON monitors & tracks</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
   </a>
-  <div class="s-row" style="cursor:pointer;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="target"></i></div>
-      <div>
-        <div class="s-title">Goals & Habits</div>
-        <div class="s-sub">Customize your tracking domains</div>
-      </div>
-    </div>
+  <a href="/habits" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="target"></i></div>
+      <div><div class="s-title">Goals & Habits</div><div class="s-sub">Manage what you're tracking</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
-  </div>
-  <div class="s-row" style="cursor:pointer;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="share-2"></i></div>
-      <div><div class="s-title">Share TWIN</div></div>
-    </div>
+  </a>
+  <div class="s-row" onclick="shareTwin()" style="cursor:pointer;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="share-2"></i></div>
+      <div><div class="s-title">Share TWIN</div><div class="s-sub">Invite a friend</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
   </div>
 </div>
@@ -249,20 +262,36 @@
 <!-- SUPPORT -->
 <div class="block-label">Support</div>
 <div class="settings-block">
-  <div class="s-row" style="cursor:pointer;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="help-circle"></i></div>
-      <div><div class="s-title">Help & FAQ</div></div>
-    </div>
+  <a href="/help" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="help-circle"></i></div>
+      <div><div class="s-title">Help & FAQ</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
-  </div>
-  <div class="s-row" style="cursor:pointer;">
-    <div class="s-left">
-      <div class="s-ico-wrap"><i data-lucide="flag"></i></div>
-      <div><div class="s-title">Report a Problem</div></div>
-    </div>
+  </a>
+  <a href="/report" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="flag"></i></div>
+      <div><div class="s-title">Report a Problem</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
-  </div>
+  </a>
+</div>
+
+<!-- ABOUT & LEGAL -->
+<div class="block-label">About</div>
+<div class="settings-block">
+  <a href="/legal/terms" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="file-text"></i></div>
+      <div><div class="s-title">Terms of Service</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
+  <a href="/legal/privacy-policy" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="lock"></i></div>
+      <div><div class="s-title">Privacy Policy</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
+  <a href="/legal/guidelines" class="s-row" style="text-decoration:none;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="book-open"></i></div>
+      <div><div class="s-title">Community Guidelines</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </a>
 </div>
 
 <div class="about-ephas" style="margin-top:16px;flex-direction:column;align-items:flex-start;gap:10px;">
@@ -302,6 +331,27 @@
   <i data-lucide="log-out"></i>
   SIGN OUT
 </a>
+
+<div class="block-label" style="color:var(--red);">Danger Zone</div>
+<div class="settings-block">
+  <div class="s-row danger" onclick="openDelete()" style="cursor:pointer;">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="trash-2"></i></div>
+      <div><div class="s-title">Delete account</div><div class="s-sub">Permanently delete your account & data</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
+  </div>
+</div>
+
+<div class="del-ov" id="delOv" onclick="if(event.target===this)closeDelete()">
+  <div class="del-card">
+    <h3>Delete account?</h3>
+    <p>This permanently deletes your account, posts, check-ins, and all your data. This <b>cannot be undone</b>. Enter your password to confirm.</p>
+    <input type="password" id="delPw" placeholder="Your password" autocomplete="current-password">
+    <div class="del-actions">
+      <button class="del-cancel" onclick="closeDelete()">Cancel</button>
+      <button class="del-confirm" id="delBtn" onclick="confirmDelete()">Delete forever</button>
+    </div>
+  </div>
+</div>
 
 <div class="app-info">
   <div class="ai-twin">TWIN</div>
@@ -357,6 +407,26 @@
 <script>
 function openVerify(){ const o=document.getElementById('vfOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
 function closeVerify(){ const o=document.getElementById('vfOv'); if(o) o.classList.remove('on'); }
+function comingSoon(name){ alert((name||'This') + ' is coming soon.'); }
+function shareTwin(){
+  const url=location.origin;
+  const data={title:'TWIN by EPHAS', text:'Build your digital twin and grow with AXON. Join me on TWIN:', url:url};
+  if(navigator.share){ navigator.share(data).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(()=>alert('Link copied!')).catch(()=>alert(url)); }
+  else { alert(url); }
+}
+function openDelete(){ const o=document.getElementById('delOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeDelete(){ const o=document.getElementById('delOv'); if(o) o.classList.remove('on'); }
+function confirmDelete(){
+  const pw=document.getElementById('delPw').value;
+  if(!pw){ alert('Enter your password to confirm.'); return; }
+  const btn=document.getElementById('delBtn'); btn.disabled=true; btn.textContent='Deleting…';
+  fetch('/account/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){ location.href='/'; }
+      else { alert(d.error==='bad_password'?'Incorrect password.':'Could not delete. Try again.'); btn.disabled=false; btn.textContent='Delete forever'; }
+    }).catch(()=>{ alert('Network error.'); btn.disabled=false; btn.textContent='Delete forever'; });
+}
 function submitVerify(e){
   e.preventDefault();
   const btn=document.getElementById('vfSubmit'); btn.disabled=true; btn.textContent='Submitting…';

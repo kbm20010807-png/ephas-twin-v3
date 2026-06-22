@@ -183,6 +183,17 @@ class VerificationRequest(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reviewed_at = db.Column(db.DateTime)
 
+class Feedback(db.Model):
+    # "Report a problem" / bug reports / content reports — reviewed by the team.
+    __tablename__ = 'feedback'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
+    kind = db.Column(db.String(20), default='problem')   # problem | bug | content_report | idea
+    target = db.Column(db.String(120), default='')       # optional: what was reported (username/post id)
+    message = db.Column(db.Text, default='')
+    status = db.Column(db.String(12), default='open', index=True)  # open | resolved
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class Profile(db.Model):
     # PRIVATE onboarding data — only AXON & the algorithm use this; never shown publicly.
     __tablename__ = 'profiles'
@@ -2230,6 +2241,87 @@ def settings():
     if not auth(): return redirect('/login')
     return render_template('settings.html', u=user_ctx(), accounts=session_accounts(),
                            verify=verification_ctx(current_user()), active='settings')
+
+@app.route('/help')
+def help_page():
+    if not auth(): return redirect('/login')
+    return render_template('help.html', u=user_ctx(), active='settings')
+
+@app.route('/report', methods=['GET', 'POST'])
+def report():
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    if request.method == 'POST':
+        d = request.get_json(silent=True) or request.form
+        msg = (d.get('message') or '').strip()
+        if not msg:
+            return jsonify({'ok': False, 'error': 'empty'})
+        fb = Feedback(user_id=cu.id, kind=(d.get('kind') or 'problem')[:20],
+                      target=(d.get('target') or '')[:120], message=msg[:2000])
+        db.session.add(fb)
+        db.session.commit()
+        return jsonify({'ok': True})
+    return render_template('report.html', u=user_ctx(), active='settings')
+
+LEGAL_DOCS = {
+    'terms': 'Terms of Service',
+    'privacy-policy': 'Privacy Policy',
+    'guidelines': 'Community Guidelines',
+}
+
+@app.route('/legal/<doc>')
+def legal(doc):
+    if doc not in LEGAL_DOCS:
+        return ('Not found', 404)
+    return render_template('legal.html', u=user_ctx() if auth() else None,
+                           doc=doc, title=LEGAL_DOCS[doc], active='settings')
+
+@app.route('/saved')
+def saved_redirect():
+    if not auth(): return redirect('/login')
+    return redirect('/profile#saved')
+
+@app.route('/account/delete', methods=['POST'])
+def account_delete():
+    if not auth(): return jsonify({'ok': False}), 401
+    cu = current_user()
+    d = request.get_json(silent=True) or request.form
+    pw = d.get('password') or ''
+    if not cu.check_password(pw):
+        return jsonify({'ok': False, 'error': 'bad_password'})
+    uid = cu.id
+    # delete children first (FK order), then the user
+    for model, col in [(Like, 'user_id'), (Comment, 'user_id'), (Bookmark, 'user_id'),
+                       (Follow, 'follower_id'), (Follow, 'following_id'), (ProfileView, 'viewer_id'),
+                       (ProfileView, 'viewed_id'), (Post, 'user_id'), (CheckIn, 'user_id'),
+                       (HabitLog, 'user_id'), (Habit, 'user_id'), (AxonMessage, 'user_id'),
+                       (AxonMemory, 'user_id'), (SearchLog, 'user_id'), (VerificationRequest, 'user_id'),
+                       (Feedback, 'user_id'), (Profile, 'user_id')]:
+        try:
+            model.query.filter(getattr(model, col) == uid).delete()
+        except Exception:
+            db.session.rollback()
+    User.query.filter_by(id=uid).delete()
+    db.session.commit()
+    # drop from the multi-account list + clear session
+    accts = [a for a in session.get('accounts', []) if a != uid]
+    session.clear()
+    if accts:
+        session['accounts'] = accts
+    return jsonify({'ok': True})
+
+@app.route('/admin/feedback')
+def admin_feedback():
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if not admin_key or request.args.get('key', '') != admin_key:
+        return ('Forbidden', 403)
+    out = []
+    for f in Feedback.query.order_by(Feedback.created_at.desc()).limit(200).all():
+        u = User.query.get(f.user_id) if f.user_id else None
+        out.append({'id': f.id, 'kind': f.kind, 'status': f.status, 'target': f.target,
+                    'from': (u.username if u else '?'), 'message': f.message,
+                    'at': f.created_at.strftime('%Y-%m-%d %H:%M') if f.created_at else ''})
+    return jsonify({'feedback': out})
 
 @app.route('/api/verify/apply', methods=['POST'])
 def verify_apply():
