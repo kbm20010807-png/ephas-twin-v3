@@ -3,6 +3,9 @@
 
 {% block head %}
 <style>
+.agree-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:16px;font-size:11px;color:var(--sub);line-height:1.5;cursor:pointer;}
+.agree-row input{width:17px;height:17px;margin-top:1px;accent-color:#C8A45A;flex-shrink:0;}
+.agree-row a{color:var(--gold);text-decoration:none;font-weight:600;}
 body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
 .auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 20%,rgba(200,164,90,.06) 0%,transparent 60%);pointer-events:none;}
 .auth-wrap{flex:1;display:flex;flex-direction:column;padding:60px 28px 40px;}
@@ -124,6 +127,10 @@ body{background:#000;display:flex;flex-direction:column;min-height:100vh;}
       <input type="password" class="form-input" id="inp-pwd2" name="confirm" placeholder="Re-enter password" autocomplete="new-password" oninput="checkMatch()">
       <div class="uname-status" id="matchStatus"></div>
     </div>
+    <label class="agree-row">
+      <input type="checkbox" id="agreeChk" name="agree" required>
+      <span>I'm 13 or older and I agree to TWIN's <a href="/legal/terms" target="_blank">Terms</a>, <a href="/legal/privacy-policy" target="_blank">Privacy Policy</a> &amp; <a href="/legal/guidelines" target="_blank">Community Guidelines</a>.</span>
+    </label>
     <div class="form-error" id="step4err" style="margin-bottom:10px;"></div>
     <button type="submit" class="btn btn-gold btn-full btn-block" style="border-radius:var(--r-xl);">
       <i data-lucide="check"></i> CREATE ACCOUNT

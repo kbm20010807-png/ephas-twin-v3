@@ -1326,7 +1326,9 @@ def signup():
         confirm = request.form.get('confirm') or ''
         username = ''.join(c for c in (request.form.get('username') or '').strip().lower() if c.isalnum() or c in '_.')[:24]
         err = None
-        if not email or '@' not in email:
+        if not request.form.get('agree'):
+            err = 'Please agree to the Terms, Privacy Policy & Community Guidelines.'
+        elif not email or '@' not in email:
             err = 'Enter a valid email address.'
         elif len(pw) < 8 or not any(c.isupper() for c in pw) or not any(not c.isalnum() for c in pw):
             err = 'Password needs 8+ characters, a capital letter, and a symbol.'
