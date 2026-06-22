@@ -33,20 +33,16 @@
 .pp-cnt .l{font-size:10px;color:var(--sub);letter-spacing:.4px;margin-top:3px;}
 /* Discord-style inline badge row */
 .pp-badges{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 20px;padding:5px 9px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);}
-.pp-badge{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:transform .12s;flex-shrink:0;}
+.pp-badge{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:transform .12s;flex-shrink:0;}
 .pp-badge:active{transform:scale(.88);}
 .pp-badge img{width:100%;height:100%;object-fit:contain;}
-.pp-badge svg{width:16px;height:16px;fill:none;stroke-width:2.25;}
-/* Badge detail modal */
-.pp-bd-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:30px;}
-.pp-bd-ov.on{display:flex;}
-.pp-bd-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:300px;width:100%;text-align:center;padding:26px 24px;}
-.pp-bd-ic{width:72px;height:72px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;}
-.pp-bd-ic img{width:100%;height:100%;object-fit:cover;}
-.pp-bd-ic svg{width:34px;height:34px;fill:none;stroke-width:2;}
-.pp-bd-name{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--black);}
-.pp-bd-desc{font-size:13px;color:var(--sub);line-height:1.55;margin-top:8px;}
-.pp-bd-x{margin-top:18px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 22px;font-size:12px;font-weight:700;color:var(--black);cursor:pointer;}
+.pp-badge svg{width:26px;height:26px;fill:none;stroke-width:2;}
+/* badge popover cloud */
+.badge-pop{position:fixed;z-index:700;display:none;max-width:230px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-md);padding:11px 13px;transform:translate(-50%, calc(-100% - 12px));pointer-events:none;}
+.badge-pop.on{display:block;}
+.badge-pop::after{content:'';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%) rotate(45deg);width:13px;height:13px;background:var(--card);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.badge-pop-name{font-family:'Inter',sans-serif;font-weight:800;font-size:13px;color:var(--black);}
+.badge-pop-desc{font-size:11px;color:var(--sub);line-height:1.5;margin-top:3px;}
 .pp-meta{display:flex;flex-wrap:wrap;gap:14px;padding:14px 20px 0;}
 .pp-meta div{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:4px;}
 .pp-meta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.75;}
@@ -107,7 +103,7 @@
 <div style="padding:12px 0 0;">
 <div class="pp-badges">
   {% for b in p.badges %}
-  <div class="pp-badge" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
+  <div class="pp-badge" onclick="event.stopPropagation();openBadge('{{ b.slug }}', this)" title="{{ b.label }}">
     {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
   </div>
   {% endfor %}
@@ -168,13 +164,9 @@
 {% endif %}
 <div style="height:30px;"></div>
 
-<div class="pp-bd-ov" id="bdOv" onclick="if(event.target===this)closeBadge()">
-  <div class="pp-bd-card">
-    <div class="pp-bd-ic" id="bdIc"></div>
-    <div class="pp-bd-name" id="bdName"></div>
-    <div class="pp-bd-desc" id="bdDesc"></div>
-    <button class="pp-bd-x" onclick="closeBadge()">Close</button>
-  </div>
+<div class="badge-pop" id="badgePop">
+  <div class="badge-pop-name" id="bpName"></div>
+  <div class="badge-pop-desc" id="bpDesc"></div>
 </div>
 
 <div class="pp-toast" id="ppToast">Link copied</div>
@@ -202,17 +194,19 @@ function shareProfile(){
 const BADGES={
 {% for b in p.badges %}'{{ b.slug }}':{label:'{{ b.label }}',desc:{{ b.desc|tojson }},icon:'{{ b.icon }}',color:'{{ b.color }}',img:{{ (b.img or '')|tojson }}},
 {% endfor %}};
-function openBadge(slug){
+function openBadge(slug, el){
   const b=BADGES[slug]; if(!b) return;
-  document.getElementById('bdName').textContent=b.label;
-  document.getElementById('bdDesc').textContent=b.desc;
-  const ic=document.getElementById('bdIc');
-  ic.style.borderColor=b.color+'55';
-  ic.innerHTML = b.img ? '<img src="'+b.img+'" alt="">' : '<i data-lucide="'+b.icon+'" style="stroke:'+b.color+';"></i>';
-  document.getElementById('bdOv').classList.add('on');
-  if(window.lucide) lucide.createIcons();
+  const pop=document.getElementById('badgePop'); if(!pop) return;
+  document.getElementById('bpName').textContent=b.label;
+  document.getElementById('bpDesc').textContent=b.desc;
+  const r=el.getBoundingClientRect();
+  pop.style.left=(r.left+r.width/2)+'px';
+  pop.style.top=r.top+'px';
+  pop.classList.add('on');
 }
-function closeBadge(){ document.getElementById('bdOv').classList.remove('on'); }
+function closeBadge(){ const p=document.getElementById('badgePop'); if(p) p.classList.remove('on'); }
+document.addEventListener('click', closeBadge);
+window.addEventListener('scroll', closeBadge, true);
 function ppTab(el){
   document.querySelectorAll('.pp-tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');

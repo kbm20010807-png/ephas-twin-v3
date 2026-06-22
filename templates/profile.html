@@ -25,21 +25,18 @@
 .pc-v{font-family:'Inter',sans-serif;font-weight:800;font-size:16px;color:var(--black);}
 .pc-l{font-size:11px;color:var(--sub);font-weight:600;}
 
-/* Discord-style inline badge row */
-.prof-badges{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:9px 0 0;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:5px 9px;}
-.prof-badge{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:transform .12s;}
-.prof-badge:active{transform:scale(.88);}
+/* badge row — bigger so the badge detail is visible */
+.prof-badges{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 0;}
+.prof-badge{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:transform .12s;}
+.prof-badge:active{transform:scale(.9);}
 .prof-badge img{width:100%;height:100%;object-fit:contain;}
-.prof-badge svg{width:16px;height:16px;fill:none;stroke-width:2.25;}
-.pb-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:30px;}
-.pb-ov.on{display:flex;}
-.pb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:300px;width:100%;text-align:center;padding:26px 24px;}
-.pb-ic{width:72px;height:72px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;}
-.pb-ic img{width:100%;height:100%;object-fit:cover;}
-.pb-ic svg{width:34px;height:34px;fill:none;stroke-width:2;}
-.pb-name{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--black);}
-.pb-desc{font-size:13px;color:var(--sub);line-height:1.55;margin-top:8px;}
-.pb-x{margin-top:18px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 22px;font-size:12px;font-weight:700;color:var(--black);cursor:pointer;}
+.prof-badge svg{width:26px;height:26px;fill:none;stroke-width:2;}
+/* badge popover "cloud" shown above the tapped badge */
+.badge-pop{position:fixed;z-index:700;display:none;max-width:230px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-md);padding:11px 13px;transform:translate(-50%, calc(-100% - 12px));pointer-events:none;}
+.badge-pop.on{display:block;}
+.badge-pop::after{content:'';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%) rotate(45deg);width:13px;height:13px;background:var(--card);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.badge-pop-name{font-family:'Inter',sans-serif;font-weight:800;font-size:13px;color:var(--black);}
+.badge-pop-desc{font-size:11px;color:var(--sub);line-height:1.5;margin-top:3px;}
 
 .acct-switch{display:flex;gap:8px;padding:14px 20px 0;}
 .acct-btn{flex:1;padding:10px 8px;border-radius:var(--r-lg);border:1.5px solid var(--border);background:var(--bg-2);font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;text-align:center;transition:all .15s;line-height:1;}
@@ -199,7 +196,7 @@
   {% if badges %}
   <div class="prof-badges">
     {% for b in badges %}
-    <div class="prof-badge" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
+    <div class="prof-badge" onclick="event.stopPropagation();openBadge('{{ b.slug }}', this)" title="{{ b.label }}">
       {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
     </div>
     {% endfor %}
@@ -542,13 +539,9 @@
 </div>
 
 {% if badges %}
-<div class="pb-ov" id="pbOv" onclick="if(event.target===this)closeBadge()">
-  <div class="pb-card">
-    <div class="pb-ic" id="pbIc"></div>
-    <div class="pb-name" id="pbName"></div>
-    <div class="pb-desc" id="pbDesc"></div>
-    <button class="pb-x" onclick="closeBadge()">Close</button>
-  </div>
+<div class="badge-pop" id="badgePop">
+  <div class="badge-pop-name" id="bpName"></div>
+  <div class="badge-pop-desc" id="bpDesc"></div>
 </div>
 {% endif %}
 {% endblock %}
@@ -689,16 +682,19 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReel(); });
 const BADGES={
 {% for b in badges %}'{{ b.slug }}':{label:'{{ b.label }}',desc:{{ b.desc|tojson }},icon:'{{ b.icon }}',color:'{{ b.color }}',img:{{ (b.img or '')|tojson }}},
 {% endfor %}};
-function openBadge(slug){
+function openBadge(slug, el){
   const b=BADGES[slug]; if(!b) return;
-  document.getElementById('pbName').textContent=b.label;
-  document.getElementById('pbDesc').textContent=b.desc;
-  const ic=document.getElementById('pbIc'); ic.style.borderColor=b.color+'55';
-  ic.innerHTML = b.img ? '<img src="'+b.img+'" alt="">' : '<i data-lucide="'+b.icon+'" style="stroke:'+b.color+';"></i>';
-  document.getElementById('pbOv').classList.add('on');
-  if(window.lucide) lucide.createIcons();
+  const pop=document.getElementById('badgePop'); if(!pop) return;
+  document.getElementById('bpName').textContent=b.label;
+  document.getElementById('bpDesc').textContent=b.desc;
+  const r=el.getBoundingClientRect();
+  pop.style.left=(r.left+r.width/2)+'px';
+  pop.style.top=r.top+'px';
+  pop.classList.add('on');
 }
-function closeBadge(){ document.getElementById('pbOv').classList.remove('on'); }
+function closeBadge(){ const p=document.getElementById('badgePop'); if(p) p.classList.remove('on'); }
+document.addEventListener('click', closeBadge);
+window.addEventListener('scroll', closeBadge, true);
 {% endif %}
 </script>
 {% endblock %}
