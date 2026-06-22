@@ -5,7 +5,7 @@
   /* ===== BRAND: gold -> WARM platinum gradient (signature) ===== */
   --grad:linear-gradient(135deg,#D8BA72 0%,#D0C2A0 28%,#C7C0B5 55%,#C4BFB8 80%,#CDC9C2 100%);
   --grad-soft:linear-gradient(135deg,rgba(216,186,114,0.16),rgba(196,191,184,0.20));
-  --gold:#C8A45A;--gold-2:#B58E3C;--plat:#C0BAB1;
+  --gold:#CBA862;--gold-2:#B58E3C;--plat:#C0BAB1;
   --gold-dim:rgba(200,164,90,0.10);--gold-b:rgba(200,164,90,0.22);
   /* ===== SURFACE ===== */
   --bg:#FAFAF9;--bg-2:#F1F0ED;--card:#FFFFFF;--surface:#F8F7F4;
@@ -25,6 +25,7 @@
 }
 [data-theme="dark"]{
   --grad:linear-gradient(135deg,#D9B96F 0%,#D0C5A0 28%,#C7C0B5 55%,#C4BFB8 80%,#CFCBC4 100%);
+  --gold:#D9B96F;  /* faded champagne gold to match the gradient / + button */
   --bg:#0B0A09;--bg-2:#16150F;--card:#161512;--surface:#1C1A15;
   --border:#272620;--black:#F5F3EE;--text:#E7E4DD;--sub:#928E84;--muted:#3C3A33;
   --box-gold:#1C1710;--box-gold-b:#3A2F1C;--box-plat:#161614;--box-plat-b:#2A2926;
