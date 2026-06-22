@@ -25,12 +25,12 @@
 .pc-v{font-family:'Inter',sans-serif;font-weight:800;font-size:16px;color:var(--black);}
 .pc-l{font-size:11px;color:var(--sub);font-weight:600;}
 
-/* badges section */
-.prof-badges-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;margin:16px 0 8px;}
-.prof-badges{display:flex;flex-wrap:wrap;gap:9px;}
-.prof-badge{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;flex-shrink:0;}
-.prof-badge img{width:100%;height:100%;object-fit:cover;}
-.prof-badge svg{width:18px;height:18px;fill:none;stroke-width:2;}
+/* Discord-style inline badge row */
+.prof-badges{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:9px 0 0;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:5px 9px;}
+.prof-badge{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:transform .12s;}
+.prof-badge:active{transform:scale(.88);}
+.prof-badge img{width:100%;height:100%;object-fit:contain;}
+.prof-badge svg{width:16px;height:16px;fill:none;stroke-width:2.25;}
 .pb-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:30px;}
 .pb-ov.on{display:flex;}
 .pb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:300px;width:100%;text-align:center;padding:26px 24px;}
@@ -196,21 +196,20 @@
 <div class="prof-info">
   <div class="prof-name">{{ u.name }}</div>
   <div class="prof-title">{{ u.level_title }}</div>
-  <div class="prof-counts">
-    <div class="pc-item"><span class="pc-v">{{ u.followers }}</span> <span class="pc-l">Followers</span></div>
-    <div class="pc-item"><span class="pc-v">{{ u.following }}</span> <span class="pc-l">Following</span></div>
-    <div class="pc-item" id="ssSubscribers" style="display:none;"><span class="pc-v">{{ u.subscribed }}</span> <span class="pc-l">Subscribers</span></div>
-  </div>
   {% if badges %}
-  <div class="prof-badges-lbl">Badges</div>
   <div class="prof-badges">
     {% for b in badges %}
-    <div class="prof-badge" style="border-color:{{ b.color }}55;" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
+    <div class="prof-badge" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
       {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
     </div>
     {% endfor %}
   </div>
   {% endif %}
+  <div class="prof-counts">
+    <div class="pc-item"><span class="pc-v">{{ u.followers }}</span> <span class="pc-l">Followers</span></div>
+    <div class="pc-item"><span class="pc-v">{{ u.following }}</span> <span class="pc-l">Following</span></div>
+    <div class="pc-item" id="ssSubscribers" style="display:none;"><span class="pc-v">{{ u.subscribed }}</span> <span class="pc-l">Subscribers</span></div>
+  </div>
   <div class="prof-meta">
     {% if u.city %}<div class="pm-item"><i data-lucide="map-pin"></i> {{ u.city }}</div>{% endif %}
     {% if u.job %}<div class="pm-item"><i data-lucide="briefcase"></i> {{ u.job }}</div>{% endif %}

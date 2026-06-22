@@ -31,13 +31,12 @@
 .pp-cnt{display:flex;flex-direction:column;}
 .pp-cnt .v{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;color:var(--black);line-height:1;}
 .pp-cnt .l{font-size:10px;color:var(--sub);letter-spacing:.4px;margin-top:3px;}
-/* Rare badges (Discord-style) — sits with a comfortable gap below the counts */
-.pp-badges{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:22px 20px 4px;}
-.pp-badges-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase;width:100%;font-family:'Inter',sans-serif;margin-bottom:2px;}
-.pp-badge{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-2);overflow:hidden;transition:transform .12s;flex-shrink:0;}
-.pp-badge:active{transform:scale(.92);}
-.pp-badge img{width:100%;height:100%;object-fit:cover;}
-.pp-badge svg{width:19px;height:19px;fill:none;stroke-width:2;}
+/* Discord-style inline badge row */
+.pp-badges{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 20px;padding:5px 9px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);}
+.pp-badge{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:transform .12s;flex-shrink:0;}
+.pp-badge:active{transform:scale(.88);}
+.pp-badge img{width:100%;height:100%;object-fit:contain;}
+.pp-badge svg{width:16px;height:16px;fill:none;stroke-width:2.25;}
 /* Badge detail modal */
 .pp-bd-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:30px;}
 .pp-bd-ov.on{display:flex;}
@@ -104,22 +103,23 @@
   <div class="pp-title"><i data-lucide="award"></i> {{ p.level_title }} · Level {{ p.level }}</div>
 </div>
 
+{% if p.badges %}
+<div style="padding:12px 0 0;">
+<div class="pp-badges">
+  {% for b in p.badges %}
+  <div class="pp-badge" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
+    {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+</div>
+{% endif %}
+
 <div class="pp-counts">
   <div class="pp-cnt"><div class="v" id="followerN">{{ p.followers }}</div><div class="l">Followers</div></div>
   <div class="pp-cnt"><div class="v">{{ p.following }}</div><div class="l">Following</div></div>
   <div class="pp-cnt"><div class="v">{{ p.achievements }}</div><div class="l">Achievements</div></div>
 </div>
-
-{% if p.badges %}
-<div class="pp-badges">
-  <div class="pp-badges-lbl">Badges</div>
-  {% for b in p.badges %}
-  <div class="pp-badge" style="border-color:{{ b.color }}55;" onclick="openBadge('{{ b.slug }}')" title="{{ b.label }}">
-    {% if b.img %}<img src="{{ b.img }}" alt="{{ b.label }}">{% else %}<i data-lucide="{{ b.icon }}" style="stroke:{{ b.color }};"></i>{% endif %}
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
 
 <div class="pp-meta">
   {% if p.city %}<div><i data-lucide="map-pin"></i> {{ p.city }}</div>{% endif %}
