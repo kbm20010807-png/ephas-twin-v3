@@ -1004,8 +1004,17 @@ def session_accounts():
     for i in ids:
         u = users.get(i)
         if u:
-            out.append({'id': u.id, 'name': u.name or u.username, 'username': u.username, 'active': u.id == active})
+            out.append({'id': u.id, 'name': u.name or u.username, 'username': u.username,
+                        'has_avatar': bool(u.avatar), 'active': u.id == active})
     return out
+
+@app.context_processor
+def inject_nav_accounts():
+    """Make the signed-in accounts available to every page (for the nav long-press switcher)."""
+    try:
+        return {'nav_accounts': session_accounts() if auth() else []}
+    except Exception:
+        return {'nav_accounts': []}
 
 def _checkin_dates(user):
     rows = db.session.query(CheckIn.date).filter_by(user_id=user.id).distinct().all()

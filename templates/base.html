@@ -11,6 +11,25 @@
 <link rel="apple-touch-icon" href="/static/twin_logo.png">
 <link rel="stylesheet" href="/static/twin.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+<style>
+.acsw-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:1000;}
+.acsw-ov.on{display:flex;}
+.acsw-sheet{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:430px;padding:10px 16px 30px;box-shadow:var(--sh-md);animation:acswUp .22s ease;}
+@keyframes acswUp{from{transform:translateY(50px);opacity:.4}to{transform:translateY(0);opacity:1}}
+.acsw-grip{width:40px;height:4px;border-radius:4px;background:var(--border);margin:4px auto 14px;}
+.acsw-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin:0 4px 10px;}
+.acsw-row{display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:var(--r);text-decoration:none;}
+.acsw-row:active,.acsw-row.active{background:var(--bg-2);}
+.acsw-av{width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;color:#241D10;overflow:hidden;flex-shrink:0;}
+.acsw-av img{width:100%;height:100%;object-fit:cover;}
+.acsw-info{flex:1;min-width:0;}
+.acsw-name{font-size:14px;font-weight:700;color:var(--black);}
+.acsw-user{font-size:12px;color:var(--sub);}
+.acsw-check{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:2;}
+.acsw-go{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:2;}
+.acsw-add{display:flex;align-items:center;gap:10px;padding:13px 8px;margin-top:6px;border-top:1px solid var(--border);text-decoration:none;color:var(--black);font-size:13px;font-weight:700;}
+.acsw-add svg{width:18px;height:18px;stroke:var(--black);fill:none;stroke-width:2;}
+</style>
 {% block head %}{% endblock %}
 </head>
 <body class="pg{% if not auth_page %} app-bg{% endif %}">
@@ -32,10 +51,26 @@
   <a href="/grow" class="nav-i {% if active=='grow' %}on{% endif %}">
     <div class="nav-ico"><i data-lucide="compass"></i></div>
   </a>
-  <a href="/profile" class="nav-i {% if active=='profile' %}on{% endif %}">
+  <a href="/profile" class="nav-i {% if active=='profile' %}on{% endif %}" id="navProfile">
     <div class="nav-ico"><i data-lucide="user"></i></div>
   </a>
 </nav>
+
+<!-- Account switcher (hold the profile tab) -->
+<div class="acsw-ov" id="acswOv" onclick="if(event.target===this)closeAcsw()">
+  <div class="acsw-sheet">
+    <div class="acsw-grip"></div>
+    <div class="acsw-title">Switch account</div>
+    {% for a in nav_accounts %}
+    <a href="{% if not a.active %}/switch/{{ a.id }}{% else %}#{% endif %}" class="acsw-row{% if a.active %} active{% endif %}"{% if a.active %} onclick="return false"{% endif %}>
+      <div class="acsw-av">{% if a.has_avatar %}<img src="/avatar/{{ a.id }}" alt="">{% else %}{{ a.name[0]|upper }}{% endif %}</div>
+      <div class="acsw-info"><div class="acsw-name">{{ a.name }}</div><div class="acsw-user">@{{ a.username }}</div></div>
+      {% if a.active %}<i data-lucide="check-circle" class="acsw-check"></i>{% else %}<i data-lucide="repeat" class="acsw-go"></i>{% endif %}
+    </a>
+    {% endfor %}
+    <a href="/add-account" class="acsw-add"><i data-lucide="plus"></i> Add another account</a>
+  </div>
+</div>
 {% endif %}
 
 <div id="pt" class="pt">
@@ -64,6 +99,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {}
 
+  // Hold the profile tab to switch accounts
+  (function(){
+    var np=document.getElementById('navProfile'); if(!np) return;
+    var timer=null, longed=false;
+    function start(){ longed=false; timer=setTimeout(function(){ longed=true; openAcsw(); if(navigator.vibrate)navigator.vibrate(15); }, 450); }
+    function cancel(){ if(timer){ clearTimeout(timer); timer=null; } }
+    np.addEventListener('touchstart', start, {passive:true});
+    ['touchend','touchmove','touchcancel'].forEach(function(ev){ np.addEventListener(ev, cancel); });
+    np.addEventListener('mousedown', start);
+    ['mouseup','mouseleave'].forEach(function(ev){ np.addEventListener(ev, cancel); });
+    np.addEventListener('click', function(e){ if(longed){ e.preventDefault(); e.stopImmediatePropagation(); longed=false; } }, true);
+  })();
+
   // Page transitions
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     a.addEventListener('click', function(e) {
@@ -86,6 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+function openAcsw(){ var o=document.getElementById('acswOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeAcsw(){ var o=document.getElementById('acswOv'); if(o) o.classList.remove('on'); }
 </script>
 {% block scripts %}{% endblock %}
 </body>
