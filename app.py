@@ -1611,6 +1611,29 @@ def home():
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
                            nsum=notif_summary(cu), active='home')
 
+MILESTONES = (3, 7, 14, 30, 60, 100, 180, 365)
+
+def checkin_reward(user, is_new):
+    """Reward payload for the dopamine moment after a check-in/out."""
+    dates = _checkin_dates(user)
+    total = len(dates)
+    xp = total * 50
+    level = xp // 200 + 1
+    gained = 50 if is_new else 0
+    prev_xp = xp - gained
+    prev_level = prev_xp // 200 + 1
+    streak, best = _streaks(dates)
+    return {
+        'xp_gained': gained,
+        'xp_from': prev_xp % 200, 'xp_to': xp % 200,
+        'level': level, 'prev_level': prev_level, 'leveled_up': level > prev_level,
+        'level_title': level_title_for(level),
+        'streak': streak, 'best_streak': best,
+        'is_record': streak > 0 and streak >= best,
+        'milestone': streak if (is_new and streak in MILESTONES) else 0,
+        'progress_pct': round((xp % 200) / 2),
+    }
+
 # ── Dynamic check-in / check-out questions ──────────────────────────────
 # Each step has several AXON-voiced phrasings so the prompts look different every
 # day and per account; AXON can also generate a fresh personalized set on top.
@@ -1786,6 +1809,8 @@ def checkin():
     cu = current_user()
     if request.method == 'POST':
         today = datetime.utcnow().date()
+        # XP/streak count one distinct day (morning OR evening) — only award on the day's first check-in
+        is_new = CheckIn.query.filter_by(user_id=cu.id, date=today).first() is None
         ci = CheckIn.query.filter_by(user_id=cu.id, kind='morning', date=today).first()
         if not ci:
             ci = CheckIn(user_id=cu.id, kind='morning', date=today)
@@ -1797,7 +1822,7 @@ def checkin():
         ci.win = (request.form.get('win') or '')[:400]
         ci.reflection = (request.form.get('reflection') or '')[:400]
         db.session.commit()
-        return ('', 204)
+        return jsonify(checkin_reward(cu, is_new))
     return render_template('checkin.html', u=user_ctx(), q=question_set(cu, 'morning'), active='checkin')
 
 @app.route('/checkout', methods=['GET', 'POST'])
@@ -1806,6 +1831,7 @@ def checkout():
     cu = current_user()
     if request.method == 'POST':
         today = datetime.utcnow().date()
+        is_new = CheckIn.query.filter_by(user_id=cu.id, date=today).first() is None
         ci = CheckIn.query.filter_by(user_id=cu.id, kind='evening', date=today).first()
         if not ci:
             ci = CheckIn(user_id=cu.id, kind='evening', date=today)
@@ -1825,7 +1851,7 @@ def checkout():
             elif h.id not in done_ids and already:
                 db.session.delete(already)
         db.session.commit()
-        return ('', 204)
+        return jsonify(checkin_reward(cu, is_new))
     return render_template('checkout.html', u=user_ctx(), habits=serialize_habits(cu),
                            q=question_set(cu, 'evening'), active='checkout')
 

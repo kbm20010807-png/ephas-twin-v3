@@ -32,6 +32,26 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .so-check{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:pop .4s ease;}
 .so-check svg{width:36px;height:36px;stroke:var(--gold);fill:none;stroke-width:1.75;}
 .so-xp{font-family:'Inter',sans-serif;font-weight:800;font-size:42px;letter-spacing:-2px;color:var(--gold);margin:12px 0 6px;}
+/* premium reward moment */
+.rw-seal{width:96px;height:96px;margin:0 auto 18px;position:relative;display:flex;align-items:center;justify-content:center;animation:rwPop .55s cubic-bezier(.16,1,.3,1);}
+.rw-seal img{width:100%;height:100%;object-fit:contain;}
+.rw-seal-ph{width:92px;height:92px;}
+@keyframes rwPop{0%{transform:scale(.55);opacity:0}100%{transform:scale(1);opacity:1}}
+.rw-title{font-family:'Inter',sans-serif;font-weight:800;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:var(--sub);text-align:center;}
+.rw-sub{font-size:13px;color:var(--gold);font-weight:700;text-align:center;margin-top:6px;}
+.rw-xp{display:flex;align-items:baseline;justify-content:center;gap:7px;margin:24px 0 14px;}
+.rw-xp .rw-xp-n{font-family:'Inter',sans-serif;font-weight:800;font-size:54px;letter-spacing:-2.5px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.rw-xp-u{font-size:16px;font-weight:800;color:var(--sub);letter-spacing:1px;}
+.rw-bar{width:240px;max-width:72vw;height:8px;border-radius:999px;background:var(--bg-2);border:1px solid var(--border);overflow:hidden;margin:0 auto;}
+.rw-bar-fill{height:100%;width:0;background:var(--grad);border-radius:999px;transition:width 1s cubic-bezier(.22,1,.36,1);}
+.rw-bar-lbl{font-size:11px;color:var(--sub);font-weight:600;text-align:center;margin-top:9px;letter-spacing:.3px;}
+.rw-streak{display:inline-flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 20px;margin:24px auto 0;}
+.rw-streak.record{border-color:var(--gold-b);box-shadow:0 0 0 1px var(--gold-b) inset;}
+.rw-streak-emblem{width:42px;height:42px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rw-streak-emblem img{width:100%;height:100%;object-fit:contain;}
+.rw-streak-n{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;color:var(--black);line-height:1;}
+.rw-streak-l{font-size:11px;color:var(--sub);font-weight:600;margin-top:3px;letter-spacing:.3px;}
+.rw-levelup{margin:20px auto 0;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:999px;padding:9px 20px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-align:center;}
 .motiv-player{display:none;width:100%;max-width:320px;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:18px;padding:18px;margin-bottom:14px;}
 .motiv-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:18px;}
 .motiv-wave span{width:3px;border-radius:2px;background:var(--gold);opacity:.7;animation:motivWave 1.1s ease-in-out infinite;}
@@ -175,12 +195,37 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   </div>
 </div>
 
-<!-- SUCCESS -->
+<!-- SUCCESS / REWARD -->
 <div class="success-ov" id="successOv">
-  <div class="so-check"><i data-lucide="check"></i></div>
-  <div class="t-label mb-2">Check-in complete</div>
-  <div class="so-xp">+50 XP</div>
-  <div style="font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:260px;margin-bottom:20px;">Logged. AXON is reading your day…</div>
+  <!-- completion seal — drop static/fx/complete.png to replace the placeholder -->
+  <div class="rw-seal" id="rwSeal">
+    <img src="/static/fx/complete.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <svg class="rw-seal-ph" viewBox="0 0 92 92" fill="none" style="display:none;">
+      <circle cx="46" cy="46" r="42" stroke="var(--gold)" stroke-width="2" opacity=".55"/>
+      <circle cx="46" cy="46" r="33" stroke="var(--gold)" stroke-width="1" opacity=".25"/>
+      <path d="M31 47l10 10 20-22" stroke="var(--gold)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="rw-title">Check-in complete</div>
+  <div class="rw-sub" id="rwLevelTitle"></div>
+
+  <div class="rw-xp"><span class="rw-xp-n" id="rwXp">+0</span><span class="rw-xp-u">XP</span></div>
+  <div class="rw-bar"><div class="rw-bar-fill" id="rwBar"></div></div>
+  <div class="rw-bar-lbl" id="rwBarLbl"></div>
+
+  <div class="rw-streak" id="rwStreak">
+    <!-- streak emblem — drop static/fx/streak.png to replace the placeholder -->
+    <div class="rw-streak-emblem" id="rwFlame">
+      <img src="/static/fx/streak.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <svg viewBox="0 0 40 40" fill="none" style="display:none;width:100%;height:100%;">
+        <path d="M20 4c4 6 9 8 9 16a9 9 0 11-18 0c0-4 2-6 4-8 1 3 3 4 3 7 2-1 2-4 2-7 1 1 0 0 0 0z" fill="var(--gold)" opacity=".9"/>
+      </svg>
+    </div>
+    <div><div class="rw-streak-n" id="rwStreakN">0</div><div class="rw-streak-l" id="rwStreakL">day streak</div></div>
+  </div>
+
+  <div class="rw-levelup" id="rwLevelup" style="display:none;"></div>
+  <div style="height:18px;"></div>
 
   <!-- AXON interactive coach -->
   <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
@@ -241,8 +286,29 @@ function submit(){
   const btn=event&&event.target?event.target.closest('button'):null;
   if(btn){btn.disabled=true;btn.style.opacity='.7';}
   fetch('/checkin',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
-    .then(r=>{ if(!r.ok) throw 0; document.getElementById('successOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); coachCheckin('morning'); })
+    .then(r=>{ if(!r.ok) throw 0; return r.json(); })
+    .then(d=>{ document.getElementById('successOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); showReward(d||{}); coachCheckin('morning'); })
     .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not save check-in. Please try again.'); });
+}
+function showReward(d){
+  var $=function(id){return document.getElementById(id);};
+  $('rwLevelTitle').textContent='Level '+(d.level||1)+(d.level_title?' · '+d.level_title:'');
+  if(window.Celebrate){
+    Celebrate.haptic(d.milestone?[20,50,20,50,30]:[14,40,14]);
+    setTimeout(function(){ Celebrate.burst({y:innerHeight*0.30, count:d.milestone?150:(d.leveled_up?120:90)}); },120);
+    Celebrate.countUp($('rwXp'),0,d.xp_gained||0,900,'+');
+  } else { $('rwXp').textContent='+'+(d.xp_gained||0); }
+  var from=d.xp_from||0, to=(d.xp_to!=null)?d.xp_to:0;
+  $('rwBar').style.width=(from/200*100)+'%';
+  setTimeout(function(){ $('rwBar').style.width=(to/200*100)+'%'; },220);
+  $('rwBarLbl').textContent=to+' / 200 XP';
+  var st=d.streak||0;
+  if(window.Celebrate) Celebrate.countUp($('rwStreakN'),Math.max(0,st-1),st,800);
+  else $('rwStreakN').textContent=st;
+  $('rwStreakL').textContent='day streak'+(d.is_record?' · record':'');
+  if(d.is_record) $('rwStreak').classList.add('record');
+  setTimeout(function(){ if(window.Celebrate) Celebrate.pulse($('rwFlame')); },520);
+  if(d.leveled_up){ var lu=$('rwLevelup'); lu.textContent='Level up — '+(d.level_title||('Level '+d.level)); lu.style.display='block'; }
 }
 function coachCheckin(kind){
   fetch('/api/axon/checkin-coach',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({kind})})
