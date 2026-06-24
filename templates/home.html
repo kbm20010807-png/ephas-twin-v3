@@ -151,7 +151,21 @@
 .hero-streak{display:flex;align-items:center;gap:6px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:7px 13px;flex-shrink:0;}
 .hero-streak svg{width:15px;height:15px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;}
 .hero-streak span{font-family:'Inter',sans-serif;font-weight:800;font-size:16px;color:var(--gold);line-height:1;}
-.hero .rings-row{margin-top:20px;display:flex;justify-content:space-around;}
+/* TWIN Score centerpiece */
+.tscore{display:flex;flex-direction:column;align-items:center;margin:20px 0 2px;}
+.tscore-ring{width:132px;height:132px;}
+.tscore-bg{fill:none;stroke:var(--border);stroke-width:9;}
+.tscore-fg{fill:none;stroke-width:9;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1);}
+.tscore-val{font-family:'Inter',sans-serif;font-weight:800;font-size:40px;letter-spacing:-2px;fill:var(--black);}
+.tscore-lbl{font-size:8px;font-weight:800;letter-spacing:2px;fill:var(--sub);text-transform:uppercase;}
+.tscore-verdict{font-size:13px;font-weight:600;color:var(--black);text-align:center;line-height:1.45;margin:14px 4px 0;}
+.tscore-action{display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.tscore-action .ta-ico{width:30px;height:30px;border-radius:9px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tscore-action .ta-ico svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
+.tscore-action .ta-txt{flex:1;font-size:12px;color:var(--text);line-height:1.45;font-weight:500;}
+.tscore-action .ta-txt b{color:var(--gold);font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:1px;display:block;margin-bottom:2px;}
+.hero .rings-row{margin-top:18px;display:flex;justify-content:space-around;}
+.hero .ring-svg{width:74px;height:74px;}
 .hero-cta{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:18px;padding:15px;border-radius:16px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;letter-spacing:.5px;text-decoration:none;box-shadow:0 8px 22px rgba(234,213,162,.16);}
 .hero-cta svg{width:17px;height:17px;stroke:#241D10;fill:none;stroke-width:2.4;}
 .hero-axon{display:flex;align-items:center;gap:11px;margin-top:18px;padding-top:15px;border-top:1px solid var(--border);text-decoration:none;}
@@ -204,6 +218,18 @@
     {% if u.streak %}<div class="hero-streak"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
   </div>
 
+  {% if twin.has %}
+  <div class="tscore">
+    <svg class="tscore-ring" viewBox="0 0 132 132">
+      <circle cx="66" cy="66" r="58" class="tscore-bg"/>
+      <circle cx="66" cy="66" r="58" class="tscore-fg" id="tscoreFg" stroke="{{ twin.color }}" stroke-dasharray="364" stroke-dashoffset="{{ twin.offset }}"/>
+      <text x="66" y="70" text-anchor="middle" class="tscore-val">{{ twin.score }}</text>
+      <text x="66" y="86" text-anchor="middle" class="tscore-lbl">TWIN SCORE</text>
+    </svg>
+  </div>
+  <div class="tscore-verdict">{{ twin.verdict }}</div>
+  {% endif %}
+
   <div class="rings-row">
     {% set rings = [
       {'lbl':'SLEEP','val': today.sleep if today.has else None,'unit':'h','pct': today.sleep_pct if today.has else 0,'color':'#C8A45A'},
@@ -222,11 +248,11 @@
     {% endfor %}
   </div>
 
-  {% if today.has %}
-  <a href="/axon" class="hero-axon">
-    <div class="axon-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
-    <div class="hero-axon-txt">See what AXON noticed about your day</div>
-    <i data-lucide="arrow-right" class="hero-axon-arrow"></i>
+  {% if twin.has %}
+  <a href="/axon" class="tscore-action" style="text-decoration:none;">
+    <div class="ta-ico"><i data-lucide="zap"></i></div>
+    <div class="ta-txt"><b>Today's move</b>{{ twin.action }}</div>
+    <i data-lucide="arrow-right" class="hero-axon-arrow" style="align-self:center;"></i>
   </a>
   {% else %}
   <a href="/checkin" class="hero-cta"><i data-lucide="plus"></i> Check in to start your day</a>
@@ -399,8 +425,8 @@ if(gd) gd.textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate()
 // Draw the day-rings in on load (start empty → sweep to today's value)
 (function(){
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const rings = document.querySelectorAll('.ring-p');
-  rings.forEach(c => { const t = c.getAttribute('stroke-dashoffset'); c.dataset.t = t; c.style.strokeDashoffset = '264'; });
+  const rings = document.querySelectorAll('.ring-p, .tscore-fg');
+  rings.forEach(c => { const t = c.getAttribute('stroke-dashoffset'); const full = c.getAttribute('stroke-dasharray') || '264'; c.dataset.t = t; c.style.strokeDashoffset = full; });
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     rings.forEach(c => { c.style.strokeDashoffset = c.dataset.t; });
   }));

@@ -1602,6 +1602,36 @@ def today_metrics(cu):
         'mood': ci.mood, 'mood_pct': pct(ci.mood, 10),
     }
 
+def twin_score(cu):
+    """The single daily TWIN Score — fuses today's check-in into one number + AXON's verdict + one action.
+    (Phase 3: wearable data plugs into the same composite.)"""
+    t = today_metrics(cu)
+    if not t.get('has'):
+        return {'has': False}
+    sp, ep, mp = t['sleep_pct'], t['energy_pct'], t['mood_pct']
+    base = (sp + ep + mp) / 3.0
+    streak, _ = _streaks(_checkin_dates(cu))
+    score = int(max(0, min(100, round(base * 0.92 + min(8, streak)))))
+    name = (cu.name or cu.username or 'there').split(' ')[0]
+    weak = min([('sleep', sp), ('energy', ep), ('mood', mp)], key=lambda a: a[1])[0]
+    if score >= 75:
+        tier, color = 'high', '#6BBF8E'
+        verdict = f"You're dialed in, {name}. This is your standard now."
+    elif score >= 50:
+        tier, color = 'mid', '#EAD5A2'
+        verdict = f"Solid base today, {name}. One lever lifts the rest."
+    else:
+        tier, color = 'low', '#D99A52'
+        verdict = f"Rough start, {name}. We rebuild from one move."
+    actions = {
+        'sleep': f"You're at {t.get('sleep')}h sleep — tonight, start winding down 30 minutes earlier.",
+        'energy': "Energy's low — take a 5-minute walk to spike it before noon.",
+        'mood': "Mood's heavy — note one thing you're grateful for, or message someone you trust.",
+    }
+    return {'has': True, 'score': score, 'tier': tier, 'color': color,
+            'verdict': verdict, 'action': actions[weak],
+            'offset': round(364 * (1 - score / 100), 1)}
+
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
@@ -1610,6 +1640,7 @@ def home():
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
+                           twin=twin_score(cu),
                            nsum=notif_summary(cu), active='home')
 
 MILESTONES = (3, 7, 14, 30, 60, 100, 180, 365)
