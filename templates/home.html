@@ -164,6 +164,9 @@
 .tscore-action .ta-ico svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
 .tscore-action .ta-txt{flex:1;font-size:12px;color:var(--text);line-height:1.45;font-weight:500;}
 .tscore-action .ta-txt b{color:var(--gold);font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:1px;display:block;margin-bottom:2px;}
+.hero-share{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:12px;border-radius:14px;background:transparent;border:1.5px solid var(--border);color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:transform .12s,border-color .15s;font-family:'Inter',sans-serif;}
+.hero-share:active{transform:scale(.99);}
+.hero-share svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
 .hero .rings-row{margin-top:18px;display:flex;justify-content:space-around;}
 .hero .ring-svg{width:74px;height:74px;}
 .hero-cta{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:18px;padding:15px;border-radius:16px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;letter-spacing:.5px;text-decoration:none;box-shadow:0 8px 22px rgba(234,213,162,.16);}
@@ -270,6 +273,14 @@
   </a>
   {% else %}
   <a href="/checkin" class="hero-cta"><i data-lucide="plus"></i> Check in to start your day</a>
+  {% endif %}
+
+  {% if twin.has %}
+  <button class="hero-share" onclick="shareTwinCard()"
+    data-score="{{ twin.score }}" data-name="{{ u.first }}" data-streak="{{ u.streak }}"
+    data-color="{{ twin.color }}" data-title="{{ u.level_title }}">
+    <i data-lucide="share-2"></i> Share my Twin Card
+  </button>
   {% endif %}
 </div>
 
@@ -511,6 +522,62 @@ function openStory(i) {
 function closeStory() {
   document.getElementById('storyOv').classList.remove('on');
 }
+// ===== The Twin Card — generate a shareable growth card =====
+function shareTwinCard(){
+  const btn = document.querySelector('.hero-share'); if(!btn) return;
+  const score = btn.dataset.score || '0';
+  const name = btn.dataset.name || '';
+  const streak = parseInt(btn.dataset.streak,10) || 0;
+  const color = btn.dataset.color || '#EAD5A2';
+  const title = btn.dataset.title || '';
+  const W=1080, H=1350;
+  const c = document.createElement('canvas'); c.width=W; c.height=H;
+  const x = c.getContext('2d');
+  // background
+  x.fillStyle = '#0D0E11'; x.fillRect(0,0,W,H);
+  let g = x.createRadialGradient(W/2, H*1.05, 80, W/2, H*1.05, W*0.95);
+  g.addColorStop(0,'rgba(234,213,162,0.20)'); g.addColorStop(1,'rgba(234,213,162,0)');
+  x.fillStyle = g; x.fillRect(0,0,W,H);
+  x.textAlign='center';
+  // wordmark
+  x.fillStyle='rgba(255,255,255,0.4)'; x.font='700 22px Inter, Arial, sans-serif';
+  x.fillText('YOUR DIGITAL', W/2, 120);
+  x.fillStyle='#EAD5A2'; x.font='800 60px Inter, Arial, sans-serif';
+  x.fillText('TWIN', W/2, 180);
+  // ring
+  const cx=W/2, cy=H/2-30, r=200;
+  x.lineWidth=26; x.lineCap='round';
+  x.strokeStyle='rgba(255,255,255,0.08)';
+  x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.stroke();
+  x.strokeStyle=color;
+  x.beginPath(); x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2 + Math.PI*2*(parseInt(score,10)/100)); x.stroke();
+  // score number
+  x.fillStyle='#fff'; x.textBaseline='middle'; x.font='800 168px Inter, Arial, sans-serif';
+  x.fillText(score, cx, cy-6);
+  x.textBaseline='alphabetic';
+  x.fillStyle='rgba(255,255,255,0.5)'; x.font='800 26px Inter, Arial, sans-serif';
+  x.fillText('TWIN SCORE', cx, cy+92);
+  // name + title
+  x.fillStyle='#fff'; x.font='800 56px Inter, Arial, sans-serif';
+  x.fillText(name, W/2, cy+r+150);
+  if(title){ x.fillStyle='#EAD5A2'; x.font='700 28px Inter, Arial, sans-serif'; x.fillText(title.toUpperCase(), W/2, cy+r+195); }
+  if(streak>0){ x.fillStyle='rgba(234,213,162,0.85)'; x.font='800 30px Inter, Arial, sans-serif'; x.fillText(streak+'-DAY STREAK', W/2, cy+r+250); }
+  // footer
+  x.fillStyle='rgba(255,255,255,0.35)'; x.font='600 24px Inter, Arial, sans-serif';
+  x.fillText('build your better self  ·  joinephas.com', W/2, H-72);
+  // share or download
+  c.toBlob(function(blob){
+    if(!blob) return;
+    const file = new File([blob],'twin-card.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:'My TWIN', text:'My TWIN Score today — building my better self.'}).catch(()=>{});
+    } else {
+      const url=URL.createObjectURL(blob); const a=document.createElement('a');
+      a.href=url; a.download='twin-card.png'; a.click(); URL.revokeObjectURL(url);
+    }
+  }, 'image/png');
+}
+
 function hLike(btn, id) {
   const n = btn.querySelector('.like-n');
   fetch('/api/like/' + id, {method:'POST'}).then(r=>r.json()).then(d=>{
