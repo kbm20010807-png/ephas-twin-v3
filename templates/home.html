@@ -11,10 +11,21 @@
 .np-c{display:flex;align-items:center;gap:3px;font-size:13px;font-weight:800;}
 .np-c svg{width:13px;height:13px;stroke:#241D10;fill:none;stroke-width:2.3;}
 .np-txt{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.65;}
-.greet{padding:16px 20px 0;}
+/* ambient champagne glow at top of feed (sits behind cards) */
+.home-amb{position:fixed;inset:0 0 auto 0;height:360px;z-index:-1;pointer-events:none;
+  background:radial-gradient(115% 90% at 50% -12%, rgba(234,213,162,.13) 0%, rgba(234,213,162,.04) 38%, transparent 64%);}
+.greet{padding:18px 20px 0;}
 .greet-time{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;font-family:'Inter',sans-serif;}
-.greet-name{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;letter-spacing:-1px;color:var(--black);margin-bottom:2px;}
+.greet-name{font-family:'Inter',sans-serif;font-weight:800;font-size:30px;letter-spacing:-1px;margin-bottom:2px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;width:fit-content;}
 .greet-date{font-size:12px;color:var(--sub);}
+/* draw-in animation for the day rings */
+.ring-p{transition:stroke-dashoffset 1.15s cubic-bezier(.16,1,.3,1);}
+/* staggered entrance */
+@keyframes hRise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.h-rise{opacity:0;animation:hRise .6s cubic-bezier(.16,1,.3,1) forwards;}
+.hd1{animation-delay:.04s;}.hd2{animation-delay:.12s;}.hd3{animation-delay:.20s;}
+@media (prefers-reduced-motion: reduce){.h-rise{animation:none;opacity:1;}.ring-p{transition:none;}}
 .rings-wrap{padding:22px 20px 0;}
 .rings-row{display:flex;justify-content:space-around;}
 .ring-item{display:flex;flex-direction:column;align-items:center;gap:8px;}
@@ -146,13 +157,15 @@
 </a>
 {% endif %}
 
-<div class="greet">
+<div class="home-amb"></div>
+
+<div class="greet h-rise hd1">
   <div class="greet-time" id="gTime">Good morning</div>
   <div class="greet-name">{{ u.first }},</div>
   <div class="greet-date" id="gDate"></div>
 </div>
 
-<div class="rings-wrap">
+<div class="rings-wrap h-rise hd2">
   <div class="t-label mb-3">Today</div>
   <div class="rings-row">
     {% set rings = [
@@ -175,7 +188,7 @@
   {% if not today.has %}<a href="/checkin" style="display:block;text-align:center;margin-top:14px;font-size:12px;font-weight:700;color:var(--gold);">Check in to see your day →</a>{% endif %}
 </div>
 
-<div class="streak-card">
+<div class="streak-card h-rise hd3">
   <div class="streak-num" style="color:var(--gold)">{{ u.streak }}</div>
   <div>
     <div style="font-size:12px;font-weight:700;color:var(--black);margin-bottom:5px;">Day streak</div>
@@ -325,6 +338,16 @@ const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+
+// Draw the day-rings in on load (start empty → sweep to today's value)
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const rings = document.querySelectorAll('.ring-p');
+  rings.forEach(c => { const t = c.getAttribute('stroke-dashoffset'); c.dataset.t = t; c.style.strokeDashoffset = '264'; });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    rings.forEach(c => { c.style.strokeDashoffset = c.dataset.t; });
+  }));
+})();
 
 // Golden notification pop — show for 5s, then fade (the bell dot stays)
 (function(){
