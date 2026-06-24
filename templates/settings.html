@@ -52,8 +52,7 @@
 /* Verification */
 .vf-card{margin:20px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh);}
 .vf-head{display:flex;align-items:center;gap:12px;}
-.vf-ico{width:44px;height:44px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--sh);}
-.vf-ico svg{width:22px;height:22px;fill:none;stroke-width:2.25;stroke:#241D10;}
+.vf-badge{width:46px;height:46px;object-fit:contain;flex-shrink:0;}
 .vf-body{flex:1;min-width:0;}
 .vf-title{font-family:'Inter',sans-serif;font-size:15px;letter-spacing:-.4px;color:var(--black);}
 .vf-sub{font-size:11px;color:var(--sub);line-height:1.5;margin-top:2px;}
@@ -151,18 +150,18 @@
 <div class="block-label">Verification</div>
 <div class="vf-card">
   <div class="vf-head">
-    <div class="vf-ico"><i data-lucide="badge-check"></i></div>
+    {% if verify.state == 'verified' %}<img src="/static/badges/verified.png" class="vf-badge" alt="" onerror="this.style.display='none'">{% endif %}
     <div class="vf-body">
       <div class="vf-title">Get Verified</div>
       <div class="vf-sub">Apply for the verified badge so people know your account is authentic.</div>
     </div>
   </div>
   {% if verify.state == 'verified' %}
-  <div class="vf-status verified"><i data-lucide="badge-check"></i> Your account is verified.</div>
+  <div class="vf-status verified">Your account is verified.</div>
   {% elif verify.state == 'pending' %}
-  <div class="vf-status pending"><i data-lucide="clock"></i> Application under review{% if verify.submitted_at %} — submitted {{ verify.submitted_at }}{% endif %}. We'll let you know.</div>
+  <div class="vf-status pending">Application under review{% if verify.submitted_at %} — submitted {{ verify.submitted_at }}{% endif %}. We'll let you know.</div>
   {% elif verify.state == 'rejected' %}
-  <div class="vf-status rejected"><i data-lucide="x-circle"></i> Your last application wasn't approved. You can apply again.</div>
+  <div class="vf-status rejected">Your last application wasn't approved. You can apply again.</div>
   <button class="vf-btn" onclick="openVerify()">Apply again</button>
   {% else %}
   <button class="vf-btn" onclick="openVerify()">Apply for verification</button>
