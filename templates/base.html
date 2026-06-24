@@ -83,6 +83,20 @@
 document.addEventListener('DOMContentLoaded', function() {
   if(typeof lucide !== 'undefined') lucide.createIcons();
 
+  // Remember this account locally for fast re-login (identity only — never the password)
+  {% if nav_accounts %}
+  try {
+    var _me = {{ (nav_accounts|selectattr('active')|list|first|default(none))|tojson }};
+    if (_me && _me.username) {
+      var _k = 'twin_accounts';
+      var _list = JSON.parse(localStorage.getItem(_k) || '[]');
+      _list = _list.filter(function(a){ return a.username !== _me.username; });
+      _list.unshift({ id:_me.id, name:_me.name, username:_me.username, has_avatar:_me.has_avatar });
+      localStorage.setItem(_k, JSON.stringify(_list.slice(0,5)));
+    }
+  } catch(e) {}
+  {% endif %}
+
   // Nav center: check-in vs check-out
   const h = new Date().getHours();
   const isEvening = h >= 18 || h < 5;

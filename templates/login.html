@@ -39,6 +39,21 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;ov
 .auth-foot{text-align:center;padding-top:26px;}
 .auth-foot-txt{font-size:13px;color:var(--sub);}
 .auth-foot-lnk{color:var(--gold);font-weight:700;text-decoration:none;}
+/* saved accounts — tap to sign in (identity only, no passwords stored) */
+.saved-wrap{margin-bottom:24px;}
+.saved-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-bottom:14px;text-align:center;}
+.saved-strip{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.saved-acc{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;width:72px;}
+.saved-av{width:60px;height:60px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:22px;color:#241D10;overflow:hidden;border:2px solid transparent;transition:border-color .15s,box-shadow .15s,transform .14s;}
+.saved-acc:active .saved-av{transform:scale(.94);}
+.saved-acc.sel .saved-av{border-color:var(--gold-b);box-shadow:0 0 0 4px var(--gold-dim);}
+.saved-av img{width:100%;height:100%;object-fit:cover;}
+.saved-nm{font-size:11px;font-weight:600;color:var(--black);max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;}
+.saved-x{position:absolute;top:-3px;right:4px;width:20px;height:20px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;}
+.saved-x svg{width:11px;height:11px;stroke:var(--sub);fill:none;stroke-width:2.5;}
+.saved-divider{display:flex;align-items:center;gap:12px;margin:4px 0 18px;}
+.saved-divider::before,.saved-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.saved-divider span{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
 /* staggered entrance */
 @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .rise{opacity:0;animation:rise .6s cubic-bezier(.16,1,.3,1) forwards;}
@@ -59,6 +74,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;ov
 
   <div class="auth-form">
     {% if error %}<div class="auth-err rise d2">{{ error }}</div>{% endif %}
+    <div class="saved-wrap rise d2" id="savedWrap" style="display:none;"></div>
     <form method="POST" action="/login" novalidate>
       <div class="fld rise d2">
         <label class="fld-lbl">Account</label>
@@ -92,6 +108,55 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh;ov
 
 {% block scripts %}
 <script>
+// Saved accounts — tap a face to fill the login, just type the password
+(function(){
+  var wrap = document.getElementById('savedWrap');
+  if(!wrap) return;
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem('twin_accounts') || '[]'); } catch(e){}
+  function initial(a){ return ((a.name || a.username || '?')[0] || '?').toUpperCase(); }
+  function render(){
+    if(!list.length){ wrap.style.display='none'; return; }
+    var h = '<div class="saved-lbl">Tap to sign in</div><div class="saved-strip">';
+    list.forEach(function(a, i){
+      var face = a.has_avatar
+        ? '<img src="/avatar/'+a.id+'" alt="" onerror="this.outerHTML=\''+initial(a)+'\'">'
+        : initial(a);
+      h += '<div class="saved-acc" data-i="'+i+'">'
+         +   '<button type="button" class="saved-x" data-rm="'+i+'" aria-label="Remove"><i data-lucide="x"></i></button>'
+         +   '<div class="saved-av">'+face+'</div>'
+         +   '<div class="saved-nm">'+(a.name || ('@'+a.username))+'</div>'
+         + '</div>';
+    });
+    h += '</div><div class="saved-divider"><span>or use another account</span></div>';
+    wrap.innerHTML = h;
+    wrap.style.display = 'block';
+    if(window.lucide) lucide.createIcons();
+  }
+  render();
+  wrap.addEventListener('click', function(e){
+    var rm = e.target.closest('[data-rm]');
+    if(rm){
+      e.stopPropagation();
+      list.splice(parseInt(rm.getAttribute('data-rm'),10), 1);
+      localStorage.setItem('twin_accounts', JSON.stringify(list));
+      render();
+      return;
+    }
+    var acc = e.target.closest('.saved-acc');
+    if(acc){
+      var a = list[parseInt(acc.getAttribute('data-i'),10)];
+      if(!a) return;
+      var em = document.querySelector('input[name="email"]');
+      if(em) em.value = a.username;
+      document.querySelectorAll('.saved-acc').forEach(function(x){ x.classList.remove('sel'); });
+      acc.classList.add('sel');
+      var pw = document.querySelector('input[name="password"]');
+      if(pw) pw.focus();
+    }
+  });
+})();
+
 function authSoon(name){
   let t=document.getElementById('authToast');
   if(!t){
