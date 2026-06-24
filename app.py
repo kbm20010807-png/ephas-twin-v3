@@ -830,6 +830,7 @@ def serialize_posts(posts, viewer=None):
             'likes': Like.query.filter_by(post_id=p.id).count(),
             'comments': Comment.query.filter_by(post_id=p.id).count(),
             'liked': p.id in liked, 'bookmarked': p.id in booked,
+            'is_mine': bool(viewer and p.user_id == viewer.id),
         })
     return out
 
@@ -2702,6 +2703,44 @@ def api_bookmark(post_id):
         db.session.add(Bookmark(user_id=cu.id, post_id=post_id)); saved = True
     db.session.commit()
     return {'saved': saved}
+
+@app.route('/api/post/<int:post_id>', methods=['GET'])
+def api_post_get(post_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    p = Post.query.get(post_id)
+    if not p: return ('', 404)
+    return {'ok': True, 'title': p.title or '', 'text': p.text or '',
+            'is_mine': bool(cu and p.user_id == cu.id)}
+
+@app.route('/api/post/<int:post_id>/edit', methods=['POST'])
+def api_post_edit(post_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    p = Post.query.get(post_id)
+    if not p: return ('', 404)
+    if p.user_id != cu.id: return ('', 403)
+    txt = (request.form.get('text') or '').strip()[:5000]
+    if not txt and not (p.title or ''): return ('', 400)
+    p.text = txt
+    if 'title' in request.form:
+        p.title = (request.form.get('title') or '').strip()[:200]
+    db.session.commit()
+    return {'ok': True, 'text': p.text or '', 'title': p.title or ''}
+
+@app.route('/api/post/<int:post_id>/delete', methods=['POST'])
+def api_post_delete(post_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    p = Post.query.get(post_id)
+    if not p: return ('', 404)
+    if p.user_id != cu.id: return ('', 403)
+    Like.query.filter_by(post_id=post_id).delete()
+    Comment.query.filter_by(post_id=post_id).delete()
+    Bookmark.query.filter_by(post_id=post_id).delete()
+    db.session.delete(p)
+    db.session.commit()
+    return {'ok': True}
 
 @app.route('/api/comments/<int:post_id>')
 def api_comments(post_id):

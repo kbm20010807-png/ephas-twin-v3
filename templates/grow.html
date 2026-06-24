@@ -191,6 +191,32 @@
 .cta-txt{font-size:11px;color:var(--sub);line-height:1.5;flex:1;}
 .cta-txt b{color:var(--black);}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
+
+/* ===== OWNER POST MENU (⋯ → edit / boost / delete) ===== */
+.pc-menu{margin-left:8px;background:none;border:none;padding:4px;cursor:pointer;display:flex;align-items:center;color:var(--sub);flex-shrink:0;}
+.pc-menu svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:2;}
+.pm-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:9500;}
+.pm-ov.on{display:flex;}
+.pm-sheet{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:430px;padding:10px 14px calc(20px + env(safe-area-inset-bottom));box-shadow:var(--sh-md);animation:acswUp .22s ease;}
+@keyframes acswUp{from{transform:translateY(50px);opacity:.4}to{transform:translateY(0);opacity:1}}
+.pm-grip{width:40px;height:4px;border-radius:4px;background:var(--border);margin:4px auto 12px;}
+.pm-item{display:flex;align-items:center;gap:13px;padding:15px 12px;border-radius:14px;font-size:14px;font-weight:600;color:var(--black);cursor:pointer;width:100%;background:none;border:none;text-align:left;}
+.pm-item:active{background:var(--bg-2);}
+.pm-item svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;flex-shrink:0;}
+.pm-item.danger{color:#EF4444;}
+.pm-soon{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);padding:2px 7px;border-radius:var(--r-full);text-transform:uppercase;}
+.pm-cancel{margin-top:6px;text-align:center;padding:14px;font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;border-top:1px solid var(--border);}
+/* edit modal */
+.pe-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9600;padding:24px;}
+.pe-ov.on{display:flex;}
+.pe-box{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:400px;padding:20px;box-shadow:var(--sh-md);}
+.pe-title{font-family:'Inter',sans-serif;font-size:16px;font-weight:800;color:var(--black);margin-bottom:14px;}
+.pe-ta{width:100%;min-height:120px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:14px;padding:13px;font-size:14px;color:var(--black);font-family:'Inter',sans-serif;resize:vertical;outline:none;line-height:1.5;box-sizing:border-box;}
+.pe-ta:focus{border-color:var(--gold-b);}
+.pe-actions{display:flex;gap:10px;margin-top:16px;}
+.pe-btn{flex:1;padding:13px;border-radius:14px;font-size:13px;font-weight:800;border:none;cursor:pointer;}
+.pe-cancel{background:var(--bg-2);color:var(--black);border:1px solid var(--border);}
+.pe-save{background:var(--grad);color:#241D10;}
 </style>
 {% endblock %}
 
@@ -245,6 +271,7 @@
       <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
+      {% if p.is_mine %}<button class="pc-menu" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
     </div>
     {% if p.tag %}<div class="ptag {{ p.tag }}">{% if p.tag=='goal' %}<i data-lucide="target"></i> Goal{% else %}<i data-lucide="award"></i> Achievement{% endif %}</div>{% endif %}
     {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
@@ -278,6 +305,7 @@
       <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
+      {% if p.is_mine %}<button class="pc-menu" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
     </div>
     {% if p.tag %}<div class="ptag {{ p.tag }}">{% if p.tag=='goal' %}<i data-lucide="target"></i> Goal{% else %}<i data-lucide="award"></i> Achievement{% endif %}</div>{% endif %}
     {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
@@ -310,6 +338,7 @@
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="tc-meta">{{ p.time }}{% if p.category %} · #{{ p.category|lower }}{% endif %}</div></div>
+      {% if p.is_mine %}<button class="pc-menu" style="margin-left:auto;" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
     </div>
     {% if p.title %}<div class="tc-title">{{ p.title }}</div>{% endif %}
     <div class="tc-body">{{ p.text|hashtags }}</div>
@@ -397,6 +426,29 @@
     <button class="pd-send" onclick="pdSend()"><i data-lucide="send"></i></button>
   </div>
 </div>
+
+<!-- ===== OWNER POST MENU ===== -->
+<div class="pm-ov" id="postMenu" onclick="if(event.target===this)closePostMenu()">
+  <div class="pm-sheet">
+    <div class="pm-grip"></div>
+    <button class="pm-item" onclick="editPost()"><i data-lucide="pencil"></i> Edit post</button>
+    <button class="pm-item" onclick="boostPost()"><i data-lucide="trending-up"></i> Boost post <span class="pm-soon">Soon</span></button>
+    <button class="pm-item danger" onclick="deletePost()"><i data-lucide="trash-2"></i> Delete post</button>
+    <div class="pm-cancel" onclick="closePostMenu()">Cancel</div>
+  </div>
+</div>
+
+<!-- ===== EDIT POST MODAL ===== -->
+<div class="pe-ov" id="postEdit" onclick="if(event.target===this)closeEdit()">
+  <div class="pe-box">
+    <div class="pe-title">Edit post</div>
+    <textarea class="pe-ta" id="peText" placeholder="Write something..."></textarea>
+    <div class="pe-actions">
+      <button class="pe-btn pe-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="pe-btn pe-save" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -437,6 +489,45 @@ function switchTab(tab, el) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
   document.getElementById('pane-' + tab).classList.add('on');
   if (window.growObserve) requestAnimationFrame(window.growObserve);
+}
+
+/* ===== owner post menu: edit / boost / delete ===== */
+let menuPostId = null;
+function openPostMenu(ev, id){ if(ev){ ev.stopPropagation(); } menuPostId = id; var o=document.getElementById('postMenu'); o.classList.add('on'); if(window.lucide) lucide.createIcons(); }
+function closePostMenu(){ document.getElementById('postMenu').classList.remove('on'); }
+function boostPost(){ closePostMenu(); growToast('Boost is coming soon — promote your post to reach more people.'); }
+function editPost(){
+  closePostMenu();
+  fetch('/api/post/' + menuPostId).then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    document.getElementById('peText').value = d.text || '';
+    document.getElementById('postEdit').classList.add('on');
+    var ta = document.getElementById('peText'); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+  }).catch(()=>{});
+}
+function closeEdit(){ document.getElementById('postEdit').classList.remove('on'); }
+function saveEdit(){
+  var t = document.getElementById('peText').value.trim();
+  if(!t) return;
+  var b = new URLSearchParams({text:t});
+  fetch('/api/post/' + menuPostId + '/edit', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:b})
+    .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); }).catch(()=>{});
+}
+function deletePost(){
+  closePostMenu();
+  if(!confirm('Delete this post? This cannot be undone.')) return;
+  fetch('/api/post/' + menuPostId + '/delete', {method:'POST'}).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      document.querySelectorAll('[data-id="' + menuPostId + '"]').forEach(function(c){ c.remove(); });
+      var pd = document.getElementById('postDetail'); if(pd && pd.classList.contains('on')) closePost();
+      growToast('Post deleted.');
+    }
+  }).catch(()=>{});
+}
+function growToast(msg){
+  var t = document.getElementById('gToast');
+  if(!t){ t = document.createElement('div'); t.id='gToast'; t.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);max-width:330px;width:86%;background:var(--card);border:1px solid var(--gold-b);color:var(--black);font-size:12px;line-height:1.5;padding:13px 16px;border-radius:14px;z-index:10001;text-align:center;box-shadow:var(--sh-md);transition:opacity .3s;pointer-events:none;'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity='1'; clearTimeout(window._gt); window._gt=setTimeout(()=>{ t.style.opacity='0'; }, 3000);
 }
 
 /* ===== reveal-on-scroll for feed cards ===== */
