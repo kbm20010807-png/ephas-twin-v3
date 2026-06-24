@@ -1032,24 +1032,44 @@ def _checkin_dates(user):
     rows = db.session.query(CheckIn.date).filter_by(user_id=user.id).distinct().all()
     return sorted({r[0] for r in rows if r[0]})
 
-def _streaks(dates):
-    """Return (current_streak, best_streak) from a sorted list of distinct dates."""
+def _streaks(dates, grace=1):
+    """Return (current_streak, best_streak). FORGIVING: the current streak survives up to
+    `grace` missed days (auto Streak Freeze) so a single slip doesn't wipe progress.
+    Best streak stays honest (true consecutive)."""
     if not dates:
         return 0, 0
     s = set(dates)
+    one = timedelta(days=1)
     today = datetime.utcnow().date()
-    cur = 0
-    d = today if today in s else (today - timedelta(days=1) if (today - timedelta(days=1)) in s else None)
-    while d in s:
-        cur += 1
-        d -= timedelta(days=1)
+    # forgiving current streak — walk back from today, allowing up to `grace` gaps
+    cur = misses = 0
+    d = today
+    while True:
+        if d in s:
+            cur += 1
+            d -= one
+        else:
+            misses += 1
+            if misses > grace:
+                break
+            d -= one
+    # honest best streak — strictly consecutive
     best = run = 0
     prev = None
-    for d in dates:
-        run = run + 1 if (prev is not None and (d - prev).days == 1) else 1
+    for dd in dates:
+        run = run + 1 if (prev is not None and (dd - prev).days == 1) else 1
         best = max(best, run)
-        prev = d
+        prev = dd
     return cur, max(best, cur)
+
+def streak_shielded(user):
+    """True if the user hasn't checked in today but their streak is still alive (a freeze is holding it)."""
+    dates = _checkin_dates(user)
+    if not dates:
+        return False
+    today = datetime.utcnow().date()
+    cur, _ = _streaks(dates)
+    return cur > 0 and today not in set(dates)
 
 def user_ctx():
     """Template context: real logged-in user (account + check-in-derived progression) over demo defaults."""
@@ -1647,6 +1667,7 @@ def home():
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
                            twin=twin_score(cu), presence=presence_ctx(),
+                           shielded=streak_shielded(cu),
                            nsum=notif_summary(cu), active='home')
 
 MILESTONES = (3, 7, 14, 30, 60, 100, 180, 365)

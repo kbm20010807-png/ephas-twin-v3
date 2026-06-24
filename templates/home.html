@@ -230,7 +230,7 @@
     <div>
       <div class="hero-date" id="gTime">Good morning</div>
       <div class="hero-name">{{ u.first }}</div>
-      <div class="hero-sub">{% if u.streak %}<b>{{ u.streak }}-day</b> streak{% if u.best_streak %} · best {{ u.best_streak }}{% endif %}{% else %}Check in to start your streak{% endif %}</div>
+      <div class="hero-sub">{% if u.streak %}<b>{{ u.streak }}-day</b> streak{% if shielded %} · <span style="color:var(--gold);font-weight:700;">freeze active</span>{% elif u.best_streak %} · best {{ u.best_streak }}{% endif %}{% else %}Check in to start your streak{% endif %}</div>
     </div>
     {% if u.streak %}<div class="hero-streak"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
   </div>
