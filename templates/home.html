@@ -25,7 +25,13 @@
 @keyframes hRise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .h-rise{opacity:0;animation:hRise .6s cubic-bezier(.16,1,.3,1) forwards;}
 .hd1{animation-delay:.04s;}.hd2{animation-delay:.12s;}.hd3{animation-delay:.20s;}
-@media (prefers-reduced-motion: reduce){.h-rise{animation:none;opacity:1;}.ring-p{transition:none;}}
+/* reveal-on-scroll for the rest of the feed */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1;transform:none;}
+/* gentle press feedback on tappable cards */
+.quests-card,.axon-card,.feed-c{transition:transform .14s ease,box-shadow .2s ease,opacity .6s cubic-bezier(.16,1,.3,1);}
+.quests-card:active,.axon-card:active{transform:scale(.985);}
+@media (prefers-reduced-motion: reduce){.h-rise{animation:none;opacity:1;}.ring-p{transition:none;}.reveal{opacity:1;transform:none;transition:none;}}
 .rings-wrap{padding:22px 20px 0;}
 .rings-row{display:flex;justify-content:space-around;}
 .ring-item{display:flex;flex-direction:column;align-items:center;gap:8px;}
@@ -200,7 +206,7 @@
 </div>
 
 <!-- QUESTS CARD -->
-<a href="/quests" class="quests-card">
+<a href="/quests" class="quests-card reveal">
   <div class="qc-body">
     <div class="qc-title">Quests</div>
     <div class="qc-sub" id="qcSub">Start earning XP today</div>
@@ -209,7 +215,7 @@
 </a>
 
 <!-- HABITS -->
-<div style="padding:20px 20px 0;">
+<div class="reveal" style="padding:20px 20px 0;">
   <div class="flex justify-b items-c mb-3">
     <div class="t-label">Your habits</div>
     <a href="/habits" style="font-size:11px;color:var(--gold);font-weight:700;text-decoration:none;">Manage →</a>
@@ -247,7 +253,7 @@
   {% endif %}
 </div>
 
-<a href="/axon" class="axon-card">
+<a href="/axon" class="axon-card reveal">
   <div class="axon-glow"></div>
   <div class="axon-top">
     <div class="axon-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
@@ -261,7 +267,7 @@
   </div>
 </a>
 
-<div style="padding:20px 20px 0;">
+<div class="reveal" style="padding:20px 20px 0;">
   <div class="flex justify-b items-c mb-3">
     <div class="t-label">Mood this week</div>
     <div style="display:flex;align-items:center;gap:12px;">
@@ -280,7 +286,7 @@
   </div>
 </div>
 
-<div style="padding:18px 20px 0;">
+<div class="reveal" style="padding:18px 20px 0;">
   <div class="t-label mb-3">Life domains</div>
   {% for d in stats.domains %}
   <div class="domain-row{% if loop.index > 4 %} domain-extra{% endif %}"{% if loop.index > 4 %} style="display:none;"{% endif %}>
@@ -295,10 +301,10 @@
   <a href="/analytics" style="font-size:11px;color:var(--sub);font-weight:600;display:block;margin-top:10px;">See details in Analytics →</a>
 </div>
 
-<div class="sect-lbl">Community</div>
+<div class="sect-lbl reveal">Community</div>
 {% if community %}
 {% for p in community %}
-<div class="feed-c">
+<div class="feed-c reveal">
   <div class="fc-hd">
     <div class="av av-32">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
     <div>
@@ -338,6 +344,20 @@ const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
 document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+
+// Reveal cards as they scroll into view
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)){ els.forEach(e=>e.classList.add('in')); return; }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {rootMargin:'0px 0px -8% 0px', threshold:0.08});
+  els.forEach(e=>io.observe(e));
+  // safety: reveal anything still hidden after 1.2s (e.g. already in view)
+  setTimeout(()=>els.forEach(e=>e.classList.add('in')), 1200);
+})();
 
 // Draw the day-rings in on load (start empty → sweep to today's value)
 (function(){
