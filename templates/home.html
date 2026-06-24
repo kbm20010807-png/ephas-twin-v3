@@ -180,6 +180,20 @@
 .qa:active .qa-ico{transform:scale(.93);border-color:var(--gold-b);}
 .qa-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.9;}
 .qa-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.2px;}
+/* ===== LIVE PRESENCE ===== */
+.live-strip{display:flex;align-items:center;justify-content:center;gap:9px;margin:16px 20px 0;padding:10px;border-radius:14px;background:var(--card);border:1px solid var(--border);box-shadow:var(--sh);}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#34D399;box-shadow:0 0 0 0 rgba(52,211,153,.5);animation:livePulse 2s infinite;flex-shrink:0;}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.5);}70%{box-shadow:0 0 0 8px rgba(52,211,153,0);}100%{box-shadow:0 0 0 0 rgba(52,211,153,0);}}
+.live-txt{font-size:12px;color:var(--sub);font-weight:500;}
+.live-txt b{color:var(--black);font-weight:800;}
+@media (prefers-reduced-motion: reduce){.live-dot{animation:none;}}
+/* ===== ANTI-TRAP DAY-END CARD ===== */
+.day-end{margin:24px 20px 8px;padding:26px 20px;border-radius:20px;text-align:center;background:linear-gradient(165deg,var(--card),var(--bg-2));border:1px solid var(--border);box-shadow:var(--sh);}
+.de-ico{width:46px;height:46px;border-radius:50%;margin:0 auto 12px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;}
+.de-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:2.5;}
+.de-title{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;color:var(--black);}
+.de-sub{font-size:12px;color:var(--sub);line-height:1.5;margin-top:6px;max-width:280px;margin-left:auto;margin-right:auto;}
+.de-sub b{color:var(--gold);font-weight:700;}
 </style>
 {% endblock %}
 
@@ -266,6 +280,13 @@
   <a href="/quests" class="qa"><div class="qa-ico"><i data-lucide="target"></i></div><div class="qa-lbl">Quests</div></a>
   <a href="/analytics" class="qa"><div class="qa-ico"><i data-lucide="bar-chart-2"></i></div><div class="qa-lbl">Stats</div></a>
 </div>
+
+{% if presence.checked_today %}
+<div class="live-strip h-rise hd3">
+  <span class="live-dot"></span>
+  <span class="live-txt"><b>{{ presence.checked_today }}</b> {% if presence.checked_today == 1 %}person{% else %}people{% endif %} checked in today</span>
+</div>
+{% endif %}
 
 <!-- QUESTS CARD -->
 <a href="/quests" class="quests-card reveal">
@@ -390,6 +411,12 @@
   <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:14px;"><i data-lucide="compass"></i> Explore Grow</a>
 </div>
 {% endif %}
+
+<div class="day-end reveal">
+  <div class="de-ico"><i data-lucide="check"></i></div>
+  <div class="de-title">That's your day, {{ u.first }}.</div>
+  <div class="de-sub">You showed up{% if u.streak %} · <b>{{ u.streak }}-day streak</b>{% endif %}. Nothing more to scroll — come back tomorrow.</div>
+</div>
 
 <div class="tw-foot">
   <div class="tw-foot-w">TWIN</div>

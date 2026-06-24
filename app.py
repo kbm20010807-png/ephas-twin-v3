@@ -1632,6 +1632,12 @@ def twin_score(cu):
             'verdict': verdict, 'action': actions[weak],
             'offset': round(364 * (1 - score / 100), 1)}
 
+def presence_ctx():
+    """Live 'the network is breathing' signal — how many people checked in recently."""
+    since = datetime.utcnow() - timedelta(hours=24)
+    checked = db.session.query(func.count(func.distinct(CheckIn.user_id))).filter(CheckIn.created_at >= since).scalar() or 0
+    return {'checked_today': int(checked)}
+
 @app.route('/home')
 def home():
     if not auth(): return redirect('/login')
@@ -1640,7 +1646,7 @@ def home():
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
-                           twin=twin_score(cu),
+                           twin=twin_score(cu), presence=presence_ctx(),
                            nsum=notif_summary(cu), active='home')
 
 MILESTONES = (3, 7, 14, 30, 60, 100, 180, 365)
