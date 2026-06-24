@@ -244,12 +244,12 @@ def level_title_for(level):
 # --- Rare profile badges (Discord-style). Custom art lives in static/badges/<slug>.png.
 # Assign to a user via their comma-separated User.badges field. ---
 BADGE_DEFS = {
-    'verified':   {'label': 'Verified',   'desc': 'Identity confirmed by EPHAS — this is a real, authentic account.', 'icon': 'badge-check', 'color': '#3B82F6'},
+    'verified':   {'label': 'Verified',   'desc': 'Identity confirmed by EPHAS — this is a real, authentic account.', 'icon': 'badge-check', 'color': '#E8B23A'},
     'pro':        {'label': 'TWIN Pro',    'desc': 'An active TWIN Pro member supporting the journey.',               'icon': 'star',        'color': '#E8B23A'},
     'ephas_team': {'label': 'EPHAS Team',  'desc': 'Official member of the EPHAS team.',                              'icon': 'shield',      'color': '#8B5CF6'},
     'founder':    {'label': 'Founder',     'desc': 'Founder of EPHAS & TWIN.',                                        'icon': 'crown',       'color': '#E8B23A'},
     'og':         {'label': 'OG',          'desc': 'One of the earliest members of the community.',                   'icon': 'sparkles',    'color': '#22C55E'},
-    'course_creator': {'label': 'Course Creator', 'desc': 'Approved by EPHAS to publish courses on TWIN.',             'icon': 'graduation-cap', 'color': '#3B82F6'},
+    'course_creator': {'label': 'Course Creator', 'desc': 'Approved by EPHAS to publish courses on TWIN.',             'icon': 'graduation-cap', 'color': '#E8B23A'},
 }
 
 # Post categories AXON sorts content into automatically.

@@ -111,7 +111,7 @@
   <div class="av av-52">{% if u.avatar %}<img src="/avatar/{{ u.id }}" alt="">{% else %}{{ u.name[0]|upper }}{% endif %}</div>
   <div class="pb-info">
     <div class="pb-name">{{ u.name }}</div>
-    <div class="pb-meta">{{ u.email }}</div>
+    <div class="pb-meta">@{{ u.username }}</div>
     <div class="pb-lv"><i data-lucide="award"></i> Level {{ u.level }} · {{ u.level_title }}</div>
   </div>
 </div>
@@ -332,27 +332,6 @@
   SIGN OUT
 </a>
 
-<div class="block-label" style="color:var(--red);">Danger Zone</div>
-<div class="settings-block">
-  <div class="s-row danger" onclick="openDelete()" style="cursor:pointer;">
-    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="trash-2"></i></div>
-      <div><div class="s-title">Delete account</div><div class="s-sub">Permanently delete your account & data</div></div></div>
-    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
-  </div>
-</div>
-
-<div class="del-ov" id="delOv" onclick="if(event.target===this)closeDelete()">
-  <div class="del-card">
-    <h3>Delete account?</h3>
-    <p>This permanently deletes your account, posts, check-ins, and all your data. This <b>cannot be undone</b>. Enter your password to confirm.</p>
-    <input type="password" id="delPw" placeholder="Your password" autocomplete="current-password">
-    <div class="del-actions">
-      <button class="del-cancel" onclick="closeDelete()">Cancel</button>
-      <button class="del-confirm" id="delBtn" onclick="confirmDelete()">Delete forever</button>
-    </div>
-  </div>
-</div>
-
 <div class="app-info">
   <div class="ai-twin">TWIN</div>
   <div class="ai-ver">VERSION 3.0.0</div>
@@ -414,18 +393,6 @@ function shareTwin(){
   if(navigator.share){ navigator.share(data).catch(()=>{}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(()=>alert('Link copied!')).catch(()=>alert(url)); }
   else { alert(url); }
-}
-function openDelete(){ const o=document.getElementById('delOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
-function closeDelete(){ const o=document.getElementById('delOv'); if(o) o.classList.remove('on'); }
-function confirmDelete(){
-  const pw=document.getElementById('delPw').value;
-  if(!pw){ alert('Enter your password to confirm.'); return; }
-  const btn=document.getElementById('delBtn'); btn.disabled=true; btn.textContent='Deleting…';
-  fetch('/account/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
-    .then(r=>r.json()).then(d=>{
-      if(d.ok){ location.href='/'; }
-      else { alert(d.error==='bad_password'?'Incorrect password.':'Could not delete. Try again.'); btn.disabled=false; btn.textContent='Delete forever'; }
-    }).catch(()=>{ alert('Network error.'); btn.disabled=false; btn.textContent='Delete forever'; });
 }
 function submitVerify(e){
   e.preventDefault();

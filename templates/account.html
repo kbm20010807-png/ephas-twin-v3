@@ -15,6 +15,18 @@
 .ac-badge.no{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;}
 .ac-soon{font-size:8px;font-weight:700;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 8px;text-transform:uppercase;}
 .pw-form input{margin-bottom:10px;}
+/* buried delete — subtle link at the very bottom */
+.del-link{display:block;text-align:center;margin:30px auto 10px;font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;}
+.del-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:600;padding:28px;}
+.del-ov.on{display:flex;}
+.del-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);max-width:340px;width:100%;padding:24px 22px;}
+.del-card h3{font-family:'Inter',sans-serif;font-size:18px;color:var(--black);margin:0 0 8px;}
+.del-card p{font-size:12px;color:var(--sub);line-height:1.55;margin:0 0 16px;}
+.del-card input{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 13px;font-size:13px;color:var(--black);margin-bottom:14px;}
+.del-actions{display:flex;gap:10px;}
+.del-actions button{flex:1;border-radius:var(--r-full);padding:12px;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+.del-cancel{background:var(--bg-2);border:1.5px solid var(--border);color:var(--black);}
+.del-confirm{background:var(--red);color:#fff;}
 </style>
 {% endblock %}
 {% block content %}
@@ -60,5 +72,35 @@
   </form>
   <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;">We'll email you a confirmation whenever your password changes.</div>
 </div>
-<div style="height:30px;"></div>
+<span class="del-link" onclick="openDelete()">Delete my account</span>
+<div style="height:24px;"></div>
+
+<div class="del-ov" id="delOv" onclick="if(event.target===this)closeDelete()">
+  <div class="del-card">
+    <h3>Delete account?</h3>
+    <p>This permanently deletes your account, posts, check-ins, and all your data. This <b>cannot be undone</b>. Enter your password to confirm.</p>
+    <input type="password" id="delPw" placeholder="Your password" autocomplete="current-password">
+    <div class="del-actions">
+      <button class="del-cancel" onclick="closeDelete()">Cancel</button>
+      <button class="del-confirm" id="delBtn" onclick="confirmDelete()">Delete forever</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openDelete(){ const o=document.getElementById('delOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeDelete(){ const o=document.getElementById('delOv'); if(o) o.classList.remove('on'); }
+function confirmDelete(){
+  const pw=document.getElementById('delPw').value;
+  if(!pw){ alert('Enter your password to confirm.'); return; }
+  const btn=document.getElementById('delBtn'); btn.disabled=true; btn.textContent='Deleting…';
+  fetch('/account/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){ location.href='/'; }
+      else { alert(d.error==='bad_password'?'Incorrect password.':'Could not delete. Try again.'); btn.disabled=false; btn.textContent='Delete forever'; }
+    }).catch(()=>{ alert('Network error.'); btn.disabled=false; btn.textContent='Delete forever'; });
+}
+</script>
 {% endblock %}
