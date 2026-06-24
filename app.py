@@ -57,6 +57,9 @@ class User(db.Model):
     show_profile_views = db.Column(db.Boolean, default=True)  # reciprocal "who viewed your profile"
     notifs_seen_at = db.Column(db.DateTime)  # last time the notifications page was opened (for unread count)
     badges = db.Column(db.String(300), default='')  # comma-separated badge slugs (pro, verified, ephas_team, ...)
+    bonus_xp = db.Column(db.Integer, default=0)      # XP won from the Progress Jackpot (real, persisted)
+    spin_date = db.Column(db.String(10), default='')  # YYYY-MM-DD of the user's last spin day
+    spins_today = db.Column(db.Integer, default=0)    # spins used so far today
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -843,6 +846,9 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_xp INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS spin_date VARCHAR(10) DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS spins_today INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS sex VARCHAR(10) DEFAULT ''",
@@ -1081,7 +1087,7 @@ def user_ctx():
     dates = _checkin_dates(cu)
     total = len(dates)
     streak, best = _streaks(dates)
-    xp = total * 50
+    xp = total * 50 + (cu.bonus_xp or 0)
     level = xp // 200 + 1
     u.update({
         'id': cu.id,
@@ -1652,6 +1658,30 @@ def twin_score(cu):
             'verdict': verdict, 'action': actions[weak],
             'offset': round(364 * (1 - score / 100), 1)}
 
+SPIN_CAP = 3
+# Progress Jackpot prizes: (key, label, detail, xp, weight). The lever is a real action; the payout is variable.
+SPIN_PRIZES = [
+    ('xp25',   '+25 XP',        'Bonus XP banked.',        25,  38),
+    ('xp50',   '+50 XP',        'Nice — 50 XP added.',     50,  24),
+    ('insight','AXON Insight',  '',                         0,  14),
+    ('xp100',  '+100 XP',       'Big one — 100 XP!',       100, 12),
+    ('freeze', 'Streak Freeze', "Your streak's protected.", 0,   8),
+    ('xp250',  '+250 XP',       'RARE — 250 XP!',          250,  4),
+]
+SPIN_INSIGHTS = [
+    "Small reps, repeated, become identity.",
+    "You don't rise to your goals — you fall to your systems.",
+    "Discipline is choosing what you want most over what you want now.",
+    "The version of you that you're building is watching today.",
+    "Consistency beats intensity. Show up small, show up always.",
+    "You already did the hard part — you showed up.",
+]
+
+def spin_state(cu):
+    today = datetime.utcnow().date().isoformat()
+    used = (cu.spins_today or 0) if cu.spin_date == today else 0
+    return {'left': max(0, SPIN_CAP - used), 'cap': SPIN_CAP}
+
 def presence_ctx():
     """Live 'the network is breathing' signal — how many people checked in recently."""
     since = datetime.utcnow() - timedelta(hours=24)
@@ -1667,7 +1697,7 @@ def home():
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
                            twin=twin_score(cu), presence=presence_ctx(),
-                           shielded=streak_shielded(cu),
+                           shielded=streak_shielded(cu), spin=spin_state(cu),
                            nsum=notif_summary(cu), active='home')
 
 MILESTONES = (3, 7, 14, 30, 60, 100, 180, 365)
@@ -1676,7 +1706,7 @@ def checkin_reward(user, is_new):
     """Reward payload for the dopamine moment after a check-in/out."""
     dates = _checkin_dates(user)
     total = len(dates)
-    xp = total * 50
+    xp = total * 50 + (user.bonus_xp or 0)
     level = xp // 200 + 1
     gained = 50 if is_new else 0
     prev_xp = xp - gained
@@ -2761,6 +2791,26 @@ def api_bookmark(post_id):
         db.session.add(Bookmark(user_id=cu.id, post_id=post_id)); saved = True
     db.session.commit()
     return {'saved': saved}
+
+@app.route('/api/spin', methods=['POST'])
+def api_spin():
+    """Progress Jackpot: a verified action earns a spin; the payout size is the variable reward."""
+    if not auth(): return ('', 401)
+    cu = current_user()
+    today = datetime.utcnow().date().isoformat()
+    used = (cu.spins_today or 0) if cu.spin_date == today else 0
+    if used >= SPIN_CAP:
+        return {'ok': False, 'reason': 'cap', 'spins_left': 0}
+    key, label, detail, xp, _w = random.choices(SPIN_PRIZES, weights=[p[4] for p in SPIN_PRIZES])[0]
+    if xp:
+        cu.bonus_xp = (cu.bonus_xp or 0) + xp
+    if key == 'insight':
+        detail = random.choice(SPIN_INSIGHTS)
+    cu.spin_date = today
+    cu.spins_today = used + 1
+    db.session.commit()
+    return {'ok': True, 'key': key, 'label': label, 'detail': detail or '',
+            'xp': xp, 'spins_left': SPIN_CAP - (used + 1)}
 
 @app.route('/api/post/<int:post_id>', methods=['GET'])
 def api_post_get(post_id):

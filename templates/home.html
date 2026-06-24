@@ -197,6 +197,28 @@
 .de-title{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;color:var(--black);}
 .de-sub{font-size:12px;color:var(--sub);line-height:1.5;margin-top:6px;max-width:280px;margin-left:auto;margin-right:auto;}
 .de-sub b{color:var(--gold);font-weight:700;}
+/* ===== PROGRESS JACKPOT (Daily Spin) ===== */
+.spin-card{margin:16px 20px 0;background:linear-gradient(135deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--sh);transition:transform .14s ease;}
+.spin-card:active{transform:scale(.99);}
+.spin-glow{position:absolute;top:-40px;right:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(234,213,162,.18),transparent 70%);pointer-events:none;}
+.spin-ico{width:44px;height:44px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.spin-ico svg{width:21px;height:21px;stroke:var(--gold);fill:none;stroke-width:1.9;}
+.spin-body{flex:1;min-width:0;position:relative;}
+.spin-title{font-size:14px;font-weight:800;color:var(--black);}
+.spin-sub{font-size:11px;color:var(--gold);font-weight:600;margin-top:2px;}
+.spin-arrow{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;position:relative;flex-shrink:0;}
+.spin-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9700;padding:28px;}
+.spin-ov.on{display:flex;}
+.spin-modal{background:linear-gradient(165deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:24px;width:100%;max-width:330px;padding:28px 24px;text-align:center;box-shadow:var(--sh-md);}
+.spin-reel{font-family:'Inter',sans-serif;font-weight:800;font-size:52px;letter-spacing:-2px;line-height:1;min-height:60px;display:flex;align-items:center;justify-content:center;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.spin-prize{font-size:16px;font-weight:800;color:var(--black);margin-top:10px;min-height:20px;}
+.spin-detail{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.4;min-height:16px;}
+.spin-btn{width:100%;margin-top:18px;padding:15px;border-radius:14px;background:var(--grad);color:#241D10;font-weight:800;font-size:14px;letter-spacing:1px;border:none;cursor:pointer;font-family:'Inter',sans-serif;}
+.spin-btn:disabled{opacity:.6;}
+.spin-left{font-size:11px;color:var(--sub);margin-top:12px;}
+.spin-earn{font-size:12px;color:var(--text);margin-top:14px;line-height:1.5;}
+.spin-earn b{color:var(--black);}
+.spin-close{font-size:12px;font-weight:700;color:var(--sub);margin-top:16px;cursor:pointer;}
 </style>
 {% endblock %}
 
@@ -296,6 +318,30 @@
 <div class="live-strip h-rise hd3">
   <span class="live-dot"></span>
   <span class="live-txt"><b>{{ presence.checked_today }}</b> {% if presence.checked_today == 1 %}person{% else %}people{% endif %} checked in today</span>
+</div>
+{% endif %}
+
+{% if spin.left %}
+<div class="spin-card h-rise hd3" onclick="openSpin()">
+  <div class="spin-glow"></div>
+  <div class="spin-ico"><i data-lucide="sparkles"></i></div>
+  <div class="spin-body">
+    <div class="spin-title">Daily Spin</div>
+    <div class="spin-sub">{{ spin.left }} spin{% if spin.left != 1 %}s{% endif %} ready · win XP &amp; more</div>
+  </div>
+  <i data-lucide="chevron-right" class="spin-arrow"></i>
+</div>
+
+<div class="spin-ov" id="spinOv" onclick="if(event.target===this)closeSpin()">
+  <div class="spin-modal">
+    <div class="spin-reel" id="spinReel">?</div>
+    <div class="spin-prize" id="spinPrize"></div>
+    <div class="spin-detail" id="spinDetail">Do a real action, win a real reward.</div>
+    <button class="spin-btn" id="spinBtn" onclick="doSpin()">SPIN</button>
+    <div class="spin-left" id="spinLeft"></div>
+    <div class="spin-earn" id="spinEarn" style="display:none;">Want another? Do <b>10 push-ups</b> → <span onclick="earnSpin()" style="color:var(--gold);cursor:pointer;text-decoration:underline;font-weight:700;">I did it</span></div>
+    <div class="spin-close" onclick="closeSpin()">Done</div>
+  </div>
 </div>
 {% endif %}
 
@@ -522,6 +568,44 @@ function openStory(i) {
 function closeStory() {
   document.getElementById('storyOv').classList.remove('on');
 }
+// ===== Progress Jackpot (Daily Spin) =====
+let spinsLeft = {{ spin.left|default(0) }};
+let spinning = false;
+function openSpin(){ var o=document.getElementById('spinOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeSpin(){ var o=document.getElementById('spinOv'); if(o) o.classList.remove('on'); if(spinsLeft<=0) location.reload(); }
+function earnSpin(){
+  document.getElementById('spinEarn').style.display='none';
+  var btn=document.getElementById('spinBtn'); btn.style.display=''; btn.disabled=false; btn.textContent='SPIN';
+  document.getElementById('spinReel').textContent='?';
+  document.getElementById('spinPrize').textContent='';
+  document.getElementById('spinDetail').textContent='Nice. Spin earned.';
+}
+function doSpin(){
+  if(spinning || spinsLeft<=0) return;
+  spinning=true;
+  var reel=document.getElementById('spinReel'), btn=document.getElementById('spinBtn');
+  btn.disabled=true; btn.textContent='…';
+  document.getElementById('spinPrize').textContent=''; document.getElementById('spinDetail').textContent='';
+  var faces=['+25','+50','AXON','+100','FREEZE','+250']; var i=0;
+  var cyc=setInterval(function(){ reel.textContent=faces[i++ % faces.length]; }, 75);
+  fetch('/api/spin',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
+    setTimeout(function(){
+      clearInterval(cyc);
+      if(!d.ok){ reel.textContent='—'; document.getElementById('spinPrize').textContent = d.reason==='cap' ? 'No spins left today' : 'Try again'; btn.disabled=false; btn.textContent='SPIN'; spinning=false; return; }
+      reel.textContent = (d.key.indexOf('xp')===0) ? ('+'+d.xp) : (d.key==='freeze' ? 'FREEZE' : 'AXON');
+      document.getElementById('spinPrize').textContent=d.label;
+      document.getElementById('spinDetail').textContent=d.detail||'';
+      spinsLeft=d.spins_left;
+      document.getElementById('spinLeft').textContent = spinsLeft>0 ? (spinsLeft+' spin'+(spinsLeft!==1?'s':'')+' left today') : '';
+      if(window.Celebrate && Celebrate.burst) Celebrate.burst();
+      if(navigator.vibrate) navigator.vibrate(20);
+      spinning=false;
+      if(spinsLeft>0){ btn.style.display='none'; document.getElementById('spinEarn').style.display='block'; }
+      else { btn.disabled=true; btn.textContent='COME BACK TOMORROW'; }
+    }, 850);
+  }).catch(function(){ clearInterval(cyc); spinning=false; btn.disabled=false; btn.textContent='SPIN'; });
+}
+
 // ===== The Twin Card — generate a shareable growth card =====
 function shareTwinCard(){
   const btn = document.querySelector('.hero-share'); if(!btn) return;
