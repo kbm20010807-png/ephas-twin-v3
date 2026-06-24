@@ -139,6 +139,33 @@
 .hb-unit{font-size:7px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-top:1px;}
 .hb-ttl{font-size:10px;font-weight:600;color:var(--sub);text-align:center;max-width:66px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hb-lock{width:8px;height:8px;vertical-align:-1px;}
+
+/* ===== FOCUSED HERO ===== */
+.hero{margin:14px 16px 2px;border-radius:24px;padding:20px 18px 18px;position:relative;overflow:hidden;background:linear-gradient(165deg,var(--card) 0%,var(--bg-2) 100%);border:1px solid var(--border);box-shadow:var(--sh-md);}
+.hero-glow{position:absolute;top:-70px;right:-50px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(234,213,162,.16),transparent 70%);pointer-events:none;}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;}
+.hero-date{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sub);margin-bottom:3px;}
+.hero-name{font-family:'Inter',sans-serif;font-weight:800;font-size:27px;letter-spacing:-1px;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;width:fit-content;}
+.hero-sub{font-size:11px;color:var(--sub);margin-top:7px;}
+.hero-sub b{color:var(--gold);font-weight:700;}
+.hero-streak{display:flex;align-items:center;gap:6px;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:7px 13px;flex-shrink:0;}
+.hero-streak svg{width:15px;height:15px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;}
+.hero-streak span{font-family:'Inter',sans-serif;font-weight:800;font-size:16px;color:var(--gold);line-height:1;}
+.hero .rings-row{margin-top:20px;display:flex;justify-content:space-around;}
+.hero-cta{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:18px;padding:15px;border-radius:16px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;letter-spacing:.5px;text-decoration:none;box-shadow:0 8px 22px rgba(234,213,162,.16);}
+.hero-cta svg{width:17px;height:17px;stroke:#241D10;fill:none;stroke-width:2.4;}
+.hero-axon{display:flex;align-items:center;gap:11px;margin-top:18px;padding-top:15px;border-top:1px solid var(--border);text-decoration:none;}
+.hero-axon .axon-ico{width:32px;height:32px;border-radius:10px;background:#F0EBDF;border:1px solid rgba(200,164,90,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.hero-axon .axon-ico img{width:82%;height:82%;object-fit:contain;}
+.hero-axon-txt{flex:1;font-size:12px;color:var(--text);font-weight:600;line-height:1.4;}
+.hero-axon-arrow{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;}
+/* ===== QUICK ACTIONS ===== */
+.qa-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 16px 6px;}
+.qa{display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;}
+.qa-ico{width:100%;height:56px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);transition:transform .14s ease,border-color .15s;}
+.qa:active .qa-ico{transform:scale(.93);border-color:var(--gold-b);}
+.qa-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.9;}
+.qa-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.2px;}
 </style>
 {% endblock %}
 
@@ -165,14 +192,18 @@
 
 <div class="home-amb"></div>
 
-<div class="greet h-rise hd1">
-  <div class="greet-time" id="gTime">Good morning</div>
-  <div class="greet-name">{{ u.first }},</div>
-  <div class="greet-date" id="gDate"></div>
-</div>
+<!-- ===== HERO: your day at a glance ===== -->
+<div class="hero h-rise hd1">
+  <div class="hero-glow"></div>
+  <div class="hero-top">
+    <div>
+      <div class="hero-date" id="gTime">Good morning</div>
+      <div class="hero-name">{{ u.first }}</div>
+      <div class="hero-sub">{% if u.streak %}<b>{{ u.streak }}-day</b> streak{% if u.best_streak %} · best {{ u.best_streak }}{% endif %}{% else %}Check in to start your streak{% endif %}</div>
+    </div>
+    {% if u.streak %}<div class="hero-streak"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
+  </div>
 
-<div class="rings-wrap h-rise hd2">
-  <div class="t-label mb-3">Today</div>
   <div class="rings-row">
     {% set rings = [
       {'lbl':'SLEEP','val': today.sleep if today.has else None,'unit':'h','pct': today.sleep_pct if today.has else 0,'color':'#C8A45A'},
@@ -187,22 +218,27 @@
         <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:{% if today.has and r.val is not none %}var(--black){% else %}var(--muted){% endif %}">{% if today.has and r.val is not none %}{{ r.val }}{{ r.unit }}{% else %}—{% endif %}</text>
         <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">{{ r.lbl }}</text>
       </svg>
-      <div class="ring-name" style="color:{% if today.has %}var(--gold){% else %}var(--sub){% endif %}">{% if today.has %}Today{% else %}No data{% endif %}</div>
     </div>
     {% endfor %}
   </div>
-  {% if not today.has %}<a href="/checkin" style="display:block;text-align:center;margin-top:14px;font-size:12px;font-weight:700;color:var(--gold);">Check in to see your day →</a>{% endif %}
+
+  {% if today.has %}
+  <a href="/axon" class="hero-axon">
+    <div class="axon-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
+    <div class="hero-axon-txt">See what AXON noticed about your day</div>
+    <i data-lucide="arrow-right" class="hero-axon-arrow"></i>
+  </a>
+  {% else %}
+  <a href="/checkin" class="hero-cta"><i data-lucide="plus"></i> Check in to start your day</a>
+  {% endif %}
 </div>
 
-<div class="streak-card h-rise hd3">
-  <div class="streak-num" style="color:var(--gold)">{{ u.streak }}</div>
-  <div>
-    <div style="font-size:12px;font-weight:700;color:var(--black);margin-bottom:5px;">Day streak</div>
-    <div class="streak-dots">
-      {% for d in stats.checked %}<div class="sd {% if d %}on{% endif %}"></div>{% endfor %}
-    </div>
-    <div style="font-size:10px;color:var(--sub);margin-top:5px;">{% if u.streak == 0 %}Check in today to start your streak{% else %}{{ u.best_streak - u.streak }}d to beat your record · {{ u.best_streak }}d best{% endif %}</div>
-  </div>
+<!-- ===== QUICK ACTIONS ===== -->
+<div class="qa-row h-rise hd2">
+  <a href="/checkin" class="qa"><div class="qa-ico"><i data-lucide="circle-plus"></i></div><div class="qa-lbl">Check in</div></a>
+  <a href="/habits" class="qa"><div class="qa-ico"><i data-lucide="repeat"></i></div><div class="qa-lbl">Habits</div></a>
+  <a href="/quests" class="qa"><div class="qa-ico"><i data-lucide="target"></i></div><div class="qa-lbl">Quests</div></a>
+  <a href="/analytics" class="qa"><div class="qa-ico"><i data-lucide="bar-chart-2"></i></div><div class="qa-lbl">Stats</div></a>
 </div>
 
 <!-- QUESTS CARD -->
@@ -343,7 +379,8 @@ document.getElementById('gTime').textContent=gMap;
 const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const n=new Date();
-document.getElementById('gDate').textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
+const gd=document.getElementById('gDate');
+if(gd) gd.textContent=days[n.getDay()]+', '+months[n.getMonth()]+' '+n.getDate();
 
 // Reveal cards as they scroll into view
 (function(){
