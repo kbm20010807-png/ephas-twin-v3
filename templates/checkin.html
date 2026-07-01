@@ -199,7 +199,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <div class="success-ov" id="successOv">
   <!-- completion seal — drop static/fx/complete.png to replace the placeholder -->
   <div class="rw-seal" id="rwSeal">
-    <img src="/static/fx/complete.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <img src="/static/axon_logo.png" alt="AXON" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
     <svg class="rw-seal-ph" viewBox="0 0 92 92" fill="none" style="display:none;">
       <circle cx="46" cy="46" r="42" stroke="var(--gold)" stroke-width="2" opacity=".55"/>
       <circle cx="46" cy="46" r="33" stroke="var(--gold)" stroke-width="1" opacity=".25"/>
@@ -230,7 +230,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- AXON interactive coach -->
   <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
     <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:16px;padding:14px;text-align:left;">
-      <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;"><img src="/static/axon_logo.png" alt="AXON" style="width:82%;height:82%;object-fit:contain;"></div>
       <div style="flex:1;"><div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
     </div>
     <button id="axonHabitBtn" onclick="addCoachHabit()" style="display:none;width:100%;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-xl);padding:12px;font-size:12px;font-weight:700;cursor:pointer;"></button>
@@ -248,7 +248,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   </div>
 
   <button class="btn btn-gold btn-full" onclick="playMotivation()" id="motivBtn" style="border-radius:var(--r-xl);margin-bottom:10px;">
-    <i data-lucide="play"></i> PLAY YOUR MOTIVATION
+    <i data-lucide="play"></i> <span id="motivLabel">HEAR THE TRUTH ABOUT YOU</span>
   </button>
   <button class="btn btn-secondary btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);">
     <i data-lucide="home"></i> BACK TO HOME
@@ -258,6 +258,12 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
 {% block scripts %}
 <script>
+// Auto-generated motivation button copy (varies each time — AXON's voice)
+(function(){
+  var phrases=["HEAR THE TRUTH ABOUT YOU","WANNA HEAR WHAT YOU NEED?","WANNA HEAR THE TRUTH?","WANNA TALK ABOUT IT?","LET ME GIVE YOU ADVICE","THE TRUTH ABOUT TODAY"];
+  var el=document.getElementById('motivLabel');
+  if(el) el.textContent = phrases[Math.floor((Date.now()/1000)%phrases.length)];
+})();
 let step=1;
 function updateProg(){for(let i=1;i<=6;i++){const s=document.getElementById('p'+i);s.classList.remove('done');if(i<step)s.style.background='var(--gold)';else if(i===step)s.style.background='rgba(200,164,90,.35)';else s.style.background='var(--border)';}}
 function show(n){document.querySelectorAll('.step-view').forEach(v=>v.classList.remove('active'));document.getElementById('s'+n).classList.add('active');step=n;updateProg();}

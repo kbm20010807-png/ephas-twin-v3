@@ -197,7 +197,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   <!-- AXON interactive coach -->
   <div id="axonCoach" style="display:none;width:100%;max-width:320px;margin-bottom:14px;">
     <div style="display:flex;gap:10px;align-items:flex-start;background:#0F0F0F;border:1px solid rgba(200,164,90,.2);border-radius:16px;padding:14px;text-align:left;">
-      <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="zap" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.75;"></i></div>
+      <div style="width:30px;height:30px;border-radius:9px;background:rgba(200,164,90,.12);border:1px solid rgba(200,164,90,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;"><img src="/static/axon_logo.png" alt="AXON" style="width:82%;height:82%;object-fit:contain;"></div>
       <div style="flex:1;"><div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;">AXON</div><div id="axonCoachMsg" style="font-size:13px;color:#ddd;line-height:1.55;white-space:pre-wrap;"></div></div>
     </div>
     <button id="axonHabitBtn" onclick="addCoachHabit()" style="display:none;width:100%;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-xl);padding:12px;font-size:12px;font-weight:700;cursor:pointer;"></button>
@@ -215,8 +215,9 @@ body{min-height:100vh;display:flex;flex-direction:column;}
   </div>
 
   <button class="btn btn-gold btn-full" onclick="playMotivation()" id="motivBtn" style="border-radius:var(--r-xl);margin-bottom:10px;">
-    <i data-lucide="play"></i> PLAY YOUR REFLECTION
+    <i data-lucide="play"></i> <span id="motivLabel">HEAR THE TRUTH ABOUT TODAY</span>
   </button>
+  <script>(function(){var ph=["HEAR THE TRUTH ABOUT TODAY","WANNA TALK ABOUT IT?","WANNA HEAR THE TRUTH?","LET ME REFLECT WITH YOU","WHAT TODAY REALLY SAID","LET ME GIVE YOU ADVICE"];var e=document.getElementById('motivLabel');if(e)e.textContent=ph[Math.floor((Date.now()/1000)%ph.length)];})();</script>
   <button class="btn btn-full" onclick="window.location='/home'" style="border-radius:var(--r-xl);background:#111;color:#fff;padding:17px;font-family:'Inter',sans-serif;font-size:13px;letter-spacing:1px;">
     <i data-lucide="home"></i> HOME
   </button>
