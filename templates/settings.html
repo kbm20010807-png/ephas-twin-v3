@@ -146,27 +146,17 @@
   </a>
 </div>
 
-<!-- VERIFICATION -->
+{% if verify.state == 'verified' or verify.state == 'pending' %}
+<!-- VERIFICATION (only surfaces once you've applied / are verified — kept off the main list to prevent spam applications) -->
 <div class="block-label">Verification</div>
 <div class="vf-card">
-  <div class="vf-head">
-    {% if verify.state == 'verified' %}<img src="/static/badges/verified.png" class="vf-badge" alt="" onerror="this.style.display='none'">{% endif %}
-    <div class="vf-body">
-      <div class="vf-title">Get Verified</div>
-      <div class="vf-sub">Apply for the verified badge so people know your account is authentic.</div>
-    </div>
-  </div>
   {% if verify.state == 'verified' %}
-  <div class="vf-status verified">Your account is verified.</div>
-  {% elif verify.state == 'pending' %}
-  <div class="vf-status pending">Application under review{% if verify.submitted_at %} — submitted {{ verify.submitted_at }}{% endif %}. We'll let you know.</div>
-  {% elif verify.state == 'rejected' %}
-  <div class="vf-status rejected">Your last application wasn't approved. You can apply again.</div>
-  <button class="vf-btn" onclick="openVerify()">Apply again</button>
+  <div class="vf-status verified"><img src="/static/badges/verified.png" class="vf-badge" alt="" onerror="this.style.display='none'" style="width:22px;height:22px;margin-right:6px;"> Your account is verified.</div>
   {% else %}
-  <button class="vf-btn" onclick="openVerify()">Apply for verification</button>
+  <div class="vf-status pending">Verification under review{% if verify.submitted_at %} — submitted {{ verify.submitted_at }}{% endif %}.</div>
   {% endif %}
 </div>
+{% endif %}
 
 <!-- PROFESSIONAL -->
 <div class="block-label">Professional</div>
@@ -185,6 +175,9 @@
     <a href="/apply-pro" class="btn btn-gold btn-full" style="font-size:12px;border-radius:var(--r-xl);">
       <i data-lucide="send"></i> APPLY FOR PROFESSIONAL
     </a>
+    {% if verify.state != 'verified' and verify.state != 'pending' %}
+    <div style="text-align:center;margin-top:13px;"><span onclick="openVerify()" style="font-size:11px;color:var(--sub);text-decoration:underline;cursor:pointer;">Apply for a verified badge</span></div>
+    {% endif %}
   </div>
 </div>
 
@@ -198,11 +191,11 @@
   </a>
   <a href="/personal" class="s-row" style="text-decoration:none;">
     <div class="s-left"><div class="s-ico-wrap"><i data-lucide="user-circle"></i></div>
-      <div><div class="s-title">Personal <span style="font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.5px;">PRIVATE</span></div><div class="s-sub">Your private data — only AXON sees it · password required</div></div></div>
-    <div class="s-arrow"><i data-lucide="lock"></i></div>
+      <div><div class="s-title">Personal <span style="font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.5px;">PRIVATE</span></div><div class="s-sub">Your private data — only AXON sees it. Helps AXON personalize.</div></div></div>
+    <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
   </a>
   <div class="s-row" onclick="comingSoon('Blocked accounts')" style="cursor:pointer;">
-    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="slash"></i></div>
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="user-x"></i></div>
       <div><div class="s-title">Blocked accounts <span class="s-soon">Soon</span></div><div class="s-sub">Manage who you've blocked</div></div></div>
     <div class="s-arrow"><i data-lucide="chevron-right"></i></div>
   </div>
