@@ -43,10 +43,15 @@
     <div class="ac-info"><div class="ac-title">Email</div><div class="ac-sub">{{ u.email }}</div></div>
     {% if u.email_verified %}<span class="ac-badge ok">Verified</span>{% else %}<a href="/verify-email"><span class="ac-badge no">Verify</span></a>{% endif %}
   </div>
-  <div class="ac-row">
+  <div class="ac-row" style="flex-wrap:wrap;">
     <div class="ac-ico"><i data-lucide="at-sign"></i></div>
     <div class="ac-info"><div class="ac-title">Username</div><div class="ac-sub">@{{ u.username }}</div></div>
-    <a href="/edit-profile" class="ac-soon" style="color:var(--gold);border-color:var(--gold-b);">Change</a>
+    <button class="ac-soon" style="color:var(--gold);border-color:var(--gold-b);background:none;cursor:pointer;" onclick="toggleUname()">Change</button>
+    <div id="unameEdit" style="display:none;width:100%;margin-top:12px;">
+      <input id="unameInput" class="form-input" value="{{ u.username }}" maxlength="24" placeholder="new username" style="margin-bottom:8px;" {% if u.username_locked %}disabled{% endif %}>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;">{% if u.username_locked %}Locked until {{ u.username_next }} (changeable once every 30 days).{% else %}Lowercase letters, numbers, _ and . — changeable once every 30 days.{% endif %}</div>
+      <button class="btn btn-gold btn-full" style="border-radius:var(--r-xl);" onclick="saveUname()" {% if u.username_locked %}disabled{% endif %}><i data-lucide="check"></i> SAVE USERNAME</button>
+    </div>
   </div>
   <div class="ac-row">
     <div class="ac-ico"><i data-lucide="smartphone"></i></div>
@@ -90,6 +95,13 @@
 
 {% block scripts %}
 <script>
+function toggleUname(){ var e=document.getElementById('unameEdit'); e.style.display = e.style.display==='none' ? 'block' : 'none'; }
+function saveUname(){
+  var v=(document.getElementById('unameInput').value||'').trim().toLowerCase().replace(/[^a-z0-9_.]/g,'');
+  if(v.length<3){ alert('Username needs at least 3 characters.'); return; }
+  fetch('/edit-profile',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username:v})})
+    .then(function(){ location.reload(); }).catch(function(){ alert('Could not save. Try again.'); });
+}
 function openDelete(){ const o=document.getElementById('delOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
 function closeDelete(){ const o=document.getElementById('delOv'); if(o) o.classList.remove('on'); }
 function confirmDelete(){
