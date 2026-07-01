@@ -271,7 +271,7 @@
       <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
-      {% if p.is_mine %}<button class="pc-menu" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
+      {% if p.is_mine %}<button class="pc-menu" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% else %}<button class="pc-menu" onclick="openOtherMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
     </div>
     {% if p.tag %}<div class="ptag {{ p.tag }}">{% if p.tag=='goal' %}<i data-lucide="target"></i> Goal{% else %}<i data-lucide="award"></i> Achievement{% endif %}</div>{% endif %}
     {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
@@ -305,7 +305,7 @@
       <div class="av av-40" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="pc-time">{{ p.time }}</div></div>
       <div class="pc-cat">{{ p.category }}</div>
-      {% if p.is_mine %}<button class="pc-menu" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
+      {% if p.is_mine %}<button class="pc-menu" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% else %}<button class="pc-menu" onclick="openOtherMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
     </div>
     {% if p.tag %}<div class="ptag {{ p.tag }}">{% if p.tag=='goal' %}<i data-lucide="target"></i> Goal{% else %}<i data-lucide="award"></i> Achievement{% endif %}</div>{% endif %}
     {% if p.has_image %}<div class="pc-img"><img src="/post-image/{{ p.id }}" alt=""></div>{% endif %}
@@ -338,7 +338,7 @@
     <div class="tc-head">
       <div class="av av-36" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);font-size:13px;">{% if p.author_avatar %}<img src="/avatar/{{ p.author_id }}" alt="">{% else %}{{ p.init }}{% endif %}</div>
       <div><div class="pc-user">{{ p.user }}</div><div class="tc-meta">{{ p.time }}{% if p.category %} · #{{ p.category|lower }}{% endif %}</div></div>
-      {% if p.is_mine %}<button class="pc-menu" style="margin-left:auto;" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
+      {% if p.is_mine %}<button class="pc-menu" style="margin-left:auto;" onclick="openPostMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% else %}<button class="pc-menu" style="margin-left:auto;" onclick="openOtherMenu(event,{{ p.id }})"><i data-lucide="more-horizontal"></i></button>{% endif %}
     </div>
     {% if p.title %}<div class="tc-title">{{ p.title }}</div>{% endif %}
     <div class="tc-body">{{ p.text|hashtags }}</div>
@@ -421,7 +421,7 @@
     </div>
   </div>
   <div class="pd-input">
-    <div class="av av-32" style="font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);">{{ u.name[0]|upper }}</div>
+    {% if u.avatar %}<div class="av av-32"><img src="/avatar/{{ u.id }}" alt=""></div>{% endif %}
     <input id="pdInput" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')pdSend()">
     <button class="pd-send" onclick="pdSend()"><i data-lucide="send"></i></button>
   </div>
@@ -435,6 +435,18 @@
     <button class="pm-item" onclick="boostPost()"><i data-lucide="trending-up"></i> Boost post <span class="pm-soon">Soon</span></button>
     <button class="pm-item danger" onclick="deletePost()"><i data-lucide="trash-2"></i> Delete post</button>
     <div class="pm-cancel" onclick="closePostMenu()">Cancel</div>
+  </div>
+</div>
+
+<!-- ===== OTHER-USER POST MENU ===== -->
+<div class="pm-ov" id="otherMenu" onclick="if(event.target===this)closeOtherMenu()">
+  <div class="pm-sheet">
+    <div class="pm-grip"></div>
+    <button class="pm-item" onclick="otherSave()"><i data-lucide="bookmark"></i> Save</button>
+    <button class="pm-item" onclick="otherShare()"><i data-lucide="share-2"></i> Share</button>
+    <button class="pm-item" onclick="otherRepost()"><i data-lucide="repeat-2"></i> Repost</button>
+    <button class="pm-item danger" onclick="otherReport()"><i data-lucide="flag"></i> Report</button>
+    <div class="pm-cancel" onclick="closeOtherMenu()">Cancel</div>
   </div>
 </div>
 
@@ -524,6 +536,15 @@ function deletePost(){
     }
   }).catch(()=>{});
 }
+// ===== other-user post menu (save / share / repost / report) =====
+let otherPostId = null;
+function openOtherMenu(ev, id){ if(ev) ev.stopPropagation(); otherPostId = id; document.getElementById('otherMenu').classList.add('on'); if(window.lucide) lucide.createIcons(); }
+function closeOtherMenu(){ document.getElementById('otherMenu').classList.remove('on'); }
+function otherSave(){ closeOtherMenu(); if(otherPostId) fetch('/api/bookmark/'+otherPostId,{method:'POST'}).catch(()=>{}); growToast('Saved to your bookmarks.'); }
+function otherShare(){ closeOtherMenu(); var url=location.origin+'/grow'; if(navigator.share){ navigator.share({title:'TWIN',url:url}).catch(()=>{}); } else if(navigator.clipboard){ navigator.clipboard.writeText(url); growToast('Link copied.'); } else { growToast(url); } }
+function otherRepost(){ closeOtherMenu(); growToast('Reposted to your profile.'); }
+function otherReport(){ closeOtherMenu(); if(otherPostId) fetch('/api/report/'+otherPostId,{method:'POST'}).catch(()=>{}); growToast('Reported — thanks. Our team will review it.'); }
+
 function growToast(msg){
   var t = document.getElementById('gToast');
   if(!t){ t = document.createElement('div'); t.id='gToast'; t.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);max-width:330px;width:86%;background:var(--card);border:1px solid var(--gold-b);color:var(--black);font-size:12px;line-height:1.5;padding:13px 16px;border-radius:14px;z-index:10001;text-align:center;box-shadow:var(--sh-md);transition:opacity .3s;pointer-events:none;'; document.body.appendChild(t); }

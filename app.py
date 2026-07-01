@@ -2836,6 +2836,19 @@ def api_post_edit(post_id):
     db.session.commit()
     return {'ok': True, 'text': p.text or '', 'title': p.title or ''}
 
+@app.route('/api/report/<int:post_id>', methods=['POST'])
+def api_report_post(post_id):
+    """Record a per-post content report for the team to review."""
+    if not auth(): return ('', 401)
+    cu = current_user()
+    try:
+        db.session.add(Feedback(user_id=cu.id, kind='content_report',
+                                target=f'post:{post_id}', message='Reported from feed', status='open'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    return {'ok': True}
+
 @app.route('/api/post/<int:post_id>/delete', methods=['POST'])
 def api_post_delete(post_id):
     if not auth(): return ('', 401)
