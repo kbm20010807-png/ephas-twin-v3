@@ -65,17 +65,13 @@
   </div>
 </div>
 
-<div class="block-label">Change password</div>
+<div class="block-label">Security</div>
 <div class="ac-block">
-  {% if pw_error %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:12px;text-align:center;">{{ pw_error }}</div>{% endif %}
-  {% if pw_success %}<div style="background:var(--green-dim);border:1px solid var(--green-b);color:var(--green);font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:12px;text-align:center;">{{ pw_success }}</div>{% endif %}
-  <form method="POST" action="/account/password" class="pw-form">
-    <input type="password" name="current" class="form-input" placeholder="Current password" autocomplete="current-password" required>
-    <input type="password" name="new" class="form-input" placeholder="New password (8+ chars, capital & symbol)" autocomplete="new-password" required>
-    <input type="password" name="confirm" class="form-input" placeholder="Confirm new password" autocomplete="new-password" required>
-    <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-top:4px;"><i data-lucide="lock"></i> UPDATE PASSWORD</button>
-  </form>
-  <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;">We'll email you a confirmation whenever your password changes.</div>
+  <a href="/account/password" class="ac-row" style="text-decoration:none;">
+    <div class="ac-ico"><i data-lucide="lock"></i></div>
+    <div class="ac-info"><div class="ac-title">Change password</div><div class="ac-sub">Update your password</div></div>
+    <i data-lucide="chevron-right" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.75;"></i>
+  </a>
 </div>
 <span class="del-link" onclick="openDelete()">Delete my account</span>
 <div style="height:24px;"></div>

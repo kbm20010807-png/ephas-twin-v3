@@ -1400,7 +1400,7 @@ def onboarding():
         p.focus = (request.form.get('focus') or '').strip()[:200]
         p.onboarded = True
         db.session.commit()
-        seed_habits_from_profile(cu, p)  # auto-add the bad habits they want to quit
+        # Habits are NOT auto-registered — the user chooses them in the Habits screen.
         if RESEND_KEY and not cu.email_verified:
             return redirect('/verify-email')
         return redirect('/home')
@@ -2518,11 +2518,13 @@ def account():
     if not reauthed(): return redirect('/reauth?next=/account')
     return render_template('account.html', u=user_ctx(), active='settings')
 
-@app.route('/account/password', methods=['POST'])
+@app.route('/account/password', methods=['GET', 'POST'])
 def account_password():
     if not auth(): return redirect('/login')
-    if not reauthed(): return redirect('/reauth?next=/account')
+    if not reauthed(): return redirect('/reauth?next=/account/password')
     cu = current_user()
+    if request.method == 'GET':
+        return render_template('change_password.html', u=user_ctx(), active='settings')
     cur, new, confirm = request.form.get('current') or '', request.form.get('new') or '', request.form.get('confirm') or ''
     err = success = None
     if not cu.check_password(cur):
@@ -2538,7 +2540,7 @@ def account_password():
             send_email(cu.email, 'Your TWIN password was changed',
                        code_email_html('—', 'Your password was just changed. If this wasn\'t you, reset it immediately and contact support.'))
         success = 'Password updated. A confirmation was sent to your email.'
-    return render_template('account.html', u=user_ctx(), active='settings', pw_error=err, pw_success=success)
+    return render_template('change_password.html', u=user_ctx(), active='settings', pw_error=err, pw_success=success)
 
 @app.route('/personal', methods=['GET', 'POST'])
 def personal():
