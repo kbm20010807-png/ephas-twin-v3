@@ -84,16 +84,6 @@
     <div class="char-count" id="lnCount">0/32</div>
   </div>
 
-  <!-- Username -->
-  <div class="form-group">
-    <label class="form-label">Username</label>
-    <input class="form-input" id="username" placeholder="@username" value="{{ u.username }}" maxlength="24" oninput="onUsernameInput(this)" {% if u.username_locked %}disabled style="opacity:.5;"{% endif %}>
-    <div id="usernameLock" class="username-lock" style="{% if not u.username_locked %}display:none;{% endif %}">
-      <i data-lucide="lock" style="stroke:var(--sub);"></i>
-      <div class="username-lock-txt" id="lockMsg">{% if u.username_locked %}Username can be changed once a month. Next change available {{ u.username_next }}.{% else %}You can change your username once every 30 days.{% endif %}</div>
-    </div>
-  </div>
-
   <!-- Bio -->
   <div class="form-group">
     <label class="form-label">Bio</label>
@@ -248,11 +238,9 @@ function saveProfile() {
     return;
   }
   document.getElementById('firstName').style.borderColor = '';
-  const unameEl = document.getElementById('username');
   const body = new URLSearchParams({
     first: fn,
     last: document.getElementById('lastName').value.trim(),
-    username: unameEl.disabled ? '' : unameEl.value.trim(),
     bio: document.getElementById('bioInput').value.trim(),
     avatar: document.getElementById('avatarData').value,
     banner: document.getElementById('bannerData').value

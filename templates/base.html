@@ -127,16 +127,30 @@ document.addEventListener('DOMContentLoaded', function() {
     np.addEventListener('click', function(e){ if(longed){ e.preventDefault(); e.stopImmediatePropagation(); longed=false; } }, true);
   })();
 
-  // Page transitions
-  document.querySelectorAll('a[href^="/"]').forEach(a => {
-    a.addEventListener('click', function(e) {
-      const href = this.getAttribute('href');
-      if(!href || href === '#' || href === window.location.pathname) return;
-      e.preventDefault();
-      document.getElementById('pt').classList.add('on');
-      setTimeout(() => { window.location.href = href; }, 180);
-    });
+  // Back-arrow buttons go to the PREVIOUS page (not a hardcoded home/parent)
+  document.querySelectorAll('a.tb-btn, .back-link, [data-back]').forEach(function(a){
+    var isBack = a.hasAttribute('data-back') || a.querySelector('svg.lucide-arrow-left, [data-lucide="arrow-left"]');
+    if(isBack){
+      a.addEventListener('click', function(e){
+        if (window.history.length > 1 && document.referrer.indexOf(location.host) !== -1) {
+          e.preventDefault(); history.back();
+        }
+      }, true);
+    }
   });
+
+  // Swipe from the left edge → go back to the previous page (native feel)
+  (function(){
+    var startX=0, startY=0, edge=false;
+    document.addEventListener('touchstart', function(e){
+      var t=e.touches[0]; startX=t.clientX; startY=t.clientY; edge = startX < 40;
+    }, {passive:true});
+    document.addEventListener('touchend', function(e){
+      if(!edge) return; edge=false;
+      var t=e.changedTouches[0], dx=t.clientX-startX, dy=Math.abs(t.clientY-startY);
+      if(dx>70 && dy<50 && window.history.length>1) history.back();
+    }, {passive:true});
+  })();
 
   // Dark mode toggle (if present)
   const dm = document.getElementById('darkModeToggle');

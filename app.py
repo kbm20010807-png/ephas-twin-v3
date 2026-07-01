@@ -2543,7 +2543,6 @@ def account_password():
 @app.route('/personal', methods=['GET', 'POST'])
 def personal():
     if not auth(): return redirect('/login')
-    if not reauthed(): return redirect('/reauth?next=/personal')
     cu = current_user()
     p = get_profile(cu)
     saved = False
@@ -2635,7 +2634,8 @@ def edit_profile():
         last = (request.form.get('last') or '').strip()[:32]
         if first:
             cu.name = (first + ' ' + last).strip()
-        cu.bio = (request.form.get('bio') or '').strip()[:300]
+        if 'bio' in request.form:
+            cu.bio = (request.form.get('bio') or '').strip()[:300]
         # Username: change allowed only once every 30 days
         uname = ''.join(c for c in (request.form.get('username') or '').strip().lower() if c.isalnum() or c in '_.')[:24]
         if uname and uname != cu.username and len(uname) >= 3:
