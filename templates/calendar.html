@@ -37,6 +37,17 @@
 .hist-chip{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:2px 9px;font-size:9px;font-weight:700;color:var(--sub);}
 .hist-score{font-family:'Inter',sans-serif;font-size:18px;color:var(--gold);font-weight:800;flex-shrink:0;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
+/* manual add-event sheet */
+.ae-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:9500;}
+.ae-ov.on{display:flex;}
+.ae-sheet{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:460px;padding:12px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:var(--sh-md);animation:aeUp .22s ease;}
+@keyframes aeUp{from{transform:translateY(40px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.ae-grip{width:40px;height:4px;border-radius:4px;background:var(--border);margin:4px auto 14px;}
+.ae-title{font-family:'Inter',sans-serif;font-size:17px;font-weight:800;color:var(--black);margin-bottom:14px;}
+.ae-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--sub);margin:12px 2px 6px;}
+.ae-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ae-note{font-size:10px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;}
+.ae-cancel{text-align:center;font-size:13px;font-weight:700;color:var(--sub);margin-top:14px;cursor:pointer;}
 </style>
 {% endblock %}
 
@@ -47,9 +58,33 @@
     <div class="tb-twin">Calendar</div>
     <div class="tb-tag">by EPHAS</div>
   </div>
-  <a href="/checkin" class="tb-btn" style="background:var(--gold-dim);border-color:var(--gold-b);">
+  <button class="tb-btn" style="background:var(--gold-dim);border-color:var(--gold-b);cursor:pointer;" onclick="openAddEvent()">
     <i data-lucide="plus" style="stroke:var(--gold);"></i>
-  </a>
+  </button>
+</div>
+
+<!-- MANUAL ADD-EVENT -->
+<div class="ae-ov" id="aeOv" onclick="if(event.target===this)closeAddEvent()">
+  <div class="ae-sheet">
+    <div class="ae-grip"></div>
+    <div class="ae-title">Add to calendar</div>
+    <label class="ae-lbl">What is it?</label>
+    <input id="aeTitle" class="form-input" placeholder="e.g. Gym session, AXON review" maxlength="80">
+    <div class="ae-2col">
+      <div><label class="ae-lbl">Date</label><input id="aeDate" class="form-input" type="date"></div>
+      <div><label class="ae-lbl">Time</label><input id="aeTime" class="form-input" type="time"></div>
+    </div>
+    <label class="ae-lbl">Remind me</label>
+    <select id="aeRemind" class="form-input">
+      <option value="none">No reminder</option>
+      <option value="at" selected>Once — at the time</option>
+      <option value="1h">30 min &amp; 1 hour before</option>
+      <option value="multi">1 day, 1 hour &amp; at the time</option>
+    </select>
+    <button class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-top:14px;" onclick="saveEvent()"><i data-lucide="calendar-plus"></i> ADD TO MY CALENDAR</button>
+    <div class="ae-note">Your phone will ask you to confirm adding it to your calendar.</div>
+    <div class="ae-cancel" onclick="closeAddEvent()">Cancel</div>
+  </div>
 </div>
 
 <div class="cal-nav">
@@ -153,5 +188,38 @@ function renderCal() {
 function prevMonth(){if(viewMonth===0){viewMonth=11;viewYear--;}else{viewMonth--;}renderCal();}
 function nextMonth(){if(viewMonth===11){viewMonth=0;viewYear++;}else{viewMonth++;}renderCal();}
 renderCal();
+
+// ===== Manual add-event → phone calendar (.ics) =====
+function openAddEvent(){
+  var o=document.getElementById('aeOv'); o.classList.add('on');
+  var now=new Date();
+  document.getElementById('aeDate').value = now.toISOString().slice(0,10);
+  document.getElementById('aeTime').value = String(now.getHours()+1).padStart(2,'0')+':00';
+  if(window.lucide) lucide.createIcons();
+}
+function closeAddEvent(){ document.getElementById('aeOv').classList.remove('on'); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function saveEvent(){
+  var title=(document.getElementById('aeTitle').value||'').trim() || 'TWIN event';
+  var date=document.getElementById('aeDate').value, time=document.getElementById('aeTime').value||'09:00';
+  if(!date){ alert('Pick a date.'); return; }
+  var dt=new Date(date+'T'+time);
+  var end=new Date(dt.getTime()+30*60000);
+  function fmt(d){ return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00'; }
+  var alarms=[];
+  var r=document.getElementById('aeRemind').value;
+  if(r==='at') alarms=['-PT0M'];
+  else if(r==='1h') alarms=['-PT30M','-PT1H'];
+  else if(r==='multi') alarms=['-P1D','-PT1H','-PT0M'];
+  var va=alarms.map(function(t){ return 'BEGIN:VALARM\nTRIGGER:'+t+'\nACTION:DISPLAY\nDESCRIPTION:'+title+'\nEND:VALARM'; }).join('\n');
+  var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//TWIN//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    'UID:'+Date.now()+'@twin','DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(dt),'DTEND:'+fmt(end),
+    'SUMMARY:'+title,'DESCRIPTION:Added from TWIN'].concat(va?[va]:[]).concat(['END:VEVENT','END:VCALENDAR']).join('\n');
+  var blob=new Blob([ics],{type:'text/calendar'});
+  var url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=(title.replace(/[^a-z0-9]/gi,'_')||'event')+'.ics'; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  closeAddEvent();
+}
 </script>
 {% endblock %}
