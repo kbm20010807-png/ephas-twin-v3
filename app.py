@@ -60,6 +60,7 @@ class User(db.Model):
     bonus_xp = db.Column(db.Integer, default=0)      # XP won from the Progress Jackpot (real, persisted)
     spin_date = db.Column(db.String(10), default='')  # YYYY-MM-DD of the user's last spin day
     spins_today = db.Column(db.Integer, default=0)    # spins used so far today
+    home_tiles = db.Column(db.Text, default='')       # JSON list of the user's chosen home tiles/buttons
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -849,6 +850,7 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_xp INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS spin_date VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS spins_today INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS home_tiles TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS sex VARCHAR(10) DEFAULT ''",
@@ -1628,6 +1630,59 @@ def today_metrics(cu):
         'mood': ci.mood, 'mood_pct': pct(ci.mood, 10),
     }
 
+# ── Customizable Home tiles (mini trackers / buttons the user pins under stories) ──
+HOME_TILE_CATALOG = {
+    'check_in':  {'label': 'Check in',  'icon': 'circle-plus',   'href': '/checkin',   'cat': 'Actions'},
+    'streak':    {'label': 'Streak',    'icon': 'flame',         'href': '/calendar',  'cat': 'You',      'dyn': 'streak'},
+    'score':     {'label': 'Twin Score','icon': 'activity',      'href': '/analytics', 'cat': 'You',      'dyn': 'score'},
+    'level':     {'label': 'Level',     'icon': 'award',         'href': '/profile',   'cat': 'You',      'dyn': 'level'},
+    'habits':    {'label': 'Habits',    'icon': 'repeat',        'href': '/habits',    'cat': 'Actions'},
+    'quests':    {'label': 'Quests',    'icon': 'target',        'href': '/quests',    'cat': 'Actions'},
+    'axon':      {'label': 'Ask AXON',  'icon': 'message-circle','href': '/axon',      'cat': 'AXON'},
+    'analytics': {'label': 'Analytics', 'icon': 'bar-chart-2',   'href': '/analytics', 'cat': 'You'},
+    'post':      {'label': 'Post',      'icon': 'plus-square',   'href': '/create',    'cat': 'Social'},
+    'calendar':  {'label': 'Calendar',  'icon': 'calendar',      'href': '/calendar',  'cat': 'Actions'},
+    'money':     {'label': 'Money',     'icon': 'wallet',        'href': '#',          'cat': 'Trackers', 'soon': True},
+    'fitness':   {'label': 'Fitness',   'icon': 'dumbbell',      'href': '#',          'cat': 'Trackers', 'soon': True},
+    'diet':      {'label': 'Diet',      'icon': 'apple',         'href': '#',          'cat': 'Trackers', 'soon': True},
+    'sleep':     {'label': 'Sleep',     'icon': 'moon',          'href': '#',          'cat': 'Trackers', 'soon': True},
+    'mind':      {'label': 'Mind',      'icon': 'brain',         'href': '#',          'cat': 'Trackers', 'soon': True},
+}
+DEFAULT_HOME_TILES = ['check_in', 'streak', 'axon', 'habits']
+
+def home_tiles_for(cu):
+    """The user's chosen home tiles (or a sensible default), resolved with live values."""
+    try:
+        keys = json.loads(cu.home_tiles) if cu.home_tiles else None
+    except Exception:
+        keys = None
+    if not isinstance(keys, list) or not keys:
+        keys = list(DEFAULT_HOME_TILES)
+    keys = [k for k in keys if k in HOME_TILE_CATALOG][:12]
+    tw = twin_score(cu)
+    streak, _ = _streaks(_checkin_dates(cu))
+    total = len(_checkin_dates(cu))
+    level = (total * 50 + (cu.bonus_xp or 0)) // 200 + 1
+    vals = {'streak': streak, 'score': (tw.get('score') if tw.get('has') else '—'), 'level': level}
+    out = []
+    for k in keys:
+        d = dict(HOME_TILE_CATALOG[k]); d['key'] = k
+        d['value'] = vals.get(d.get('dyn')) if d.get('dyn') else None
+        out.append(d)
+    return out
+
+@app.route('/api/home-tiles', methods=['POST'])
+def api_home_tiles():
+    if not auth(): return ('', 401)
+    cu = current_user()
+    body = request.get_json(silent=True) or {}
+    tiles = body.get('tiles')
+    if isinstance(tiles, list):
+        tiles = [t for t in tiles if t in HOME_TILE_CATALOG][:12]
+        cu.home_tiles = json.dumps(tiles)
+        db.session.commit()
+    return {'ok': True}
+
 def twin_score(cu):
     """The single daily TWIN Score — fuses today's check-in into one number + AXON's verdict + one action.
     (Phase 3: wearable data plugs into the same composite.)"""
@@ -1698,6 +1753,7 @@ def home():
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
                            twin=twin_score(cu), presence=presence_ctx(),
                            shielded=streak_shielded(cu), spin=spin_state(cu),
+                           tiles=home_tiles_for(cu), tile_catalog=HOME_TILE_CATALOG,
                            nsum=notif_summary(cu), active='home')
 
 MILESTONES = (3, 7, 14, 30, 60, 100, 180, 365)

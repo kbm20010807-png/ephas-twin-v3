@@ -183,6 +183,44 @@
 .qa:active .qa-ico{transform:scale(.93);border-color:var(--gold-b);}
 .qa-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.9;}
 .qa-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.2px;}
+/* ===== CUSTOMIZABLE HOME TILES ===== */
+.tiles-wrap{padding:16px 16px 4px;}
+.tiles-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px;}
+.tiles-lbl{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);}
+.tiles-edit{background:none;border:none;color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px;}
+.tiles-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;}
+.tile-ico{width:100%;height:58px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);transition:transform .14s ease,border-color .15s;position:relative;}
+.tile:active .tile-ico{transform:scale(.93);}
+.tile-ico svg{width:21px;height:21px;stroke:var(--gold);fill:none;stroke-width:1.9;}
+.tile-val{position:absolute;top:9px;right:10px;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;color:var(--gold);line-height:1;}
+.tile-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.2px;text-align:center;}
+.tile-soon{font-size:7px;font-weight:800;letter-spacing:.5px;color:var(--sub);text-transform:uppercase;}
+.tile-x{position:absolute;top:-5px;right:6px;width:20px;height:20px;border-radius:50%;background:#EF4444;border:2px solid var(--bg);display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;padding:0;}
+.tile-x svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:3;}
+.tiles-grid.editing .tile-x{display:flex;}
+.tiles-grid.editing .tile-ico{animation:tileWobble .3s ease-in-out infinite;}
+@keyframes tileWobble{0%,100%{transform:rotate(-1.2deg);}50%{transform:rotate(1.2deg);}}
+.tile-add .tile-ico{border-style:dashed;background:var(--bg-2);}
+.tile-add .tile-ico svg{stroke:var(--sub);}
+/* tile picker sheet */
+.tp-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:9500;}
+.tp-ov.on{display:flex;}
+.tp-sheet{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:460px;max-height:82vh;overflow-y:auto;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:var(--sh-md);animation:tpUp .22s ease;}
+@keyframes tpUp{from{transform:translateY(40px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.tp-grip{width:40px;height:4px;border-radius:4px;background:var(--border);margin:4px auto 14px;}
+.tp-title{font-family:'Inter',sans-serif;font-size:17px;font-weight:800;color:var(--black);margin-bottom:6px;}
+.tp-cat{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin:16px 2px 8px;}
+.tp-item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);}
+.tp-item-ico{width:36px;height:36px;border-radius:11px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tp-item-ico svg{width:17px;height:17px;stroke:var(--gold);fill:none;stroke-width:1.9;}
+.tp-item-lbl{flex:1;font-size:14px;font-weight:600;color:var(--black);}
+.tp-add-btn{background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-full);padding:6px 15px;font-size:12px;font-weight:800;cursor:pointer;}
+.tp-add-btn.added{background:var(--bg-2);border-color:var(--border);color:var(--sub);}
+.tp-cancel{text-align:center;font-size:13px;font-weight:700;color:var(--sub);margin-top:18px;cursor:pointer;}
+/* stories row */
+.stories-strip{display:flex;gap:15px;padding:14px 18px 6px;overflow-x:auto;scrollbar-width:none;}
+.stories-strip::-webkit-scrollbar{display:none;}
 /* ===== LIVE PRESENCE ===== */
 .live-strip{display:flex;align-items:center;justify-content:center;gap:9px;margin:16px 20px 0;padding:10px;border-radius:14px;background:var(--card);border:1px solid var(--border);box-shadow:var(--sh);}
 .live-dot{width:8px;height:8px;border-radius:50%;background:#34D399;box-shadow:0 0 0 0 rgba(52,211,153,.5);animation:livePulse 2s infinite;flex-shrink:0;}
@@ -309,12 +347,52 @@
   {% endif %}
 </div>
 
-<!-- ===== QUICK ACTIONS ===== -->
-<div class="qa-row h-rise hd2">
-  <a href="/checkin" class="qa"><div class="qa-ico"><i data-lucide="circle-plus"></i></div><div class="qa-lbl">Check in</div></a>
-  <a href="/habits" class="qa"><div class="qa-ico"><i data-lucide="repeat"></i></div><div class="qa-lbl">Habits</div></a>
-  <a href="/quests" class="qa"><div class="qa-ico"><i data-lucide="target"></i></div><div class="qa-lbl">Quests</div></a>
-  <a href="/analytics" class="qa"><div class="qa-ico"><i data-lucide="bar-chart-2"></i></div><div class="qa-lbl">Stats</div></a>
+<!-- ===== STORIES / TWIN DROPS ===== -->
+<div class="stories-strip h-rise hd2">
+  <div class="story-item" onclick="location.href='/checkin'">
+    <div class="story-ring yours"><div class="story-inner">+</div></div>
+    <div class="story-lbl">Your Drop</div>
+  </div>
+  {% for s in stories %}
+  <div class="story-item" onclick="openStory({{ loop.index0 }})">
+    <div class="story-ring active"><div class="story-inner">{% if s.has_avatar %}<img src="/avatar/{{ s.id }}" alt="">{% else %}{{ s.init }}{% endif %}</div></div>
+    <div class="story-lbl">{{ s.name }}</div>
+  </div>
+  {% else %}
+  <div class="story-item" onclick="location.href='/grow'" style="opacity:.75;">
+    <div class="story-ring seen"><div class="story-inner"><i data-lucide="users" style="width:20px;height:20px;stroke:var(--sub);"></i></div></div>
+    <div class="story-lbl">Find people</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ===== YOUR CUSTOMIZABLE TILES (mini trackers / buttons) ===== -->
+<div class="tiles-wrap h-rise hd3">
+  <div class="tiles-head">
+    <span class="tiles-lbl">Your shortcuts</span>
+    <button class="tiles-edit" onclick="toggleTileEdit()"><span id="tileEditLbl">Edit</span></button>
+  </div>
+  <div class="tiles-grid" id="tilesGrid">
+    {% for t in tiles %}
+    <a href="{{ t.href }}" class="tile" data-key="{{ t.key }}" {% if t.soon %}onclick="tileSoon(event)"{% endif %}>
+      <button class="tile-x" onclick="removeTile(event,'{{ t.key }}')"><i data-lucide="x"></i></button>
+      <div class="tile-ico"><i data-lucide="{{ t.icon }}"></i>{% if t.value is not none %}<span class="tile-val">{{ t.value }}</span>{% endif %}</div>
+      <div class="tile-lbl">{{ t.label }}{% if t.soon %} <span class="tile-soon">soon</span>{% endif %}</div>
+    </a>
+    {% endfor %}
+    <button class="tile tile-add" onclick="openTilePicker()"><div class="tile-ico"><i data-lucide="plus"></i></div><div class="tile-lbl">Add</div></button>
+  </div>
+</div>
+
+<!-- tile picker -->
+<div class="tp-ov" id="tilePicker" onclick="if(event.target===this)closeTilePicker()">
+  <div class="tp-sheet">
+    <div class="tp-grip"></div>
+    <div class="tp-title">Add a shortcut</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:4px;">Pin the trackers &amp; buttons you want on your home.</div>
+    <div id="tpList"></div>
+    <div class="tp-cancel" onclick="closeTilePicker()">Done</div>
+  </div>
 </div>
 
 {% if presence.checked_today %}
@@ -572,6 +650,35 @@ function openStory(i) {
 function closeStory() {
   document.getElementById('storyOv').classList.remove('on');
 }
+// ===== Customizable home tiles =====
+var TILE_CATALOG = {{ tile_catalog|tojson }};
+var MY_TILES = {{ tiles|map(attribute='key')|list|tojson }};
+function toggleTileEdit(){
+  var g=document.getElementById('tilesGrid'), on=g.classList.toggle('editing');
+  document.getElementById('tileEditLbl').textContent = on ? 'Done' : 'Edit';
+}
+function tileSoon(e){ e.preventDefault(); if(window.Celebrate){} alert('Coming in Phase 3 — this tracker connects to your real data soon.'); }
+function saveTiles(){ fetch('/api/home-tiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tiles:MY_TILES})}); }
+function removeTile(e,key){ e.preventDefault(); e.stopPropagation(); MY_TILES=MY_TILES.filter(function(k){return k!==key;}); saveTiles(); location.reload(); }
+function addTile(key){ if(MY_TILES.indexOf(key)===-1 && MY_TILES.length<12){ MY_TILES.push(key); saveTiles(); location.reload(); } }
+function openTilePicker(){
+  var cats={}; Object.keys(TILE_CATALOG).forEach(function(k){ var d=TILE_CATALOG[k]; (cats[d.cat]=cats[d.cat]||[]).push(k); });
+  var html='';
+  Object.keys(cats).forEach(function(cat){
+    html+='<div class="tp-cat">'+cat+'</div>';
+    cats[cat].forEach(function(k){
+      var d=TILE_CATALOG[k], added=MY_TILES.indexOf(k)!==-1;
+      html+='<div class="tp-item"><div class="tp-item-ico"><i data-lucide="'+d.icon+'"></i></div>'
+          +'<div class="tp-item-lbl">'+d.label+(d.soon?' <span style="font-size:9px;color:var(--sub);">soon</span>':'')+'</div>'
+          +'<button class="tp-add-btn '+(added?'added':'')+'" '+(added?'disabled':'onclick="addTile(\''+k+'\')"')+'>'+(added?'Added':'Add')+'</button></div>';
+    });
+  });
+  document.getElementById('tpList').innerHTML=html;
+  document.getElementById('tilePicker').classList.add('on');
+  if(window.lucide) lucide.createIcons();
+}
+function closeTilePicker(){ document.getElementById('tilePicker').classList.remove('on'); }
+
 // ===== Progress Jackpot (Daily Spin) =====
 let spinsLeft = {{ spin.left|default(0) }};
 let spinning = false;
