@@ -197,9 +197,10 @@
 .tiles-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px;}
 .tiles-lbl{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);}
 .tiles-edit{background:none;border:none;color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px;}
-.tiles-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;}
-.tile-ico{width:100%;height:58px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);transition:transform .14s ease,border-color .15s;position:relative;}
+.tiles-grid{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:0 2px 4px;-webkit-overflow-scrolling:touch;}
+.tiles-grid::-webkit-scrollbar{display:none;}
+.tile{flex:0 0 auto;width:70px;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;}
+.tile-ico{width:70px;height:58px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);transition:transform .14s ease,border-color .15s;position:relative;}
 .tile:active .tile-ico{transform:scale(.93);}
 .tile-ico svg{width:21px;height:21px;stroke:var(--gold);fill:none;stroke-width:1.9;}
 .tile-val{position:absolute;top:9px;right:10px;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;color:var(--gold);line-height:1;}
@@ -210,8 +211,7 @@
 .tiles-grid.editing .tile-x{display:flex;}
 .tiles-grid.editing .tile-ico{animation:tileWobble .3s ease-in-out infinite;}
 @keyframes tileWobble{0%,100%{transform:rotate(-1.2deg);}50%{transform:rotate(1.2deg);}}
-.tile-add .tile-ico{border-style:dashed;background:var(--bg-2);}
-.tile-add .tile-ico svg{stroke:var(--sub);}
+.tile-add .tile-ico{background:var(--gold-dim);border-color:var(--gold-b);}
 /* tile picker sheet */
 .tp-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:9500;}
 .tp-ov.on{display:flex;}
@@ -331,17 +331,15 @@
 <div class="tiles-wrap h-rise hd3">
   <div class="tiles-head">
     <span class="tiles-lbl">Your shortcuts</span>
-    <button class="tiles-edit" onclick="toggleTileEdit()"><span id="tileEditLbl">Edit</span></button>
   </div>
   <div class="tiles-grid" id="tilesGrid">
     {% for t in tiles %}
     <a href="{{ t.href }}" class="tile" data-key="{{ t.key }}" {% if t.soon %}onclick="tileSoon(event)"{% endif %}>
-      <button class="tile-x" onclick="removeTile(event,'{{ t.key }}')"><i data-lucide="x"></i></button>
       <div class="tile-ico"><i data-lucide="{{ t.icon }}"></i>{% if t.value is not none %}<span class="tile-val">{{ t.value }}</span>{% endif %}</div>
       <div class="tile-lbl">{{ t.label }}{% if t.soon %} <span class="tile-soon">soon</span>{% endif %}</div>
     </a>
     {% endfor %}
-    <button class="tile tile-add" onclick="openTilePicker()"><div class="tile-ico"><i data-lucide="plus"></i></div><div class="tile-lbl">Add</div></button>
+    <button class="tile tile-add" onclick="openTilePicker()"><div class="tile-ico"><i data-lucide="sliders-horizontal"></i></div><div class="tile-lbl">Edit</div></button>
   </div>
 </div>
 
@@ -485,8 +483,8 @@ function toggleTileEdit(){
 }
 function tileSoon(e){ e.preventDefault(); if(window.Celebrate){} alert('Coming in Phase 3 — this tracker connects to your real data soon.'); }
 function saveTiles(){ fetch('/api/home-tiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tiles:MY_TILES})}); }
-function removeTile(e,key){ e.preventDefault(); e.stopPropagation(); MY_TILES=MY_TILES.filter(function(k){return k!==key;}); saveTiles(); location.reload(); }
 function addTile(key){ if(MY_TILES.indexOf(key)===-1 && MY_TILES.length<12){ MY_TILES.push(key); saveTiles(); location.reload(); } }
+function removeTileKey(key){ MY_TILES=MY_TILES.filter(function(k){return k!==key;}); saveTiles(); location.reload(); }
 function openTilePicker(){
   var cats={}; Object.keys(TILE_CATALOG).forEach(function(k){ var d=TILE_CATALOG[k]; (cats[d.cat]=cats[d.cat]||[]).push(k); });
   var html='';
@@ -496,7 +494,7 @@ function openTilePicker(){
       var d=TILE_CATALOG[k], added=MY_TILES.indexOf(k)!==-1;
       html+='<div class="tp-item"><div class="tp-item-ico"><i data-lucide="'+d.icon+'"></i></div>'
           +'<div class="tp-item-lbl">'+d.label+(d.soon?' <span style="font-size:9px;color:var(--sub);">soon</span>':'')+'</div>'
-          +'<button class="tp-add-btn '+(added?'added':'')+'" '+(added?'disabled':'onclick="addTile(\''+k+'\')"')+'>'+(added?'Added':'Add')+'</button></div>';
+          +'<button class="tp-add-btn '+(added?'added':'')+'" onclick="'+(added?'removeTileKey':'addTile')+'(\''+k+'\')">'+(added?'Remove':'Add')+'</button></div>';
     });
   });
   document.getElementById('tpList').innerHTML=html;
@@ -504,6 +502,8 @@ function openTilePicker(){
   if(window.lucide) lucide.createIcons();
 }
 function closeTilePicker(){ document.getElementById('tilePicker').classList.remove('on'); }
+// open the editor automatically when linked from Settings (/home?edit=tiles)
+if (location.search.indexOf('edit') !== -1) { setTimeout(openTilePicker, 250); }
 
 // ===== Progress Jackpot (Daily Spin) =====
 let spinsLeft = {{ spin.left|default(0) }};
