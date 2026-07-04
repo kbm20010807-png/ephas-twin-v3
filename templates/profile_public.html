@@ -88,7 +88,7 @@
   </div>
   <div class="pp-acts">
     <button class="pp-follow {% if p.is_following %}yes{% else %}no{% endif %}" id="followBtn" onclick="toggleFollow()">{% if p.is_following %}Following{% else %}+ Follow{% endif %}</button>
-    <a class="pp-ibtn" href="/messages" title="Message"><i data-lucide="send"></i></a>
+    <a class="pp-ibtn" href="/dm/{{ p.username }}" title="Message"><i data-lucide="send"></i></a>
     <button class="pp-ibtn" type="button" onclick="shareProfile()" title="Share"><i data-lucide="share-2"></i></button>
   </div>
 </div>

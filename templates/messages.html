@@ -1,137 +1,74 @@
 {% extends 'base.html' %}
 {% block title %}Messages{% endblock %}
-
 {% block head %}
 <style>
-.search-wrap{padding:14px 20px 0;position:relative;}
-.search-ico{position:absolute;left:34px;top:50%;transform:translateY(-50%);}
-.search-ico svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:1.75;}
-.search-inp{width:100%;background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:12px 16px 12px 44px;font-size:13px;color:var(--black);outline:none;transition:border-color .15s;}
-.search-inp:focus{border-color:var(--gold);}
-.search-inp::placeholder{color:var(--muted);}
-.axon-thread{margin:14px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--sh);}
-.at-glow{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(200,164,90,.1),transparent 70%);}
-.at-ico{width:44px;height:44px;border-radius:var(--r);background:#F0EBDF;border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
-.at-ico img{width:82%;height:82%;object-fit:contain;}
-.at-info{flex:1;min-width:0;}
-.at-name{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--black);letter-spacing:-.3px;}
-.at-prev{font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-.sg-row{display:flex;align-items:center;gap:12px;padding:12px 20px;}
-.sg-av{width:46px;height:46px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:900;color:#241D10;font-size:17px;overflow:hidden;flex-shrink:0;text-decoration:none;}
-.sg-av img{width:100%;height:100%;object-fit:cover;}
-.sg-body{flex:1;min-width:0;text-decoration:none;}
-.sg-name{font-size:13px;font-weight:700;color:var(--black);}
-.sg-sub{font-size:11px;color:var(--sub);margin-top:1px;}
-.sg-follow{border:1.5px solid var(--gold-b);background:var(--gold-dim);color:var(--gold);border-radius:var(--r-full);padding:7px 16px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;}
-.sg-follow.on{background:var(--bg-2);color:var(--sub);border-color:var(--border);}
-.at-live{background:#22C55E;border-radius:var(--r-full);padding:2px 9px;font-size:8px;font-weight:700;color:#000;letter-spacing:1px;flex-shrink:0;}
-.thread{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
-.thread:active{background:var(--bg-2);}
-.th-av{position:relative;}
-.th-online{position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;background:#22C55E;border:2px solid var(--bg);}
-.th-body{flex:1;min-width:0;}
-.th-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
-.th-name{font-size:13px;font-weight:700;color:var(--black);}
-.th-time{font-size:10px;color:var(--muted);}
-.th-prev{font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.th-badge{width:18px;height:18px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;flex-shrink:0;margin-left:8px;}
-.requests-cta{margin:16px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:12px;}
-.rc-ico{width:42px;height:42px;border-radius:var(--r);background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.rc-ico svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:1.75;}
-.rc-body{flex:1;}
-.rc-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:2px;}
-.rc-sub{font-size:11px;color:var(--sub);line-height:1.4;}
-.tw-foot{padding:28px 20px 16px;text-align:center;}
+.mg-row{display:flex;align-items:center;gap:13px;padding:13px 20px;text-decoration:none;border-bottom:1px solid var(--border);}
+.mg-row:active{background:var(--bg-2);}
+.mg-av{width:50px;height:50px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;color:#241D10;font-size:18px;overflow:hidden;flex-shrink:0;}
+.mg-av img{width:100%;height:100%;object-fit:cover;}
+.mg-av.axon{background:#F0EBDF;border:1px solid var(--gold-b);}
+.mg-av.axon img{width:82%;height:82%;object-fit:contain;}
+.mg-info{flex:1;min-width:0;}
+.mg-name{font-size:14px;font-weight:700;color:var(--black);}
+.mg-last{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.mg-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.mg-time{font-size:10px;color:var(--muted);}
+.mg-dot{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--gold);color:#241D10;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.mg-empty{text-align:center;padding:40px 24px 16px;}
+.mg-empty svg{width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;}
+.sug-lbl{padding:22px 20px 8px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--sub);text-transform:uppercase;}
+.sug-row{display:flex;align-items:center;gap:12px;padding:11px 20px;text-decoration:none;}
+.sug-av{width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:900;color:#241D10;font-size:15px;overflow:hidden;flex-shrink:0;}
+.sug-av img{width:100%;height:100%;object-fit:cover;}
+.sug-info{flex:1;min-width:0;}
+.sug-name{font-size:13px;font-weight:700;color:var(--black);}
+.sug-user{font-size:11px;color:var(--sub);}
+.sug-msg{background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-full);padding:6px 14px;font-size:11px;font-weight:800;}
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="topbar">
-  <div style="width:36px;"></div>
-  <div class="tb-brand">
-    <div class="tb-twin">Messages</div>
-    <div class="tb-tag">by EPHAS</div>
-  </div>
-  <div style="width:36px;"></div>
+  <a href="/home" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Messages</div></div>
+  <a href="/grow" class="tb-btn"><i data-lucide="search"></i></a>
 </div>
 
-<div class="search-wrap">
-  <div class="search-ico"><i data-lucide="search"></i></div>
-  <input class="search-inp" type="text" placeholder="Search messages...">
-</div>
+<a href="/axon" class="mg-row">
+  <div class="mg-av axon"><img src="/static/axon_logo.png" alt="AXON"></div>
+  <div class="mg-info"><div class="mg-name">AXON <span style="font-size:9px;color:var(--gold);font-weight:700;">YOUR COACH</span></div><div class="mg-last">Chat with your AI coach anytime</div></div>
+  <div class="mg-right"><i data-lucide="chevron-right" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.75;"></i></div>
+</a>
 
-<!-- AXON PINNED -->
-<div class="axon-thread" onclick="window.location='/axon'">
-  <div class="at-glow"></div>
-  <div class="at-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
-  <div class="at-info">
-    <div class="at-name">AXON AI Coach</div>
-    <div class="at-prev">Welcome to TWIN — tap to chat with me anytime.</div>
+{% for c in convos %}
+<a href="/dm/{{ c.username }}" class="mg-row">
+  <div class="mg-av">{% if c.has_avatar %}<img src="/avatar/{{ c.id }}" alt="">{% else %}{{ c.init }}{% endif %}</div>
+  <div class="mg-info">
+    <div class="mg-name">{{ c.name }}</div>
+    <div class="mg-last">{{ c.last }}</div>
   </div>
-  <div class="at-live">LIVE</div>
-</div>
-
-<div class="sect-lbl">Direct Messages</div>
-
-{% if not threads %}
-<div style="text-align:center;padding:24px 24px 8px;">
-  <div style="font-size:12px;color:var(--sub);line-height:1.5;">No messages yet — connect with people below to start.</div>
-</div>
-{% else %}
-{% for t in threads %}
-<div class="thread">
-  <div class="th-av">
-    <div class="av av-44 {% if loop.index == 1 %}th-av{% endif %}">{{ t.init }}</div>
-    {% if loop.index == 1 %}<div class="th-online"></div>{% endif %}
+  <div class="mg-right">
+    <div class="mg-time">{{ c.time }}</div>
+    {% if c.unread %}<div class="mg-dot">{{ c.unread }}</div>{% endif %}
   </div>
-  <div class="th-body">
-    <div class="th-row">
-      <div class="th-name">{{ t.user }}</div>
-      <div class="th-time">{{ t.time }}</div>
-    </div>
-    <div style="display:flex;align-items:center;">
-      <div class="th-prev">{{ t.preview }}</div>
-      {% if t.unread > 0 %}<div class="th-badge">{{ t.unread }}</div>{% endif %}
-    </div>
-  </div>
-</div>
+</a>
 {% endfor %}
+
+{% if not convos %}
+<div class="mg-empty">
+  <i data-lucide="message-circle"></i>
+  <div style="font-size:13px;color:var(--sub);margin-top:10px;line-height:1.5;">No conversations yet.<br>Message someone below or from their profile.</div>
+</div>
 {% endif %}
 
-<!-- PEOPLE YOU MAY KNOW -->
 {% if suggestions %}
-<div class="sect-lbl">People you may know</div>
+<div class="sug-lbl">People you may know</div>
 {% for s in suggestions %}
-<div class="sg-row">
-  <a href="/u/{{ s.username }}" class="sg-av">{% if s.has_avatar %}<img src="/avatar/{{ s.id }}" alt="">{% else %}{{ s.init }}{% endif %}</a>
-  <a href="/u/{{ s.username }}" class="sg-body">
-    <div class="sg-name">{{ s.name }}</div>
-    <div class="sg-sub">@{{ s.username }}{% if s.followers %} · {{ s.followers }} followers{% endif %}</div>
-  </a>
-  <button class="sg-follow" data-id="{{ s.id }}" onclick="sgFollow(this)">+ Follow</button>
-</div>
+<a href="/dm/{{ s.username }}" class="sug-row">
+  <div class="sug-av">{% if s.has_avatar %}<img src="/avatar/{{ s.id }}" alt="">{% else %}{{ s.init }}{% endif %}</div>
+  <div class="sug-info"><div class="sug-name">{{ s.name }}</div><div class="sug-user">@{{ s.username }}</div></div>
+  <span class="sug-msg">Message</span>
+</a>
 {% endfor %}
 {% endif %}
-
-<div class="requests-cta">
-  <div class="rc-body">
-    <div class="rc-title">Find Your Circle</div>
-    <div class="rc-sub">Connect with accountability partners, coaches, and builders on the same path.</div>
-  </div>
-  <a href="/grow" class="btn btn-sm btn-primary" style="border-radius:var(--r-full);flex-shrink:0;padding:9px 16px;font-size:11px;white-space:nowrap;">Discover</a>
-</div>
-
-<div class="tw-foot">
-  <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.5px;color:var(--muted);">TWIN · Powered by EPHAS</div>
-</div>
-{% endblock %}
-{% block scripts %}
-<script>
-function sgFollow(btn){
-  fetch('/api/follow/'+btn.dataset.id,{method:'POST'}).then(r=>r.json()).then(d=>{
-    if(d.following){ btn.textContent='Following'; btn.classList.add('on'); }
-    else { btn.textContent='+ Follow'; btn.classList.remove('on'); }
-  }).catch(()=>{});
-}
-</script>
+<div style="height:24px;"></div>
 {% endblock %}

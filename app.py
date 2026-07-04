@@ -70,6 +70,16 @@ class User(db.Model):
         return check_password_hash(self.password_hash, pw)
 
 
+class DirectMessage(db.Model):
+    __tablename__ = 'direct_messages'
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, index=True, nullable=False)
+    recipient_id = db.Column(db.Integer, index=True, nullable=False)
+    text = db.Column(db.Text, default='')
+    read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+
 class CheckIn(db.Model):
     __tablename__ = 'checkins'
     id = db.Column(db.Integer, primary_key=True)
@@ -2149,12 +2159,66 @@ def people_suggestions(cu, limit=8):
                     'has_avatar': bool(u.avatar), 'followers': Follow.query.filter_by(following_id=u.id).count()})
     return out
 
+def dm_conversations(cu):
+    """List of the people the user has DM'd, newest first, with unread counts."""
+    msgs = (DirectMessage.query
+            .filter((DirectMessage.sender_id == cu.id) | (DirectMessage.recipient_id == cu.id))
+            .order_by(DirectMessage.created_at.desc()).all())
+    seen, out = set(), []
+    for m in msgs:
+        other = m.recipient_id if m.sender_id == cu.id else m.sender_id
+        if other in seen:
+            continue
+        seen.add(other)
+        tu = User.query.get(other)
+        if not tu:
+            continue
+        unread = DirectMessage.query.filter_by(sender_id=other, recipient_id=cu.id, read=False).count()
+        nm = tu.name or tu.username
+        out.append({'id': tu.id, 'name': nm, 'username': tu.username, 'init': (nm[0].upper() if nm else 'U'),
+                    'has_avatar': bool(tu.avatar), 'last': (m.text or '')[:64], 'time': time_ago(m.created_at),
+                    'unread': unread})
+    return out
+
 @app.route('/messages')
 def messages():
     if not auth(): return redirect('/login')
     cu = current_user()
-    return render_template('messages.html', u=user_ctx(), threads=DEMO_THREADS,
+    return render_template('messages.html', u=user_ctx(), convos=dm_conversations(cu),
                            suggestions=people_suggestions(cu), active='messages')
+
+@app.route('/dm/<username>')
+def dm(username):
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    target = User.query.filter(func.lower(User.username) == username.lower()).first()
+    if not target or target.id == cu.id:
+        return redirect('/messages')
+    # opening the chat marks their messages to you as read
+    DirectMessage.query.filter_by(sender_id=target.id, recipient_id=cu.id, read=False).update({'read': True})
+    db.session.commit()
+    rows = (DirectMessage.query
+            .filter(((DirectMessage.sender_id == cu.id) & (DirectMessage.recipient_id == target.id)) |
+                    ((DirectMessage.sender_id == target.id) & (DirectMessage.recipient_id == cu.id)))
+            .order_by(DirectMessage.created_at).all())
+    thread = [{'mine': m.sender_id == cu.id, 'text': m.text, 'time': time_ago(m.created_at)} for m in rows]
+    nm = target.name or target.username
+    tgt = {'id': target.id, 'name': nm, 'username': target.username,
+           'init': (nm[0].upper() if nm else 'U'), 'has_avatar': bool(target.avatar)}
+    return render_template('dm.html', u=user_ctx(), target=tgt, thread=thread, active='messages')
+
+@app.route('/api/dm/<int:target_id>', methods=['POST'])
+def api_dm_send(target_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    if target_id == cu.id or not User.query.get(target_id):
+        return ('', 400)
+    text = (request.form.get('text') or '').strip()[:2000]
+    if not text:
+        return ('', 400)
+    db.session.add(DirectMessage(sender_id=cu.id, recipient_id=target_id, text=text))
+    db.session.commit()
+    return {'ok': True}
 
 @app.route('/habits')
 def habits():
