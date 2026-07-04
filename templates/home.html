@@ -90,7 +90,8 @@
 .story-ring.active{background:conic-gradient(var(--gold) 0%,#F59E0B 100%);}
 .story-ring.yours{background:transparent;border:2px dashed var(--gold);padding:0;width:58px;height:58px;}
 .story-ring.seen{background:var(--border);}
-.story-inner{width:100%;height:100%;border-radius:50%;border:2px solid var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-2);font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);}
+.story-inner{width:100%;height:100%;border-radius:50%;border:2px solid var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-2);font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);line-height:0;}
+.tile-ico svg,.story-inner svg,.qa-ico svg{display:block;}
 .story-inner img{width:100%;height:100%;object-fit:cover;}
 .story-ring.yours .story-inner{font-size:20px;}
 .story-ring.active .story-inner{font-size:18px;}
@@ -183,6 +184,14 @@
 .qa:active .qa-ico{transform:scale(.93);border-color:var(--gold-b);}
 .qa-ico svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.9;}
 .qa-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.2px;}
+/* ===== COMPACT GREETING BAR ===== */
+.greet-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 2px;}
+.greet-time{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--sub);text-transform:uppercase;}
+.greet-hi{font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;width:fit-content;line-height:1.15;}
+.greet-score{display:flex;flex-direction:column;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px 12px;cursor:pointer;}
+.greet-score span{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;color:var(--gold);line-height:1;}
+.greet-score small{font-size:7px;font-weight:800;letter-spacing:1px;color:var(--sub);margin-top:2px;}
+.hero-streak{cursor:pointer;}
 /* ===== CUSTOMIZABLE HOME TILES ===== */
 .tiles-wrap{padding:16px 16px 4px;}
 .tiles-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px;}
@@ -287,70 +296,22 @@
 
 <div class="home-amb"></div>
 
-<!-- ===== HERO: your day at a glance ===== -->
-<div class="hero h-rise hd1">
-  <div class="hero-glow"></div>
-  <div class="hero-top">
-    <div>
-      <div class="hero-date" id="gTime">Good morning</div>
-      <div class="hero-name">{{ u.first }}</div>
-      <div class="hero-sub">{% if u.streak %}<b>{{ u.streak }}-day</b> streak{% if shielded %} · <span style="color:var(--gold);font-weight:700;">freeze active</span>{% elif u.best_streak %} · best {{ u.best_streak }}{% endif %}{% else %}Check in to start your streak{% endif %}</div>
-    </div>
-    {% if u.streak %}<div class="hero-streak"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
+<!-- ===== COMPACT GREETING ===== -->
+<div class="greet-bar h-rise hd1">
+  <div>
+    <div class="greet-time" id="gTime">Good morning</div>
+    <div class="greet-hi">{{ u.first }}</div>
   </div>
-
-  {% if twin.has %}
-  <div class="tscore">
-    <svg class="tscore-ring" viewBox="0 0 132 132">
-      <circle cx="66" cy="66" r="58" class="tscore-bg"/>
-      <circle cx="66" cy="66" r="58" class="tscore-fg" id="tscoreFg" stroke="{{ twin.color }}" stroke-dasharray="364" stroke-dashoffset="{{ twin.offset }}"/>
-      <text x="66" y="70" text-anchor="middle" class="tscore-val">{{ twin.score }}</text>
-      <text x="66" y="86" text-anchor="middle" class="tscore-lbl">TWIN SCORE</text>
-    </svg>
+  <div style="display:flex;align-items:center;gap:8px;">
+    {% if twin.has %}<div class="greet-score" onclick="location.href='/analytics'"><span>{{ twin.score }}</span><small>SCORE</small></div>{% endif %}
+    {% if u.streak %}<div class="hero-streak" onclick="location.href='/calendar'"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
   </div>
-  <div class="tscore-verdict">{{ twin.verdict }}</div>
-  {% endif %}
-
-  <div class="rings-row">
-    {% set rings = [
-      {'lbl':'SLEEP','val': today.sleep if today.has else None,'unit':'h','pct': today.sleep_pct if today.has else 0,'color':'#C8A45A'},
-      {'lbl':'ENERGY','val': today.energy if today.has else None,'unit':'','pct': today.energy_pct if today.has else 0,'color':'#22C55E'},
-      {'lbl':'MOOD','val': today.mood if today.has else None,'unit':'','pct': today.mood_pct if today.has else 0,'color':'#8B5CF6'}
-    ] %}
-    {% for r in rings %}
-    <div class="ring-item">
-      <svg class="ring-svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="42" class="ring-bg"/>
-        {% if today.has and r.val is not none %}<circle cx="50" cy="50" r="42" class="ring-p" stroke="{{ r.color }}" stroke-dasharray="264" stroke-dashoffset="{{ (264 * (1 - r.pct/100))|round(1) }}"/>{% endif %}
-        <text x="50" y="46" text-anchor="middle" class="ring-val" style="fill:{% if today.has and r.val is not none %}var(--black){% else %}var(--muted){% endif %}">{% if today.has and r.val is not none %}{{ r.val }}{{ r.unit }}{% else %}—{% endif %}</text>
-        <text x="50" y="58" text-anchor="middle" class="ring-lbl" style="fill:var(--sub)">{{ r.lbl }}</text>
-      </svg>
-    </div>
-    {% endfor %}
-  </div>
-
-  {% if twin.has %}
-  <a href="/axon" class="tscore-action" style="text-decoration:none;">
-    <div class="ta-txt"><b>Today's move</b>{{ twin.action }}</div>
-    <i data-lucide="arrow-right" class="hero-axon-arrow" style="align-self:center;"></i>
-  </a>
-  {% else %}
-  <a href="/checkin" class="hero-cta"><i data-lucide="plus"></i> Check in to start your day</a>
-  {% endif %}
-
-  {% if twin.has %}
-  <button class="hero-share" onclick="shareTwinCard()"
-    data-score="{{ twin.score }}" data-name="{{ u.first }}" data-streak="{{ u.streak }}"
-    data-color="{{ twin.color }}" data-title="{{ u.level_title }}">
-    <i data-lucide="share-2"></i> Share my Twin Card
-  </button>
-  {% endif %}
 </div>
 
 <!-- ===== STORIES / TWIN DROPS ===== -->
 <div class="stories-strip h-rise hd2">
   <div class="story-item" onclick="location.href='/checkin'">
-    <div class="story-ring yours"><div class="story-inner">+</div></div>
+    <div class="story-ring yours"><div class="story-inner"><i data-lucide="plus" style="width:22px;height:22px;stroke:var(--gold);stroke-width:2.5;display:block;"></i></div></div>
     <div class="story-lbl">Your Drop</div>
   </div>
   {% for s in stories %}
@@ -395,101 +356,6 @@
   </div>
 </div>
 
-{% if presence.checked_today %}
-<div class="live-strip h-rise hd3">
-  <span class="live-dot"></span>
-  <span class="live-txt"><b>{{ presence.checked_today }}</b> {% if presence.checked_today == 1 %}person{% else %}people{% endif %} checked in today</span>
-</div>
-{% endif %}
-
-{% if spin.left %}
-<div class="spin-card h-rise hd3" onclick="openSpin()">
-  <div class="spin-glow"></div>
-  <div class="spin-shimmer"></div>
-  <div class="spin-coin"><span>{{ spin.left }}</span></div>
-  <div class="spin-body">
-    <div class="spin-title">Daily Spin</div>
-    <div class="spin-sub">{{ spin.left }} spin{% if spin.left != 1 %}s{% endif %} ready · win real XP</div>
-  </div>
-  <i data-lucide="chevron-right" class="spin-arrow"></i>
-</div>
-
-<div class="spin-ov" id="spinOv" onclick="if(event.target===this)closeSpin()">
-  <div class="spin-modal">
-    <div class="spin-reel" id="spinReel">?</div>
-    <div class="spin-prize" id="spinPrize"></div>
-    <div class="spin-detail" id="spinDetail">Do a real action, win a real reward.</div>
-    <button class="spin-btn" id="spinBtn" onclick="doSpin()">SPIN</button>
-    <div class="spin-left" id="spinLeft"></div>
-    <div class="spin-earn" id="spinEarn" style="display:none;">Want another? Do <b>10 push-ups</b> → <span onclick="earnSpin()" style="color:var(--gold);cursor:pointer;text-decoration:underline;font-weight:700;">I did it</span></div>
-    <div class="spin-close" onclick="closeSpin()">Done</div>
-  </div>
-</div>
-{% endif %}
-
-<!-- QUESTS CARD -->
-<a href="/quests" class="quests-card reveal">
-  <div class="qc-body">
-    <div class="qc-title">Quests</div>
-    <div class="qc-sub" id="qcSub">Start earning XP today</div>
-  </div>
-  <div class="qc-tag">VIEW ALL</div>
-</a>
-
-<!-- HABITS -->
-<div class="reveal" style="padding:20px 20px 0;">
-  <div class="flex justify-b items-c mb-3">
-    <div class="t-label">Your habits</div>
-    <a href="/habits" style="font-size:11px;color:var(--gold);font-weight:700;text-decoration:none;">Manage →</a>
-  </div>
-  {% if habits %}
-  {% set goods = habits|rejectattr('is_bad')|list %}
-  {% set bads = habits|selectattr('is_bad')|list %}
-  {% if goods %}
-  <div class="hb-cat">Build</div>
-  <div class="hb-scroll">
-    {% for h in goods %}
-    <div class="hb-item" onclick="location.href='/checkout'">
-      <div class="hb-circle {% if h.done_today %}done{% endif %}"><span class="hb-num">{{ h.streak }}</span><span class="hb-unit">days</span></div>
-      <div class="hb-ttl">{{ h.name }}{% if h.private %} <i data-lucide="lock" class="hb-lock"></i>{% endif %}</div>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% if bads %}
-  <div class="hb-cat">Quitting</div>
-  <div class="hb-scroll">
-    {% for h in bads %}
-    <div class="hb-item" onclick="location.href='/checkout'">
-      <div class="hb-circle bad {% if h.done_today %}done{% endif %}"><span class="hb-num">{{ h.streak }}</span><span class="hb-unit">clean</span></div>
-      <div class="hb-ttl">{{ h.name }}</div>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% else %}
-  <a href="/habits" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px dashed var(--border);border-radius:var(--r-lg);padding:14px;text-decoration:none;">
-    <div class="qc-ico" style="width:36px;height:36px;"><i data-lucide="plus" style="stroke:var(--gold);"></i></div>
-    <div style="font-size:12px;color:var(--sub);">Add a habit to build streaks — or quit a bad one.</div>
-  </a>
-  {% endif %}
-</div>
-
-<a href="/axon" class="axon-card reveal">
-  <div class="axon-glow"></div>
-  <div class="axon-top">
-    <div class="axon-ico"><img src="/static/axon_logo.png" alt="AXON"></div>
-    <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;color:var(--sub);">AXON AI COACH</div>
-    <div class="axon-dot"></div>
-  </div>
-  <div class="axon-txt">Welcome to TWIN. Complete your first <b>check-in</b> and I'll start learning your patterns and coaching you.</div>
-  <div class="axon-link">
-    <div style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;">Ask AXON</div>
-    <i data-lucide="arrow-right" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;"></i>
-  </div>
-</a>
-
-<div class="sect-lbl reveal">From the community</div>
 {% if community %}
 {% for p in community %}
 <div class="feed-c reveal">
@@ -516,12 +382,6 @@
   <a href="/grow" class="btn btn-secondary btn-sm" style="display:inline-flex;margin-top:14px;"><i data-lucide="compass"></i> Explore Grow</a>
 </div>
 {% endif %}
-
-<div class="day-end reveal">
-  <div class="de-ico"><i data-lucide="check"></i></div>
-  <div class="de-title">That's your day, {{ u.first }}.</div>
-  <div class="de-sub">You showed up{% if u.streak %} · <b>{{ u.streak }}-day streak</b>{% endif %}. Nothing more to scroll — come back tomorrow.</div>
-</div>
 
 <div class="tw-foot">
   <div class="tw-foot-w">TWIN</div>
