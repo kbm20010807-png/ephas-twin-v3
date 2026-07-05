@@ -985,6 +985,28 @@ def get_profile(user):
 SEX_OPTIONS = ('male', 'female', 'prefer not to say')
 RELIGION_OPTIONS = ('islam', 'christianity', 'judaism', 'other')
 
+MIN_AGE = 16  # TWIN is 16+ (privacy + wellness-data compliance)
+
+def compute_age(birth_date, age_str=''):
+    """Best-effort age. Prefers a YYYY-MM-DD birth date; falls back to a typed age. Returns int or None."""
+    bd = (birth_date or '').strip()
+    if bd:
+        try:
+            y, m, d = (int(x) for x in bd.split('-')[:3])
+            today = datetime.utcnow()
+            yrs = today.year - y - ((today.month, today.day) < (m, d))
+            if 0 < yrs < 120:
+                return yrs
+        except Exception:
+            pass
+    try:
+        a = int((age_str or '').strip())
+        if 0 < a < 120:
+            return a
+    except Exception:
+        pass
+    return None
+
 def apply_basics(p, form):
     """Apply the private 'basics' fields (sex/birth date/height/weight/age/religion) to a Profile."""
     p.height = (form.get('height') or '').strip()[:20]
@@ -1406,6 +1428,13 @@ def onboarding():
     cu = current_user()
     p = get_profile(cu)
     if request.method == 'POST':
+        # Age gate: TWIN is 16+. Enforce if the user gave a birth date / age.
+        age = compute_age(request.form.get('birth_date'), request.form.get('age'))
+        if age is not None and age < MIN_AGE:
+            apply_basics(p, request.form)
+            db.session.commit()
+            return render_template('onboarding.html', u=user_ctx(), p=p, auth_page=True,
+                                   age_error=f"You must be at least {MIN_AGE} to use TWIN.")
         apply_basics(p, request.form)
         p.primary_goal = (request.form.get('primary_goal') or '').strip()[:300]
         p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
@@ -1762,7 +1791,7 @@ def home():
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),
                            twin=twin_score(cu), presence=presence_ctx(),
-                           shielded=streak_shielded(cu), spin=spin_state(cu),
+                           shielded=streak_shielded(cu),
                            tiles=home_tiles_for(cu), tile_catalog=HOME_TILE_CATALOG,
                            nsum=notif_summary(cu), active='home')
 
@@ -2144,7 +2173,8 @@ def profile():
         Post.query.join(Bookmark, Bookmark.post_id == Post.id).filter(Bookmark.user_id == cu.id).order_by(Post.created_at.desc()).all(), cu)
     return render_template('profile.html', u=user_ctx(), stats=stats_ctx(),
                            my_posts=my_posts, my_threads=my_threads, my_courses=my_courses,
-                           badges=resolve_badges(current_user()), saved=saved, active='profile')
+                           badges=resolve_badges(current_user()), saved=saved,
+                           spin=spin_state(cu), active='profile')
 
 def people_suggestions(cu, limit=8):
     """People you may know — community members you don't already follow."""

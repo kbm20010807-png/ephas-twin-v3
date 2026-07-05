@@ -171,6 +171,43 @@
 .live-modal-box{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;width:100%;max-width:320px;}
 .live-modal-ico{width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
 .live-modal-ico svg{width:28px;height:28px;stroke:#EF4444;fill:none;stroke-width:1.75;}
+
+/* ===== DAILY SPIN (moved to profile) ===== */
+.spin-card{margin:16px 20px 4px;background:linear-gradient(135deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(234,213,162,.10);transition:transform .14s ease;}
+.spin-card:active{transform:scale(.99);}
+.spin-glow{position:absolute;top:-40px;right:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(234,213,162,.20),transparent 70%);pointer-events:none;}
+.spin-shimmer{position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.10) 50%,transparent 65%);background-size:250% 100%;animation:spinShimmer 3.4s ease-in-out infinite;}
+@keyframes spinShimmer{0%{background-position:160% 0;}60%,100%{background-position:-60% 0;}}
+.spin-coin{width:46px;height:46px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -2px 4px rgba(140,110,50,.35),0 3px 8px rgba(0,0,0,.25);}
+.spin-coin::after{content:'';position:absolute;inset:4px;border-radius:50%;border:1.5px solid rgba(120,95,40,.35);}
+.spin-coin span{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:#3A2D12;position:relative;}
+@media (prefers-reduced-motion: reduce){.spin-shimmer{animation:none;}}
+.spin-body{flex:1;min-width:0;position:relative;}
+.spin-title{font-size:14px;font-weight:800;color:var(--black);}
+.spin-sub{font-size:11px;color:var(--gold);font-weight:600;margin-top:2px;}
+.spin-arrow{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;position:relative;flex-shrink:0;}
+.spin-badge{position:absolute;top:12px;right:14px;font-family:'Inter',sans-serif;font-size:10px;font-weight:800;letter-spacing:.5px;color:#3A2D12;background:var(--grad);border-radius:var(--r-full);padding:3px 9px;}
+.spin-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9700;padding:28px;}
+.spin-ov.on{display:flex;}
+.spin-modal{background:linear-gradient(165deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:24px;width:100%;max-width:330px;padding:28px 24px;text-align:center;box-shadow:var(--sh-md);}
+.spin-window{position:relative;height:92px;margin:2px auto 4px;overflow:hidden;border-radius:16px;background:linear-gradient(180deg,var(--bg-2),var(--black,#0b0b0d));border:1px solid var(--gold-b);box-shadow:inset 0 6px 16px rgba(0,0,0,.45);}
+.spin-window::before,.spin-window::after{content:'';position:absolute;left:0;right:0;height:30px;z-index:2;pointer-events:none;}
+.spin-window::before{top:0;background:linear-gradient(180deg,var(--card),transparent);}
+.spin-window::after{bottom:0;background:linear-gradient(0deg,var(--card),transparent);}
+.spin-window-line{position:absolute;top:50%;left:10px;right:10px;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:3;opacity:.55;}
+.spin-window.win{animation:spinWin .55s ease;}
+@keyframes spinWin{0%,100%{box-shadow:inset 0 6px 16px rgba(0,0,0,.45);}45%{box-shadow:inset 0 6px 16px rgba(0,0,0,.45),0 0 34px rgba(234,213,162,.65);}}
+.spin-strip{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;will-change:transform;}
+.spin-cell{height:92px;flex:0 0 92px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:38px;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.spin-cell.sm{font-size:26px;letter-spacing:0;}
+.spin-prize{font-size:16px;font-weight:800;color:var(--black);margin-top:10px;min-height:20px;}
+.spin-detail{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.4;min-height:16px;}
+.spin-btn{width:100%;margin-top:18px;padding:15px;border-radius:14px;background:var(--grad);color:#241D10;font-weight:800;font-size:14px;letter-spacing:1px;border:none;cursor:pointer;font-family:'Inter',sans-serif;}
+.spin-btn:disabled{opacity:.6;}
+.spin-left{font-size:11px;color:var(--sub);margin-top:12px;}
+.spin-earn{font-size:12px;color:var(--text);margin-top:14px;line-height:1.5;display:none;}
+.spin-earn b{color:var(--black);}
+.spin-close{font-size:12px;font-weight:700;color:var(--sub);margin-top:16px;cursor:pointer;}
 </style>
 {% endblock %}
 
@@ -221,6 +258,34 @@
     <span class="xp-chip next">LEVEL {{ u.level + 1 }}</span>
   </div>
   <div class="xp-strip-bar"><div class="xp-strip-fill" style="width:{{ u.progress_pct }}%"></div></div>
+</div>
+
+<!-- DAILY SPIN -->
+<div class="spin-card" onclick="openSpin()">
+  <div class="spin-glow"></div>
+  {% if spin.left > 0 %}<div class="spin-shimmer"></div><div class="spin-badge">{{ spin.left }} LEFT</div>{% endif %}
+  <div class="spin-coin"><span>★</span></div>
+  <div class="spin-body">
+    <div class="spin-title">Daily Spin</div>
+    <div class="spin-sub">{% if spin.left > 0 %}Tap to win XP, streak freezes &amp; more{% else %}Come back tomorrow for more spins{% endif %}</div>
+  </div>
+  <i data-lucide="chevron-right" class="spin-arrow"></i>
+</div>
+
+<!-- SPIN OVERLAY -->
+<div class="spin-ov" id="spinOv">
+  <div class="spin-modal" onclick="event.stopPropagation()">
+    <div class="spin-window" id="spinWindow">
+      <div class="spin-strip" id="spinStrip"><div class="spin-cell">★</div></div>
+      <div class="spin-window-line"></div>
+    </div>
+    <div class="spin-prize" id="spinPrize"></div>
+    <div class="spin-detail" id="spinDetail">Spin to earn XP, streak freezes or an AXON insight.</div>
+    <button class="spin-btn" id="spinBtn" onclick="doSpin()" {% if spin.left <= 0 %}disabled{% endif %}>{% if spin.left > 0 %}SPIN{% else %}COME BACK TOMORROW{% endif %}</button>
+    <div class="spin-earn" id="spinEarn">Want another? <b>Do 10 push-ups</b> or check in again to earn a spin.</div>
+    <div class="spin-left" id="spinLeft">{% if spin.left > 0 %}{{ spin.left }} spin{{ 's' if spin.left != 1 else '' }} left today{% endif %}</div>
+    <div class="spin-close" onclick="closeSpin()">Close</div>
+  </div>
 </div>
 
 <!-- TWIN TABS -->
@@ -539,6 +604,81 @@
 <script>
 let acctType = localStorage.getItem('twinAcctType') || 'twin';
 let isSubscribed = false;
+
+// ===== Daily Spin =====
+let spinsLeft = {{ spin.left|default(0) }};
+let spinning = false;
+function openSpin(){ var o=document.getElementById('spinOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeSpin(){ var o=document.getElementById('spinOv'); if(o) o.classList.remove('on'); if(spinsLeft<=0) location.reload(); }
+function earnSpin(){
+  document.getElementById('spinEarn').style.display='none';
+  var btn=document.getElementById('spinBtn'); btn.style.display=''; btn.disabled=false; btn.textContent='SPIN';
+  document.getElementById('spinStrip').innerHTML='<div class="spin-cell">★</div>';
+  document.getElementById('spinStrip').style.transform='translateY(0)';
+  document.getElementById('spinPrize').textContent='';
+  document.getElementById('spinDetail').textContent='Nice. Spin earned.';
+}
+var SPIN_FACES = ['+25','+50','+100','+250','FREEZE','AXON'];
+function spinFace(key, xp){
+  if(key && key.indexOf('xp')===0) return '+'+xp;
+  if(key === 'freeze') return 'FREEZE';
+  if(key === 'axon') return 'AXON';
+  return SPIN_FACES[Math.floor(spinFrame() % SPIN_FACES.length)];
+}
+var _sf = 0; function spinFrame(){ _sf = (_sf*9301 + 49297) % 233280; return _sf; } // deterministic pseudo-shuffle
+function buildStrip(finalLabel){
+  var H = 92, N = 30;               // 30 cells, land on the last
+  var strip = document.getElementById('spinStrip');
+  var html = '';
+  for(var i=0;i<N-1;i++){
+    var f = SPIN_FACES[Math.floor(spinFrame() % SPIN_FACES.length)];
+    html += '<div class="spin-cell'+(f.length>4?' sm':'')+'">'+f+'</div>';
+  }
+  html += '<div class="spin-cell'+(finalLabel.length>4?' sm':'')+'">'+finalLabel+'</div>';
+  strip.innerHTML = html;
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+  return {H:H, N:N};
+}
+function doSpin(){
+  if(spinning || spinsLeft<=0) return;
+  spinning=true;
+  var win=document.getElementById('spinWindow'), strip=document.getElementById('spinStrip'), btn=document.getElementById('spinBtn');
+  win.classList.remove('win');
+  btn.disabled=true; btn.textContent='SPINNING…';
+  document.getElementById('spinPrize').textContent=''; document.getElementById('spinDetail').textContent='';
+  if(navigator.vibrate) navigator.vibrate([12,40,12,40,12]);
+  fetch('/api/spin',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
+    if(!d.ok){
+      document.getElementById('spinPrize').textContent = d.reason==='cap' ? 'No spins left today' : 'Try again';
+      btn.disabled=false; btn.textContent='SPIN'; spinning=false; return;
+    }
+    var finalLabel = spinFace(d.key, d.xp);
+    var geo = buildStrip(finalLabel);
+    // force reflow so the reset transform applies before we animate
+    void strip.offsetHeight;
+    var target = -((geo.N - 1) * geo.H);
+    strip.style.transition = 'transform 3.1s cubic-bezier(.11,.72,.16,1)';   // fast start, long slow landing
+    strip.style.transform = 'translateY('+target+'px)';
+    // land
+    var landed = false;
+    function land(){
+      if(landed) return; landed = true;
+      win.classList.add('win');
+      document.getElementById('spinPrize').textContent=d.label;
+      document.getElementById('spinDetail').textContent=d.detail||'';
+      spinsLeft=d.spins_left;
+      document.getElementById('spinLeft').textContent = spinsLeft>0 ? (spinsLeft+' spin'+(spinsLeft!==1?'s':'')+' left today') : '';
+      if(window.Celebrate && Celebrate.burst) Celebrate.burst();
+      if(navigator.vibrate) navigator.vibrate([0,60,30,90]);
+      spinning=false;
+      if(spinsLeft>0){ btn.style.display='none'; document.getElementById('spinEarn').style.display='block'; }
+      else { btn.disabled=true; btn.textContent='COME BACK TOMORROW'; }
+    }
+    strip.addEventListener('transitionend', land, {once:true});
+    setTimeout(land, 3300); // fallback if transitionend doesn't fire
+  }).catch(function(){ spinning=false; btn.disabled=false; btn.textContent='SPIN'; });
+}
 
 function applyAcct(type) {
   // Professional view is now grant-based (a badge) — the profile always shows the TWIN view.

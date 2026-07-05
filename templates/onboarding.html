@@ -24,6 +24,10 @@ body{background:var(--bg);min-height:100vh;}
     <div>These answers are <b>private</b> — only AXON uses them to coach you and tailor your feed. They're never shown to anyone else.</div>
   </div>
 
+  {% if age_error %}
+  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#EF4444;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:16px;text-align:center;">{{ age_error }}</div>
+  {% endif %}
+
   <form method="POST" action="/onboarding" id="obForm" onsubmit="collect()">
     <div class="form-group">
       <label class="ob-lbl">Sex</label>
