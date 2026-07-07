@@ -2770,6 +2770,54 @@ def account_delete():
         session['accounts'] = accts
     return jsonify({'ok': True})
 
+@app.route('/admin/health')
+def admin_health():
+    """One-glance readiness dashboard. Open /admin/health?key=YOUR_ADMIN_KEY (or while logged in
+    if ADMIN_KEY isn't set yet). Shows only pass/fail + counts — never secret values."""
+    admin_key = os.environ.get('ADMIN_KEY', '')
+    if admin_key:
+        if request.args.get('key', '') != admin_key:
+            return ('Forbidden', 403)
+    elif not auth():
+        return ('Set ADMIN_KEY in Railway, or log in, to view this.', 403)
+
+    dialect = db.engine.dialect.name  # 'postgresql' or 'sqlite'
+    db_ok = dialect.startswith('postgre')
+    secret_ok = os.environ.get('SECRET_KEY', '') not in ('', 'TWIN-EPHAS-V3-DEV-ONLY')
+    try:
+        users = User.query.count(); checkins = CheckIn.query.count()
+    except Exception:
+        users = checkins = -1
+    rows = [
+        ('Database is Postgres (data persists across deploys)', db_ok, dialect + ('' if db_ok else '  ← DATA WILL RESET ON DEPLOY')),
+        ('DATABASE_URL is set', bool(os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_PUBLIC_URL')), ''),
+        ('SECRET_KEY set to a real value (not the dev default)', secret_ok, 'logins survive deploys' if secret_ok else 'using DEV default — everyone gets logged out on deploy'),
+        ('ANTHROPIC_API_KEY set (AXON coach)', bool(os.environ.get('ANTHROPIC_API_KEY')), ''),
+        ('RESEND_API_KEY set (emails)', bool(os.environ.get('RESEND_API_KEY')), ''),
+        ('EMAIL_FROM set', bool(os.environ.get('EMAIL_FROM')), os.environ.get('EMAIL_FROM', '(missing)')),
+        ('CRON_KEY set (streak-nudge emails)', bool(os.environ.get('CRON_KEY')), ''),
+        ('APP_URL set (email links)', bool(os.environ.get('APP_URL')), os.environ.get('APP_URL', '(missing)')),
+        ('OPENAI_API_KEY set (nicer AXON voice — optional)', bool(os.environ.get('OPENAI_API_KEY')), 'optional'),
+    ]
+    critical_fail = not (db_ok and secret_ok and os.environ.get('ANTHROPIC_API_KEY'))
+    html = ["<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>",
+            "<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:24px auto;padding:0 16px;background:#0c0c0e;color:#eee}",
+            "h1{font-size:22px}.row{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid #222}",
+            ".ic{font-size:20px;flex-shrink:0}.t{font-weight:600}.n{color:#999;font-size:13px;margin-top:2px}",
+            ".banner{padding:14px;border-radius:12px;margin:12px 0;font-weight:700}",
+            ".ok{background:#12331f;color:#6BBF8E}.bad{background:#3a1414;color:#f08a8a}</style></head><body>"]
+    html.append("<h1>TWIN — Launch Health</h1>")
+    html.append(f"<div class='banner {'bad' if critical_fail else 'ok'}'>" +
+                ("⚠️ Not ready — fix the red criticals below before F&F." if critical_fail
+                 else "✅ Criticals pass — you're good to hand it out.") + "</div>")
+    html.append(f"<div class='n' style='margin-bottom:10px'>Users: {users} · Check-ins: {checkins}  "
+                "(create an account, then redeploy and refresh — if these numbers survive, persistence works)</div>")
+    for label, ok, note in rows:
+        html.append(f"<div class='row'><div class='ic'>{'✅' if ok else '❌'}</div>"
+                    f"<div><div class='t'>{label}</div>{('<div class=n>'+note+'</div>') if note else ''}</div></div>")
+    html.append("</body></html>")
+    return '\n'.join(html)
+
 @app.route('/sw.js')
 def service_worker():
     # Served from root so the PWA controls the whole app (not just /static/).
