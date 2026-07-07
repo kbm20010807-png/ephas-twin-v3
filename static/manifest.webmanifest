@@ -1,0 +1,17 @@
+{
+  "name": "TWIN — become your best self",
+  "short_name": "TWIN",
+  "description": "Track your life, grow every day, and let AXON coach you. Powered by EPHAS.",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["health", "lifestyle", "social"],
+  "icons": [
+    { "src": "/static/twin_logo_180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/static/twin_logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/twin_logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

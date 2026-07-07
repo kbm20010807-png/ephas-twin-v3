@@ -2770,6 +2770,14 @@ def account_delete():
         session['accounts'] = accts
     return jsonify({'ok': True})
 
+@app.route('/sw.js')
+def service_worker():
+    # Served from root so the PWA controls the whole app (not just /static/).
+    resp = app.send_static_file('sw.js')
+    resp.headers['Service-Worker-Allowed'] = '/'
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
 @app.route('/cron/streak-nudge')
 def cron_streak_nudge():
     """Point a once-daily evening cron (Railway cron / cron-job.org) at
