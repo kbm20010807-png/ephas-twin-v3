@@ -27,11 +27,15 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 .ax-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px;}
 .ax-chip{background:var(--bg-2);border:1.5px solid var(--border);border-radius:var(--r-full);padding:9px 16px;font-size:12px;font-weight:600;color:var(--black);cursor:pointer;transition:border-color .15s;}
 .ax-chip:hover{border-color:var(--gold-b);}
-.ax-typing{display:flex!important;gap:4px;align-items:center;}
-.ax-typing span{width:6px;height:6px;border-radius:50%;background:var(--sub);animation:axBlink 1.2s infinite;}
-.ax-typing span:nth-child(2){animation-delay:.2s;}
-.ax-typing span:nth-child(3){animation-delay:.4s;}
+.ax-typing{display:flex!important;gap:8px;align-items:center;}
+.ax-typing .ax-dots{display:inline-flex;gap:4px;align-items:center;}
+.ax-typing .ax-dots span{width:6px;height:6px;border-radius:50%;background:var(--sub);animation:axBlink 1.2s infinite;}
+.ax-typing .ax-dots span:nth-child(2){animation-delay:.2s;}
+.ax-typing .ax-dots span:nth-child(3){animation-delay:.4s;}
 @keyframes axBlink{0%,60%,100%{opacity:.3;}30%{opacity:1;}}
+.ax-think{font-size:13px;font-weight:600;background:linear-gradient(90deg,var(--sub),var(--gold),var(--sub));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:axShimmer 2s linear infinite;transition:opacity .2s;}
+@keyframes axShimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+@media (prefers-reduced-motion:reduce){.ax-think{animation:none;-webkit-text-fill-color:var(--sub);}}
 .ax-input-bar{padding:12px 14px 30px;border-top:1px solid var(--border);background:var(--bg);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;}
 .ax-input{flex:1;background:var(--bg-2);border:1.5px solid var(--border);border-radius:20px;padding:11px 16px;font-size:13px;line-height:1.4;color:var(--black);outline:none;transition:border-color .15s;resize:none;max-height:130px;overflow-y:auto;font-family:inherit;}
 .ax-input:focus{border-color:var(--gold);}
@@ -161,12 +165,35 @@ function addMsg(role, text){
   if(typeof lucide !== 'undefined') lucide.createIcons();
   scrollDown();
 }
+// Rotating "thinking" status lines — like ChatGPT, so the wait feels alive.
+const AX_THINK_PHRASES = [
+  'AXON is thinking',
+  'Reading your check-ins',
+  'Connecting the dots',
+  'Weighing your options',
+  'Working out your next move',
+  'Almost there',
+];
+let axThinkTimer = null;
+function startThinking(){
+  const el = document.getElementById('axThink');
+  if(!el) return;
+  let i = 0;
+  el.textContent = AX_THINK_PHRASES[0] + '…';
+  axThinkTimer = setInterval(() => {
+    i = (i + 1) % AX_THINK_PHRASES.length;
+    el.style.opacity = '0';
+    setTimeout(() => { el.textContent = AX_THINK_PHRASES[i] + '…'; el.style.opacity = '1'; }, 180);
+  }, 1600);
+}
+function stopThinking(){ if(axThinkTimer){ clearInterval(axThinkTimer); axThinkTimer = null; } }
 function showTyping(){
   const row = document.createElement('div');
   row.className = 'ax-row'; row.id = 'axTyping';
-  row.innerHTML = '<div class="ax-av"><img src="/static/axon_logo.png" alt="AXON"></div><div class="ax-msg bot ax-typing"><span></span><span></span><span></span></div>';
+  row.innerHTML = '<div class="ax-av"><img src="/static/axon_logo.png" alt="AXON"></div><div class="ax-msg bot ax-typing"><span class="ax-think" id="axThink">AXON is thinking…</span><span class="ax-dots"><span></span><span></span><span></span></span></div>';
   msgs.appendChild(row);
   if(typeof lucide !== 'undefined') lucide.createIcons();
+  startThinking();
   scrollDown();
 }
 function addBotBubble(){
@@ -201,6 +228,7 @@ function send(){
     axStreaming = false;
     if(axCurBubble){ const r = axCurBubble.closest('.ax-row'); if(r) r.remove(); axCurBubble = null; }
   }
+  stopThinking();
   const t = document.getElementById('axTyping'); if(t) t.remove();
   showTyping();
   // Wait ~1s of quiet before generating, so rapid follow-ups are answered together
@@ -216,26 +244,30 @@ function fireAxon(){
   axStreaming = true;
   fetch('/api/axon/stream', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({message}), signal:axCtrl.signal})
     .then(resp => {
-      const t = document.getElementById('axTyping'); if(t) t.remove();
-      if(!resp.ok || !resp.body){ axStreaming = false; addMsg('bot', 'Something went wrong — give me a sec and try again.'); return; }
-      const bubble = addBotBubble();
-      axCurBubble = bubble;
+      if(!resp.ok || !resp.body){ stopThinking(); const t = document.getElementById('axTyping'); if(t) t.remove(); axStreaming = false; addMsg('bot', 'Something went wrong — give me a sec and try again.'); return; }
       const reader = resp.body.getReader();
       const dec = new TextDecoder();
       let acc = '';
+      let bubble = null;   // created lazily on the FIRST token, so the "thinking" status shows until then
       (function read(){
         reader.read().then(({done, value}) => {
           if(done){ axStreaming = false; axCurBubble = null;
+            stopThinking(); const t = document.getElementById('axTyping'); if(t) t.remove();
             if(vmActive){ vmCaption(acc.replace(/[*_•#>]/g,'').slice(0,240)); ttsPlay(acc, function(){ if(vmActive) startListen(); }); }
             return; }
           acc += dec.decode(value, {stream:true});
+          if(!bubble){   // first chunk arrived — swap the thinking status for the real answer bubble
+            stopThinking(); const t = document.getElementById('axTyping'); if(t) t.remove();
+            bubble = addBotBubble(); axCurBubble = bubble;
+          }
           bubble.innerHTML = mdFormat(acc);
           scrollDown();
           read();
-        }).catch(() => { axStreaming = false; });
+        }).catch(() => { axStreaming = false; stopThinking(); });
       })();
     })
     .catch(err => {
+      stopThinking();
       const t = document.getElementById('axTyping'); if(t) t.remove();
       axStreaming = false;
       if(err && err.name === 'AbortError') return;   // interrupted on purpose — already handled
