@@ -302,7 +302,7 @@
     <div class="spin-prize" id="spinPrize"></div>
     <div class="spin-detail" id="spinDetail">Spin to earn XP, streak freezes or an AXON insight.</div>
     <button class="spin-btn" id="spinBtn" onclick="doSpin()" {% if spin.left <= 0 %}disabled{% endif %}>{% if spin.left > 0 %}SPIN{% else %}COME BACK TOMORROW{% endif %}</button>
-    <div class="spin-earn" id="spinEarn">Want another? <b>Do 10 push-ups</b> or check in again to earn a spin.</div>
+    <div class="spin-earn" id="spinEarn">Want another? <a href="/pushups" style="color:var(--gold);font-weight:800;text-decoration:none;">Do 10 push-ups →</a> or check in again to earn a spin.</div>
     <div class="spin-left" id="spinLeft">{% if spin.left > 0 %}{{ spin.left }} spin{{ 's' if spin.left != 1 else '' }} left today{% endif %}</div>
     <div class="spin-close" onclick="closeSpin()">Close</div>
   </div>

@@ -71,6 +71,9 @@ class User(db.Model):
     home_tiles = db.Column(db.Text, default='')       # JSON list of the user's chosen home tiles/buttons
     claimed_quests = db.Column(db.Text, default='')   # JSON {quest_key: period_id} — XP already banked
     claimed_milestones = db.Column(db.Text, default='')  # JSON list of streak milestones already rewarded
+    last_nudge = db.Column(db.String(10), default='')  # YYYY-MM-DD we last emailed a streak-at-risk nudge
+    bonus_spins = db.Column(db.Integer, default=0)     # extra spins earned today from actions (e.g. pushups)
+    bonus_spins_date = db.Column(db.String(10), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -888,6 +891,9 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS home_tiles TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS claimed_quests TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS claimed_milestones TEXT DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_nudge VARCHAR(10) DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_spins INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_spins_date VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS sex VARCHAR(10) DEFAULT ''",
@@ -1875,13 +1881,20 @@ SPIN_INSIGHTS = [
     "You already did the hard part — you showed up.",
 ]
 
+PUSHUP_SPIN_CAP = 2  # max extra spins/day earnable from pushups
+
+def bonus_spins_today(cu):
+    today = datetime.utcnow().date().isoformat()
+    return (cu.bonus_spins or 0) if cu.bonus_spins_date == today else 0
+
 def spins_earned(cu):
     """Spins are EARNED by real actions today, not handed out: 1 base + 1 per check-in
-    (morning/evening) done today, capped at SPIN_CAP. Ties the reward to the behavior."""
+    (morning/evening), capped at SPIN_CAP — PLUS bonus spins earned from pushups. Ties
+    the reward to the behavior (the core 'do the work → get the dopamine' loop)."""
     tzday = (datetime.utcnow() + timedelta(minutes=user_tz_offset(cu))).date()
     kinds = {r.kind for r in CheckIn.query.filter_by(user_id=cu.id, date=tzday).all()}
-    earned = 1 + (1 if 'morning' in kinds else 0) + (1 if 'evening' in kinds else 0)
-    return min(earned, SPIN_CAP)
+    base = 1 + (1 if 'morning' in kinds else 0) + (1 if 'evening' in kinds else 0)
+    return min(base, SPIN_CAP) + bonus_spins_today(cu)
 
 def spin_state(cu):
     today = datetime.utcnow().date().isoformat()
@@ -2730,6 +2743,44 @@ def account_delete():
         session['accounts'] = accts
     return jsonify({'ok': True})
 
+@app.route('/cron/streak-nudge')
+def cron_streak_nudge():
+    """Point a once-daily evening cron (Railway cron / cron-job.org) at
+    /cron/streak-nudge?key=CRON_KEY. Emails users whose live streak will break if they
+    don't check in today. The only unprompted return channel until PWA push exists.
+    CSRF-exempt by design (external caller) — protected by the secret key instead."""
+    key = os.environ.get('CRON_KEY') or os.environ.get('ADMIN_KEY', '')
+    if not key or request.args.get('key', '') != key:
+        return ('Forbidden', 403)
+    sent = 0
+    for u in User.query.filter_by(email_verified=True).all():
+        if not u.email:
+            continue
+        tzday = (datetime.utcnow() + timedelta(minutes=user_tz_offset(u))).date()
+        today_iso = tzday.isoformat()
+        if u.last_nudge == today_iso:
+            continue
+        dates = _checkin_dates(u)
+        if tzday in dates:
+            continue  # already checked in today, streak safe
+        streak, _ = _streaks(sorted(dates))
+        if streak < 2:
+            continue  # nothing meaningful at stake yet
+        app_url = os.environ.get('APP_URL', '').rstrip('/')
+        checkin_link = (app_url + '/checkin') if app_url else '/checkin'
+        html = (f"<div style='font-family:sans-serif;max-width:440px;margin:auto'>"
+                f"<h2 style='color:#B8863B'>Your {streak}-day streak ends tonight 🔥</h2>"
+                f"<p>Hey {u.name or u.username}, you haven't checked in today. "
+                f"A 30-second check-in keeps your {streak}-day streak alive and updates your Twin Score.</p>"
+                f"<p><a href='{checkin_link}' style='background:#E8B23A;color:#241D10;"
+                f"padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:800'>Check in now</a></p>"
+                f"<p style='color:#888;font-size:12px'>You're getting this because you have an active TWIN streak.</p></div>")
+        if send_email(u.email, f"Your {streak}-day streak ends tonight", html):
+            u.last_nudge = today_iso
+            sent += 1
+    db.session.commit()
+    return {'ok': True, 'nudged': sent}
+
 @app.route('/admin/feedback')
 def admin_feedback():
     admin_key = os.environ.get('ADMIN_KEY', '')
@@ -3118,6 +3169,26 @@ def api_spin():
     db.session.commit()
     return {'ok': True, 'key': key, 'label': label, 'detail': detail or '',
             'xp': xp, 'spins_left': max(0, earned - (used + 1))}
+
+@app.route('/pushups')
+def pushups():
+    if not auth(): return redirect('/login')
+    return render_template('pushups.html', u=user_ctx(), spin=spin_state(current_user()), active='home')
+
+@app.route('/api/pushup-reward', methods=['POST'])
+def api_pushup_reward():
+    """Called when the user completes a pushup set — grants an earned spin (capped daily).
+    Free preview of the Pro AI form-check: today it just counts; Pro will grade form."""
+    if not auth(): return ('', 401)
+    cu = current_user()
+    today = datetime.utcnow().date().isoformat()
+    have = (cu.bonus_spins or 0) if cu.bonus_spins_date == today else 0
+    if have >= PUSHUP_SPIN_CAP:
+        return {'ok': False, 'reason': 'cap', 'bonus': have}
+    cu.bonus_spins_date = today
+    cu.bonus_spins = have + 1
+    db.session.commit()
+    return {'ok': True, 'bonus': cu.bonus_spins, 'spins_left': spin_state(cu)['left']}
 
 @app.route('/api/post/<int:post_id>', methods=['GET'])
 def api_post_get(post_id):

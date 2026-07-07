@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Pushup Challenge{% endblock %}
+{% block head %}
+<style>
+.pu-wrap{padding:0 0 40px;}
+.pu-hero{margin:14px 20px 0;padding:16px;border-radius:18px;background:linear-gradient(135deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);text-align:center;}
+.pu-title{font-family:'Inter',sans-serif;font-weight:800;font-size:20px;color:var(--black);}
+.pu-sub{font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5;}
+.pu-preview-tag{display:inline-block;margin-top:8px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:4px 10px;}
+.pu-stage{position:relative;margin:16px 20px 0;border-radius:20px;overflow:hidden;background:#000;aspect-ratio:3/4;border:1px solid var(--border);}
+.pu-stage video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+.pu-count{position:absolute;top:14px;left:0;right:0;text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:64px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.6);letter-spacing:-2px;pointer-events:none;}
+.pu-count small{display:block;font-size:12px;font-weight:700;letter-spacing:2px;opacity:.85;}
+.pu-target{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;font-size:13px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.6);}
+.pu-state{position:absolute;bottom:44px;left:0;right:0;text-align:center;color:var(--gold);font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.pu-actions{display:flex;gap:10px;margin:16px 20px 0;}
+.pu-btn{flex:1;padding:15px;border-radius:14px;font-weight:800;font-size:14px;border:none;cursor:pointer;font-family:'Inter',sans-serif;}
+.pu-btn.gold{background:var(--grad);color:#241D10;}
+.pu-btn.ghost{background:var(--bg-2);color:var(--black);border:1.5px solid var(--border);}
+.pu-manual{margin:14px 20px 0;text-align:center;font-size:12px;color:var(--sub);}
+.pu-manual button{background:var(--card);border:1px solid var(--border);color:var(--gold);border-radius:var(--r-full);padding:8px 16px;font-weight:800;cursor:pointer;margin-top:8px;}
+.pu-done{margin:16px 20px 0;padding:16px;border-radius:16px;background:var(--gold-dim);border:1px solid var(--gold-b);text-align:center;display:none;}
+.pu-done.on{display:block;}
+.pu-done-t{font-weight:800;color:var(--gold);font-size:16px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="topbar">
+  <a href="/profile" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <div class="tb-brand"><div class="tb-twin">Pushup Challenge</div></div>
+  <div style="width:36px;"></div>
+</div>
+
+<div class="pu-wrap">
+  <div class="pu-hero">
+    <div class="pu-title">Earn a spin — do 10 pushups</div>
+    <div class="pu-sub">Point your camera at yourself and start. AXON counts your reps on-device — nothing is uploaded.</div>
+    <div class="pu-preview-tag">Free preview · Pro will grade your form</div>
+  </div>
+
+  <div class="pu-stage" id="stage">
+    <video id="cam" autoplay muted playsinline></video>
+    <div class="pu-count" id="count">0<small>REPS</small></div>
+    <div class="pu-state" id="state"></div>
+    <div class="pu-target" id="target">Target: 10</div>
+  </div>
+
+  <div class="pu-actions">
+    <button class="pu-btn gold" id="startBtn" onclick="startCam()">Start camera</button>
+    <button class="pu-btn ghost" onclick="location.href='/profile'">Done</button>
+  </div>
+
+  <div class="pu-manual">
+    Camera not cooperating? Count them yourself:
+    <br><button onclick="addRep()">+1 rep</button>
+  </div>
+
+  <div class="pu-done" id="doneCard">
+    <div class="pu-done-t">🔥 Nice — spin earned!</div>
+    <div style="font-size:12px;color:var(--sub);margin-top:6px;">Head to your profile and tap Daily Spin.</div>
+    <button class="pu-btn gold" style="margin-top:12px;" onclick="location.href='/profile'">Go spin</button>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const TARGET = 10;
+let reps = 0, rewarded = false, down = false, cam = null, pose = null;
+
+function setCount(){ document.getElementById('count').innerHTML = reps + '<small>REPS</small>'; }
+function reward(){
+  if(rewarded) return; rewarded = true;
+  document.getElementById('state').textContent = '';
+  fetch('/api/pushup-reward',{method:'POST'}).then(r=>r.json()).then(d=>{
+    document.getElementById('doneCard').classList.add('on');
+    if(navigator.vibrate) navigator.vibrate([0,80,40,120]);
+  }).catch(()=>{ document.getElementById('doneCard').classList.add('on'); });
+}
+function addRep(){
+  if(reps>=TARGET) return;
+  reps++; setCount();
+  if(navigator.vibrate) navigator.vibrate(15);
+  if(reps>=TARGET) reward();
+}
+
+async function startCam(){
+  const btn=document.getElementById('startBtn');
+  btn.textContent='Starting…'; btn.disabled=true;
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    const v=document.getElementById('cam'); v.srcObject=stream; await v.play();
+    btn.textContent='Counting…';
+    initPose(v);
+  }catch(e){
+    btn.textContent='Camera blocked — use +1 rep'; btn.disabled=false;
+  }
+}
+
+// MediaPipe Pose rep counter (loads from CDN; if it fails, the manual +1 button still works).
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.crossOrigin='anonymous'; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+async function initPose(video){
+  try{
+    if(!window.Pose){
+      await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+    }
+    pose = new Pose({locateFile:(f)=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
+    pose.setOptions({modelComplexity:0, smoothLandmarks:true, minDetectionConfidence:.6, minTrackingConfidence:.6});
+    pose.onResults(onPose);
+    const loop = async ()=>{ if(video.readyState>=2){ await pose.send({image:video}); } requestAnimationFrame(loop); };
+    loop();
+  }catch(e){
+    document.getElementById('state').textContent = 'Auto-count off — use +1';
+  }
+}
+function angle(a,b,c){
+  const ab={x:a.x-b.x,y:a.y-b.y}, cb={x:c.x-b.x,y:c.y-b.y};
+  const dot=ab.x*cb.x+ab.y*cb.y;
+  const m=(Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y))||1e-6;
+  return Math.acos(Math.max(-1,Math.min(1,dot/m)))*180/Math.PI;
+}
+function onPose(res){
+  if(rewarded || !res.poseLandmarks) return;
+  const L=res.poseLandmarks;
+  // left arm 11-13-15, right arm 12-14-16 — use whichever is more visible
+  const la=angle(L[11],L[13],L[15]), ra=angle(L[12],L[14],L[16]);
+  const el=Math.min(la,ra);
+  const st=document.getElementById('state');
+  if(el < 95){ down=true; st.textContent='DOWN'; }
+  else if(el > 155 && down){ down=false; st.textContent='UP'; addRep(); }
+}
+</script>
+{% endblock %}
