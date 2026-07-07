@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}{% if notfound %}Not found{% else %}{{ p.name }}{% endif %}{% endblock %}
+{% if not notfound %}
+{% block og_title %}{{ p.name }} on TWIN{% endblock %}
+{% block og_desc %}Level {{ p.level }} · {{ p.followers }} followers · {{ p.level_title }}. Follow {{ p.name }}'s growth on TWIN.{% endblock %}
+{% block tw_title %}{{ p.name }} on TWIN{% endblock %}
+{% block tw_desc %}Level {{ p.level }} · {{ p.level_title }} · follow their growth on TWIN.{% endblock %}
+{% endif %}
 {% block head %}
 <style>
 /* Banner / cover */
@@ -67,10 +73,17 @@
 {% endblock %}
 {% block content %}
 <div class="topbar">
-  <a href="javascript:history.back()" class="tb-btn"><i data-lucide="arrow-left"></i></a>
+  <a href="{% if guest %}/{% else %}javascript:history.back(){% endif %}" class="tb-btn"><i data-lucide="arrow-left"></i></a>
   <div class="tb-brand"><div class="tb-twin">{% if notfound %}Profile{% else %}{{ p.first }}{% endif %}</div></div>
   <div style="width:36px;"></div>
 </div>
+
+{% if guest %}
+<a href="/signup" style="display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 20px 0;padding:12px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;border-radius:14px;text-decoration:none;">
+  <i data-lucide="sparkles" style="width:16px;height:16px;stroke:#241D10;fill:none;stroke-width:2;"></i>
+  Join TWIN — track your life &amp; grow with AXON
+</a>
+{% endif %}
 
 {% if notfound %}
 <div class="pp-empty" style="padding-top:80px;">
@@ -87,9 +100,14 @@
     <span class="pp-lvl" title="Level {{ p.level }}">{{ p.level }}</span>
   </div>
   <div class="pp-acts">
+    {% if guest %}
+    <a class="pp-follow no" href="/signup" style="text-decoration:none;display:inline-flex;align-items:center;">Join to follow</a>
+    <button class="pp-ibtn" type="button" onclick="shareProfile()" title="Share"><i data-lucide="share-2"></i></button>
+    {% else %}
     <button class="pp-follow {% if p.is_following %}yes{% else %}no{% endif %}" id="followBtn" onclick="toggleFollow()">{% if p.is_following %}Following{% else %}+ Follow{% endif %}</button>
     <a class="pp-ibtn" href="/dm/{{ p.username }}" title="Message"><i data-lucide="send"></i></a>
     <button class="pp-ibtn" type="button" onclick="shareProfile()" title="Share"><i data-lucide="share-2"></i></button>
+    {% endif %}
   </div>
 </div>
 

@@ -9,6 +9,16 @@
 <title>{% block title %}TWIN{% endblock %} — Powered by EPHAS</title>
 <link rel="icon" type="image/png" href="/static/twin_logo.png">
 <link rel="apple-touch-icon" href="/static/twin_logo.png">
+<!-- Social share card (Open Graph + Twitter) so pasted links aren't a bare grey URL -->
+<meta property="og:site_name" content="TWIN">
+<meta property="og:type" content="{% block og_type %}website{% endblock %}">
+<meta property="og:title" content="{% block og_title %}TWIN — become your best self{% endblock %}">
+<meta property="og:description" content="{% block og_desc %}Track your life, grow every day, and let AXON coach you. Powered by EPHAS.{% endblock %}">
+<meta property="og:image" content="{% block og_image %}/static/twin_logo.png{% endblock %}">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{% block tw_title %}TWIN — become your best self{% endblock %}">
+<meta name="twitter:description" content="{% block tw_desc %}Track your life, grow every day, and let AXON coach you.{% endblock %}">
+<meta name="twitter:image" content="/static/twin_logo.png">
 <link rel="stylesheet" href="/static/twin.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 <script src="/static/celebrate.js" defer></script>

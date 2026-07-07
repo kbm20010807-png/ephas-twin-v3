@@ -2219,21 +2219,23 @@ def public_profile_ctx(target, viewer):
         'following': Follow.query.filter_by(follower_id=target.id).count(),
         'member_since': target.created_at.strftime('%b %Y') if target.created_at else 'Just now',
         'city': target.city or '', 'job': target.job or '',
-        'is_following': Follow.query.filter_by(follower_id=viewer.id, following_id=target.id).first() is not None,
+        'is_following': bool(viewer) and Follow.query.filter_by(follower_id=viewer.id, following_id=target.id).first() is not None,
         'views': ProfileView.query.filter_by(viewed_id=target.id).count(),
     }
 
 @app.route('/u/<username>')
 def public_profile(username):
-    if not auth(): return redirect('/login')
+    # Public read-only profile — works for LOGGED-OUT visitors too, so shared links convert
+    # instead of dead-ending at /login. Guests see a "Join TWIN" CTA in place of follow/message.
     cu = current_user()
+    guest = cu is None
     target = User.query.filter(func.lower(User.username) == username.lower()).first()
     if not target:
-        return render_template('profile_public.html', u=user_ctx(), notfound=True, active='home'), 404
-    if target.id == cu.id:
+        return render_template('profile_public.html', u=(user_ctx() if cu else None), notfound=True, guest=guest, active='home'), 404
+    if cu and target.id == cu.id:
         return redirect('/profile')
-    # Reciprocal view recording: only when BOTH have it on; throttle to once / 6h per viewer
-    if cu.show_profile_views and target.show_profile_views:
+    # Reciprocal view recording: only for logged-in viewers when BOTH opt in; throttle 6h
+    if cu and cu.show_profile_views and target.show_profile_views:
         recent = ProfileView.query.filter(ProfileView.viewer_id == cu.id, ProfileView.viewed_id == target.id,
                                            ProfileView.created_at >= datetime.utcnow() - timedelta(hours=6)).first()
         if not recent:
@@ -2246,8 +2248,8 @@ def public_profile(username):
     target_can_course = can_post_courses(target)
     courses = serialize_posts(Post.query.filter_by(user_id=target.id, kind='course')
                               .order_by(Post.created_at.desc()).limit(20).all(), cu) if target_can_course else []
-    return render_template('profile_public.html', u=user_ctx(), p=public_profile_ctx(target, cu),
-                           posts=posts, threads=threads, courses=courses,
+    return render_template('profile_public.html', u=(user_ctx() if cu else None), p=public_profile_ctx(target, cu),
+                           posts=posts, threads=threads, courses=courses, guest=guest,
                            target_can_course=target_can_course, active='home')
 
 @app.route('/profile')
