@@ -4,6 +4,7 @@ import json
 import base64
 import random
 import hashlib
+import secrets
 import requests
 from datetime import datetime, timedelta, timezone
 from collections import Counter
@@ -87,6 +88,14 @@ class DirectMessage(db.Model):
     text = db.Column(db.Text, default='')
     read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+
+class BlockedUser(db.Model):
+    __tablename__ = 'blocked_users'
+    id = db.Column(db.Integer, primary_key=True)
+    blocker_id = db.Column(db.Integer, index=True, nullable=False)  # who did the blocking
+    blocked_id = db.Column(db.Integer, index=True, nullable=False)  # who is blocked
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class CheckIn(db.Model):
@@ -993,6 +1002,36 @@ def current_user():
 
 def auth():
     return current_user() is not None
+
+@app.before_request
+def _csrf_protect():
+    """Double-submit CSRF: every session gets a token; state-changing /api POSTs must echo it
+    (via X-CSRF-Token header from our fetch wrapper, or a _csrf form field). Blocks forged
+    follow/DM/block/delete requests from other sites a logged-in user visits."""
+    if not session.get('csrf'):
+        session['csrf'] = secrets.token_urlsafe(32)
+    if request.method == 'POST' and request.path.startswith('/api/'):
+        sent = request.headers.get('X-CSRF-Token') or (request.form.get('_csrf') if request.form else None)
+        if not sent or sent != session.get('csrf'):
+            return ('CSRF check failed — refresh the page and try again.', 403)
+
+@app.context_processor
+def _inject_csrf():
+    return {'csrf_token': session.get('csrf', '')}
+
+def is_blocked(a_id, b_id):
+    """True if a blocked b OR b blocked a (either direction cuts the connection)."""
+    return BlockedUser.query.filter(
+        db.or_(db.and_(BlockedUser.blocker_id == a_id, BlockedUser.blocked_id == b_id),
+               db.and_(BlockedUser.blocker_id == b_id, BlockedUser.blocked_id == a_id))).first() is not None
+
+def blocked_ids(user_id):
+    """Set of user ids this user has blocked OR been blocked by — hide them from feeds/search."""
+    out = set()
+    for b in BlockedUser.query.filter(db.or_(BlockedUser.blocker_id == user_id,
+                                             BlockedUser.blocked_id == user_id)).all():
+        out.add(b.blocked_id if b.blocker_id == user_id else b.blocker_id)
+    return out
 
 def get_profile(user):
     p = Profile.query.filter_by(user_id=user.id).first()
@@ -2333,12 +2372,33 @@ def api_dm_send(target_id):
     cu = current_user()
     if target_id == cu.id or not User.query.get(target_id):
         return ('', 400)
+    if is_blocked(cu.id, target_id):
+        return {'ok': False, 'error': 'blocked'}, 403
     text = (request.form.get('text') or '').strip()[:2000]
     if not text:
         return ('', 400)
     db.session.add(DirectMessage(sender_id=cu.id, recipient_id=target_id, text=text))
     db.session.commit()
     return {'ok': True}
+
+@app.route('/api/block/<int:target_id>', methods=['POST'])
+def api_block(target_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    if target_id == cu.id or not User.query.get(target_id):
+        return ('', 400)
+    ex = BlockedUser.query.filter_by(blocker_id=cu.id, blocked_id=target_id).first()
+    if ex:
+        db.session.delete(ex); blocked = False
+    else:
+        db.session.add(BlockedUser(blocker_id=cu.id, blocked_id=target_id))
+        # blocking also severs any follow relationship both ways
+        Follow.query.filter(db.or_(
+            db.and_(Follow.follower_id == cu.id, Follow.following_id == target_id),
+            db.and_(Follow.follower_id == target_id, Follow.following_id == cu.id))).delete()
+        blocked = True
+    db.session.commit()
+    return {'ok': True, 'blocked': blocked}
 
 @app.route('/habits')
 def habits():
@@ -2655,6 +2715,7 @@ def account_delete():
                        (AxonMemory, 'user_id'), (SearchLog, 'user_id'), (VerificationRequest, 'user_id'),
                        (Feedback, 'user_id'),
                        (DirectMessage, 'sender_id'), (DirectMessage, 'recipient_id'),  # erase private DMs both ways
+                       (BlockedUser, 'blocker_id'), (BlockedUser, 'blocked_id'),
                        (Profile, 'user_id')]:
         try:
             model.query.filter(getattr(model, col) == uid).delete()

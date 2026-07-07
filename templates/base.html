@@ -19,6 +19,26 @@
 <meta name="twitter:title" content="{% block tw_title %}TWIN — become your best self{% endblock %}">
 <meta name="twitter:description" content="{% block tw_desc %}Track your life, grow every day, and let AXON coach you.{% endblock %}">
 <meta name="twitter:image" content="/static/twin_logo.png">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<script>
+// Auto-attach the CSRF token to every same-origin POST fetch (installed before any page script).
+(function(){
+  var tok=(document.querySelector('meta[name="csrf-token"]')||{}).content||'';
+  var _f=window.fetch;
+  window.fetch=function(input,init){
+    init=init||{};
+    var method=(init.method||(typeof input!=='string'&&input&&input.method)||'GET').toUpperCase();
+    var url=(typeof input==='string')?input:(input&&input.url)||'';
+    var sameOrigin=url.indexOf('http')!==0||url.indexOf(location.origin)===0;
+    if(method==='POST'&&sameOrigin){
+      var h=new Headers(init.headers||(typeof input!=='string'&&input&&input.headers)||{});
+      if(!h.has('X-CSRF-Token'))h.set('X-CSRF-Token',tok);
+      init.headers=h;
+    }
+    return _f(input,init);
+  };
+})();
+</script>
 <link rel="stylesheet" href="/static/twin.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 <script src="/static/celebrate.js" defer></script>

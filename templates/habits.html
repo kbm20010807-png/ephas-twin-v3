@@ -73,6 +73,7 @@
   <div class="h-modal-box" onclick="event.stopPropagation()">
     <div class="t-lg mb-4">New habit</div>
     <form action="/api/habit/add" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf_token }}">
       <div class="ha-label">Name</div>
       <input type="text" name="name" id="addName" class="form-input" placeholder="e.g. Workout, Read, Quit smoking" required maxlength="80" style="margin-bottom:18px;">
       <div class="ha-label">Type</div>
@@ -92,6 +93,7 @@
   <div class="h-modal-box" onclick="event.stopPropagation()">
     <div class="t-lg mb-4">Edit habit</div>
     <form action="/api/habit/edit/0" method="post" id="editForm">
+      <input type="hidden" name="_csrf" value="{{ csrf_token }}">
       <div class="form-group">
         <label class="form-label">Name</label>
         <input type="text" name="name" id="editName" class="form-input" maxlength="80">
@@ -101,6 +103,7 @@
       <button type="submit" class="btn btn-gold btn-full" style="border-radius:var(--r-xl);margin-bottom:10px;"><i data-lucide="check"></i> Save</button>
     </form>
     <form action="/api/habit/delete/0" method="post" id="deleteForm">
+      <input type="hidden" name="_csrf" value="{{ csrf_token }}">
       <button type="submit" class="btn btn-danger btn-full" style="border-radius:var(--r-xl);"><i data-lucide="trash-2"></i> Delete habit</button>
     </form>
   </div>
