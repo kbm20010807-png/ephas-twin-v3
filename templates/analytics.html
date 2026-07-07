@@ -64,32 +64,44 @@
 <div class="hero-score">
   <div class="hs-lbl">Weekly average</div>
   <div class="hs-num">{{ stats.avg_mood }}</div>
-  <div class="hs-trend">
-    <i data-lucide="trending-up"></i>
-    +0.4 from last week
+  {% if stats.deltas.mood is not none %}
+  <div class="hs-trend" style="{% if stats.deltas.mood < 0 %}background:var(--red-dim);border-color:var(--red-dim);color:var(--red);{% endif %}">
+    <i data-lucide="{% if stats.deltas.mood < 0 %}trending-down{% else %}trending-up{% endif %}"></i>
+    {{ '+' if stats.deltas.mood >= 0 else '' }}{{ stats.deltas.mood }} from last week
   </div>
+  {% else %}
+  <div class="hs-trend" style="background:var(--bg-2);border-color:var(--border);color:var(--sub);">Not enough data yet</div>
+  {% endif %}
 </div>
+
+{% macro trend_pill(delta, unit='') -%}
+  {% if delta is not none %}
+    <div class="metric-trend {{ 't-up' if delta >= 0 else 't-dn' }}">{{ '↑ +' if delta >= 0 else '↓ ' }}{{ delta }}{{ unit }} this week</div>
+  {% else %}
+    <div class="metric-trend" style="color:var(--sub);">— this week</div>
+  {% endif %}
+{%- endmacro %}
 
 <div class="metric-row">
   <div class="metric-c m-sleep">
     <div class="metric-lbl">Sleep</div>
     <div class="metric-val">{{ stats.avg_sleep }}h</div>
-    <div class="metric-trend t-up">↑ +0.3h this week</div>
+    {{ trend_pill(stats.deltas.sleep, 'h') }}
   </div>
   <div class="metric-c m-energy">
     <div class="metric-lbl">Energy</div>
     <div class="metric-val">{{ stats.avg_energy }}</div>
-    <div class="metric-trend t-up">↑ +0.5 this week</div>
+    {{ trend_pill(stats.deltas.energy) }}
   </div>
   <div class="metric-c m-mood">
     <div class="metric-lbl">Mood</div>
     <div class="metric-val">{{ stats.avg_mood }}</div>
-    <div class="metric-trend t-up">↑ +0.4 this week</div>
+    {{ trend_pill(stats.deltas.mood) }}
   </div>
   <div class="metric-c m-prod">
     <div class="metric-lbl">Productivity</div>
     <div class="metric-val">{{ stats.avg_productivity }}</div>
-    <div class="metric-trend t-dn">↓ -0.2 this week</div>
+    {{ trend_pill(stats.deltas.prod) }}
   </div>
 </div>
 
@@ -129,7 +141,6 @@
       <div class="dc-pct">{{ d.pct }}%</div>
     </div>
     <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
-    <div class="dc-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}" style="margin-top:6px;">{{ d.trend }} this week</div>
   </div>
   {% endfor %}
 </div>

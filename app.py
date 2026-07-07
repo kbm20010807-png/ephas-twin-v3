@@ -23,6 +23,13 @@ if not db_url:
     db_url = 'sqlite:///twin_local.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Keep Postgres connections healthy: Railway reaps idle connections, so verify each
+# one before use (pre_ping) and recycle before their ~5-min idle timeout. Prevents
+# intermittent "server closed the connection" 500s between sparse sessions.
+if db_url.startswith('postgres'):
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True, 'pool_recycle': 280, 'pool_size': 5, 'max_overflow': 5,
+    }
 
 # Session cookie hardening
 _is_prod = bool(os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_PUBLIC_URL'))
@@ -685,11 +692,18 @@ def axon_system_prompt(user):
 def axon_reply(user, message):
     if not ANTHROPIC_KEY:
         return "AXON isn't connected yet. Add your ANTHROPIC_API_KEY in Railway and I'll come online to coach you."
+    # Daily usage gate (Free vs Pro) — same cap the stream path enforces, so no path is uncapped.
+    used, limit, is_pro, model = axon_usage(user)
+    if used >= limit:
+        if is_pro:
+            return f"That's our AXON time for today ({limit} messages) — rest, apply what we covered, and come back tomorrow. Resets at your midnight."
+        return (f"That's your daily AXON time ({limit} messages on Free). Upgrade to **TWIN Pro** for "
+                f"{AXON_DAILY_PRO} messages a day and the smarter coach. Resets at your midnight.")
     db.session.add(AxonMessage(user_id=user.id, role='user', content=_safe(message, 2000)))
     db.session.commit()
     msgs = [{"role": r.role, "content": r.content} for r in axon_today_messages(user)]
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-    body = {"model": AXON_MODEL, "max_tokens": 700, "system": axon_system_prompt(user), "messages": msgs}
+    body = {"model": model, "max_tokens": 700, "system": axon_system_prompt(user), "messages": msgs}
     try:
         r = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=40)
         data = r.json()
@@ -923,6 +937,8 @@ DEMO_STATS = {
     "weekly": [0, 0, 0, 0, 0, 0, 0],
     "days":   ["M","T","W","T","F","S","S"],
     "checked": [False, False, False, False, False, False, False],
+    "deltas": {"sleep": None, "energy": None, "mood": None, "prod": None},
+    "trend_ready": False,
 }
 
 DEMO_ZONES = [
@@ -1210,6 +1226,25 @@ def stats_ctx():
     s['days'] = [d.strftime('%a')[0] for d in week_days]
     s['checked'] = [d in checked_dates for d in week_days]
     s['weekly'] = [mood_by_date.get(d, 0) for d in week_days]
+
+    # Real week-over-week deltas (this week vs last week). None => not enough data, hide the pill.
+    def window_avg(lst, attr, dfrom, dto):
+        vals = [getattr(x, attr) for x in lst
+                if getattr(x, attr) is not None and dfrom <= x.date < dto]
+        return (sum(vals) / len(vals)) if vals else None
+    last_start = week_start - timedelta(days=7)
+    this_to = today + timedelta(days=1)
+    def delta(lst, attr):
+        cur = window_avg(lst, attr, week_start, this_to)
+        prev = window_avg(lst, attr, last_start, week_start)
+        if cur is None or prev is None:
+            return None
+        return round(cur - prev, 1)
+    s['deltas'] = {
+        'sleep': delta(morn, 'sleep'), 'energy': delta(morn, 'energy'),
+        'mood': delta(morn, 'mood'), 'prod': delta(eve, 'day_rating'),
+    }
+    s['trend_ready'] = any(v is not None for v in s['deltas'].values())
     return s
 
 def quest_periods():
@@ -2563,7 +2598,9 @@ def account_delete():
                        (ProfileView, 'viewed_id'), (Post, 'user_id'), (CheckIn, 'user_id'),
                        (HabitLog, 'user_id'), (Habit, 'user_id'), (AxonMessage, 'user_id'),
                        (AxonMemory, 'user_id'), (SearchLog, 'user_id'), (VerificationRequest, 'user_id'),
-                       (Feedback, 'user_id'), (Profile, 'user_id')]:
+                       (Feedback, 'user_id'),
+                       (DirectMessage, 'sender_id'), (DirectMessage, 'recipient_id'),  # erase private DMs both ways
+                       (Profile, 'user_id')]:
         try:
             model.query.filter(getattr(model, col) == uid).delete()
         except Exception:

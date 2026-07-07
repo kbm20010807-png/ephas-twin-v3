@@ -109,6 +109,26 @@
 .badge-c.earned .badge-ico svg{stroke:var(--gold);}
 .badge-c.earned .badge-nm{color:var(--gold);}
 
+/* Collectible achievement medals — earned = glowing rarity gradient, locked = greyed + progress */
+.ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:2px 20px 0;}
+.ach{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:15px 6px;border-radius:16px;background:var(--card);border:1px solid var(--border);text-align:center;overflow:hidden;}
+.ach.locked{opacity:.6;}
+.ach-medal{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-2);border:1px solid var(--border);}
+.ach-medal svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.75;}
+.ach.earned .ach-medal{border:none;box-shadow:0 4px 14px rgba(0,0,0,.28),inset 0 1px 3px rgba(255,255,255,.45);}
+.ach.earned .ach-medal svg{stroke:#241D10;}
+.ach.earned.r-common .ach-medal{background:linear-gradient(145deg,#CBD2DB,#8A93A3);}
+.ach.earned.r-rare   .ach-medal{background:linear-gradient(145deg,#86CBF2,#3B7FC4);}
+.ach.earned.r-epic   .ach-medal{background:linear-gradient(145deg,#C9A0F0,#7C4DB8);}
+.ach.earned.r-legend .ach-medal{background:var(--grad);animation:achPulse 2.2s ease-in-out infinite;}
+@keyframes achPulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 rgba(234,213,162,0);}50%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 20px rgba(234,213,162,.65);}}
+.ach-nm{font-size:11px;font-weight:800;color:var(--black);line-height:1.2;}
+.ach.locked .ach-nm{color:var(--sub);}
+.ach-rar{font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--sub);}
+.ach.earned .ach-rar{color:var(--gold);}
+.ach-lock{position:absolute;top:8px;right:8px;width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;}
+@media (prefers-reduced-motion:reduce){.ach.earned.r-legend .ach-medal{animation:none;}}
+
 .prof-post{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
 .pp-meta{font-size:10px;color:var(--sub);margin-bottom:8px;}
 .pp-body{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;}
@@ -382,18 +402,30 @@
     <div class="dom-c">
       <div class="dom-top"><div class="dom-name">{{ d.name }}</div><div class="dom-pct">{{ d.pct }}%</div></div>
       <div class="prog-bar"><div class="prog-fill" style="width:{{ d.pct }}%"></div></div>
-      <div class="dom-trend {% if d.trend.startswith('+') %}t-up{% else %}t-dn{% endif %}">{{ d.trend }} this week</div>
     </div>
     {% endfor %}
   </div>
   <div class="sect-lbl">Achievements</div>
-  <div class="badges-row">
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="flame"></i></div><div class="badge-nm">7-Day Streak</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="sunrise"></i></div><div class="badge-nm">Early Riser</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="book-open"></i></div><div class="badge-nm">Reader</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="trophy"></i></div><div class="badge-nm">30-Day Streak</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="star"></i></div><div class="badge-nm">100 Check-Ins</div></div>
-    <div class="badge-c"><div class="badge-ico"><i data-lucide="layers"></i></div><div class="badge-nm">All Domains</div></div>
+  {% set bs = stats.best_streak or 0 %}
+  {% set tc = stats.total_checkins or 0 %}
+  {% set doms = stats.domains|selectattr('pct','greaterthan',0)|list|length %}
+  {% set achs = [
+    ('First Step', 'footprints', 'common', tc >= 1, tc, 1),
+    ('Week Warrior', 'flame', 'common', bs >= 7, bs, 7),
+    ('Fortnight', 'zap', 'rare', bs >= 14, bs, 14),
+    ('Iron Month', 'trophy', 'epic', bs >= 30, bs, 30),
+    ('Centurion', 'medal', 'legend', tc >= 100, tc, 100),
+    ('Polymath', 'layers', 'rare', doms >= 6, doms, 6),
+  ] %}
+  <div class="ach-grid">
+    {% for nm, ico, rar, earned, cur, tgt in achs %}
+    <div class="ach r-{{ rar }} {{ 'earned' if earned else 'locked' }}">
+      {% if not earned %}<i data-lucide="lock" class="ach-lock"></i>{% endif %}
+      <div class="ach-medal"><i data-lucide="{{ ico }}"></i></div>
+      <div class="ach-nm">{{ nm }}</div>
+      <div class="ach-rar">{% if earned %}{{ rar if rar != 'legend' else 'legendary' }}{% else %}{{ cur }}/{{ tgt }}{% endif %}</div>
+    </div>
+    {% endfor %}
   </div>
   <div style="height:16px;"></div>
 </div>

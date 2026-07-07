@@ -165,6 +165,18 @@
 .tscore-action .ta-ico svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
 .tscore-action .ta-txt{flex:1;font-size:12px;color:var(--text);line-height:1.45;font-weight:500;}
 .tscore-action .ta-txt b{color:var(--gold);font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:1px;display:block;margin-bottom:2px;}
+.tscore-cta{margin-top:14px;font-size:12px;font-weight:700;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:10px 18px;text-decoration:none;}
+/* streak-at-risk banner */
+.risk-card{display:flex;align-items:center;gap:12px;margin:12px 20px 0;padding:13px 16px;background:linear-gradient(135deg,rgba(217,154,82,.14),var(--card));border:1px solid var(--gold-b);border-radius:16px;text-decoration:none;box-shadow:0 6px 18px rgba(217,154,82,.10);}
+.risk-card:active{transform:scale(.99);}
+.risk-ico{width:38px;height:38px;border-radius:11px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.risk-ico svg{width:19px;height:19px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;}
+.risk-body{flex:1;min-width:0;}
+.risk-title{font-size:13.5px;font-weight:800;color:var(--black);}
+.risk-sub{font-size:11px;color:var(--sub);margin-top:2px;}
+.risk-arrow{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;}
+/* this-week strip */
+.week-strip{margin:16px 20px 0;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;}
 .hero-share{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:12px;border-radius:14px;background:transparent;border:1.5px solid var(--border);color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:transform .12s,border-color .15s;font-family:'Inter',sans-serif;}
 .hero-share:active{transform:scale(.99);}
 .hero-share svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
@@ -277,8 +289,57 @@
     <div class="greet-hi">{{ u.first }}</div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    {% if twin.has %}<div class="greet-score" onclick="location.href='/analytics'"><span>{{ twin.score }}</span><small>SCORE</small></div>{% endif %}
     {% if u.streak %}<div class="hero-streak" onclick="location.href='/calendar'"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
+  </div>
+</div>
+
+<!-- ===== STREAK AT RISK (only when alive but not checked in today) ===== -->
+{% if u.streak and not twin.has %}
+<a href="/checkin" class="risk-card h-rise hd1">
+  <div class="risk-ico"><i data-lucide="flame"></i></div>
+  <div class="risk-body">
+    <div class="risk-title">Your {{ u.streak }}-day streak ends at midnight</div>
+    <div class="risk-sub">{% if shielded %}A Streak Freeze is holding it — check in to keep it clean.{% else %}Check in now to keep it alive.{% endif %}</div>
+  </div>
+  <i data-lucide="chevron-right" class="risk-arrow"></i>
+</a>
+{% endif %}
+
+<!-- ===== TWIN SCORE HERO ===== -->
+{% if twin.has %}
+<div class="tscore h-rise hd2" onclick="location.href='/analytics'" style="cursor:pointer;">
+  <svg class="tscore-ring" viewBox="0 0 130 130">
+    <circle class="tscore-bg" cx="65" cy="65" r="58"/>
+    <circle class="tscore-fg" cx="65" cy="65" r="58" stroke="{{ twin.color }}" stroke-dasharray="364" stroke-dashoffset="{{ twin.offset }}"/>
+    <text class="tscore-val" x="65" y="64" text-anchor="middle" dominant-baseline="middle">{{ twin.score }}</text>
+    <text class="tscore-lbl" x="65" y="90" text-anchor="middle">TWIN SCORE</text>
+  </svg>
+  <div class="tscore-verdict">{{ twin.verdict }}</div>
+  <div class="tscore-action" style="width:100%;max-width:340px;">
+    <div class="ta-ico"><i data-lucide="arrow-up-right"></i></div>
+    <div class="ta-txt"><b>Today's move</b>{{ twin.action }}</div>
+  </div>
+</div>
+{% else %}
+<div class="tscore h-rise hd2">
+  <svg class="tscore-ring" viewBox="0 0 130 130">
+    <circle class="tscore-bg" cx="65" cy="65" r="58"/>
+    <text class="tscore-val" x="65" y="64" text-anchor="middle" dominant-baseline="middle" style="fill:var(--sub);">—</text>
+    <text class="tscore-lbl" x="65" y="90" text-anchor="middle">TWIN SCORE</text>
+  </svg>
+  <a href="/checkin" class="tscore-cta">Check in to unlock today's Twin Score</a>
+</div>
+{% endif %}
+
+<!-- ===== THIS WEEK (don't break the chain) ===== -->
+<div class="week-strip h-rise hd3">
+  <div class="week-bars">
+    {% for i in range(7) %}
+    <div class="wb {% if stats.checked[i] %}done{% else %}empty{% endif %}">
+      <div class="wb-bar" style="height:{% if stats.checked[i] %}100%{% else %}34%{% endif %};"></div>
+      <div class="wb-lbl">{{ stats.days[i] }}</div>
+    </div>
+    {% endfor %}
   </div>
 </div>
 
