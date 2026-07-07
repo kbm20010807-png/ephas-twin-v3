@@ -287,7 +287,7 @@
   <div class="spin-coin"><span>★</span></div>
   <div class="spin-body">
     <div class="spin-title">Daily Spin</div>
-    <div class="spin-sub">{% if spin.left > 0 %}Tap to win XP, streak freezes &amp; more{% else %}Come back tomorrow for more spins{% endif %}</div>
+    <div class="spin-sub">{% if spin.left > 0 %}Tap to win bonus XP &amp; AXON insights{% else %}Check in to earn more spins today{% endif %}</div>
   </div>
   <i data-lucide="chevron-right" class="spin-arrow"></i>
 </div>
@@ -650,7 +650,7 @@ function earnSpin(){
   document.getElementById('spinPrize').textContent='';
   document.getElementById('spinDetail').textContent='Nice. Spin earned.';
 }
-var SPIN_FACES = ['+25','+50','+100','+250','FREEZE','AXON'];
+var SPIN_FACES = ['+25','+50','+100','+250','+75','AXON'];
 function spinFace(key, xp){
   if(key && key.indexOf('xp')===0) return '+'+xp;
   if(key === 'freeze') return 'FREEZE';
@@ -682,7 +682,7 @@ function doSpin(){
   if(navigator.vibrate) navigator.vibrate([12,40,12,40,12]);
   fetch('/api/spin',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
     if(!d.ok){
-      document.getElementById('spinPrize').textContent = d.reason==='cap' ? 'No spins left today' : 'Try again';
+      document.getElementById('spinPrize').textContent = d.reason==='earn' ? 'Check in to earn more spins' : 'Try again';
       btn.disabled=false; btn.textContent='SPIN'; spinning=false; return;
     }
     var finalLabel = spinFace(d.key, d.xp);

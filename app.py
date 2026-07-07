@@ -68,6 +68,8 @@ class User(db.Model):
     spin_date = db.Column(db.String(10), default='')  # YYYY-MM-DD of the user's last spin day
     spins_today = db.Column(db.Integer, default=0)    # spins used so far today
     home_tiles = db.Column(db.Text, default='')       # JSON list of the user's chosen home tiles/buttons
+    claimed_quests = db.Column(db.Text, default='')   # JSON {quest_key: period_id} — XP already banked
+    claimed_milestones = db.Column(db.Text, default='')  # JSON list of streak milestones already rewarded
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, pw):
@@ -875,6 +877,8 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS spin_date VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS spins_today INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS home_tiles TEXT DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS claimed_quests TEXT DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS claimed_milestones TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS sex VARCHAR(10) DEFAULT ''",
@@ -1310,6 +1314,32 @@ def quests_ctx(user):
     q['seasonal'][0]['current'] = streak
     q['seasonal'][0]['progress'] = max(0, min(100, int(streak / 90 * 100)))
     q['seasonal'][0]['done'] = streak >= 90
+
+    # Bank XP for completed quests — once per period. This is what makes the '+X XP'
+    # promise in notifications real instead of decorative.
+    try:
+        claimed = json.loads(user.claimed_quests) if user.claimed_quests else {}
+    except Exception:
+        claimed = {}
+    period_id = {
+        'daily': day_start.date().isoformat(),
+        'weekly': week_start.date().isoformat(),
+        'monthly': month_start.date().isoformat(),
+        'seasonal': 'season',
+    }
+    changed = False
+    for cat in ('daily', 'weekly', 'monthly', 'seasonal'):
+        for i, quest in enumerate(q.get(cat, [])):
+            if quest.get('done'):
+                ckey = f"{cat}:{i}"
+                if claimed.get(ckey) != period_id[cat]:
+                    user.bonus_xp = (user.bonus_xp or 0) + int(quest.get('xp', 0))
+                    claimed[ckey] = period_id[cat]
+                    quest['claimed'] = True
+                    changed = True
+    if changed:
+        user.claimed_quests = json.dumps(claimed)
+        db.session.commit()
     return q
 
 def notifications_ctx(user):
@@ -1794,7 +1824,7 @@ SPIN_PRIZES = [
     ('xp50',   '+50 XP',        'Nice — 50 XP added.',     50,  24),
     ('insight','AXON Insight',  '',                         0,  14),
     ('xp100',  '+100 XP',       'Big one — 100 XP!',       100, 12),
-    ('freeze', 'Streak Freeze', "Your streak's protected.", 0,   8),
+    ('xp75',   '+75 XP',        'Solid — 75 XP banked.',    75,  8),
     ('xp250',  '+250 XP',       'RARE — 250 XP!',          250,  4),
 ]
 SPIN_INSIGHTS = [
@@ -1806,10 +1836,19 @@ SPIN_INSIGHTS = [
     "You already did the hard part — you showed up.",
 ]
 
+def spins_earned(cu):
+    """Spins are EARNED by real actions today, not handed out: 1 base + 1 per check-in
+    (morning/evening) done today, capped at SPIN_CAP. Ties the reward to the behavior."""
+    tzday = (datetime.utcnow() + timedelta(minutes=user_tz_offset(cu))).date()
+    kinds = {r.kind for r in CheckIn.query.filter_by(user_id=cu.id, date=tzday).all()}
+    earned = 1 + (1 if 'morning' in kinds else 0) + (1 if 'evening' in kinds else 0)
+    return min(earned, SPIN_CAP)
+
 def spin_state(cu):
     today = datetime.utcnow().date().isoformat()
     used = (cu.spins_today or 0) if cu.spin_date == today else 0
-    return {'left': max(0, SPIN_CAP - used), 'cap': SPIN_CAP}
+    earned = spins_earned(cu)
+    return {'left': max(0, earned - used), 'cap': SPIN_CAP, 'earned': earned}
 
 def presence_ctx():
     """Live 'the network is breathing' signal — how many people checked in recently."""
@@ -1836,12 +1875,26 @@ def checkin_reward(user, is_new):
     """Reward payload for the dopamine moment after a check-in/out."""
     dates = _checkin_dates(user)
     total = len(dates)
+    streak, best = _streaks(dates)
+    # Milestone bonus: hitting a streak milestone (7/14/30/…) banks escalating XP, once ever.
+    milestone = streak if (is_new and streak in MILESTONES) else 0
+    milestone_bonus = 0
+    if milestone:
+        try:
+            claimed = json.loads(user.claimed_milestones) if user.claimed_milestones else []
+        except Exception:
+            claimed = []
+        if milestone not in claimed:
+            milestone_bonus = milestone * 10  # 7d→+70, 30d→+300, 100d→+1000
+            user.bonus_xp = (user.bonus_xp or 0) + milestone_bonus
+            claimed.append(milestone)
+            user.claimed_milestones = json.dumps(claimed)
+            db.session.commit()
     xp = total * 50 + (user.bonus_xp or 0)
     level = xp // 200 + 1
-    gained = 50 if is_new else 0
+    gained = (50 if is_new else 0) + milestone_bonus
     prev_xp = xp - gained
     prev_level = prev_xp // 200 + 1
-    streak, best = _streaks(dates)
     return {
         'xp_gained': gained,
         'xp_from': prev_xp % 200, 'xp_to': xp % 200,
@@ -1849,7 +1902,7 @@ def checkin_reward(user, is_new):
         'level_title': level_title_for(level),
         'streak': streak, 'best_streak': best,
         'is_record': streak > 0 and streak >= best,
-        'milestone': streak if (is_new and streak in MILESTONES) else 0,
+        'milestone': milestone, 'milestone_bonus': milestone_bonus,
         'progress_pct': round((xp % 200) / 2),
     }
 
@@ -2988,8 +3041,10 @@ def api_spin():
     cu = current_user()
     today = datetime.utcnow().date().isoformat()
     used = (cu.spins_today or 0) if cu.spin_date == today else 0
-    if used >= SPIN_CAP:
-        return {'ok': False, 'reason': 'cap', 'spins_left': 0}
+    earned = spins_earned(cu)
+    if used >= earned:
+        # out of earned spins — tell them how to earn more (check in)
+        return {'ok': False, 'reason': 'earn', 'spins_left': 0}
     key, label, detail, xp, _w = random.choices(SPIN_PRIZES, weights=[p[4] for p in SPIN_PRIZES])[0]
     if xp:
         cu.bonus_xp = (cu.bonus_xp or 0) + xp
@@ -2999,7 +3054,7 @@ def api_spin():
     cu.spins_today = used + 1
     db.session.commit()
     return {'ok': True, 'key': key, 'label': label, 'detail': detail or '',
-            'xp': xp, 'spins_left': SPIN_CAP - (used + 1)}
+            'xp': xp, 'spins_left': max(0, earned - (used + 1))}
 
 @app.route('/api/post/<int:post_id>', methods=['GET'])
 def api_post_get(post_id):
