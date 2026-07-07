@@ -1,8 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Analytics{% endblock %}
+{% block title %}Twin{% endblock %}
 
 {% block head %}
 <style>
+/* ===== The Living Twin (vitality that decays when neglected) ===== */
+.lt-wrap{padding:22px 20px 6px;text-align:center;}
+.lt-orb{width:148px;height:148px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center;}
+.lt-glow{position:absolute;inset:6px;border-radius:50%;filter:blur(24px);transition:opacity .6s ease;}
+.lt-orb img{width:100%;height:100%;object-fit:contain;position:relative;transition:filter .8s ease;animation:ltBreathe 4.5s ease-in-out infinite;}
+@keyframes ltBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.045);}}
+@media (prefers-reduced-motion:reduce){.lt-orb img{animation:none;}}
+.lt-state{font-family:'Inter',sans-serif;font-weight:800;font-size:19px;color:var(--black);margin-top:10px;letter-spacing:-.3px;}
+.lt-msg{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.5;max-width:290px;margin-left:auto;margin-right:auto;}
+.lt-bar{height:9px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);overflow:hidden;max-width:240px;margin:14px auto 0;}
+.lt-bar-fill{height:100%;border-radius:var(--r-full);transition:width 1.1s cubic-bezier(.16,1,.3,1);}
+.lt-vlabel{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:9px;}
+.lt-cta{display:inline-block;margin-top:14px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;padding:11px 24px;border-radius:var(--r-full);text-decoration:none;}
 .hero-score{padding:24px 20px 0;text-align:center;}
 .hs-lbl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--sub);text-transform:uppercase;font-family:'Inter',sans-serif;margin-bottom:8px;}
 .hs-num{font-family:'Inter',sans-serif;font-weight:800;font-size:72px;letter-spacing:-4px;color:var(--black);line-height:1;}
@@ -48,9 +61,23 @@
 <div class="topbar">
   <div style="width:36px;"></div>
   <div class="tb-brand">
-    <div class="tb-twin">Analytics</div>
+    <div class="tb-twin">Twin</div>
   </div>
   <a href="/calendar" class="tb-btn" title="Calendar"><i data-lucide="calendar"></i></a>
+</div>
+
+<!-- ===== THE LIVING TWIN ===== -->
+<div class="lt-wrap">
+  <div class="lt-orb">
+    <div class="lt-glow" style="background:radial-gradient(circle,{{ vitality.color }},transparent 68%);opacity:{{ (0.12 + vitality.v/100*0.55)|round(2) }};"></div>
+    <img src="/static/twin_keel.png" alt="Your Twin"
+         style="{% if vitality.v < 25 %}filter:grayscale(.6) brightness(.62) saturate(.4);{% else %}filter:saturate({{ (0.35 + vitality.v/100*0.75)|round(2) }}) brightness({{ (0.7 + vitality.v/100*0.45)|round(2) }});{% endif %}">
+  </div>
+  <div class="lt-state">{{ vitality.title }}</div>
+  <div class="lt-msg">{{ vitality.msg }}</div>
+  <div class="lt-bar"><div class="lt-bar-fill" style="width:{{ vitality.v }}%;background:{{ vitality.color }};"></div></div>
+  <div class="lt-vlabel">Twin Vitality · {{ vitality.v }}%</div>
+  {% if vitality.v < 50 %}<a href="/checkin" class="lt-cta">Check in to revive it</a>{% endif %}
 </div>
 
 {% if not stats.total_checkins %}

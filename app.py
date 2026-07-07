@@ -1788,7 +1788,7 @@ HOME_TILE_CATALOG = {
     'habits':    {'label': 'Habits',    'icon': 'repeat',        'href': '/habits',    'cat': 'Actions'},
     'quests':    {'label': 'Quests',    'icon': 'target',        'href': '/quests',    'cat': 'Actions'},
     'axon':      {'label': 'Ask AXON',  'icon': 'message-circle','href': '/axon',      'cat': 'AXON'},
-    'analytics': {'label': 'Analytics', 'icon': 'bar-chart-2',   'href': '/analytics', 'cat': 'You'},
+    'analytics': {'label': 'Twin',      'icon': 'activity',      'href': '/analytics', 'cat': 'You'},
     'post':      {'label': 'Post',      'icon': 'plus-square',   'href': '/create',    'cat': 'Social'},
     'calendar':  {'label': 'Calendar',  'icon': 'calendar',      'href': '/calendar',  'cat': 'Actions'},
     'money':     {'label': 'Money',     'icon': 'wallet',        'href': '#',          'cat': 'Trackers', 'soon': True},
@@ -1861,6 +1861,31 @@ def twin_score(cu):
     return {'has': True, 'score': score, 'tier': tier, 'color': color,
             'verdict': verdict, 'action': actions[weak],
             'offset': round(364 * (1 - score / 100), 1)}
+
+def twin_vitality(cu):
+    """The living Twin: a pet-like vitality that DECAYS when you neglect it and GLOWS when
+    you feed it real data. Distinct from the daily Twin Score (today's performance) — this is
+    how alive your Twin is based on how consistently you show up. The core 'it's alive' hook."""
+    dates = set(_checkin_dates(cu))
+    if not dates:
+        return {'v': 0, 'state': 'asleep', 'color': '#6B6B6B', 'days_since': None,
+                'title': 'Your Twin is asleep', 'msg': 'Check in to bring it to life for the first time.'}
+    tzday = (datetime.utcnow() + timedelta(minutes=user_tz_offset(cu))).date()
+    last = max(dates)
+    days_since = (tzday - last).days
+    base = max(0, 100 - days_since * 22)                 # neglect decays it ~22/day
+    recent = sum(1 for i in range(7) if (tzday - timedelta(days=i)) in dates)
+    consistency = recent / 7 * 100
+    v = max(0, min(100, round(base * 0.6 + consistency * 0.4)))
+    if v >= 75:
+        state, color, title, msg = 'thriving', '#6BBF8E', 'Your Twin is thriving', 'You’re feeding it every day. Keep the fire going.'
+    elif v >= 50:
+        state, color, title, msg = 'steady', '#EAD5A2', 'Your Twin is steady', 'Looking good. One check-in keeps it strong.'
+    elif v >= 25:
+        state, color, title, msg = 'fading', '#D99A52', 'Your Twin is fading', 'It’s been a minute — check in to bring it back.'
+    else:
+        state, color, title, msg = 'dormant', '#9A6B4A', 'Your Twin is going dormant', 'It needs you today. A 30-second check-in revives it.'
+    return {'v': v, 'state': state, 'color': color, 'days_since': days_since, 'title': title, 'msg': msg}
 
 SPIN_CAP = 3
 # Progress Jackpot prizes: (key, label, detail, xp, weight). The lever is a real action; the payout is variable.
@@ -2182,7 +2207,9 @@ def checkout():
 @app.route('/analytics')
 def analytics():
     if not auth(): return redirect('/login')
-    return render_template('analytics.html', u=user_ctx(), stats=stats_ctx(), active='analytics')
+    cu = current_user()
+    return render_template('analytics.html', u=user_ctx(), stats=stats_ctx(),
+                           vitality=twin_vitality(cu), twin=twin_score(cu), active='analytics')
 
 @app.route('/grow')
 def grow():
