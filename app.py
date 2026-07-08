@@ -101,6 +101,14 @@ class BlockedUser(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class ArchivedThread(db.Model):
+    __tablename__ = 'archived_threads'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, index=True, nullable=False)   # whose inbox archived it
+    other_id = db.Column(db.Integer, index=True, nullable=False)  # the conversation partner
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class CheckIn(db.Model):
     __tablename__ = 'checkins'
     id = db.Column(db.Integer, primary_key=True)
@@ -2359,14 +2367,20 @@ def people_suggestions(cu, limit=8):
     return out
 
 def dm_conversations(cu):
-    """List of the people the user has DM'd, newest first, with unread counts."""
+    """Conversations split into Friends vs Requests. A conversation is a REQUEST if the other
+    person messaged you, you never replied, and you don't follow them (an unsolicited DM).
+    Archived and blocked threads are hidden."""
     msgs = (DirectMessage.query
             .filter((DirectMessage.sender_id == cu.id) | (DirectMessage.recipient_id == cu.id))
             .order_by(DirectMessage.created_at.desc()).all())
-    seen, out = set(), []
+    archived = {a.other_id for a in ArchivedThread.query.filter_by(user_id=cu.id).all()}
+    blocked = blocked_ids(cu.id)
+    i_follow = {f.following_id for f in Follow.query.filter_by(follower_id=cu.id).all()}
+    i_sent_to = {m.recipient_id for m in msgs if m.sender_id == cu.id}
+    seen, friends, requests = set(), [], []
     for m in msgs:
         other = m.recipient_id if m.sender_id == cu.id else m.sender_id
-        if other in seen:
+        if other in seen or other in archived or other in blocked:
             continue
         seen.add(other)
         tu = User.query.get(other)
@@ -2374,17 +2388,46 @@ def dm_conversations(cu):
             continue
         unread = DirectMessage.query.filter_by(sender_id=other, recipient_id=cu.id, read=False).count()
         nm = tu.name or tu.username
-        out.append({'id': tu.id, 'name': nm, 'username': tu.username, 'init': (nm[0].upper() if nm else 'U'),
-                    'has_avatar': bool(tu.avatar), 'last': (m.text or '')[:64], 'time': time_ago(m.created_at),
-                    'unread': unread})
-    return out
+        row = {'id': tu.id, 'name': nm, 'username': tu.username, 'init': (nm[0].upper() if nm else 'U'),
+               'has_avatar': bool(tu.avatar), 'last': (m.text or '')[:64], 'time': time_ago(m.created_at),
+               'unread': unread}
+        is_request = (other not in i_sent_to) and (other not in i_follow)
+        (requests if is_request else friends).append(row)
+    return {'friends': friends, 'requests': requests}
 
 @app.route('/messages')
 def messages():
     if not auth(): return redirect('/login')
     cu = current_user()
-    return render_template('messages.html', u=user_ctx(), convos=dm_conversations(cu),
+    convos = dm_conversations(cu)
+    # Course chats: conversations with people who publish courses (a light "Courses" section)
+    course_authors = {p.user_id for p in Post.query.filter_by(kind='course').all()}
+    courses = [c for c in convos['friends'] if c['id'] in course_authors]
+    return render_template('messages.html', u=user_ctx(),
+                           friends=convos['friends'], requests=convos['requests'], courses=courses,
                            suggestions=people_suggestions(cu), active='messages')
+
+@app.route('/api/dm/delete/<int:target_id>', methods=['POST'])
+def api_dm_delete(target_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    DirectMessage.query.filter(db.or_(
+        db.and_(DirectMessage.sender_id == cu.id, DirectMessage.recipient_id == target_id),
+        db.and_(DirectMessage.sender_id == target_id, DirectMessage.recipient_id == cu.id))).delete()
+    db.session.commit()
+    return {'ok': True}
+
+@app.route('/api/dm/archive/<int:target_id>', methods=['POST'])
+def api_dm_archive(target_id):
+    if not auth(): return ('', 401)
+    cu = current_user()
+    ex = ArchivedThread.query.filter_by(user_id=cu.id, other_id=target_id).first()
+    if ex:
+        db.session.delete(ex); archived = False
+    else:
+        db.session.add(ArchivedThread(user_id=cu.id, other_id=target_id)); archived = True
+    db.session.commit()
+    return {'ok': True, 'archived': archived}
 
 @app.route('/dm/<username>')
 def dm(username):
