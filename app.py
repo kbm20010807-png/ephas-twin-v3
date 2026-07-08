@@ -2124,10 +2124,15 @@ def axon_generate_questions(user, kind):
         meaning = ("rating=overall day 1-10; habits=did they keep their habits; goal=did they hit "
                    "their #1 goal; blocker=what got in the way; tomorrow=tomorrow's one priority; "
                    "gratitude=three things they're grateful for")
-    sys = ("You are AXON, a sharp, warm self-growth coach. Generate fresh check-in questions for the user. "
-           "Voice: direct, wise, motivating, never corny. Each question (q) <= 8 words. Each hint <= 14 words. "
-           "Make them feel personal and a little different from the usual. You MAY use their first name in at "
-           "most one or two questions, not all. Return ONLY valid minified JSON, no prose, no code fences.")
+    sys = ("You are AXON, a sharp, warm self-growth coach writing a DAILY check-in people will actually answer "
+           "HONESTLY (not just swipe past). Strategy for the questions: "
+           "1) Make each DIFFERENT from each other and from a generic template — never repeat a phrasing. "
+           "2) Lower the stakes so they tell the truth — an implicit 'no judgment, just data' tone. "
+           "3) Prefer SPECIFIC, COMPARATIVE or CONCRETE angles (e.g. 'better or worse than yesterday?', "
+           "'what time did you actually...', 'name one thing you...') — these are harder to answer on autopilot. "
+           "4) Human and occasionally playful, never corny or clinical. "
+           "Each question (q) <= 8 words. Each hint <= 14 words. Use their first name in AT MOST one question. "
+           "Return ONLY valid minified JSON, no prose, no code fences.")
     msg = (f"Context:\n{' '.join(ctx)}\n\nField meanings: {meaning}.\n\n"
            f"Return JSON with EXACTLY these keys: {steps}. "
            'Each value is an object {"q": "...", "hint": "..."}. JSON only.')
@@ -2147,6 +2152,16 @@ def axon_generate_questions(user, kind):
             hint = (v.get('hint') or '').strip()
             if q:
                 out[step] = {'q': q[:90], 'hint': hint[:140]}
+        # Dedup: if the model repeated a question, auto-switch that one to a different (pool) question.
+        fb = question_set(user, kind)
+        seen_q = set()
+        for step in steps:
+            if step in out:
+                ql = out[step]['q'].strip().lower()
+                if ql in seen_q and step in fb:
+                    out[step] = fb[step]
+                    ql = out[step]['q'].strip().lower()
+                seen_q.add(ql)
         if len(out) >= max(3, len(steps) - 1):  # accept if it got most of them
             _QSET_CACHE[key] = out
             return out

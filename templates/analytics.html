@@ -5,10 +5,12 @@
 <style>
 /* ===== The Living Twin (vitality that decays when neglected) ===== */
 .lt-wrap{padding:22px 20px 6px;text-align:center;}
-.lt-orb{width:148px;height:148px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center;}
-.lt-glow{position:absolute;inset:6px;border-radius:50%;filter:blur(24px);transition:opacity .6s ease;}
-.lt-orb img{width:100%;height:100%;object-fit:contain;position:relative;transition:filter .8s ease;animation:ltBreathe 4.5s ease-in-out infinite;}
-@keyframes ltBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.045);}}
+.lt-orb{width:156px;height:156px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center;}
+/* soft, diffuse halo — no hard edges */
+.lt-glow{position:absolute;inset:-14px;border-radius:50%;filter:blur(38px);transition:opacity 1s ease;pointer-events:none;}
+.lt-glow2{position:absolute;inset:20px;border-radius:50%;filter:blur(16px);opacity:.5;transition:opacity 1s ease;pointer-events:none;}
+.lt-orb img{width:88%;height:88%;object-fit:contain;position:relative;transition:filter 1s ease;animation:ltBreathe 6s ease-in-out infinite;}
+@keyframes ltBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
 @media (prefers-reduced-motion:reduce){.lt-orb img{animation:none;}}
 .lt-state{font-family:'Inter',sans-serif;font-weight:800;font-size:19px;color:var(--black);margin-top:10px;letter-spacing:-.3px;}
 .lt-msg{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.5;max-width:290px;margin-left:auto;margin-right:auto;}
@@ -16,6 +18,13 @@
 .lt-bar-fill{height:100%;border-radius:var(--r-full);transition:width 1.1s cubic-bezier(.16,1,.3,1);}
 .lt-vlabel{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:9px;}
 .lt-cta{display:inline-block;margin-top:14px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;padding:11px 24px;border-radius:var(--r-full);text-decoration:none;}
+/* Twin hub shortcuts */
+.th-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px 4px;}
+.th-btn{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 6px;background:var(--card);border:1px solid var(--border);border-radius:16px;text-decoration:none;box-shadow:var(--sh);}
+.th-btn:active{transform:scale(.97);}
+.th-ico{width:40px;height:40px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;}
+.th-ico svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:2;}
+.th-btn span{font-size:11px;font-weight:700;color:var(--black);}
 .hero-score{padding:24px 20px 0;text-align:center;}
 .hs-lbl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--sub);text-transform:uppercase;font-family:'Inter',sans-serif;margin-bottom:8px;}
 .hs-num{font-family:'Inter',sans-serif;font-weight:800;font-size:72px;letter-spacing:-4px;color:var(--black);line-height:1;}
@@ -69,15 +78,26 @@
 <!-- ===== THE LIVING TWIN ===== -->
 <div class="lt-wrap">
   <div class="lt-orb">
-    <div class="lt-glow" style="background:radial-gradient(circle,{{ vitality.color }},transparent 68%);opacity:{{ (0.12 + vitality.v/100*0.55)|round(2) }};"></div>
+    <div class="lt-glow" style="background:radial-gradient(circle,{{ vitality.color }},transparent 70%);opacity:{{ (0.10 + vitality.v/100*0.32)|round(2) }};"></div>
+    <div class="lt-glow2" style="background:radial-gradient(circle,{{ vitality.color }},transparent 65%);opacity:{{ (0.06 + vitality.v/100*0.22)|round(2) }};"></div>
     <img src="/static/twin_keel.png" alt="Your Twin"
-         style="{% if vitality.v < 25 %}filter:grayscale(.6) brightness(.62) saturate(.4);{% else %}filter:saturate({{ (0.35 + vitality.v/100*0.75)|round(2) }}) brightness({{ (0.7 + vitality.v/100*0.45)|round(2) }});{% endif %}">
+         style="{% if vitality.v < 25 %}filter:grayscale(.55) brightness(.72) saturate(.5);{% else %}filter:saturate({{ (0.5 + vitality.v/100*0.5)|round(2) }}) brightness({{ (0.85 + vitality.v/100*0.2)|round(2) }});{% endif %}">
   </div>
   <div class="lt-state">{{ vitality.title }}</div>
   <div class="lt-msg">{{ vitality.msg }}</div>
   <div class="lt-bar"><div class="lt-bar-fill" style="width:{{ vitality.v }}%;background:{{ vitality.color }};"></div></div>
   <div class="lt-vlabel">Twin Vitality · {{ vitality.v }}%</div>
   {% if vitality.v < 50 %}<a href="/checkin" class="lt-cta">Check in to revive it</a>{% endif %}
+</div>
+
+<!-- Twin hub shortcuts -->
+<div class="th-grid">
+  <a href="/checkin" class="th-btn"><div class="th-ico"><i data-lucide="sunrise"></i></div><span>Check in</span></a>
+  <a href="/habits" class="th-btn"><div class="th-ico"><i data-lucide="target"></i></div><span>Habits</span></a>
+  <a href="/calendar" class="th-btn"><div class="th-ico"><i data-lucide="flame"></i></div><span>Streaks</span></a>
+  <a href="/quests" class="th-btn"><div class="th-ico"><i data-lucide="award"></i></div><span>Quests</span></a>
+  <a href="/pushups" class="th-btn"><div class="th-ico"><i data-lucide="dumbbell"></i></div><span>Pushups</span></a>
+  <a href="/profile" class="th-btn"><div class="th-ico"><i data-lucide="medal"></i></div><span>Badges</span></a>
 </div>
 
 {% if not stats.total_checkins %}
