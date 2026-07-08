@@ -26,6 +26,11 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 .h-btn.on .h-check{background:var(--gold);border-color:var(--gold);}
 .h-btn.on .h-check::after{content:'';display:block;width:5px;height:9px;border-right:2px solid #000;border-bottom:2px solid #000;transform:rotate(45deg);margin-top:-2px;}
 .ci-skip{display:block;width:100%;background:none;border:none;color:var(--sub);font-size:12px;font-weight:600;padding:12px 0 2px;cursor:pointer;text-align:center;}
+.ci-mic{display:inline-flex;align-items:center;gap:7px;margin-top:10px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);border-radius:var(--r-full);padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.ci-mic svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;}
+.ci-mic.rec{background:rgba(217,83,79,.12);border-color:rgba(217,83,79,.4);color:#E06A66;animation:micPulse 1.1s ease-in-out infinite;}
+.ci-mic.rec svg{stroke:#E06A66;}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,83,79,.3);}50%{box-shadow:0 0 0 6px rgba(217,83,79,0);}}
 .ci-skip:active{opacity:.6;}
 .success-ov{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .3s;}
 .success-ov.show{opacity:1;pointer-events:all;}
@@ -169,6 +174,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="step-q" data-q="win">{{ q.win.q }}</div>
     <div class="step-hint" data-hint="win">{{ q.win.hint }}</div>
     <textarea class="form-input form-textarea" id="winTxt" placeholder="Today I'm looking forward to..." style="flex:1;min-height:120px;"></textarea>
+    <button type="button" class="ci-mic" onclick="dictate(this,'winTxt')"><i data-lucide="mic"></i> <span>Tap to speak</span></button>
     <div style="text-align:right;font-size:10px;color:var(--sub);margin-top:5px;" id="winCt">0/200</div>
     <div class="step-footer">
       <div class="flex gap-2">
@@ -185,6 +191,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="step-q" data-q="reflection">{{ q.reflection.q }}</div>
     <div class="step-hint" data-hint="reflection">{{ q.reflection.hint }}</div>
     <textarea class="form-input form-textarea" id="refTxt" placeholder="Today I will focus on..." style="flex:1;min-height:120px;"></textarea>
+    <button type="button" class="ci-mic" onclick="dictate(this,'refTxt')"><i data-lucide="mic"></i> <span>Tap to speak</span></button>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(6)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
@@ -258,6 +265,27 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 
 {% block scripts %}
 <script>
+// ===== Voice dictation — talk instead of type (free, on-device Web Speech API) =====
+var _recog=null;
+(function(){ // hide mic buttons if the browser can't do speech recognition
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ document.querySelectorAll('.ci-mic').forEach(function(b){b.style.display='none';}); }
+})();
+function dictate(btn,targetId){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ btn.style.display='none'; return; }
+  var ta=document.getElementById(targetId);
+  if(_recog){ try{_recog.stop();}catch(e){} if(btn.classList.contains('rec')){ btn.classList.remove('rec'); return; } }
+  _recog=new SR(); _recog.lang='en-US'; _recog.interimResults=true; _recog.continuous=false;
+  var base=ta.value?ta.value.replace(/\s+$/,'')+' ':'';
+  btn.classList.add('rec'); btn.querySelector('span').textContent='Listening…';
+  if(navigator.vibrate) navigator.vibrate(12);
+  _recog.onresult=function(e){ var t=''; for(var i=e.resultIndex;i<e.results.length;i++){ t+=e.results[i][0].transcript; }
+    ta.value=base+t; try{ta.dispatchEvent(new Event('input'));}catch(x){} };
+  _recog.onend=function(){ btn.classList.remove('rec'); btn.querySelector('span').textContent='Tap to speak'; };
+  _recog.onerror=function(){ btn.classList.remove('rec'); btn.querySelector('span').textContent='Tap to speak'; };
+  try{ _recog.start(); }catch(e){ btn.classList.remove('rec'); btn.querySelector('span').textContent='Tap to speak'; }
+}
 // Auto-generated motivation button copy (varies each time — AXON's voice)
 (function(){
   var phrases=["HEAR THE TRUTH ABOUT YOU","WANNA HEAR WHAT YOU NEED?","WANNA HEAR THE TRUTH?","WANNA TALK ABOUT IT?","LET ME GIVE YOU ADVICE","THE TRUTH ABOUT TODAY"];
