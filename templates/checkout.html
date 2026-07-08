@@ -246,7 +246,7 @@ function submit(){
   const btn=event&&event.target?event.target.closest('button'):null;
   if(btn){btn.disabled=true;btn.style.opacity='.7';}
   fetch('/checkout',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
-    .then(r=>{ if(!r.ok) throw 0; document.getElementById('sOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); coachCheckin('evening'); })
+    .then(r=>{ if(!r.ok) throw 0; try{history.replaceState(null,'','/home');}catch(e){} document.getElementById('sOv').classList.add('show'); if(typeof lucide!=='undefined')lucide.createIcons(); coachCheckin('evening'); })
     .catch(()=>{ if(btn){btn.disabled=false;btn.style.opacity='1';} alert('Could not save check-out. Please try again.'); });
 }
 function coachCheckin(kind){

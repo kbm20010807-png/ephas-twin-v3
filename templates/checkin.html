@@ -298,6 +298,8 @@ function submit(){
 }
 function showReward(d){
   var $=function(id){return document.getElementById(id);};
+  // Point the back-stack at Home so back/swipe/AXON never loops to this results screen.
+  try{ history.replaceState(null,'','/home'); }catch(e){}
   $('rwLevelTitle').textContent='Level '+(d.level||1)+(d.level_title?' · '+d.level_title:'');
   if(window.Celebrate){
     Celebrate.haptic(d.milestone?[20,50,20,50,30]:[14,40,14]);
