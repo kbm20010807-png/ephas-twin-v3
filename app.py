@@ -1950,7 +1950,8 @@ def presence_ctx():
 def home():
     if not auth(): return redirect('/login')
     cu = current_user()
-    community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread'])).order_by(Post.created_at.desc()).limit(3).all(), cu)
+    # A real scrollable feed (posts/threads/reels) so opening Home lands you mid-content — the scroll hook.
+    community = serialize_posts(Post.query.filter(Post.kind.in_(['post', 'thread', 'reel'])).order_by(Post.created_at.desc()).limit(15).all(), cu)
     return render_template('home.html', u=user_ctx(), stats=stats_ctx(), community=community,
                            habits=serialize_habits(cu), stories=stories_ctx(cu),
                            qteasers=quest_teasers(cu), today=today_metrics(cu),

@@ -69,6 +69,8 @@
 .domain-bar-bg{flex:1;height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
 .domain-bar-fg{height:100%;background:var(--grad);border-radius:4px;}
 .domain-val{font-size:11px;font-weight:700;color:var(--gold);width:30px;text-align:right;flex-shrink:0;}
+.feed-lbl{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 8px;}
+.feed-lbl span{font-size:13px;font-weight:800;letter-spacing:.3px;color:var(--black);}
 .feed-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px;margin:0 20px 10px;box-shadow:var(--sh);}
 .fc-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .fc-bdy{font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px;}
@@ -298,18 +300,20 @@
 
 <div class="home-amb"></div>
 
-<!-- ===== COMPACT GREETING ===== -->
+<!-- ===== COMPACT GREETING (tiny score pill, not a big card) ===== -->
 <div class="greet-bar h-rise hd1">
   <div>
     <div class="greet-time" id="gTime">Good morning</div>
     <div class="greet-hi">{{ u.first }}</div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
+    {% if twin.has %}<a href="/analytics" class="greet-score" style="text-decoration:none;"><span style="color:{{ twin.color }}">{{ twin.score }}</span><small>SCORE</small></a>
+    {% else %}<a href="/checkin" class="greet-score" style="text-decoration:none;"><span style="color:var(--sub)">—</span><small>SCORE</small></a>{% endif %}
     {% if u.streak %}<div class="hero-streak" onclick="location.href='/calendar'"><i data-lucide="flame"></i><span>{{ u.streak }}</span></div>{% endif %}
   </div>
 </div>
 
-<!-- ===== STREAK AT RISK (only when alive but not checked in today) ===== -->
+<!-- streak at risk (small hook, only when alive but not checked in today) -->
 {% if u.streak and not twin.has %}
 <a href="/checkin" class="risk-card h-rise hd1">
   <div class="risk-ico"><i data-lucide="flame"></i></div>
@@ -320,48 +324,6 @@
   <i data-lucide="chevron-right" class="risk-arrow"></i>
 </a>
 {% endif %}
-
-<!-- ===== TWIN SCORE (compact card, no big ring) ===== -->
-{% if twin.has %}
-<div class="tsc-card h-rise hd2" onclick="location.href='/analytics'">
-  <div class="tsc-top">
-    <div class="tsc-num" style="color:{{ twin.color }}">{{ twin.score }}</div>
-    <div class="tsc-meta">
-      <div class="tsc-lbl">TWIN SCORE</div>
-      <div class="tsc-verdict">{{ twin.verdict }}</div>
-    </div>
-    <i data-lucide="chevron-right" class="tsc-arrow"></i>
-  </div>
-  <div class="tsc-track"><div class="tsc-fill" style="width:{{ twin.score }}%;background:{{ twin.color }}"></div></div>
-  <div class="tsc-action">
-    <div class="ta-ico"><i data-lucide="arrow-up-right"></i></div>
-    <div class="ta-txt"><b>Today's move</b>{{ twin.action }}</div>
-  </div>
-</div>
-{% else %}
-<a href="/checkin" class="tsc-card tsc-empty h-rise hd2">
-  <div class="tsc-top">
-    <div class="tsc-num" style="color:var(--sub)">—</div>
-    <div class="tsc-meta">
-      <div class="tsc-lbl">TWIN SCORE</div>
-      <div class="tsc-verdict">Check in to unlock today's Twin Score.</div>
-    </div>
-    <i data-lucide="chevron-right" class="tsc-arrow"></i>
-  </div>
-</a>
-{% endif %}
-
-<!-- ===== THIS WEEK (don't break the chain) ===== -->
-<div class="week-strip h-rise hd3">
-  <div class="week-bars">
-    {% for i in range(7) %}
-    <div class="wb {% if stats.checked[i] %}done{% else %}empty{% endif %}">
-      <div class="wb-bar" style="height:{% if stats.checked[i] %}100%{% else %}34%{% endif %};"></div>
-      <div class="wb-lbl">{{ stats.days[i] }}</div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
 
 <!-- ===== STORIES / TWIN DROPS ===== -->
 <div class="stories-strip h-rise hd2">
@@ -385,7 +347,7 @@
 <!-- ===== YOUR CUSTOMIZABLE TILES (mini trackers / buttons) ===== -->
 <div class="tiles-wrap h-rise hd3">
   <div class="tiles-head">
-    <span class="tiles-lbl">Your shortcuts</span>
+    <span class="tiles-lbl">Gadgets</span>
   </div>
   <div class="tiles-grid" id="tilesGrid">
     {% for t in tiles %}
@@ -402,14 +364,15 @@
 <div class="tp-ov" id="tilePicker" onclick="if(event.target===this)closeTilePicker()">
   <div class="tp-sheet">
     <div class="tp-grip"></div>
-    <div class="tp-title">Add a shortcut</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:4px;">Pin the trackers &amp; buttons you want on your home.</div>
+    <div class="tp-title">Add a gadget</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:4px;">Pin the mini trackers &amp; buttons you want on your home.</div>
     <div id="tpList"></div>
     <div class="tp-cancel" onclick="closeTilePicker()">Done</div>
   </div>
 </div>
 
 {% if community %}
+<div class="feed-lbl"><span>For you</span><a href="/grow" style="text-decoration:none;color:var(--sub);font-size:11px;font-weight:700;">See all</a></div>
 {% for p in community %}
 <div class="feed-c reveal">
   <div class="fc-hd">
