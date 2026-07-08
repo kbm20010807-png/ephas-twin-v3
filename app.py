@@ -38,6 +38,10 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,        # JS can't read the session cookie (blocks cookie theft via XSS)
     SESSION_COOKIE_SAMESITE='Lax',       # blocks most cross-site request forgery
     SESSION_COOKIE_SECURE=_is_prod,      # only send cookie over HTTPS in production
+    # Keep users signed in per device: a persistent 1-year cookie whose expiry rolls forward
+    # on every visit, instead of a temporary cookie that dies when the phone/PWA closes.
+    PERMANENT_SESSION_LIFETIME=timedelta(days=365),
+    SESSION_REFRESH_EACH_REQUEST=True,
     MAX_CONTENT_LENGTH=12 * 1024 * 1024,      # cap request size (12MB) to limit abuse
     MAX_FORM_MEMORY_SIZE=12 * 1024 * 1024,    # allow large base64 image fields (avatar/banner) in forms
 )
@@ -1022,6 +1026,7 @@ def _csrf_protect():
     """Double-submit CSRF: every session gets a token; state-changing /api POSTs must echo it
     (via X-CSRF-Token header from our fetch wrapper, or a _csrf form field). Blocks forged
     follow/DM/block/delete requests from other sites a logged-in user visits."""
+    session.permanent = True   # keep the login alive per device (1-year rolling cookie)
     if not session.get('csrf'):
         session['csrf'] = secrets.token_urlsafe(32)
     if request.method == 'POST' and request.path.startswith('/api/'):
