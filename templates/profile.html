@@ -111,21 +111,31 @@
 
 /* Collectible achievement medals — earned = glowing rarity gradient, locked = greyed + progress */
 .ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:2px 20px 0;}
-.ach{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:15px 6px;border-radius:16px;background:var(--card);border:1px solid var(--border);text-align:center;overflow:hidden;}
-.ach.locked{opacity:.6;}
-.ach-medal{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-2);border:1px solid var(--border);}
-.ach-medal svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.75;}
-.ach.earned .ach-medal{border:none;box-shadow:0 4px 14px rgba(0,0,0,.28),inset 0 1px 3px rgba(255,255,255,.45);}
-.ach.earned .ach-medal svg{stroke:#241D10;}
-.ach.earned.r-common .ach-medal{background:linear-gradient(145deg,#CBD2DB,#8A93A3);}
-.ach.earned.r-rare   .ach-medal{background:linear-gradient(145deg,#86CBF2,#3B7FC4);}
-.ach.earned.r-epic   .ach-medal{background:linear-gradient(145deg,#C9A0F0,#7C4DB8);}
-.ach.earned.r-legend .ach-medal{background:var(--grad);animation:achPulse 2.2s ease-in-out infinite;}
-@keyframes achPulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 rgba(234,213,162,0);}50%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 20px rgba(234,213,162,.65);}}
+.ach{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;padding:16px 6px;border-radius:16px;background:linear-gradient(180deg,var(--card),var(--bg-2));border:1px solid var(--border);text-align:center;overflow:hidden;}
+.ach.locked{opacity:.7;}
+.ach.earned{border-color:rgba(234,213,162,.18);}
+/* medal = struck coin: outer rim, inner face, sheen highlight, engraved icon */
+.ach-medal{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg-2);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.06),inset 0 -2px 5px rgba(0,0,0,.35),0 2px 6px rgba(0,0,0,.3);}
+.ach-medal::before{content:'';position:absolute;inset:5px;border-radius:50%;border:1.5px solid rgba(255,255,255,.10);}   /* engraved inner ring */
+.ach-medal::after{content:'';position:absolute;inset:0;border-radius:50%;background:linear-gradient(150deg,rgba(255,255,255,.4),transparent 45%);opacity:.35;pointer-events:none;} /* top sheen */
+.ach-medal svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.9;position:relative;z-index:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));}
+.ach.earned .ach-medal{box-shadow:inset 0 2px 3px rgba(255,255,255,.55),inset 0 -3px 6px rgba(0,0,0,.35),0 5px 16px rgba(0,0,0,.3);}
+.ach.earned .ach-medal svg{stroke:#2a2110;}
+.ach.earned .ach-medal::after{opacity:.6;}
+.ach.earned.r-common .ach-medal{background:radial-gradient(120% 120% at 30% 20%,#EAF0F6,#B4BCC9 45%,#7C8493);}
+.ach.earned.r-rare   .ach-medal{background:radial-gradient(120% 120% at 30% 20%,#BFE6FB,#5FA9E0 45%,#2E6FB0);}
+.ach.earned.r-epic   .ach-medal{background:radial-gradient(120% 120% at 30% 20%,#E4CAF7,#B07EE8 45%,#6E3FB0);}
+.ach.earned.r-legend .ach-medal{background:radial-gradient(120% 120% at 30% 20%,#FFF4D0,#EAD5A2 42%,#C9A44E);animation:achPulse 2.6s ease-in-out infinite;}
+.ach.earned.r-legend .ach-medal svg{stroke:#4a3410;}
+@keyframes achPulse{0%,100%{box-shadow:inset 0 2px 3px rgba(255,255,255,.55),inset 0 -3px 6px rgba(0,0,0,.35),0 5px 16px rgba(0,0,0,.3),0 0 0 rgba(234,213,162,0);}50%{box-shadow:inset 0 2px 3px rgba(255,255,255,.55),inset 0 -3px 6px rgba(0,0,0,.35),0 5px 16px rgba(0,0,0,.3),0 0 22px rgba(234,213,162,.7);}}
 .ach-nm{font-size:11px;font-weight:800;color:var(--black);line-height:1.2;}
 .ach.locked .ach-nm{color:var(--sub);}
-.ach-rar{font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--sub);}
-.ach.earned .ach-rar{color:var(--gold);}
+.ach-rar{font-size:8px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--sub);}
+.ach.earned.r-common .ach-rar{color:#9aa3b2;}
+.ach.earned.r-rare .ach-rar{color:#5FA9E0;}
+.ach.earned.r-epic .ach-rar{color:#B07EE8;}
+.ach.earned.r-legend .ach-rar{color:var(--gold);}
 .ach-lock{position:absolute;top:8px;right:8px;width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;}
 @media (prefers-reduced-motion:reduce){.ach.earned.r-legend .ach-medal{animation:none;}}
 
@@ -210,15 +220,30 @@
 .spin-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9700;padding:28px;}
 .spin-ov.on{display:flex;}
 .spin-modal{background:linear-gradient(165deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:24px;width:100%;max-width:330px;padding:28px 24px;text-align:center;box-shadow:var(--sh-md);}
-.spin-window{position:relative;height:92px;margin:2px auto 4px;overflow:hidden;border-radius:16px;background:linear-gradient(180deg,var(--bg-2),var(--black,#0b0b0d));border:1px solid var(--gold-b);box-shadow:inset 0 6px 16px rgba(0,0,0,.45);}
-.spin-window::before,.spin-window::after{content:'';position:absolute;left:0;right:0;height:30px;z-index:2;pointer-events:none;}
-.spin-window::before{top:0;background:linear-gradient(180deg,var(--card),transparent);}
-.spin-window::after{bottom:0;background:linear-gradient(0deg,var(--card),transparent);}
-.spin-window-line{position:absolute;top:50%;left:10px;right:10px;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:3;opacity:.55;}
-.spin-window.win{animation:spinWin .55s ease;}
-@keyframes spinWin{0%,100%{box-shadow:inset 0 6px 16px rgba(0,0,0,.45);}45%{box-shadow:inset 0 6px 16px rgba(0,0,0,.45),0 0 34px rgba(234,213,162,.65);}}
+/* premium slot window: metallic gold bezel + glossy glass + selection band */
+.spin-window{position:relative;height:96px;margin:4px auto 6px;overflow:hidden;border-radius:18px;
+  background:radial-gradient(120% 100% at 50% 0%,#1c1c22,#0a0a0c 70%);
+  border:1px solid transparent;background-clip:padding-box;
+  box-shadow:inset 0 8px 22px rgba(0,0,0,.6),inset 0 -2px 6px rgba(255,255,255,.04),
+    0 0 0 1px rgba(234,213,162,.35),0 0 0 3px rgba(234,213,162,.10),0 10px 26px rgba(0,0,0,.35);}
+/* top gloss + bottom shade fade the reel edges */
+.spin-window::before,.spin-window::after{content:'';position:absolute;left:0;right:0;height:34px;z-index:2;pointer-events:none;}
+.spin-window::before{top:0;background:linear-gradient(180deg,rgba(0,0,0,.85),transparent);}
+.spin-window::after{bottom:0;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);}
+/* center selection band with gold rails */
+.spin-window-line{position:absolute;top:50%;left:0;right:0;height:40px;transform:translateY(-50%);z-index:3;pointer-events:none;
+  border-top:1px solid rgba(234,213,162,.55);border-bottom:1px solid rgba(234,213,162,.55);
+  background:linear-gradient(90deg,rgba(234,213,162,.14),transparent 30%,transparent 70%,rgba(234,213,162,.14));}
+/* glass sheen sweep across the window */
+.spin-window .spin-gloss{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.10) 48%,transparent 56%);
+  background-size:250% 100%;animation:spinGloss 4s ease-in-out infinite;}
+@keyframes spinGloss{0%{background-position:150% 0;}60%,100%{background-position:-60% 0;}}
+.spin-window.win{animation:spinWin .6s ease;}
+@keyframes spinWin{0%,100%{box-shadow:inset 0 8px 22px rgba(0,0,0,.6),0 0 0 1px rgba(234,213,162,.35),0 0 0 3px rgba(234,213,162,.10),0 10px 26px rgba(0,0,0,.35);}
+  45%{box-shadow:inset 0 8px 22px rgba(0,0,0,.6),0 0 0 1px rgba(234,213,162,.7),0 0 30px rgba(234,213,162,.6),0 10px 26px rgba(0,0,0,.35);}}
 .spin-strip{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;will-change:transform;}
-.spin-cell{height:92px;flex:0 0 92px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:38px;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.spin-cell{height:96px;flex:0 0 96px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:40px;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 8px rgba(0,0,0,.3);}
 .spin-cell.sm{font-size:26px;letter-spacing:0;}
 .spin-prize{font-size:16px;font-weight:800;color:var(--black);margin-top:10px;min-height:20px;}
 .spin-detail{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.4;min-height:16px;}
@@ -298,6 +323,7 @@
     <div class="spin-window" id="spinWindow">
       <div class="spin-strip" id="spinStrip"><div class="spin-cell">★</div></div>
       <div class="spin-window-line"></div>
+      <div class="spin-gloss"></div>
     </div>
     <div class="spin-prize" id="spinPrize"></div>
     <div class="spin-detail" id="spinDetail">Spin to earn XP, streak freezes or an AXON insight.</div>
@@ -659,7 +685,7 @@ function spinFace(key, xp){
 }
 var _sf = 0; function spinFrame(){ _sf = (_sf*9301 + 49297) % 233280; return _sf; } // deterministic pseudo-shuffle
 function buildStrip(finalLabel){
-  var H = 92, N = 30;               // 30 cells, land on the last
+  var H = 96, N = 30;               // 30 cells, land on the last
   var strip = document.getElementById('spinStrip');
   var html = '';
   for(var i=0;i<N-1;i++){
