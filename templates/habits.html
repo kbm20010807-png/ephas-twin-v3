@@ -75,7 +75,10 @@
     <form action="/api/habit/add" method="post">
       <input type="hidden" name="_csrf" value="{{ csrf_token }}">
       <div class="ha-label">Name</div>
-      <input type="text" name="name" id="addName" class="form-input" placeholder="e.g. Workout, Read, Quit smoking" required maxlength="80" style="margin-bottom:18px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:18px;">
+        <input type="text" name="name" id="addName" class="form-input" placeholder="e.g. Workout, Read, Quit smoking" required maxlength="80" style="flex:1;margin:0;">
+        <button type="button" class="v-mic" onclick="twinDictate(this,'addName')" aria-label="Speak the habit name"><i data-lucide="mic"></i></button>
+      </div>
       <div class="ha-label">Type</div>
       <div class="ha-type">
         <button type="button" class="ha-type-btn on" data-type="keep" onclick="setType('keep')"><i data-lucide="trending-up"></i> Keep / build</button>

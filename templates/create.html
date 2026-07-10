@@ -87,7 +87,10 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <input type="file" id="postFile" accept="image/*,video/*" style="display:none;" onchange="onPick(this)">
 
     <textarea class="cr-cap" id="postTxt" placeholder="Write a caption... use #hashtags to be found" oninput="capCount()"></textarea>
-    <div class="cr-count" id="postCt">0/500</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <button type="button" class="v-mic" onclick="twinDictate(this,'postTxt')" aria-label="Speak your post"><i data-lucide="mic"></i> Speak</button>
+      <div class="cr-count" id="postCt">0/500</div>
+    </div>
 
     <div>
       <div class="cr-field-lbl">Make it a…</div>
@@ -114,6 +117,7 @@ body{min-height:100vh;display:flex;flex-direction:column;}
       <div><div class="cr-who-name">{{ u.name }}</div><div class="cr-who-sub">Writing a thread</div></div>
     </div>
     <textarea class="cr-cap" id="threadTxt" placeholder="Share your thoughts, a story, or a breakdown... #hashtags welcome" style="min-height:200px;" oninput="threadCount()"></textarea>
+    <button type="button" class="v-mic" onclick="twinDictate(this,'threadTxt')" aria-label="Speak your thread"><i data-lucide="mic"></i> Speak</button>
     <div class="cr-count" id="threadCt">0/2000</div>
     <div class="axon-note"><i data-lucide="sparkles"></i> AXON files your thread under the right topic automatically.</div>
     <div class="cr-footer">

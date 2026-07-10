@@ -231,6 +231,30 @@
   </div>
 </div>
 
+<!-- ACCESSIBILITY -->
+<div class="block-label">Accessibility</div>
+<div class="settings-block">
+  <div class="s-row">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="pause"></i></div>
+      <div><div class="s-title">Reduce Motion</div><div class="s-sub">Turn off animations &amp; effects</div></div></div>
+    <label class="toggle"><input type="checkbox" id="a11yMotion" onchange="a11ySet('nomotion',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="s-row">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="contrast"></i></div>
+      <div><div class="s-title">High Contrast</div><div class="s-sub">Stronger text &amp; borders</div></div></div>
+    <label class="toggle"><input type="checkbox" id="a11yContrast" onchange="a11ySet('contrast',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="s-row">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="vibrate"></i></div>
+      <div><div class="s-title">Vibration</div><div class="s-sub">Haptic feedback on actions</div></div></div>
+    <label class="toggle"><input type="checkbox" id="a11yHaptics" checked onchange="a11ySet('nohaptics',!this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div class="s-row">
+    <div class="s-left"><div class="s-ico-wrap"><i data-lucide="mic"></i></div>
+      <div><div class="s-title">Voice Entry</div><div class="s-sub">Every input has a mic — speak instead of type</div></div></div>
+  </div>
+</div>
+
 <!-- TWIN -->
 <div class="block-label">TWIN</div>
 <div class="settings-block">
@@ -381,6 +405,20 @@
 
 {% block scripts %}
 <script>
+// ===== Accessibility toggles (persisted per device) =====
+function a11ySet(key,on){
+  var a={}; try{ a=JSON.parse(localStorage.getItem('twinA11y')||'{}'); }catch(e){}
+  a[key]=!!on;
+  localStorage.setItem('twinA11y',JSON.stringify(a));
+  document.documentElement.classList.toggle('a11y-'+key,!!on);
+}
+(function(){
+  var a={}; try{ a=JSON.parse(localStorage.getItem('twinA11y')||'{}'); }catch(e){}
+  var m=document.getElementById('a11yMotion'), c=document.getElementById('a11yContrast'), h=document.getElementById('a11yHaptics');
+  if(m) m.checked=!!a.nomotion;
+  if(c) c.checked=!!a.contrast;
+  if(h) h.checked=!a.nohaptics;
+})();
 function openVerify(){ const o=document.getElementById('vfOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
 function closeVerify(){ const o=document.getElementById('vfOv'); if(o) o.classList.remove('on'); }
 function comingSoon(name){ alert((name||'This') + ' is coming soon.'); }

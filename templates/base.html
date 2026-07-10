@@ -14,6 +14,43 @@
 <meta name="apple-mobile-web-app-title" content="TWIN">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(function(){});});}</script>
+<script>
+// Accessibility prefs — applied before paint so there's no flash
+(function(){
+  try{
+    var a=JSON.parse(localStorage.getItem('twinA11y')||'{}');
+    var h=document.documentElement;
+    if(a.nomotion) h.classList.add('a11y-nomotion');
+    if(a.contrast) h.classList.add('a11y-contrast');
+    if(a.nohaptics) h.classList.add('a11y-nohaptics');
+  }catch(e){}
+  // best-effort: silence vibration app-wide when disabled in accessibility settings
+  try{
+    var ov=Navigator.prototype.vibrate;
+    if(ov) Object.defineProperty(Navigator.prototype,'vibrate',{value:function(p){
+      if(document.documentElement.classList.contains('a11y-nohaptics')) return false;
+      return ov.call(this,p);
+    }});
+  }catch(e){}
+})();
+// Universal voice entry: twinDictate(btn, inputId) — speak into any field (on-device Web Speech)
+var _twinRecog=null;
+function twinDictate(btn,inputId){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ btn.style.display='none'; return; }
+  var ta=document.getElementById(inputId); if(!ta) return;
+  if(_twinRecog){ try{_twinRecog.stop();}catch(e){} if(btn.classList.contains('rec')){ btn.classList.remove('rec'); return; } }
+  _twinRecog=new SR(); _twinRecog.lang='en-US'; _twinRecog.interimResults=true; _twinRecog.continuous=false;
+  var base=ta.value?ta.value.replace(/\s+$/,'')+' ':'';
+  btn.classList.add('rec');
+  if(navigator.vibrate) navigator.vibrate(12);
+  _twinRecog.onresult=function(e){ var t=''; for(var i=e.resultIndex;i<e.results.length;i++){ t+=e.results[i][0].transcript; }
+    ta.value=base+t; try{ta.dispatchEvent(new Event('input'));}catch(x){} };
+  _twinRecog.onend=function(){ btn.classList.remove('rec'); };
+  _twinRecog.onerror=function(){ btn.classList.remove('rec'); };
+  try{ _twinRecog.start(); }catch(e){ btn.classList.remove('rec'); }
+}
+</script>
 <!-- Social share card (Open Graph + Twitter) so pasted links aren't a bare grey URL -->
 <meta property="og:site_name" content="TWIN">
 <meta property="og:type" content="{% block og_type %}website{% endblock %}">
@@ -118,20 +155,20 @@
 
 {% if not auth_page %}
 <div class="spacer-nav"></div>
-<nav class="nav-bar">
-  <a href="/home" class="nav-i {% if active=='home' %}on{% endif %}">
+<nav class="nav-bar" aria-label="Main navigation">
+  <a href="/home" class="nav-i {% if active=='home' %}on{% endif %}" aria-label="Home">
     <div class="nav-ico"><i data-lucide="home"></i></div>
   </a>
-  <a href="/analytics" class="nav-i {% if active=='analytics' %}on{% endif %}">
+  <a href="/analytics" class="nav-i {% if active=='analytics' %}on{% endif %}" aria-label="Your Twin">
     <div class="nav-ico"><i data-lucide="activity"></i></div>
   </a>
-  <a href="/checkin" class="nav-ctr" id="navCtrLink">
+  <a href="/checkin" class="nav-ctr" id="navCtrLink" aria-label="Check in">
     <div class="nav-ctr-btn"><i data-lucide="plus"></i></div>
   </a>
-  <a href="/grow" class="nav-i {% if active=='grow' %}on{% endif %}">
+  <a href="/grow" class="nav-i {% if active=='grow' %}on{% endif %}" aria-label="Explore">
     <div class="nav-ico"><i data-lucide="search"></i></div>
   </a>
-  <a href="/profile" class="nav-i {% if active=='profile' %}on{% endif %}" id="navProfile">
+  <a href="/profile" class="nav-i {% if active=='profile' %}on{% endif %}" id="navProfile" aria-label="Profile">
     <div class="nav-ico"><i data-lucide="user"></i></div>
   </a>
 </nav>
