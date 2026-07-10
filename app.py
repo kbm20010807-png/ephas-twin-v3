@@ -2138,7 +2138,9 @@ def axon_generate_questions(user, kind):
            "2) Lower the stakes so they tell the truth — an implicit 'no judgment, just data' tone. "
            "3) Prefer SPECIFIC, COMPARATIVE or CONCRETE angles (e.g. 'better or worse than yesterday?', "
            "'what time did you actually...', 'name one thing you...') — these are harder to answer on autopilot. "
-           "4) Human and occasionally playful, never corny or clinical. "
+           "4) If their habit list is provided, tie the habits question to ONE habit BY NAME "
+           "(e.g. 'Did the gym happen today — honestly?') so the question tracks their real habit. "
+           "5) Human and occasionally playful, never corny or clinical. "
            "Each question (q) <= 8 words. Each hint <= 14 words. Use their first name in AT MOST one question. "
            "Return ONLY valid minified JSON, no prose, no code fences.")
     msg = (f"Context:\n{' '.join(ctx)}\n\nField meanings: {meaning}.\n\n"
@@ -2240,7 +2242,9 @@ def analytics():
     if not auth(): return redirect('/login')
     cu = current_user()
     return render_template('analytics.html', u=user_ctx(), stats=stats_ctx(),
-                           vitality=twin_vitality(cu), twin=twin_score(cu), active='analytics')
+                           vitality=twin_vitality(cu), twin=twin_score(cu),
+                           habits=serialize_habits(cu), qteasers=quest_teasers(cu),
+                           active='analytics')
 
 @app.route('/grow')
 def grow():

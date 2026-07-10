@@ -16,13 +16,48 @@
 .lt-bar-fill{height:100%;border-radius:var(--r-full);transition:width 1.1s cubic-bezier(.16,1,.3,1);}
 .lt-vlabel{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:9px;}
 .lt-cta{display:inline-block;margin-top:14px;background:var(--grad);color:#241D10;font-weight:800;font-size:13px;padding:11px 24px;border-radius:var(--r-full);text-decoration:none;}
-/* Twin hub shortcuts */
-.th-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px 4px;}
-.th-btn{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 6px;background:var(--card);border:1px solid var(--border);border-radius:16px;text-decoration:none;box-shadow:var(--sh);}
-.th-btn:active{transform:scale(.97);}
-.th-ico{width:40px;height:40px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;}
-.th-ico svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:2;}
-.th-btn span{font-size:11px;font-weight:700;color:var(--black);}
+/* clean streak chip */
+.lt-streak{display:inline-flex;align-items:baseline;gap:6px;margin-top:14px;text-decoration:none;background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:8px 16px;}
+.lt-streak svg{width:15px;height:15px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;align-self:center;}
+.lt-streak b{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--gold);line-height:1;}
+.lt-streak span{font-size:11px;font-weight:700;color:var(--sub);}
+/* habit progress rings (horizontal scroll) */
+.hb-strip{display:flex;gap:14px;padding:2px 20px 6px;overflow-x:auto;scrollbar-width:none;}
+.hb-strip::-webkit-scrollbar{display:none;}
+.hb-circ{flex:0 0 auto;width:72px;display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;}
+.hb-circ svg{width:64px;height:64px;transform:rotate(-90deg);}
+.hb-bg{fill:none;stroke:var(--border);stroke-width:4.5;}
+.hb-fg{fill:none;stroke:var(--sub);stroke-width:4.5;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.16,1,.3,1);}
+.hb-fg.done{stroke:var(--gold);}
+.hb-num{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;fill:var(--black);transform:rotate(90deg);transform-origin:30px 30px;}
+.hb-sub{font-size:7px;font-weight:700;fill:var(--sub);letter-spacing:.5px;transform:rotate(90deg);transform-origin:30px 30px;}
+.hb-name{font-size:10px;font-weight:700;color:var(--black);max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+.hb-add .hb-plus{width:64px;height:64px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;}
+.hb-add .hb-plus svg{width:20px;height:20px;stroke:var(--sub);fill:none;stroke-width:2;transform:none;}
+/* quests — game card */
+.qg-card{display:flex;align-items:center;gap:13px;margin:14px 20px 0;padding:15px 16px;background:linear-gradient(135deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:18px;text-decoration:none;box-shadow:var(--sh);}
+.qg-card:active{transform:scale(.99);}
+.qg-ico{width:44px;height:44px;border-radius:13px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qg-ico svg{width:21px;height:21px;stroke:var(--gold);fill:none;stroke-width:2;}
+.qg-body{flex:1;min-width:0;}
+.qg-title{font-size:14px;font-weight:800;color:var(--black);display:flex;align-items:center;gap:8px;}
+.qg-count{font-size:10px;font-weight:800;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:var(--r-full);padding:2px 8px;}
+.qg-bars{display:flex;gap:4px;margin:7px 0 5px;}
+.qg-bar{flex:1;height:5px;border-radius:5px;background:var(--border);}
+.qg-bar.on{background:var(--gold);}
+.qg-sub{font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qg-arrow{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0;}
+/* trackers grid */
+.tk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;}
+.tk-card{position:relative;display:block;padding:15px 14px 13px;background:var(--card);border:1px solid var(--border);border-radius:16px;text-decoration:none;box-shadow:var(--sh);cursor:pointer;}
+.tk-card:active{transform:scale(.98);}
+.tk-card.live{border-color:var(--gold-b);}
+.tk-ico{width:38px;height:38px;border-radius:11px;background:var(--gold-dim);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;margin-bottom:9px;}
+.tk-ico svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;}
+.tk-name{font-size:13px;font-weight:800;color:var(--black);}
+.tk-desc{font-size:10.5px;color:var(--sub);line-height:1.4;margin-top:3px;}
+.tk-tag{position:absolute;top:11px;right:11px;font-size:7.5px;font-weight:800;letter-spacing:1px;color:var(--sub);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 7px;}
+.tk-tag.on{color:#241D10;background:var(--grad);border:none;}
 .hero-score{padding:24px 20px 0;text-align:center;}
 .hs-lbl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--sub);text-transform:uppercase;font-family:'Inter',sans-serif;margin-bottom:8px;}
 .hs-num{font-family:'Inter',sans-serif;font-weight:800;font-size:72px;letter-spacing:-4px;color:var(--black);line-height:1;}
@@ -83,17 +118,91 @@
   <div class="lt-msg">{{ vitality.msg }}</div>
   <div class="lt-bar"><div class="lt-bar-fill" style="width:{{ vitality.v }}%;background:{{ vitality.color }};"></div></div>
   <div class="lt-vlabel">Twin Vitality · {{ vitality.v }}%</div>
+  {% if u.streak %}
+  <a href="/calendar" class="lt-streak"><i data-lucide="flame"></i><b>{{ u.streak }}</b><span>day streak</span></a>
+  {% endif %}
   {% if vitality.v < 50 %}<a href="/checkin" class="lt-cta">Check in to revive it</a>{% endif %}
 </div>
 
-<!-- Twin hub shortcuts -->
-<div class="th-grid">
-  <a href="/checkin" class="th-btn"><div class="th-ico"><i data-lucide="sunrise"></i></div><span>Check in</span></a>
-  <a href="/habits" class="th-btn"><div class="th-ico"><i data-lucide="target"></i></div><span>Habits</span></a>
-  <a href="/calendar" class="th-btn"><div class="th-ico"><i data-lucide="flame"></i></div><span>Streaks</span></a>
-  <a href="/quests" class="th-btn"><div class="th-ico"><i data-lucide="award"></i></div><span>Quests</span></a>
-  <a href="/pushups" class="th-btn"><div class="th-ico"><i data-lucide="dumbbell"></i></div><span>Pushups</span></a>
-  <a href="/profile" class="th-btn"><div class="th-ico"><i data-lucide="medal"></i></div><span>Badges</span></a>
+<!-- ===== HABITS (progress rings, scroll sideways) ===== -->
+{% if habits %}
+<div class="sect-lbl" style="display:flex;align-items:center;justify-content:space-between;">Habits <a href="/habits" style="font-size:11px;font-weight:700;color:var(--sub);text-decoration:none;">Manage</a></div>
+<div class="hb-strip">
+  {% for h in habits %}
+  <a href="/habits" class="hb-circ">
+    <svg viewBox="0 0 60 60">
+      <circle class="hb-bg" cx="30" cy="30" r="26"/>
+      <circle class="hb-fg {% if h.done_today %}done{% endif %}" cx="30" cy="30" r="26"
+              stroke-dasharray="163" stroke-dashoffset="{{ (163 * (1 - ([h.streak,30]|min) / 30))|round(1) }}"/>
+      <text class="hb-num" x="30" y="29" text-anchor="middle" dominant-baseline="middle">{{ h.streak }}</text>
+      <text class="hb-sub" x="30" y="42" text-anchor="middle">{% if h.done_today %}✓ today{% else %}days{% endif %}</text>
+    </svg>
+    <div class="hb-name">{{ h.name }}</div>
+  </a>
+  {% endfor %}
+  <a href="/habits" class="hb-circ hb-add"><div class="hb-plus"><i data-lucide="plus"></i></div><div class="hb-name">Add</div></a>
+</div>
+{% endif %}
+
+<!-- ===== QUESTS (game-like, one tap) ===== -->
+{% set qdone = qteasers|selectattr('done')|list|length %}
+<a href="/quests" class="qg-card">
+  <div class="qg-ico"><i data-lucide="swords"></i></div>
+  <div class="qg-body">
+    <div class="qg-title">Quests <span class="qg-count">{{ qdone }}/{{ qteasers|length }}</span></div>
+    <div class="qg-bars">
+      {% for t in qteasers[:6] %}<div class="qg-bar {% if t.done %}on{% endif %}"></div>{% endfor %}
+    </div>
+    <div class="qg-sub">{% if qdone == qteasers|length and qteasers %}All clear — legend.{% else %}{{ (qteasers|rejectattr('done')|list|first).text if qteasers|rejectattr('done')|list else 'New quests soon' }}{% endif %}</div>
+  </div>
+  <i data-lucide="chevron-right" class="qg-arrow"></i>
+</a>
+
+<!-- ===== TRACKERS (your data, one place) ===== -->
+<div class="sect-lbl">Trackers</div>
+<div class="tk-grid">
+  <a href="/pushups" class="tk-card live">
+    <div class="tk-ico"><i data-lucide="dumbbell"></i></div>
+    <div class="tk-name">Workout</div>
+    <div class="tk-desc">AI camera counts your reps live</div>
+    <span class="tk-tag on">LIVE</span>
+  </a>
+  <a href="/habits" class="tk-card live">
+    <div class="tk-ico"><i data-lucide="crosshair"></i></div>
+    <div class="tk-name">Goals</div>
+    <div class="tk-desc">Are you on track or not</div>
+    <span class="tk-tag on">LIVE</span>
+  </a>
+  <div class="tk-card" onclick="tkSoon('Run & Sports')">
+    <div class="tk-ico"><i data-lucide="footprints"></i></div>
+    <div class="tk-name">Run &amp; Sports</div>
+    <div class="tk-desc">One tap starts tracking, watch-style</div>
+    <span class="tk-tag">PHASE 3</span>
+  </div>
+  <div class="tk-card" onclick="tkSoon('Money')">
+    <div class="tk-ico"><i data-lucide="wallet"></i></div>
+    <div class="tk-name">Money</div>
+    <div class="tk-desc">What you saved &amp; collected</div>
+    <span class="tk-tag">PHASE 3</span>
+  </div>
+  <div class="tk-card" onclick="tkSoon('Social Circle')">
+    <div class="tk-ico"><i data-lucide="users"></i></div>
+    <div class="tk-name">Social Circle</div>
+    <div class="tk-desc">Your people — private notes, AXON remembers</div>
+    <span class="tk-tag">PHASE 3</span>
+  </div>
+  <div class="tk-card" onclick="tkSoon('Mood & Emotion')">
+    <div class="tk-ico"><i data-lucide="heart-pulse"></i></div>
+    <div class="tk-name">Mood &amp; Emotion</div>
+    <div class="tk-desc">Voice &amp; mood patterns, mental clarity</div>
+    <span class="tk-tag">PHASE 3</span>
+  </div>
+  <div class="tk-card" onclick="tkSoon('Health')">
+    <div class="tk-ico"><i data-lucide="stethoscope"></i></div>
+    <div class="tk-name">Health</div>
+    <div class="tk-desc">Blood, pressure, sugar, vitamins — manual or photo</div>
+    <span class="tk-tag">PHASE 3</span>
+  </div>
 </div>
 
 {% if not stats.total_checkins %}
@@ -193,4 +302,9 @@
   <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:-1px;color:var(--muted);">TWIN</div>
   <img src="/static/ephas_logo2.png" style="height:7px;margin:4px auto 0;display:block;opacity:.2;" class="elogo" alt="">
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+function tkSoon(name){ alert(name+' connects to your real data in Phase 3 — the trackers update. It will live right here.'); }
+</script>
 {% endblock %}
