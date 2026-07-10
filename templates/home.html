@@ -98,26 +98,32 @@
 .story-ring.yours .story-inner{font-size:20px;}
 .story-ring.active .story-inner{font-size:18px;}
 .story-lbl{font-size:9px;font-weight:600;color:var(--sub);white-space:nowrap;max-width:62px;overflow:hidden;text-overflow:ellipsis;text-align:center;}
-/* Story overlay */
-.story-ov{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
-.story-ov.on{display:flex;}
-.story-ov-close{position:absolute;top:52px;right:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.story-ov-close svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
-.story-bar{width:100%;max-width:360px;height:3px;background:rgba(255,255,255,.15);border-radius:3px;margin-bottom:20px;}
-.story-bar-fill{height:100%;background:var(--gold);border-radius:3px;animation:storyProgress 5s linear forwards;}
-@keyframes storyProgress{from{width:0}to{width:100%}}
-.story-card{width:100%;max-width:360px;background:#0A0A0A;border:1px solid rgba(200,164,90,.15);border-radius:20px;padding:24px;text-align:center;}
-.story-av{width:60px;height:60px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:22px;font-weight:900;color:var(--gold);background:#09090B;overflow:hidden;}
-.story-av img{width:100%;height:100%;object-fit:cover;}
-.story-username{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
-.story-subtitle{font-size:10px;color:#666;letter-spacing:1px;margin-bottom:20px;}
-.story-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
-.sm-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 8px;}
-.sm-val{font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.5px;color:#fff;margin-bottom:2px;}
-.sm-lbl{font-size:8px;letter-spacing:1.5px;color:#555;text-transform:uppercase;}
-.story-streak{background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:12px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;}
-.story-streak svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;}
-.story-streak-txt{font-size:12px;font-weight:700;color:var(--gold);}
+/* Story viewer (Instagram-style, full-screen) */
+.sv-ov{position:fixed;inset:0;background:#000;z-index:9999;display:none;max-width:430px;margin:0 auto;}
+.sv-ov.on{display:block;}
+.sv-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;}
+.sv-bars{position:absolute;top:50px;left:12px;right:12px;display:flex;gap:4px;z-index:4;}
+.sv-bar{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden;}
+.sv-fill{height:100%;width:0;background:#fff;border-radius:3px;}
+.sv-head{position:absolute;top:62px;left:14px;right:14px;display:flex;align-items:center;gap:10px;z-index:4;}
+.sv-av{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;color:#241D10;font-size:14px;overflow:hidden;flex-shrink:0;border:1.5px solid rgba(255,255,255,.6);}
+.sv-av img{width:100%;height:100%;object-fit:cover;}
+.sv-meta{flex:1;min-width:0;}
+.sv-name{color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6);}
+.sv-time{color:rgba(255,255,255,.75);font-size:11px;}
+.sv-x{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.4);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.sv-x svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
+.sv-cap{position:absolute;bottom:calc(40px + env(safe-area-inset-bottom));left:20px;right:20px;color:#fff;font-size:14px;font-weight:600;text-align:center;text-shadow:0 1px 6px rgba(0,0,0,.7);z-index:4;line-height:1.45;}
+.sv-tap{position:absolute;top:0;bottom:0;width:38%;z-index:3;}
+.sv-tap.left{left:0;}
+.sv-tap.right{right:0;width:62%;}
+/* Apple-style wiggle edit mode for gadgets */
+.tile{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.tiles-grid.wiggle .tile{animation:tileWiggle .32s ease-in-out infinite alternate;}
+.tiles-grid.wiggle .tile:nth-child(2n){animation-delay:.14s;}
+@keyframes tileWiggle{from{transform:rotate(-2.4deg);}to{transform:rotate(2.4deg);}}
+.tiles-grid.wiggle .tile.dragging{animation:none;transform:scale(1.14);opacity:.92;position:relative;z-index:6;}
+@media (prefers-reduced-motion:reduce){.tiles-grid.wiggle .tile{animation:none;}}
 
 /* QUESTS SHORTCUT CARD */
 .quests-card{margin:14px 20px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer;box-shadow:var(--sh);}
@@ -325,16 +331,16 @@
 </a>
 {% endif %}
 
-<!-- ===== STORIES / TWIN DROPS ===== -->
+<!-- ===== STORIES / TWIN DROPS (camera-first, Instagram-style) ===== -->
 <div class="stories-strip h-rise hd2">
-  <div class="story-item" onclick="location.href='/checkin'">
-    <div class="story-ring yours"><div class="story-inner"><i data-lucide="plus" style="width:22px;height:22px;stroke:var(--gold);stroke-width:2.5;display:block;"></i></div></div>
+  <div class="story-item" onclick="location.href='/drop'">
+    <div class="story-ring yours"><div class="story-inner"><i data-lucide="camera" style="width:20px;height:20px;stroke:var(--gold);stroke-width:2.2;display:block;"></i></div></div>
     <div class="story-lbl">Your Drop</div>
   </div>
   {% for s in stories %}
   <div class="story-item" onclick="openStory({{ loop.index0 }})">
     <div class="story-ring active"><div class="story-inner">{% if s.has_avatar %}<img src="/avatar/{{ s.id }}" alt="">{% else %}{{ s.init }}{% endif %}</div></div>
-    <div class="story-lbl">{{ s.name }}</div>
+    <div class="story-lbl">{% if s.mine %}Your story{% else %}{{ s.first }}{% endif %}</div>
   </div>
   {% else %}
   <div class="story-item" onclick="location.href='/grow'" style="opacity:.75;">
@@ -342,6 +348,20 @@
     <div class="story-lbl">Find people</div>
   </div>
   {% endfor %}
+</div>
+
+<!-- story viewer (full-screen, progress bars, tap sides to navigate) -->
+<div class="sv-ov" id="svOv">
+  <div class="sv-bars" id="svBars"></div>
+  <div class="sv-head">
+    <div class="sv-av" id="svAv"></div>
+    <div class="sv-meta"><div class="sv-name" id="svName"></div><div class="sv-time" id="svTime"></div></div>
+    <button class="sv-x" onclick="closeStory()"><i data-lucide="x"></i></button>
+  </div>
+  <img class="sv-img" id="svImg" alt="">
+  <div class="sv-cap" id="svCap"></div>
+  <div class="sv-tap left" onclick="svNav(-1)"></div>
+  <div class="sv-tap right" onclick="svNav(1)"></div>
 </div>
 
 <!-- ===== YOUR CUSTOMIZABLE TILES (mini trackers / buttons) ===== -->
@@ -471,38 +491,79 @@ const QTEASERS = {{ qteasers|tojson }};
   }, 5000);
 })();
 
+// Home: swiping right from the left edge opens the Drop camera (Instagram-style)
+window.SWIPE_RIGHT_TO = '/drop';
+
+// ===== Story viewer (Instagram-style: progress bars, tap sides, auto-advance) =====
 const STORIES = {{ stories|tojson }};
-function openStory(i) {
-  const s = STORIES[i]; if(!s) return;
-  const av = document.getElementById('storyAv');
-  av.innerHTML = s.has_avatar ? '<img src="/avatar/' + s.id + '" alt="">' : s.init;
-  document.getElementById('storyName').textContent = s.name;
-  document.getElementById('storySleep').textContent = s.sleep;
-  document.getElementById('storyEnergy').textContent = s.energy;
-  document.getElementById('storyMood').textContent = s.mood;
-  document.getElementById('storyStreak').textContent = s.streak + '-Day Streak';
-  document.getElementById('storyProfileLink').href = '/u/' + s.username;
-  const fill = document.getElementById('storyBarFill');
-  fill.style.animation = 'none';
-  fill.offsetHeight;
-  fill.style.animation = '';
-  document.getElementById('storyOv').classList.add('on');
-  if(typeof lucide !== 'undefined') lucide.createIcons();
+let svU=0, svI=0, svTimer=null;
+function openStory(ui){
+  if(!STORIES[ui] || !STORIES[ui].items || !STORIES[ui].items.length) return;
+  svU=ui; svI=0;
+  document.getElementById('svOv').classList.add('on');
+  document.body.style.overflow='hidden';
+  renderStory();
+  if(window.lucide) lucide.createIcons();
 }
-function closeStory() {
-  document.getElementById('storyOv').classList.remove('on');
+function renderStory(){
+  const s=STORIES[svU], it=s.items[svI];
+  document.getElementById('svAv').innerHTML = s.has_avatar ? '<img src="/avatar/'+s.id+'" alt="">' : s.init;
+  document.getElementById('svName').textContent = s.mine ? 'Your story' : s.name;
+  document.getElementById('svTime').textContent = it.time||'';
+  const cap=document.getElementById('svCap');
+  cap.textContent = it.caption||''; cap.style.display = it.caption ? 'block' : 'none';
+  document.getElementById('svImg').src = it.img;
+  const bars=document.getElementById('svBars'); bars.innerHTML='';
+  s.items.forEach(function(_,i){
+    const b=document.createElement('div'); b.className='sv-bar';
+    const f=document.createElement('div'); f.className='sv-fill';
+    if(i<svI) f.style.width='100%';
+    b.appendChild(f); bars.appendChild(b);
+  });
+  clearTimeout(svTimer);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    const f=bars.children[svI].firstChild;
+    f.style.transition='width 5s linear'; f.style.width='100%';
+  });});
+  svTimer=setTimeout(function(){ svNav(1); },5000);
 }
-// ===== Customizable home tiles =====
+function svNav(d){
+  const s=STORIES[svU];
+  svI+=d;
+  if(svI<0){ if(svU>0){ svU--; svI=STORIES[svU].items.length-1; } else svI=0; }
+  else if(svI>=s.items.length){ if(svU<STORIES.length-1){ svU++; svI=0; } else return closeStory(); }
+  renderStory();
+}
+function closeStory(){ clearTimeout(svTimer); document.getElementById('svOv').classList.remove('on'); document.body.style.overflow=''; }
+
+// ===== Customizable home gadgets =====
 var TILE_CATALOG = {{ tile_catalog|tojson }};
 var MY_TILES = {{ tiles|map(attribute='key')|list|tojson }};
-function toggleTileEdit(){
-  var g=document.getElementById('tilesGrid'), on=g.classList.toggle('editing');
-  document.getElementById('tileEditLbl').textContent = on ? 'Done' : 'Edit';
-}
-function tileSoon(e){ e.preventDefault(); if(window.Celebrate){} alert('Coming in Phase 3 — this tracker connects to your real data soon.'); }
+function tileSoon(e){ e.preventDefault(); alert('Coming in Phase 3 — this tracker connects to your real data soon.'); }
 function saveTiles(){ fetch('/api/home-tiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tiles:MY_TILES})}); }
-function addTile(key){ if(MY_TILES.indexOf(key)===-1 && MY_TILES.length<12){ MY_TILES.push(key); saveTiles(); location.reload(); } }
-function removeTileKey(key){ MY_TILES=MY_TILES.filter(function(k){return k!==key;}); saveTiles(); location.reload(); }
+function renderTiles(){
+  var g=document.getElementById('tilesGrid'), html='';
+  MY_TILES.forEach(function(k){
+    var d=TILE_CATALOG[k]; if(!d) return;
+    html+='<a href="'+d.href+'" class="tile" data-key="'+k+'"'+(d.soon?' onclick="tileSoon(event)"':'')+'>'
+        +'<div class="tile-ico"><i data-lucide="'+d.icon+'"></i></div>'
+        +'<div class="tile-lbl">'+d.label+(d.soon?' <span class="tile-soon">soon</span>':'')+'</div></a>';
+  });
+  html+='<button class="tile tile-add" onclick="openTilePicker()"><div class="tile-ico"><i data-lucide="sliders-horizontal"></i></div><div class="tile-lbl">Edit</div></button>';
+  g.innerHTML=html;
+  if(window.lucide) lucide.createIcons();
+  bindTileHold();
+}
+// Add/Remove keep the sheet OPEN — tap Done or the dim area above to close it.
+function addTile(key){ if(MY_TILES.indexOf(key)===-1 && MY_TILES.length<12){ MY_TILES.push(key); saveTiles(); renderTiles(); setPickerBtn(key,true); } }
+function removeTileKey(key){ MY_TILES=MY_TILES.filter(function(k){return k!==key;}); saveTiles(); renderTiles(); setPickerBtn(key,false); }
+function setPickerBtn(key,added){
+  var btn=document.querySelector('.tp-add-btn[data-key="'+key+'"]');
+  if(!btn) return;
+  btn.className='tp-add-btn'+(added?' added':'');
+  btn.textContent=added?'Remove':'Add';
+  btn.setAttribute('onclick',(added?'removeTileKey':'addTile')+"('"+key+"')");
+}
 function openTilePicker(){
   var cats={}; Object.keys(TILE_CATALOG).forEach(function(k){ var d=TILE_CATALOG[k]; (cats[d.cat]=cats[d.cat]||[]).push(k); });
   var html='';
@@ -512,7 +573,7 @@ function openTilePicker(){
       var d=TILE_CATALOG[k], added=MY_TILES.indexOf(k)!==-1;
       html+='<div class="tp-item"><div class="tp-item-ico"><i data-lucide="'+d.icon+'"></i></div>'
           +'<div class="tp-item-lbl">'+d.label+(d.soon?' <span style="font-size:9px;color:var(--sub);">soon</span>':'')+'</div>'
-          +'<button class="tp-add-btn '+(added?'added':'')+'" onclick="'+(added?'removeTileKey':'addTile')+'(\''+k+'\')">'+(added?'Remove':'Add')+'</button></div>';
+          +'<button class="tp-add-btn '+(added?'added':'')+'" data-key="'+k+'" onclick="'+(added?'removeTileKey':'addTile')+'(\''+k+'\')">'+(added?'Remove':'Add')+'</button></div>';
     });
   });
   document.getElementById('tpList').innerHTML=html;
@@ -522,6 +583,51 @@ function openTilePicker(){
 function closeTilePicker(){ document.getElementById('tilePicker').classList.remove('on'); }
 // open the editor automatically when linked from Settings (/home?edit=tiles)
 if (location.search.indexOf('edit') !== -1) { setTimeout(openTilePicker, 250); }
+
+// ===== Apple-style hold-to-edit: long-press a gadget -> wiggle mode -> drag to reorder =====
+var wiggleOn=false, holdT=null;
+function enterWiggle(){
+  if(wiggleOn) return; wiggleOn=true;
+  document.getElementById('tilesGrid').classList.add('wiggle');
+  if(navigator.vibrate) navigator.vibrate(10);
+  setTimeout(function(){ document.addEventListener('touchstart',wiggleOutside,{passive:true}); document.addEventListener('mousedown',wiggleOutside); },60);
+}
+function wiggleOutside(e){ if(!e.target.closest('#tilesGrid')) exitWiggle(); }
+function exitWiggle(){
+  wiggleOn=false;
+  document.getElementById('tilesGrid').classList.remove('wiggle');
+  document.removeEventListener('touchstart',wiggleOutside);
+  document.removeEventListener('mousedown',wiggleOutside);
+}
+function bindTileHold(){
+  document.querySelectorAll('#tilesGrid .tile:not(.tile-add)').forEach(function(t){
+    t.addEventListener('touchstart',function(){ holdT=setTimeout(enterWiggle,500); },{passive:true});
+    t.addEventListener('touchmove',function(e){
+      if(!wiggleOn){ clearTimeout(holdT); return; }
+      e.preventDefault();                                  // take over from horizontal scroll
+      t.classList.add('dragging');
+      var x=e.touches[0].clientX, y=e.touches[0].clientY;
+      var el=document.elementFromPoint(x,y);
+      var over=el && el.closest ? el.closest('#tilesGrid .tile') : null;
+      if(over && over!==t && !over.classList.contains('tile-add')){
+        var r=over.getBoundingClientRect();
+        if(x < r.left + r.width/2) over.parentNode.insertBefore(t,over);
+        else over.parentNode.insertBefore(t,over.nextSibling);
+      }
+    },{passive:false});
+    t.addEventListener('touchend',function(){
+      clearTimeout(holdT);
+      if(t.classList.contains('dragging')){
+        t.classList.remove('dragging');
+        MY_TILES=Array.prototype.slice.call(document.querySelectorAll('#tilesGrid .tile:not(.tile-add)'))
+                 .map(function(el){return el.dataset.key;});
+        saveTiles();
+      }
+    });
+    t.addEventListener('click',function(e){ if(wiggleOn) e.preventDefault(); });  // don't navigate mid-edit
+  });
+}
+bindTileHold();
 
 // ===== The Twin Card — generate a shareable growth card =====
 function shareTwinCard(){

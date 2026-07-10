@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Drop{% endblock %}
+{% block head %}
+<style>
+body{background:#000;}
+.dp-stage{position:fixed;inset:0;max-width:430px;margin:0 auto;background:#000;overflow:hidden;display:flex;flex-direction:column;}
+.dp-cam{position:absolute;inset:0;}
+.dp-cam video{width:100%;height:100%;object-fit:cover;}
+.dp-cam video.mirror{transform:scaleX(-1);}
+.dp-cam img{width:100%;height:100%;object-fit:cover;}
+/* top bar */
+.dp-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:52px 18px 0;z-index:5;}
+.dp-btn{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.dp-btn svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2;}
+/* capture row */
+.dp-foot{position:absolute;bottom:0;left:0;right:0;padding:0 18px calc(30px + env(safe-area-inset-bottom));z-index:5;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.dp-shutter{width:76px;height:76px;border-radius:50%;border:4.5px solid #fff;background:rgba(255,255,255,.15);cursor:pointer;transition:transform .12s;}
+.dp-shutter:active{transform:scale(.9);}
+.dp-row{display:flex;align-items:center;justify-content:space-between;width:100%;}
+.dp-gal{width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,.45);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.dp-gal svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2;}
+.dp-hint{color:rgba(255,255,255,.75);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+/* after-capture sheet */
+.dp-share{position:absolute;bottom:0;left:0;right:0;padding:16px 18px calc(26px + env(safe-area-inset-bottom));z-index:6;background:linear-gradient(0deg,rgba(0,0,0,.88),rgba(0,0,0,.55) 70%,transparent);display:none;flex-direction:column;gap:12px;}
+.dp-share.on{display:flex;}
+.dp-cap{width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:13px 15px;color:#fff;font-size:14px;outline:none;}
+.dp-cap::placeholder{color:rgba(255,255,255,.5);}
+.dp-dests{display:flex;gap:10px;}
+.dp-dest{flex:1;padding:15px;border-radius:14px;border:none;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.dp-dest svg{width:16px;height:16px;stroke-width:2;fill:none;}
+.dp-dest.story{background:var(--grad);color:#241D10;}
+.dp-dest.story svg{stroke:#241D10;}
+.dp-dest.post{background:rgba(255,255,255,.14);color:#fff;border:1.5px solid rgba(255,255,255,.3);}
+.dp-dest.post svg{stroke:#fff;}
+.dp-retake{align-self:center;background:none;border:none;color:rgba(255,255,255,.7);font-size:12px;font-weight:700;cursor:pointer;padding:6px 10px;}
+.dp-denied{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px;z-index:4;}
+.dp-denied.on{display:flex;}
+.dp-denied .t{color:#fff;font-weight:700;font-size:15px;}
+.dp-denied .s{color:rgba(255,255,255,.6);font-size:12px;line-height:1.5;}
+.dp-toast{position:absolute;top:110px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:12px;font-weight:700;border-radius:999px;padding:10px 18px;z-index:9;display:none;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="dp-stage">
+  <div class="dp-cam">
+    <video id="dpVideo" autoplay muted playsinline class="mirror"></video>
+    <img id="dpShot" style="display:none;" alt="">
+  </div>
+
+  <div class="dp-top">
+    <button class="dp-btn" onclick="location.href='/home'"><i data-lucide="x"></i></button>
+    <button class="dp-btn" id="dpFlip" onclick="flipCam()"><i data-lucide="switch-camera"></i></button>
+  </div>
+
+  <div class="dp-denied" id="dpDenied">
+    <i data-lucide="camera-off" style="width:34px;height:34px;stroke:rgba(255,255,255,.6);fill:none;stroke-width:1.5;"></i>
+    <div class="t">Camera is blocked</div>
+    <div class="s">Allow camera access in your browser settings,<br>or pick a photo from your gallery below.</div>
+  </div>
+
+  <div class="dp-foot" id="dpFoot">
+    <div class="dp-hint" id="dpHint">Your Drop</div>
+    <div class="dp-row">
+      <div class="dp-gal" onclick="document.getElementById('dpFile').click()"><i data-lucide="image"></i></div>
+      <button class="dp-shutter" id="dpShutter" onclick="capture()"></button>
+      <div style="width:44px;"></div>
+    </div>
+  </div>
+
+  <div class="dp-share" id="dpShare">
+    <input class="dp-cap" id="dpCaption" placeholder="Add a caption…" maxlength="200" autocomplete="off">
+    <div class="dp-dests">
+      <button class="dp-dest story" onclick="shareDrop('story')"><i data-lucide="zap"></i> Your Story</button>
+      <button class="dp-dest post" onclick="shareDrop('post')"><i data-lucide="layout-grid"></i> Post</button>
+    </div>
+    <button class="dp-retake" onclick="retake()">↺ Retake</button>
+  </div>
+
+  <div class="dp-toast" id="dpToast"></div>
+  <input type="file" id="dpFile" accept="image/*" style="display:none;" onchange="fromGallery(this)">
+  <canvas id="dpCanvas" style="display:none;"></canvas>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let stream=null, facing='user', shotData='';
+
+function toast(m){ const t=document.getElementById('dpToast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',1800); }
+
+async function startCam(){
+  stopCam();
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1080}},audio:false});
+    const v=document.getElementById('dpVideo');
+    v.srcObject=stream; v.classList.toggle('mirror', facing==='user');
+    await v.play();
+    document.getElementById('dpDenied').classList.remove('on');
+  }catch(e){
+    document.getElementById('dpDenied').classList.add('on');
+  }
+}
+function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } }
+function flipCam(){ facing = facing==='user' ? 'environment' : 'user'; startCam(); }
+
+function capture(){
+  const v=document.getElementById('dpVideo');
+  if(!stream || v.readyState<2){ document.getElementById('dpFile').click(); return; }
+  const c=document.getElementById('dpCanvas');
+  const w=Math.min(v.videoWidth,1080), h=Math.round(v.videoHeight*(w/v.videoWidth));
+  c.width=w; c.height=h;
+  const x=c.getContext('2d');
+  if(facing==='user'){ x.translate(w,0); x.scale(-1,1); }   // un-mirror the selfie
+  x.drawImage(v,0,0,w,h);
+  shotData=c.toDataURL('image/jpeg',0.82);
+  showShot();
+}
+function fromGallery(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=function(){
+      const c=document.getElementById('dpCanvas');
+      const w=Math.min(img.width,1080), h=Math.round(img.height*(w/img.width));
+      c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      shotData=c.toDataURL('image/jpeg',0.82);
+      showShot();
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(f);
+  inp.value='';
+}
+function showShot(){
+  stopCam();
+  const s=document.getElementById('dpShot');
+  s.src=shotData; s.style.display='block';
+  document.getElementById('dpVideo').style.display='none';
+  document.getElementById('dpFoot').style.display='none';
+  document.getElementById('dpShare').classList.add('on');
+  if(navigator.vibrate) navigator.vibrate(12);
+}
+function retake(){
+  shotData='';
+  document.getElementById('dpShot').style.display='none';
+  document.getElementById('dpVideo').style.display='';
+  document.getElementById('dpShare').classList.remove('on');
+  document.getElementById('dpFoot').style.display='';
+  startCam();
+}
+let sharing=false;
+function shareDrop(dest){
+  if(!shotData || sharing) return;
+  sharing=true;
+  const cap=(document.getElementById('dpCaption').value||'').trim();
+  const body=new URLSearchParams(dest==='story' ? {image:shotData, caption:cap}
+                                                : {kind:'post', text:cap, image:shotData});
+  fetch(dest==='story' ? '/api/story' : '/create', {method:'POST', body})
+    .then(r=>{ if(!r.ok) throw 0;
+      toast(dest==='story' ? 'Added to your story ✓' : 'Posted ✓');
+      if(navigator.vibrate) navigator.vibrate([0,50,30,80]);
+      setTimeout(()=>location.href='/home', 700);
+    })
+    .catch(()=>{ sharing=false; toast('Could not share — try again'); });
+}
+startCam();
+window.addEventListener('pagehide', stopCam);
+</script>
+{% endblock %}

@@ -227,7 +227,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('touchend', function(e){
       if(!edge) return; edge=false;
       var t=e.changedTouches[0], dx=t.clientX-startX, dy=Math.abs(t.clientY-startY);
-      if(dx>70 && dy<50 && window.history.length>1) history.back();
+      if(dx>70 && dy<50){
+        // pages can override the edge-swipe (Home swipes right into the Drop camera, IG-style)
+        if(window.SWIPE_RIGHT_TO){ location.href=window.SWIPE_RIGHT_TO; return; }
+        if(window.history.length>1) history.back();
+      }
     }, {passive:true});
   })();
 

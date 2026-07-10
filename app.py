@@ -113,6 +113,15 @@ class ArchivedThread(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Story(db.Model):
+    __tablename__ = 'stories'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, index=True, nullable=False)
+    image = db.Column(db.Text, default='')          # base64 data URL (camera capture)
+    caption = db.Column(db.String(200), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # expires 24h after
+
+
 class CheckIn(db.Model):
     __tablename__ = 'checkins'
     id = db.Column(db.Integer, primary_key=True)
@@ -1735,33 +1744,26 @@ def post_img(pid):
     return ('', 404)
 
 def stories_ctx(cu):
-    """Stories are manual-only — check-ins no longer auto-post as stories."""
-    return []
+    """Real 24h stories (camera Drops) from you + people you follow, grouped per user.
+    Your own bubble comes first so you can rewatch your Drop."""
     following = {f.following_id for f in Follow.query.filter_by(follower_id=cu.id).all()}
-    if not following:
-        return []
-    today = datetime.utcnow().date()
-    cutoff = today - timedelta(days=2)
-    rows = (CheckIn.query.filter(CheckIn.kind == 'morning', CheckIn.date >= cutoff, CheckIn.user_id.in_(following))
-            .order_by(CheckIn.date.desc(), CheckIn.id.desc()).all())
-    seen, out = set(), []
-    for ci in rows:
-        if ci.user_id in seen:
-            continue
-        seen.add(ci.user_id)
-        u = User.query.get(ci.user_id)
+    ids = list(following | {cu.id})
+    cutoff = datetime.utcnow() - timedelta(hours=24)
+    rows = (Story.query.filter(Story.user_id.in_(ids), Story.created_at >= cutoff)
+            .order_by(Story.created_at.asc()).all())
+    by_user = {}
+    for s in rows:
+        by_user.setdefault(s.user_id, []).append(
+            {'img': f'/story-img/{s.id}', 'caption': s.caption or '', 'time': time_ago(s.created_at)})
+    out = []
+    for uid in ([cu.id] if cu.id in by_user else []) + [u for u in by_user if u != cu.id]:
+        u = User.query.get(uid)
         if not u:
             continue
-        streak, _ = _streaks(_checkin_dates(u))
         nm = u.name or u.username
-        out.append({
-            'id': u.id, 'name': nm, 'first': nm.split(' ')[0][:14], 'username': u.username,
-            'init': (nm[:1] or 'U').upper(), 'has_avatar': bool(u.avatar),
-            'sleep': ci.sleep if ci.sleep is not None else '—',
-            'energy': ci.energy if ci.energy is not None else '—',
-            'mood': ci.mood if ci.mood is not None else '—',
-            'streak': streak, 'today': ci.date == today,
-        })
+        out.append({'id': u.id, 'name': nm, 'first': nm.split(' ')[0][:14], 'username': u.username,
+                    'init': (nm[:1] or 'U').upper(), 'has_avatar': bool(u.avatar),
+                    'mine': uid == cu.id, 'items': by_user[uid]})
         if len(out) >= 25:
             break
     return out
@@ -3316,6 +3318,39 @@ def api_spin():
     db.session.commit()
     return {'ok': True, 'key': key, 'label': label, 'detail': detail or '',
             'xp': xp, 'spins_left': max(0, earned - (used + 1))}
+
+@app.route('/drop')
+def drop():
+    """Camera-first Drop surface (Instagram-style): capture, then share as Story or Post."""
+    if not auth(): return redirect('/login')
+    return render_template('drop.html', u=user_ctx(), active='home')
+
+@app.route('/api/story', methods=['POST'])
+def api_story():
+    if not auth(): return ('', 401)
+    cu = current_user()
+    image = (request.form.get('image') or '')
+    if not image.startswith('data:image'):
+        return {'ok': False, 'error': 'no_image'}, 400
+    image = image[:2800000]  # same safety cap as posts
+    caption = (request.form.get('caption') or '').strip()[:200]
+    db.session.add(Story(user_id=cu.id, image=image, caption=caption))
+    db.session.commit()
+    return {'ok': True}
+
+@app.route('/story-img/<int:sid>')
+def story_img(sid):
+    if not auth(): return ('', 401)
+    s = Story.query.get(sid)
+    if s and s.image and s.image.startswith('data:') and ',' in s.image:
+        header, b64 = s.image.split(',', 1)
+        mime = header[5:].split(';')[0] or 'image/jpeg'
+        try:
+            return Response(base64.b64decode(b64), mimetype=mime,
+                            headers={'Cache-Control': 'private, max-age=3600'})
+        except Exception:
+            pass
+    return ('', 404)
 
 @app.route('/pushups')
 def pushups():
