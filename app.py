@@ -2138,8 +2138,9 @@ def axon_generate_questions(user, kind):
            "2) Lower the stakes so they tell the truth — an implicit 'no judgment, just data' tone. "
            "3) Prefer SPECIFIC, COMPARATIVE or CONCRETE angles (e.g. 'better or worse than yesterday?', "
            "'what time did you actually...', 'name one thing you...') — these are harder to answer on autopilot. "
-           "4) If their habit list is provided, tie the habits question to ONE habit BY NAME "
-           "(e.g. 'Did the gym happen today — honestly?') so the question tracks their real habit. "
+           "4) CRITICAL — the 'habits' question is answered by TAPPING a CHECKLIST of all their habits, "
+           "so it must ask which ones they'll commit to / which ones they did (plural, checklist-style, "
+           "e.g. 'Which of these are you locking in today?'). NEVER a yes/no question about a single habit. "
            "5) Human and occasionally playful, never corny or clinical. "
            "Each question (q) <= 8 words. Each hint <= 14 words. Use their first name in AT MOST one question. "
            "Return ONLY valid minified JSON, no prose, no code fences.")

@@ -378,7 +378,11 @@ updateProg();
 // AXON personalizes the questions in the background, then swaps them in.
 fetch('/api/axon/questions?kind=morning').then(r=>r.json()).then(d=>{
   const Q=d&&d.questions; if(!Q) return;
+  // Only refresh steps the user hasn't reached — the question on screen never changes mid-read.
+  const ORDER=['sleep','energy','mood','habits','win','reflection'];
   for(const k in Q){
+    const idx=ORDER.indexOf(k);
+    if(idx>-1 && idx < step) continue;
     const qe=document.querySelector('[data-q="'+k+'"]'); if(qe&&Q[k].q) qe.textContent=Q[k].q;
     const he=document.querySelector('[data-hint="'+k+'"]'); if(he&&Q[k].hint) he.textContent=Q[k].hint;
   }

@@ -302,10 +302,14 @@ function playMotivation(){
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
 updateProg();
-// AXON personalizes the questions in the background, then swaps them in.
+// AXON personalizes the questions in the background — but only for steps not reached yet,
+// so the question on screen never changes while you're reading it.
 fetch('/api/axon/questions?kind=evening').then(r=>r.json()).then(d=>{
   const Q=d&&d.questions; if(!Q) return;
+  const ORDER=['rating','habits','goal','blocker','tomorrow','gratitude'];
   for(const k in Q){
+    const idx=ORDER.indexOf(k);
+    if(idx>-1 && idx < step) continue;
     const qe=document.querySelector('[data-q="'+k+'"]'); if(qe&&Q[k].q) qe.textContent=Q[k].q;
     const he=document.querySelector('[data-hint="'+k+'"]'); if(he&&Q[k].hint) he.textContent=Q[k].hint;
   }
