@@ -36,7 +36,17 @@
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;background:var(--bg);}
-body{background:var(--bg);color:var(--black);font-family:'Inter',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;}
+body{background:var(--bg);color:var(--black);font-family:'Inter',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;overscroll-behavior-y:contain;}
+/* pull-to-refresh disc (slides down from above the topbar as you pull) */
+.ptr{position:fixed;top:0;left:50%;transform:translate(-50%,-56px);z-index:9999;width:44px;height:44px;border-radius:50%;
+  background:var(--card);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 22px rgba(0,0,0,.35);opacity:0;pointer-events:none;will-change:transform,opacity;}
+.ptr svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:none;}
+.ptr.ready{border-color:var(--gold);}
+.ptr.snap{transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .32s ease;}
+.ptr.spin{opacity:1;}
+.ptr.spin svg{animation:ptrSpin .7s linear infinite;}
+@keyframes ptrSpin{to{transform:rotate(360deg);}}
 /* Premium app backdrop: fixed gold-glow gradient behind everything (cards stay solid on top). Only on app pages. */
 body.app-bg::before{content:'';position:fixed;inset:0;background:var(--app-bg);z-index:-1;pointer-events:none;}
 a{text-decoration:none;color:inherit;}
