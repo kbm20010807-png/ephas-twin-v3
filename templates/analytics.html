@@ -5,12 +5,10 @@
 <style>
 /* ===== The Living Twin (vitality that decays when neglected) ===== */
 .lt-wrap{padding:22px 20px 6px;text-align:center;}
-.lt-orb{width:156px;height:156px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center;}
-/* soft, diffuse halo — no hard edges */
-.lt-glow{position:absolute;inset:-14px;border-radius:50%;filter:blur(38px);transition:opacity 1s ease;pointer-events:none;}
-.lt-glow2{position:absolute;inset:20px;border-radius:50%;filter:blur(16px);opacity:.5;transition:opacity 1s ease;pointer-events:none;}
-.lt-orb img{width:88%;height:88%;object-fit:contain;position:relative;transition:filter 1s ease;animation:ltBreathe 6s ease-in-out infinite;}
-@keyframes ltBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
+.lt-orb{width:130px;height:130px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center;}
+/* no glow blobs — a tight drop-shadow on the logo itself hugs its real shape */
+.lt-orb img{width:100%;height:100%;object-fit:contain;position:relative;transition:filter 1s ease;animation:ltBreathe 7s ease-in-out infinite;}
+@keyframes ltBreathe{0%,100%{opacity:1;}50%{opacity:.86;}}
 @media (prefers-reduced-motion:reduce){.lt-orb img{animation:none;}}
 .lt-state{font-family:'Inter',sans-serif;font-weight:800;font-size:19px;color:var(--black);margin-top:10px;letter-spacing:-.3px;}
 .lt-msg{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.5;max-width:290px;margin-left:auto;margin-right:auto;}
@@ -78,10 +76,8 @@
 <!-- ===== THE LIVING TWIN ===== -->
 <div class="lt-wrap">
   <div class="lt-orb">
-    <div class="lt-glow" style="background:radial-gradient(circle,{{ vitality.color }},transparent 70%);opacity:{{ (0.10 + vitality.v/100*0.32)|round(2) }};"></div>
-    <div class="lt-glow2" style="background:radial-gradient(circle,{{ vitality.color }},transparent 65%);opacity:{{ (0.06 + vitality.v/100*0.22)|round(2) }};"></div>
     <img src="/static/twin_keel.png" alt="Your Twin"
-         style="{% if vitality.v < 25 %}filter:grayscale(.55) brightness(.72) saturate(.5);{% else %}filter:saturate({{ (0.5 + vitality.v/100*0.5)|round(2) }}) brightness({{ (0.85 + vitality.v/100*0.2)|round(2) }});{% endif %}">
+         style="{% if vitality.v < 25 %}filter:grayscale(.55) brightness(.72) saturate(.5) drop-shadow(0 4px 14px rgba(0,0,0,.35));{% else %}filter:saturate({{ (0.5 + vitality.v/100*0.5)|round(2) }}) brightness({{ (0.85 + vitality.v/100*0.2)|round(2) }}) drop-shadow(0 0 {{ (6 + vitality.v/100*10)|round(0)|int }}px {{ vitality.color }}{{ '55' if vitality.v >= 60 else '3d' }});{% endif %}">
   </div>
   <div class="lt-state">{{ vitality.title }}</div>
   <div class="lt-msg">{{ vitality.msg }}</div>
