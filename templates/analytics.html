@@ -125,6 +125,48 @@
 .dc-pct{font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--gold);}
 .dc-trend{font-size:10px;font-weight:700;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
+
+/* mini spin button beside quests */
+.qs-row{display:flex;gap:10px;margin:14px 20px 0;align-items:stretch;}
+.spin-mini{position:relative;width:76px;border:none;border-radius:18px;background:var(--grad);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 8px 20px rgba(234,213,162,.18);}
+.spin-mini:active{transform:scale(.96);}
+.spin-mini.used{opacity:.55;}
+.sm-coin{font-size:22px;color:#241D10;line-height:1;}
+.sm-lbl{font-family:'Inter',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;color:#241D10;}
+.sm-n{position:absolute;top:7px;right:8px;font-style:normal;font-family:'Inter',sans-serif;font-size:10px;font-weight:800;background:#241D10;color:var(--gold);border-radius:9px;padding:1px 6px;}
+/* spin overlay (roulette) */
+.spin-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9700;padding:28px;}
+.spin-ov.on{display:flex;}
+.spin-modal{background:linear-gradient(165deg,var(--card),var(--bg-2));border:1px solid var(--gold-b);border-radius:24px;width:100%;max-width:330px;padding:28px 24px;text-align:center;box-shadow:var(--sh-md);}
+.spin-window{position:relative;height:96px;margin:4px auto 6px;overflow:hidden;border-radius:18px;
+  background:radial-gradient(120% 100% at 50% 0%,#1c1c22,#0a0a0c 70%);
+  border:1px solid transparent;background-clip:padding-box;
+  box-shadow:inset 0 8px 22px rgba(0,0,0,.6),inset 0 -2px 6px rgba(255,255,255,.04),
+    0 0 0 1px rgba(234,213,162,.35),0 0 0 3px rgba(234,213,162,.10),0 10px 26px rgba(0,0,0,.35);}
+.spin-window::before,.spin-window::after{content:'';position:absolute;left:0;right:0;height:34px;z-index:2;pointer-events:none;}
+.spin-window::before{top:0;background:linear-gradient(180deg,rgba(0,0,0,.85),transparent);}
+.spin-window::after{bottom:0;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);}
+.spin-window-line{position:absolute;top:50%;left:0;right:0;height:40px;transform:translateY(-50%);z-index:3;pointer-events:none;
+  border-top:1px solid rgba(234,213,162,.55);border-bottom:1px solid rgba(234,213,162,.55);
+  background:linear-gradient(90deg,rgba(234,213,162,.14),transparent 30%,transparent 70%,rgba(234,213,162,.14));}
+.spin-window .spin-gloss{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.10) 48%,transparent 56%);
+  background-size:250% 100%;animation:spinGloss 4s ease-in-out infinite;}
+@keyframes spinGloss{0%{background-position:150% 0;}60%,100%{background-position:-60% 0;}}
+.spin-window.win{animation:spinWin .6s ease;}
+@keyframes spinWin{0%,100%{box-shadow:inset 0 8px 22px rgba(0,0,0,.6),0 0 0 1px rgba(234,213,162,.35),0 0 0 3px rgba(234,213,162,.10),0 10px 26px rgba(0,0,0,.35);}
+  45%{box-shadow:inset 0 8px 22px rgba(0,0,0,.6),0 0 0 1px rgba(234,213,162,.7),0 0 30px rgba(234,213,162,.6),0 10px 26px rgba(0,0,0,.35);}}
+.spin-strip{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;will-change:transform;}
+.spin-cell{height:96px;flex:0 0 96px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:40px;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 8px rgba(0,0,0,.3);}
+.spin-cell.sm{font-size:26px;letter-spacing:0;}
+.spin-prize{font-size:16px;font-weight:800;color:var(--black);margin-top:10px;min-height:20px;}
+.spin-detail{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.4;min-height:16px;}
+.spin-btn{width:100%;margin-top:18px;padding:15px;border-radius:14px;background:var(--grad);color:#241D10;font-weight:800;font-size:14px;letter-spacing:1px;border:none;cursor:pointer;font-family:'Inter',sans-serif;}
+.spin-btn:disabled{opacity:.6;}
+.spin-left{font-size:11px;color:var(--sub);margin-top:12px;}
+.spin-earn{font-size:12px;color:var(--text);margin-top:14px;line-height:1.5;display:none;}
+.spin-earn b{color:var(--black);}
+.spin-close{font-size:12px;font-weight:700;color:var(--sub);margin-top:16px;cursor:pointer;}
 </style>
 {% endblock %}
 
@@ -179,7 +221,8 @@
 
 <!-- ===== QUESTS (game-like, one tap) ===== -->
 {% set qdone = qteasers|selectattr('done')|list|length %}
-<a href="/quests" class="qg-card">
+<div class="qs-row">
+<a href="/quests" class="qg-card" style="margin:0;flex:1;">
   <div class="qg-ico"><i data-lucide="swords"></i></div>
   <div class="qg-body">
     <div class="qg-title">Quests <span class="qg-count">{{ qdone }}/{{ qteasers|length }}</span></div>
@@ -190,6 +233,29 @@
   </div>
   <i data-lucide="chevron-right" class="qg-arrow"></i>
 </a>
+<button class="spin-mini {% if spin.left <= 0 %}used{% endif %}" onclick="openSpin()" aria-label="Daily Spin">
+  <span class="sm-coin">&#9733;</span>
+  <span class="sm-lbl">Spin</span>
+  {% if spin.left > 0 %}<em class="sm-n">{{ spin.left }}</em>{% endif %}
+</button>
+</div>
+
+<!-- SPIN OVERLAY (the roulette) -->
+<div class="spin-ov" id="spinOv" onclick="if(event.target===this)closeSpin()">
+  <div class="spin-modal">
+    <div class="spin-window" id="spinWindow">
+      <div class="spin-strip" id="spinStrip"><div class="spin-cell">&#9733;</div></div>
+      <div class="spin-window-line"></div>
+      <div class="spin-gloss"></div>
+    </div>
+    <div class="spin-prize" id="spinPrize"></div>
+    <div class="spin-detail" id="spinDetail">Spin to earn XP or an AXON insight.</div>
+    <button class="spin-btn" id="spinBtn" onclick="doSpin()" {% if spin.left <= 0 %}disabled{% endif %}>{% if spin.left > 0 %}SPIN{% else %}COME BACK TOMORROW{% endif %}</button>
+    <div class="spin-earn" id="spinEarn">Want another? <a href="/pushups" style="color:var(--gold);font-weight:800;text-decoration:none;">Do 10 push-ups &#8594;</a> or check in again to earn a spin.</div>
+    <div class="spin-left" id="spinLeft">{% if spin.left > 0 %}{{ spin.left }} spin{{ 's' if spin.left != 1 else '' }} left today{% endif %}</div>
+    <div class="spin-close" onclick="closeSpin()">Close</div>
+  </div>
+</div>
 
 <!-- ===== TRACKERS (live = big rows, coming = teaser strip) ===== -->
 <div class="sect-lbl">Trackers</div>
@@ -321,6 +387,79 @@
 {% endblock %}
 {% block scripts %}
 <script>
+
+// ===== Daily Spin (roulette) =====
+let spinsLeft = {{ spin.left|default(0) }};
+let spinning = false;
+function openSpin(){ var o=document.getElementById('spinOv'); if(o){ o.classList.add('on'); if(window.lucide) lucide.createIcons(); } }
+function closeSpin(){ var o=document.getElementById('spinOv'); if(o) o.classList.remove('on'); if(spinsLeft<=0) location.reload(); }
+function earnSpin(){
+  document.getElementById('spinEarn').style.display='none';
+  var btn=document.getElementById('spinBtn'); btn.style.display=''; btn.disabled=false; btn.textContent='SPIN';
+  document.getElementById('spinStrip').innerHTML='<div class="spin-cell">\u2605</div>';
+  document.getElementById('spinStrip').style.transform='translateY(0)';
+  document.getElementById('spinPrize').textContent='';
+  document.getElementById('spinDetail').textContent='Nice. Spin earned.';
+}
+var SPIN_FACES = ['+25','+50','+100','+250','+75','AXON'];
+function spinFace(key, xp){
+  if(key && key.indexOf('xp')===0) return '+'+xp;
+  if(key === 'axon') return 'AXON';
+  return SPIN_FACES[Math.floor(spinFrame() % SPIN_FACES.length)];
+}
+var _sf = 0; function spinFrame(){ _sf = (_sf*9301 + 49297) % 233280; return _sf; }
+function buildStrip(finalLabel){
+  var H = 96, N = 30;
+  var strip = document.getElementById('spinStrip');
+  var html = '';
+  for(var i=0;i<N-1;i++){
+    var f = SPIN_FACES[Math.floor(spinFrame() % SPIN_FACES.length)];
+    html += '<div class="spin-cell'+(f.length>4?' sm':'')+'">'+f+'</div>';
+  }
+  html += '<div class="spin-cell'+(finalLabel.length>4?' sm':'')+'">'+finalLabel+'</div>';
+  strip.innerHTML = html;
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+  return {H:H, N:N};
+}
+function doSpin(){
+  if(spinning || spinsLeft<=0) return;
+  spinning=true;
+  var win=document.getElementById('spinWindow'), strip=document.getElementById('spinStrip'), btn=document.getElementById('spinBtn');
+  win.classList.remove('win');
+  btn.disabled=true; btn.textContent='SPINNING\u2026';
+  document.getElementById('spinPrize').textContent=''; document.getElementById('spinDetail').textContent='';
+  if(navigator.vibrate) navigator.vibrate([12,40,12,40,12]);
+  fetch('/api/spin',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
+    if(!d.ok){
+      document.getElementById('spinPrize').textContent = d.reason==='earn' ? 'Check in to earn more spins' : 'Try again';
+      btn.disabled=false; btn.textContent='SPIN'; spinning=false; return;
+    }
+    var finalLabel = spinFace(d.key, d.xp);
+    var geo = buildStrip(finalLabel);
+    void strip.offsetHeight;
+    var target = -((geo.N - 1) * geo.H);
+    strip.style.transition = 'transform 3.1s cubic-bezier(.11,.72,.16,1)';
+    strip.style.transform = 'translateY('+target+'px)';
+    var landed = false;
+    function land(){
+      if(landed) return; landed = true;
+      win.classList.add('win');
+      document.getElementById('spinPrize').textContent=d.label;
+      document.getElementById('spinDetail').textContent=d.detail||'';
+      spinsLeft=d.spins_left;
+      document.getElementById('spinLeft').textContent = spinsLeft>0 ? (spinsLeft+' spin'+(spinsLeft!==1?'s':'')+' left today') : '';
+      if(window.Celebrate && Celebrate.burst) Celebrate.burst();
+      if(navigator.vibrate) navigator.vibrate([0,60,30,90]);
+      spinning=false;
+      if(spinsLeft>0){ btn.style.display='none'; document.getElementById('spinEarn').style.display='block'; }
+      else { btn.disabled=true; btn.textContent='COME BACK TOMORROW'; }
+    }
+    strip.addEventListener('transitionend', land, {once:true});
+    setTimeout(land, 3300);
+  }).catch(function(){ spinning=false; btn.disabled=false; btn.textContent='SPIN'; });
+}
+
 function tkSoon(name){ alert(name+' connects to your real data in Phase 3 — the trackers update. It will live right here.'); }
 </script>
 {% endblock %}

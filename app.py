@@ -890,6 +890,7 @@ def serialize_posts(posts, viewer=None):
             'username': (a.username if a else ''),
             'title': p.title or '', 'text': p.text or '', 'category': p.category or 'Growth',
             'has_image': bool(p.image), 'tag': p.tag or '', 'time': time_ago(p.created_at),
+            'media': ('video' if (p.image or '').startswith('data:video') else 'image') if p.image else '',
             'likes': Like.query.filter_by(post_id=p.id).count(),
             'comments': Comment.query.filter_by(post_id=p.id).count(),
             'liked': p.id in liked, 'bookmarked': p.id in booked,
@@ -2245,7 +2246,7 @@ def analytics():
     return render_template('analytics.html', u=user_ctx(), stats=stats_ctx(),
                            vitality=twin_vitality(cu), twin=twin_score(cu),
                            habits=serialize_habits(cu), qteasers=quest_teasers(cu),
-                           active='analytics')
+                           spin=spin_state(cu), active='analytics')
 
 @app.route('/grow')
 def grow():
@@ -2379,7 +2380,7 @@ def profile():
     return render_template('profile.html', u=user_ctx(), stats=stats_ctx(),
                            my_posts=my_posts, my_threads=my_threads, my_courses=my_courses,
                            badges=resolve_badges(current_user()), saved=saved,
-                           spin=spin_state(cu), active='profile')
+                           active='profile')
 
 def people_suggestions(cu, limit=8):
     """People you may know — community members you don't already follow."""

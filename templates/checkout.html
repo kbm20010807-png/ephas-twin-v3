@@ -147,7 +147,6 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="step-q" data-q="blocker">{{ q.blocker.q }}</div>
     <div class="step-hint" data-hint="blocker">{{ q.blocker.hint }}</div>
     <textarea class="form-input form-textarea" id="blockTxt" placeholder="What slowed me down was..." style="flex:1;min-height:100px;"></textarea>
-    <button type="button" class="ci-mic" onclick="dictate(this,'blockTxt')"><i data-lucide="mic"></i> <span>Tap to speak</span></button>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(4)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
@@ -162,7 +161,6 @@ body{min-height:100vh;display:flex;flex-direction:column;}
     <div class="step-q" data-q="tomorrow">{{ q.tomorrow.q }}</div>
     <div class="step-hint" data-hint="tomorrow">{{ q.tomorrow.hint }}</div>
     <textarea class="form-input form-textarea" id="tmrTxt" placeholder="Tomorrow I must..." style="flex:1;min-height:100px;"></textarea>
-    <button type="button" class="ci-mic" onclick="dictate(this,'tmrTxt')"><i data-lucide="mic"></i> <span>Tap to speak</span></button>
     <div class="step-footer">
       <div class="flex gap-2">
         <button class="btn btn-secondary" onclick="prev(5)" style="border-radius:var(--r-xl);width:52px;flex-shrink:0;"><i data-lucide="arrow-left"></i></button>
@@ -232,7 +230,45 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 {% endblock %}
 
 {% block scripts %}
+<!-- Mode chooser: talk it out with AXON, or type it -->
+<div class="mode-ov" id="modeOv" style="display:none;">
+  <div class="mode-sheet">
+    <div class="mode-title">How do you want to close the day?</div>
+    <div class="mode-sub">Same questions either way — pick your style.</div>
+    <button class="mode-btn voice" onclick="startVoiceCheckout()">
+      <div class="mode-ico"><i data-lucide="mic"></i></div>
+      <div><div class="m-t">Talk it out</div><div class="m-s">AXON asks out loud — you just answer</div></div>
+    </button>
+    <button class="mode-btn manual" onclick="document.getElementById('modeOv').style.display='none'">
+      <div class="mode-ico"><i data-lucide="keyboard"></i></div>
+      <div><div class="m-t">Type it myself</div><div class="m-s">The classic tap &amp; type flow</div></div>
+    </button>
+  </div>
+</div>
+<script src="/static/voicecheck.js" defer></script>
 <script>
+window.addEventListener('load', function(){
+  if(window.VoiceCheck && VoiceCheck.supported()){
+    document.getElementById('modeOv').style.display='flex';
+    if(typeof lucide!=='undefined') lucide.createIcons();
+  }
+});
+function startVoiceCheckout(){
+  document.getElementById('modeOv').style.display='none';
+  var $=function(id){return document.getElementById(id);};
+  VoiceCheck.start({
+    doneLine: 'Day closed. Rest up.',
+    steps: [
+      {key:'rating', type:'scale', apply:function(v){ $('dayR').value=v; $('dayDisp').textContent=v; }},
+      {key:'habits', type:'match', items:function(){ return Array.prototype.map.call(document.querySelectorAll('.co-habit'), function(el){ return {el:el, name:el.querySelector('.co-h-name').textContent.trim()}; }); }, apply:function(){}},
+      {key:'goal', type:'yesno', apply:function(v){ selectYN(v==='yes'?'y':'n'); }},
+      {key:'blocker', type:'text', apply:function(t){ $('blockTxt').value=t; }},
+      {key:'tomorrow', type:'text', apply:function(t){ $('tmrTxt').value=t; }},
+      {key:'gratitude', type:'grats', apply:function(parts){ var inps=document.querySelectorAll('.grat-inp'); parts.forEach(function(p,i){ if(inps[i]) inps[i].value=p; }); }}
+    ],
+    onDone: function(){ submit(); }
+  });
+}
 // ===== Voice dictation — talk instead of type (free, on-device) =====
 var _recog=null;
 (function(){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
