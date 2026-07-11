@@ -257,6 +257,7 @@ function startVoiceCheckout(){
   document.getElementById('modeOv').style.display='none';
   var $=function(id){return document.getElementById(id);};
   VoiceCheck.start({
+    kind: 'evening',
     doneLine: 'Day closed. Rest up.',
     steps: [
       {key:'rating', type:'scale', apply:function(v){ $('dayR').value=v; $('dayDisp').textContent=v; }},

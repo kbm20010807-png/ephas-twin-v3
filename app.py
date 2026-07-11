@@ -2682,6 +2682,55 @@ def axon_voices():
     engine, voices = tts_engine()
     return {'enabled': bool(engine), 'engine': engine, 'voices': voices}
 
+@app.route('/api/axon/parse-checkin', methods=['POST'])
+def api_parse_checkin():
+    """Free-speech check-in: the user rambles naturally; AXON extracts every field it can
+    (sleep, energy, mood, habits, ...) so one answer can fill several questions at once.
+    Returns {'ok', 'data': {field: value, ..., 'ack': spoken acknowledgement}}."""
+    if not auth(): return ('', 401)
+    cu = current_user()
+    if not ANTHROPIC_KEY:
+        return {'ok': False, 'reason': 'no_ai'}
+    kind = 'morning' if request.form.get('kind') == 'morning' else 'evening'
+    transcript = (request.form.get('transcript') or '').strip()[:1200]
+    if not transcript:
+        return {'ok': False}, 400
+    habit_names = [h.name for h in Habit.query.filter_by(user_id=cu.id).limit(12).all()]
+    if kind == 'morning':
+        fields = ("sleep (hours slept, number 3-12, halves ok) | energy (integer 1-10) | mood (integer 1-10) | "
+                  "habits (array of names FROM THEIR LIST they plan to do today) | "
+                  "win (short text - what they look forward to today) | "
+                  "reflection (short text - their #1 focus/priority today)")
+    else:
+        fields = ("rating (integer 1-10, how the day went) | "
+                  "habits (array of names FROM THEIR LIST they actually did today) | "
+                  "goal ('yes' or 'no' - did they hit their #1 goal) | "
+                  "blocker (short text - what got in the way) | "
+                  "tomorrow (short text - tomorrow's priority) | "
+                  "gratitude (array of up to 3 short things they're grateful for)")
+    sys = ("You extract structured check-in data from natural, rambling speech. "
+           "Return ONLY minified JSON, no prose, no code fences. "
+           "Include a field ONLY when the person clearly expressed it — omit everything unsaid. "
+           "Numbers must be numbers, not strings. "
+           'Always include "ack": ONE short warm sentence in the voice of a sharp human coach, '
+           "acknowledging something SPECIFIC they said (no emojis, max 16 words).")
+    msg = (f"Their habit list: {', '.join(habit_names) if habit_names else 'none'}.\n"
+           f"Extractable fields: {fields}\n\n"
+           f'They said: "{transcript}"\n\nJSON only.')
+    headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    body = {"model": AXON_MODEL_FREE, "max_tokens": 300, "system": sys,
+            "messages": [{"role": "user", "content": msg}]}
+    try:
+        raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=15).json()['content'][0]['text'].strip()
+        if raw.startswith('```'):
+            raw = raw.split('```')[1].lstrip('json').strip()
+        data = json.loads(raw)
+        if not isinstance(data, dict):
+            return {'ok': False}
+        return {'ok': True, 'data': data}
+    except Exception:
+        return {'ok': False}
+
 @app.route('/api/axon/tts', methods=['POST'])
 def axon_tts():
     """Realistic AXON speech. Returns mp3 from the active engine, or 204 to fall back to the device voice."""

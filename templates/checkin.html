@@ -290,6 +290,7 @@ function startVoiceCheckin(){
   document.getElementById('modeOv').style.display='none';
   var $=function(id){return document.getElementById(id);};
   VoiceCheck.start({
+    kind: 'morning',
     doneLine: 'Locked in. Good work.',
     steps: [
       {key:'sleep', type:'number', min:3, max:12, unit:'h', apply:function(v){ $('sleepR').value=v; $('sleepDisp').textContent=v; }},
