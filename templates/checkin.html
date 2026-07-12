@@ -417,6 +417,7 @@ updateProg();
 // AXON personalizes the questions in the background, then swaps them in.
 fetch('/api/axon/questions?kind=morning').then(r=>r.json()).then(d=>{
   const Q=d&&d.questions; if(!Q) return;
+  if(Q._opener && Q._opener.q) window.AXON_OPENER = Q._opener.q;   // personalized voice greeting
   // Only refresh steps the user hasn't reached — the question on screen never changes mid-read.
   const ORDER=['sleep','energy','mood','habits','win','reflection'];
   for(const k in Q){

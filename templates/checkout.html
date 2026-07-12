@@ -344,6 +344,7 @@ updateProg();
 // so the question on screen never changes while you're reading it.
 fetch('/api/axon/questions?kind=evening').then(r=>r.json()).then(d=>{
   const Q=d&&d.questions; if(!Q) return;
+  if(Q._opener && Q._opener.q) window.AXON_OPENER = Q._opener.q;   // personalized voice greeting
   const ORDER=['rating','habits','goal','blocker','tomorrow','gratitude'];
   for(const k in Q){
     const idx=ORDER.indexOf(k);

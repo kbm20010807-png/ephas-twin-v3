@@ -181,6 +181,8 @@
     return null;
   }
   function greeting() {
+    // Prefer AXON's personalized opener ("Heard you had an issue with Melina — let's talk.")
+    if (typeof window.AXON_OPENER === 'string' && window.AXON_OPENER) return window.AXON_OPENER;
     var name = cfg.name || '';
     var pools = cfg.kind === 'morning'
       ? ['Hey ' + name + '. Good to hear you — let’s take a minute on your morning.',

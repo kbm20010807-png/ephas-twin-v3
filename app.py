@@ -2114,17 +2114,32 @@ def axon_generate_questions(user, kind):
         return None
     steps = CHECKIN_STEPS if kind == 'morning' else CHECKOUT_STEPS
     name = _first_name(user)
-    # light personal context
+    # personal context: metrics + THEIR OWN RECENT WORDS (this is what makes follow-ups real)
     recent = (CheckIn.query.filter_by(user_id=user.id)
-              .order_by(CheckIn.date.desc()).limit(5).all())
+              .order_by(CheckIn.date.desc(), CheckIn.id.desc()).limit(8).all())
     moods = [r.mood for r in recent if r.mood is not None]
     energies = [r.energy for r in recent if r.energy is not None]
-    habit_names = [h.name for h in Habit.query.filter_by(user_id=user.id).limit(8).all()]
+    notes = []
+    for r in recent:
+        d = r.date.isoformat() if r.date else ''
+        if r.kind == 'evening' and (r.note or '').strip():
+            notes.append(f"{d} evening: {r.note.strip()[:220]}")
+        elif r.kind == 'morning':
+            if (r.reflection or '').strip(): notes.append(f"{d} focus: {r.reflection.strip()[:120]}")
+            if (r.win or '').strip(): notes.append(f"{d} looking forward: {r.win.strip()[:120]}")
+        if len(notes) >= 6:
+            break
+    habit_bits = []
+    for h in Habit.query.filter_by(user_id=user.id).limit(8).all():
+        habit_bits.append(f"{h.name} ({'quit-habit' if h.is_bad else 'keep-habit'}, streak {habit_streak(h.id)}d)")
+    mem = (get_axon_memory(user).summary or '').strip()[:400]
     ctx = [f"User's first name: {name}.",
            f"Time of day: {'morning, just woke up' if kind == 'morning' else 'evening, winding down'}."]
     if moods: ctx.append(f"Recent mood avg: {round(sum(moods)/len(moods),1)}/10.")
     if energies: ctx.append(f"Recent energy avg: {round(sum(energies)/len(energies),1)}/10.")
-    if habit_names: ctx.append("Their habits: " + ", ".join(habit_names) + ".")
+    if habit_bits: ctx.append("Their habits: " + ", ".join(habit_bits) + ".")
+    if notes: ctx.append("THEIR OWN RECENT WORDS (follow up on these!):\n- " + "\n- ".join(notes))
+    if mem: ctx.append(f"What AXON remembers about them: {mem}")
     if kind == 'morning':
         meaning = ("sleep=hours slept last night; energy=energy 1-10; mood=mood 1-10; "
                    "habits=what they'll commit to today; win=what they look forward to; "
@@ -2133,23 +2148,27 @@ def axon_generate_questions(user, kind):
         meaning = ("rating=overall day 1-10; habits=did they keep their habits; goal=did they hit "
                    "their #1 goal; blocker=what got in the way; tomorrow=tomorrow's one priority; "
                    "gratitude=three things they're grateful for")
-    sys = ("You are AXON, a sharp, warm self-growth coach writing a DAILY check-in people will actually answer "
-           "HONESTLY (not just swipe past). Strategy for the questions: "
-           "1) Make each DIFFERENT from each other and from a generic template — never repeat a phrasing. "
-           "2) Lower the stakes so they tell the truth — an implicit 'no judgment, just data' tone. "
-           "3) Prefer SPECIFIC, COMPARATIVE or CONCRETE angles (e.g. 'better or worse than yesterday?', "
-           "'what time did you actually...', 'name one thing you...') — these are harder to answer on autopilot. "
-           "4) CRITICAL — the 'habits' question is answered by TAPPING a CHECKLIST of all their habits, "
-           "so it must ask which ones they'll commit to / which ones they did (plural, checklist-style, "
-           "e.g. 'Which of these are you locking in today?'). NEVER a yes/no question about a single habit. "
-           "5) Human and occasionally playful, never corny or clinical. "
-           "Each question (q) <= 8 words. Each hint <= 14 words. Use their first name in AT MOST one question. "
+    sys = ("You are AXON, the user's personal coach-therapist who REMEMBERS their life and follows up like a "
+           "real person who cares. Write today's check-in questions. Strategy: "
+           "1) FOLLOW-UPS FIRST: when their recent words mention a specific person, issue, goal or struggle "
+           "(a name, a fight, a deadline, a slip), make the TEXT questions (win/reflection/blocker/tomorrow) "
+           "direct follow-ups BY NAME — e.g. 'Did you and Melina sort it out?' or 'Did the pitch deck get done?'. "
+           "2) Slider questions (sleep/energy/mood/rating) must still ask about their metric, but may nod to "
+           "context — e.g. 'After yesterday's mess, how did you sleep?'. "
+           "3) CRITICAL — the 'habits' question is answered by TAPPING a CHECKLIST of all their habits, so it "
+           "must ask which ones (plural, checklist-style). It may call out the habit they're slacking on by name "
+           "in the HINT (e.g. 'Movies streak says 0 — today's the day?'). NEVER a yes/no about one habit. "
+           "4) Warm, human, zero judgment — a coach who's on their side, occasionally playful, never clinical. "
+           "5) Every question different from each other; no generic templates when a follow-up exists. "
+           "Each question (q) <= 10 words. Each hint <= 14 words. First name in AT MOST one question. "
            "Return ONLY valid minified JSON, no prose, no code fences.")
     msg = (f"Context:\n{' '.join(ctx)}\n\nField meanings: {meaning}.\n\n"
-           f"Return JSON with EXACTLY these keys: {steps}. "
-           'Each value is an object {"q": "...", "hint": "..."}. JSON only.')
+           f"Return JSON with EXACTLY these keys: {steps}, "
+           'each an object {"q": "...", "hint": "..."} — PLUS one extra key "opener": '
+           "a one-sentence spoken greeting for them referencing the most important recent thread "
+           "(warm, specific, max 18 words, no question mark needed). JSON only.")
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-    body = {"model": AXON_MODEL_FREE, "max_tokens": 600, "system": sys,
+    body = {"model": AXON_MODEL_FREE, "max_tokens": 700, "system": sys,
             "messages": [{"role": "user", "content": msg}]}
     try:
         raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=20).json()['content'][0]['text']
@@ -2174,6 +2193,9 @@ def axon_generate_questions(user, kind):
                     out[step] = fb[step]
                     ql = out[step]['q'].strip().lower()
                 seen_q.add(ql)
+        opener = (data.get('opener') or '').strip()
+        if opener:
+            out['_opener'] = {'q': opener[:140], 'hint': ''}
         if len(out) >= max(3, len(steps) - 1):  # accept if it got most of them
             _QSET_CACHE[key] = out
             return out
@@ -2708,17 +2730,23 @@ def api_parse_checkin():
                   "blocker (short text - what got in the way) | "
                   "tomorrow (short text - tomorrow's priority) | "
                   "gratitude (array of up to 3 short things they're grateful for)")
+    # yesterday's thread, so replies connect ("good — that's the follow-through with Melina")
+    last_eve = (CheckIn.query.filter(CheckIn.user_id == cu.id, CheckIn.kind == 'evening',
+                                     CheckIn.note.isnot(None))
+                .order_by(CheckIn.date.desc(), CheckIn.id.desc()).first())
+    thread = (last_eve.note or '').strip()[:220] if last_eve else ''
     sys = ("You extract structured check-in data from natural, rambling speech. "
            "Return ONLY minified JSON, no prose, no code fences. "
            "Include a field ONLY when the person clearly expressed it — omit everything unsaid. "
            "Numbers must be numbers, not strings. "
-           'Always include "ack": ONE short sentence (max 12 words) in the voice of a warm, sharp '
-           "therapist-coach — reflect something SPECIFIC they said, human and validating, never robotic. "
-           "NEVER put a question in the ack (the next question is asked separately). No emojis. "
-           'Examples: "Seven hours and straight to the gym — I like that." / '
-           '"A six after that kind of night is honestly solid."')
+           'Always include "ack": 1-2 short sentences (max 22 words total) as their warm, sharp '
+           "therapist-coach who KNOWS their ongoing situations — reflect something SPECIFIC they said, "
+           "and when it connects to their recent thread, add ONE short practical nudge "
+           '(e.g. "Good — keep it that way, and tell her that too."). '
+           "NEVER put a question in the ack (the next question is asked separately). No emojis.")
     msg = (f"Their habit list: {', '.join(habit_names) if habit_names else 'none'}.\n"
-           f"Extractable fields: {fields}\n\n"
+           + (f"Their recent thread: {thread}\n" if thread else "")
+           + f"Extractable fields: {fields}\n\n"
            f'They said: "{transcript}"\n\nJSON only.')
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL_FREE, "max_tokens": 220, "system": sys,
