@@ -63,6 +63,18 @@ body{background:var(--bg);min-height:100vh;}
       </div>
     </div>
 
+    {% if voices %}
+    <div class="form-group">
+      <label class="ob-lbl">Pick AXON's voice <span style="font-weight:400;color:var(--sub);">(tap to hear)</span></label>
+      <div class="chip-wrap" id="voiceChips">
+        {% for v in voices %}
+        <div class="ob-chip" data-v="{{ v.id }}" onclick="pickObVoice(this,'{{ v.id }}','{{ v.name }}')">{{ '🧔' if v.sex == 'm' else '👩' }} {{ v.name }}</div>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="axon_voice" id="voiceHidden" value="">
+    </div>
+    {% endif %}
+
     <div class="form-group">
       <label class="ob-lbl">Your #1 goal right now</label>
       <input name="primary_goal" class="form-input" placeholder="e.g. Build discipline, lose 10kg, launch my business" value="{{ p.primary_goal }}">
@@ -100,6 +112,19 @@ body{background:var(--bg);min-height:100vh;}
 {% endblock %}
 {% block scripts %}
 <script>
+// AXON voice picker — select + live preview
+var _obv=null;
+function pickObVoice(el,id,name){
+  document.querySelectorAll('#voiceChips .ob-chip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('voiceHidden').value=id;
+  try{ if(_obv){_obv.pause();} }catch(e){}
+  fetch('/api/axon/tts',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({text:"Hey, I'm "+name+". I'll be your coach.",voice_id:id})})
+    .then(function(r){return r.status===200?r.blob():null;})
+    .then(function(b){ if(!b) return; var u=URL.createObjectURL(b); _obv=new Audio(u); _obv.onended=function(){URL.revokeObjectURL(u);}; _obv.play().catch(function(){}); })
+    .catch(function(){});
+}
 function chipText(wrapId){
   return [...document.querySelectorAll('#'+wrapId+' .ob-chip.on')].map(c=>c.textContent.trim()).join(',');
 }

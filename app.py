@@ -66,6 +66,8 @@ class User(db.Model):
     tz_offset = db.Column(db.Integer, default=0)  # minutes east of UTC (from the user's device)
     is_pro = db.Column(db.Boolean, default=False)  # TWIN Pro subscriber
     axon_personality = db.Column(db.String(20), default='mentor')  # how AXON talks
+    axon_voice = db.Column(db.String(40), default='')              # chosen TTS voice id
+    axon_personalize = db.Column(db.Boolean, default=True)         # may AXON use their data to personalize
     show_profile_views = db.Column(db.Boolean, default=True)  # reciprocal "who viewed your profile"
     notifs_seen_at = db.Column(db.DateTime)  # last time the notifications page was opened (for unread count)
     badges = db.Column(db.String(300), default='')  # comma-separated badge slugs (pro, verified, ephas_team, ...)
@@ -467,25 +469,23 @@ LAST_AXON_ERROR = {'status': None, 'body': None, 'note': 'no axon call yet'}
 OPENAI_KEY = os.environ.get('OPENAI_API_KEY', '')
 OPENAI_TTS_MODEL = os.environ.get('OPENAI_TTS_MODEL', 'tts-1')  # 'tts-1' cheap, 'tts-1-hd' nicer (2x)
 OPENAI_VOICES = [
-    {'id': 'onyx',    'name': 'Onyx',    'desc': 'Deep, authoritative — strong mentor'},
-    {'id': 'nova',    'name': 'Nova',    'desc': 'Bright, friendly — easy morning chat'},
-    {'id': 'echo',    'name': 'Echo',    'desc': 'Warm, calm, steady — grounded coach'},
-    {'id': 'shimmer', 'name': 'Shimmer', 'desc': 'Soft, gentle, kind — gentle encourager'},
-    {'id': 'fable',   'name': 'Fable',   'desc': 'Expressive, storyteller — engaging'},
-    {'id': 'alloy',   'name': 'Alloy',   'desc': 'Neutral, balanced — all-purpose'},
+    {'id': 'onyx',    'name': 'Drake', 'sex': 'm', 'desc': 'Deep, authoritative — strong mentor'},
+    {'id': 'echo',    'name': 'Jake',  'sex': 'm', 'desc': 'Warm, calm, steady — grounded coach'},
+    {'id': 'fable',   'name': 'Leo',   'sex': 'm', 'desc': 'Expressive storyteller — engaging'},
+    {'id': 'nova',    'name': 'Maya',  'sex': 'f', 'desc': 'Bright, friendly — easy morning chat'},
+    {'id': 'shimmer', 'name': 'Luna',  'sex': 'f', 'desc': 'Soft, gentle — kind encourager'},
+    {'id': 'alloy',   'name': 'Aria',  'sex': 'f', 'desc': 'Clear, balanced — all-purpose'},
 ]
 
 ELEVENLABS_KEY = os.environ.get('ELEVENLABS_API_KEY', '')
 ELEVEN_MODEL = os.environ.get('ELEVEN_MODEL', 'eleven_turbo_v2_5')  # fast + cheaper
 ELEVEN_VOICES = [
-    {'id': 'pNInz6obpgDQGcFmaJgB', 'name': 'Adam',   'desc': 'Deep, steady, grounded — a calm mentor'},
-    {'id': 'TxGEqnHWrfWFTfGW9XjX', 'name': 'Josh',   'desc': 'Young, warm, friendly — easy morning chat'},
-    {'id': 'VR6AewLTigWG4xSOukaG', 'name': 'Arnold', 'desc': 'Crisp, firm, no-excuses — tough coach'},
-    {'id': 'ErXwobaYiN019PkySvjV', 'name': 'Antoni', 'desc': 'Well-rounded, confident — all-purpose'},
-    {'id': '21m00Tcm4TlvDq8ikWAM', 'name': 'Rachel', 'desc': 'Calm, clear, reassuring — soothing guide'},
-    {'id': 'EXAVITQu4vr4xnSDxMaL', 'name': 'Bella',  'desc': 'Soft, gentle, encouraging — kind & warm'},
-    {'id': 'AZnzlk1XvdvUeBnXmlld', 'name': 'Domi',   'desc': 'Strong, energetic — hype & motivation'},
-    {'id': 'MF3mGyEYCl7XYWbV9V6O', 'name': 'Elli',   'desc': 'Expressive, emotional — empathetic listener'},
+    {'id': 'pNInz6obpgDQGcFmaJgB', 'name': 'Adam',   'sex': 'm', 'desc': 'Deep, steady, grounded — a calm mentor'},
+    {'id': 'TxGEqnHWrfWFTfGW9XjX', 'name': 'Josh',   'sex': 'm', 'desc': 'Young, warm, friendly — easy morning chat'},
+    {'id': 'VR6AewLTigWG4xSOukaG', 'name': 'Arnold', 'sex': 'm', 'desc': 'Crisp, firm, no-excuses — tough coach'},
+    {'id': '21m00Tcm4TlvDq8ikWAM', 'name': 'Rachel', 'sex': 'f', 'desc': 'Calm, clear, reassuring — soothing guide'},
+    {'id': 'EXAVITQu4vr4xnSDxMaL', 'name': 'Bella',  'sex': 'f', 'desc': 'Soft, gentle, encouraging — kind & warm'},
+    {'id': 'AZnzlk1XvdvUeBnXmlld', 'name': 'Domi',   'sex': 'f', 'desc': 'Strong, energetic — hype & motivation'},
 ]
 
 # How AXON talks — the user picks one in AXON settings
@@ -915,6 +915,8 @@ with app.app_context():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS claimed_milestones TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_nudge VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_spins INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS axon_voice VARCHAR(40) DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS axon_personalize BOOLEAN DEFAULT TRUE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_spins_date VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMP",
         "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS private_account BOOLEAN DEFAULT FALSE",
@@ -1572,13 +1574,18 @@ def onboarding():
         p.primary_goal = (request.form.get('primary_goal') or '').strip()[:300]
         p.bad_habits = (request.form.get('bad_habits') or '').strip()[:400]
         p.focus = (request.form.get('focus') or '').strip()[:200]
+        v = (request.form.get('axon_voice') or '').strip()
+        if v and any(x['id'] == v for x in tts_engine()[1]):
+            cu.axon_voice = v
         p.onboarded = True
         db.session.commit()
         # Habits are NOT auto-registered — the user chooses them in the Habits screen.
         if RESEND_KEY and not cu.email_verified:
             return redirect('/verify-email')
         return redirect('/home')
-    return render_template('onboarding.html', u=user_ctx(), p=p, auth_page=True)
+    _eng, _voices = tts_engine()
+    return render_template('onboarding.html', u=user_ctx(), p=p, auth_page=True,
+                           voices=(_voices if _eng else []))
 
 @app.route('/onboarding/skip')
 def onboarding_skip():
@@ -2138,8 +2145,10 @@ def axon_generate_questions(user, kind):
     if moods: ctx.append(f"Recent mood avg: {round(sum(moods)/len(moods),1)}/10.")
     if energies: ctx.append(f"Recent energy avg: {round(sum(energies)/len(energies),1)}/10.")
     if habit_bits: ctx.append("Their habits: " + ", ".join(habit_bits) + ".")
-    if notes: ctx.append("THEIR OWN RECENT WORDS (follow up on these!):\n- " + "\n- ".join(notes))
-    if mem: ctx.append(f"What AXON remembers about them: {mem}")
+    # Privacy: only read their words/memory back to them if personalization is ON
+    if getattr(user, 'axon_personalize', True):
+        if notes: ctx.append("THEIR OWN RECENT WORDS (follow up on these!):\n- " + "\n- ".join(notes))
+        if mem: ctx.append(f"What AXON remembers about them: {mem}")
     if kind == 'morning':
         meaning = ("sleep=hours slept last night; energy=energy 1-10; mood=mood 1-10; "
                    "habits=what they'll commit to today; win=what they look forward to; "
@@ -2730,11 +2739,14 @@ def api_parse_checkin():
                   "blocker (short text - what got in the way) | "
                   "tomorrow (short text - tomorrow's priority) | "
                   "gratitude (array of up to 3 short things they're grateful for)")
-    # yesterday's thread, so replies connect ("good — that's the follow-through with Melina")
-    last_eve = (CheckIn.query.filter(CheckIn.user_id == cu.id, CheckIn.kind == 'evening',
-                                     CheckIn.note.isnot(None))
-                .order_by(CheckIn.date.desc(), CheckIn.id.desc()).first())
-    thread = (last_eve.note or '').strip()[:220] if last_eve else ''
+    # yesterday's thread, so replies connect ("good — that's the follow-through with Melina").
+    # Respects the AXON privacy setting: personalization off = no thread context.
+    thread = ''
+    if getattr(cu, 'axon_personalize', True):
+        last_eve = (CheckIn.query.filter(CheckIn.user_id == cu.id, CheckIn.kind == 'evening',
+                                         CheckIn.note.isnot(None))
+                    .order_by(CheckIn.date.desc(), CheckIn.id.desc()).first())
+        thread = (last_eve.note or '').strip()[:220] if last_eve else ''
     sys = ("You extract structured check-in data from natural, rambling speech. "
            "Return ONLY minified JSON, no prose, no code fences. "
            "Include a field ONLY when the person clearly expressed it — omit everything unsaid. "
@@ -2770,7 +2782,9 @@ def axon_tts():
     text = (request.form.get('text') or '').strip()[:1200]
     if not engine or not text:
         return ('', 204)
-    voice_id = (request.form.get('voice_id') or voices[0]['id']).strip()
+    # explicit voice_id > the user's saved persona > the default voice
+    saved = (getattr(current_user(), 'axon_voice', '') or '').strip()
+    voice_id = (request.form.get('voice_id') or saved or voices[0]['id']).strip()
     if not any(v['id'] == voice_id for v in voices):
         voice_id = voices[0]['id']
     try:
@@ -3202,14 +3216,24 @@ def create():
 def axon_settings():
     if not auth(): return redirect('/login')
     cu = current_user()
+    engine, voices = tts_engine()
     if request.method == 'POST':
         p = (request.form.get('personality') or '').strip().lower()
         if p in AXON_PERSONALITIES:
             cu.axon_personality = p
-            db.session.commit()
-        return {'ok': True, 'personality': cu.axon_personality}
+        v = (request.form.get('voice') or '').strip()
+        if v and any(x['id'] == v for x in voices):
+            cu.axon_voice = v
+        if 'personalize' in request.form:
+            cu.axon_personalize = request.form.get('personalize') == '1'
+        db.session.commit()
+        return {'ok': True, 'personality': cu.axon_personality,
+                'voice': cu.axon_voice, 'personalize': bool(cu.axon_personalize)}
     return render_template('axon_settings.html', u=user_ctx(),
-                           personality=(cu.axon_personality or 'mentor'), active='settings')
+                           personality=(cu.axon_personality or 'mentor'),
+                           voices=voices, engine=engine, my_voice=(cu.axon_voice or ''),
+                           personalize=(cu.axon_personalize if cu.axon_personalize is not None else True),
+                           active='settings')
 
 @app.route('/apply-pro')
 def apply_pro():

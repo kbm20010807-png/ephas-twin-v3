@@ -35,6 +35,15 @@
 .freq-btn.on{border-color:var(--gold);color:var(--gold);}
 .save-btn{margin:20px 20px 0;}
 .tw-foot{padding:28px 20px 16px;text-align:center;}
+/* voice persona cards */
+.vp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.vp-card{position:relative;padding:12px 8px 10px;border-radius:14px;background:var(--bg-2);border:1.5px solid var(--border);cursor:pointer;text-align:center;transition:border-color .15s;}
+.vp-card.on{border-color:var(--gold);background:var(--gold-dim);}
+.vp-name{font-family:'Inter',sans-serif;font-size:13px;font-weight:800;color:var(--black);}
+.vp-card.on .vp-name{color:var(--gold);}
+.vp-desc{font-size:8.5px;color:var(--sub);line-height:1.35;margin-top:3px;min-height:22px;}
+.vp-play{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2;margin-top:4px;}
+.vp-card.on .vp-play{stroke:var(--gold);}
 </style>
 {% endblock %}
 
@@ -172,6 +181,51 @@
 
 <!-- AXON VOICE -->
 <div class="sect-lbl">AXON voice</div>
+{% if engine %}
+<div class="insight-card">
+  <div class="ic-top">
+    <div class="ic-ico"><i data-lucide="mic"></i></div>
+    <div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--sub);letter-spacing:.5px;">Pick who AXON sounds like — tap to hear them</div>
+  </div>
+  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin:4px 0 8px;">Him</div>
+  <div class="vp-grid">
+    {% for v in voices if v.sex == 'm' %}
+    <div class="vp-card {% if my_voice == v.id %}on{% endif %}" data-v="{{ v.id }}" onclick="pickVoice(this,'{{ v.id }}','{{ v.name }}')">
+      <div class="vp-name">{{ v.name }}</div>
+      <div class="vp-desc">{{ v.desc }}</div>
+      <i data-lucide="volume-2" class="vp-play"></i>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin:14px 0 8px;">Her</div>
+  <div class="vp-grid">
+    {% for v in voices if v.sex == 'f' %}
+    <div class="vp-card {% if my_voice == v.id %}on{% endif %}" data-v="{{ v.id }}" onclick="pickVoice(this,'{{ v.id }}','{{ v.name }}')">
+      <div class="vp-name">{{ v.name }}</div>
+      <div class="vp-desc">{{ v.desc }}</div>
+      <i data-lucide="volume-2" class="vp-play"></i>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="voiceSaved" style="font-size:10px;font-weight:700;color:#22C55E;margin-top:10px;display:none;">Voice saved ✓</div>
+</div>
+
+<!-- AXON PRIVACY -->
+<div class="sect-lbl">AXON privacy</div>
+<div class="insight-card">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ic-ico" style="flex-shrink:0;"><i data-lucide="shield"></i></div>
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:800;color:var(--black);">Let AXON use my data to personalize</div>
+      <div style="font-size:11px;color:var(--sub);margin-top:3px;line-height:1.5;">AXON remembers what you tell it and follows up — your goals, struggles, people you mention.</div>
+    </div>
+    <label class="toggle"><input type="checkbox" id="perszTog" {% if personalize %}checked{% endif %} onchange="togPersonalize(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+  </div>
+  <div id="perszWarn" style="display:{% if personalize %}none{% else %}block{% endif %};margin-top:12px;padding:11px 13px;background:rgba(217,83,79,.08);border:1px solid rgba(217,83,79,.25);border-radius:12px;font-size:11px;color:var(--sub);line-height:1.55;">
+    Personalization is <b style="color:#E06A66;">off</b> — AXON won't remember your check-ins or follow up on your goals, habits or people. Questions become generic and features like personalized openers stop working.
+  </div>
+</div>
+{% else %}
 <div class="insight-card">
   <div class="ic-top">
     <div class="ic-ico"><i data-lucide="mic"></i></div>
@@ -186,6 +240,7 @@
   <button class="btn btn-secondary btn-full" onclick="testVoice()" style="border-radius:var(--r-xl);"><i data-lucide="play"></i> Test voice</button>
   <div id="voiceNote" style="font-size:11px;color:var(--sub);margin-top:10px;display:none;">Voice options come from your device. iPhone has great built-in voices in Settings → Accessibility → Spoken Content.</div>
 </div>
+{% endif %}
 
 <div class="save-btn">
   <button class="btn btn-primary btn-full" onclick="saveSettings()" style="border-radius:var(--r-xl);">
@@ -213,6 +268,31 @@ function setPers(el){
   el.classList.add('on');
   fetch('/axon-settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'personality='+encodeURIComponent(el.dataset.p)})
     .then(()=>{ const s=document.getElementById('persSaved'); s.style.display='block'; setTimeout(()=>s.style.display='none',1600); }).catch(()=>{});
+}
+
+// ---- Voice personas (saved to server, previewed live) ----
+var _pv=null;
+function pickVoice(el,id,name){
+  document.querySelectorAll('.vp-card').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  // save
+  fetch('/axon-settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'voice='+encodeURIComponent(id)})
+    .then(function(){ var s=document.getElementById('voiceSaved'); s.style.display='block'; setTimeout(function(){s.style.display='none';},1600); }).catch(function(){});
+  // preview
+  try{ if(_pv){_pv.pause();} }catch(e){}
+  fetch('/api/axon/tts',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({text:"Hey, I'm "+name+". I'll be your voice — let's make today count.",voice_id:id})})
+    .then(function(r){return r.status===200?r.blob():null;})
+    .then(function(b){ if(!b) return; var u=URL.createObjectURL(b); _pv=new Audio(u); _pv.onended=function(){URL.revokeObjectURL(u);}; _pv.play().catch(function(){}); })
+    .catch(function(){});
+}
+function togPersonalize(inp){
+  var on=inp.checked;
+  if(!on && !confirm("Turn off personalization? AXON will stop remembering your check-ins and won't follow up on your goals, habits or people. Personalized questions and openers stop working.")){
+    inp.checked=true; return;
+  }
+  document.getElementById('perszWarn').style.display = on ? 'none' : 'block';
+  fetch('/axon-settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'personalize='+(on?'1':'0')}).catch(function(){});
 }
 
 // ---- Voice settings (device-specific -> localStorage) ----
@@ -244,8 +324,10 @@ function testVoice(){
   speechSynthesis.cancel(); speechSynthesis.speak(u);
 }
 document.addEventListener('DOMContentLoaded',function(){
-  document.getElementById('rateSel').value=localStorage.getItem('axon_rate')||'1.03';
-  document.getElementById('pitchSel').value=localStorage.getItem('axon_pitch')||'1';
+  var r=document.getElementById('rateSel'), p=document.getElementById('pitchSel');
+  if(!r||!p) return;   // persona grid mode — no device sliders on the page
+  r.value=localStorage.getItem('axon_rate')||'1.03';
+  p.value=localStorage.getItem('axon_pitch')||'1';
   if(window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
 });
 function saveSettings(){
