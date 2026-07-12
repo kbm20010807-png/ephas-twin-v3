@@ -291,6 +291,7 @@ function startVoiceCheckin(){
   var $=function(id){return document.getElementById(id);};
   VoiceCheck.start({
     kind: 'morning',
+    name: {{ u.first|tojson }},
     doneLine: 'Locked in. Good work.',
     steps: [
       {key:'sleep', type:'number', min:3, max:12, unit:'h', apply:function(v){ $('sleepR').value=v; $('sleepDisp').textContent=v; }},

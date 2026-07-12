@@ -2712,16 +2712,19 @@ def api_parse_checkin():
            "Return ONLY minified JSON, no prose, no code fences. "
            "Include a field ONLY when the person clearly expressed it — omit everything unsaid. "
            "Numbers must be numbers, not strings. "
-           'Always include "ack": ONE short warm sentence in the voice of a sharp human coach, '
-           "acknowledging something SPECIFIC they said (no emojis, max 16 words).")
+           'Always include "ack": ONE short sentence (max 12 words) in the voice of a warm, sharp '
+           "therapist-coach — reflect something SPECIFIC they said, human and validating, never robotic. "
+           "NEVER put a question in the ack (the next question is asked separately). No emojis. "
+           'Examples: "Seven hours and straight to the gym — I like that." / '
+           '"A six after that kind of night is honestly solid."')
     msg = (f"Their habit list: {', '.join(habit_names) if habit_names else 'none'}.\n"
            f"Extractable fields: {fields}\n\n"
            f'They said: "{transcript}"\n\nJSON only.')
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-    body = {"model": AXON_MODEL_FREE, "max_tokens": 300, "system": sys,
+    body = {"model": AXON_MODEL_FREE, "max_tokens": 220, "system": sys,
             "messages": [{"role": "user", "content": msg}]}
     try:
-        raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=15).json()['content'][0]['text'].strip()
+        raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=12).json()['content'][0]['text'].strip()
         if raw.startswith('```'):
             raw = raw.split('```')[1].lstrip('json').strip()
         data = json.loads(raw)

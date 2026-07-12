@@ -108,7 +108,7 @@
         if (navigator.vibrate) navigator.vibrate(12);
         var ack = (typeof d.data.ack === 'string' && d.data.ack) ? d.data.ack : 'Got it.';
         subEl.textContent = '';
-        speak(ack, advance);
+        advance(ack);   // ack + next question spoken as ONE utterance (one fetch, no gap)
       })
       .catch(function () { localFallback(said); });
   }
@@ -138,7 +138,7 @@
     filled[s.key] = true;
     valEl.textContent = '✓ Got it';
     if (navigator.vibrate) navigator.vibrate(12);
-    setTimeout(advance, 650);
+    advance('Got it.');
   }
 
   function applyValue(s, val) {
@@ -180,8 +180,20 @@
     for (var i = 0; i < cfg.steps.length; i++) if (!filled[cfg.steps[i].key]) return cfg.steps[i];
     return null;
   }
-  function ask() {
-    var s = current(); if (!s) return finish();
+  function greeting() {
+    var name = cfg.name || '';
+    var pools = cfg.kind === 'morning'
+      ? ['Hey ' + name + '. Good to hear you — let’s take a minute on your morning.',
+         'Morning, ' + name + '. Quick check-in, then you’re off.',
+         'Hey ' + name + '. Let’s see where you’re at today.']
+      : ['Hey ' + name + '. Let’s close the day properly.',
+         'Evening, ' + name + '. Talk to me — how did today go?',
+         'Hey ' + name + '. Day’s done — let’s take stock.'];
+    return pools[Math.floor(Math.random() * pools.length)];
+  }
+  // ask(prefix): speaks prefix (greeting or ack) + the next question as ONE utterance — one fetch, zero gap
+  function ask(prefix) {
+    var s = current(); if (!s) return finish(prefix);
     var done = cfg.steps.filter(function (x) { return filled[x.key]; }).length;
     progEl.textContent = done + ' / ' + cfg.steps.length;
     var q = (document.querySelector('[data-q="' + s.key + '"]') || {}).textContent || s.key;
@@ -189,12 +201,12 @@
     subEl.textContent = 'AXON is asking…';
     var idx = cfg.steps.indexOf(s);
     if (typeof window.show === 'function') { try { window.show(idx + 1); } catch (e) {} }
-    speak(q, listen);
+    speak((prefix ? prefix + ' ' : '') + q, listen);
   }
-  function advance() { if (!active) return; current() ? ask() : finish(); }
-  function finish() {
+  function advance(prefix) { if (!active) return; current() ? ask(prefix) : finish(prefix); }
+  function finish(prefix) {
     qEl.textContent = 'All done.'; subEl.textContent = 'Saving…'; trEl.textContent = '';
-    speak(cfg.doneLine || 'Done. Locked in.', function () {});
+    speak((prefix ? prefix + ' ' : '') + (cfg.doneLine || 'Done. Locked in.'), function () {});
     setTimeout(function () { stop(true); cfg.onDone(); }, 500);
   }
   function stop(silent) {
@@ -211,7 +223,7 @@
       if (!SR) { alert('Voice needs a supported browser (Safari/Chrome). Type it this time.'); return; }
       cfg = c; filled = {}; active = true;
       build(); ov.classList.add('on');
-      ask();
+      ask(greeting());   // opens like a person: "Hey Khalid. Good to hear you..." + first question
     }
   };
 })();
