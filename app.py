@@ -2992,6 +2992,45 @@ def service_worker():
     resp.headers['Cache-Control'] = 'no-cache'
     return resp
 
+@app.route('/api/export-data')
+def api_export_data():
+    """GDPR-style export: everything we hold about the user, as a downloadable JSON file."""
+    if not auth(): return redirect('/login')
+    cu = current_user()
+    p = get_profile(cu)
+    def dt(x): return x.isoformat() if x else None
+    data = {
+        'exported_at': datetime.utcnow().isoformat() + 'Z',
+        'account': {'email': cu.email, 'username': cu.username, 'name': cu.name, 'bio': cu.bio,
+                    'city': cu.city, 'job': cu.job, 'created_at': dt(cu.created_at),
+                    'axon_personality': cu.axon_personality, 'axon_voice': cu.axon_voice,
+                    'axon_personalize': bool(cu.axon_personalize), 'badges': cu.badges,
+                    'xp_bonus': cu.bonus_xp},
+        'personal': {'sex': p.sex, 'birth_date': p.birth_date, 'age': p.age, 'height': p.height,
+                     'weight': p.weight, 'religion': p.religion, 'primary_goal': p.primary_goal,
+                     'bad_habits': p.bad_habits, 'focus': p.focus},
+        'checkins': [{'date': dt(r.date), 'kind': r.kind, 'sleep': r.sleep, 'energy': r.energy,
+                      'mood': r.mood, 'day_rating': r.day_rating, 'goal_hit': r.goal_hit,
+                      'habits': r.habits, 'win': r.win, 'reflection': r.reflection, 'note': r.note}
+                     for r in CheckIn.query.filter_by(user_id=cu.id).order_by(CheckIn.date).all()],
+        'habits': [{'name': h.name, 'is_bad': h.is_bad, 'created_at': dt(h.created_at),
+                    'log_dates': [dt(l.date) for l in HabitLog.query.filter_by(habit_id=h.id).all()]}
+                   for h in Habit.query.filter_by(user_id=cu.id).all()],
+        'posts': [{'kind': x.kind, 'title': x.title, 'text': x.text, 'created_at': dt(x.created_at)}
+                  for x in Post.query.filter_by(user_id=cu.id).order_by(Post.created_at).all()],
+        'axon_chat': [{'role': m.role, 'content': m.content, 'at': dt(m.created_at)}
+                      for m in AxonMessage.query.filter_by(user_id=cu.id).order_by(AxonMessage.created_at).all()],
+        'direct_messages': [{'direction': 'sent' if m.sender_id == cu.id else 'received',
+                             'text': m.text, 'at': dt(m.created_at)}
+                            for m in DirectMessage.query.filter(
+                                db.or_(DirectMessage.sender_id == cu.id,
+                                       DirectMessage.recipient_id == cu.id))
+                            .order_by(DirectMessage.created_at).all()],
+    }
+    return Response(json.dumps(data, indent=2, ensure_ascii=False),
+                    mimetype='application/json',
+                    headers={'Content-Disposition': 'attachment; filename=twin-data-export.json'})
+
 @app.route('/cron/streak-nudge')
 def cron_streak_nudge():
     """Point a once-daily evening cron (Railway cron / cron-job.org) at
