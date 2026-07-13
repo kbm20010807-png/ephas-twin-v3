@@ -1,15 +1,76 @@
-/* VoiceCheck v2 — free-speech conversational check-in.
-   AXON speaks with the real TTS pipeline (/api/axon/tts: OpenAI/ElevenLabs when configured,
-   device voice as fallback), you answer NATURALLY — ramble, add context, whatever — and
-   AXON's AI (/api/axon/parse-checkin) extracts every field it heard. One rambling answer
-   can fill several questions at once; only what's still missing gets asked. */
+/* VoiceCheck v3 — fast conversational check-in.
+   Speed design:
+   - ONE reusable <audio> element, unlocked by the user's initial tap (iOS keeps it trusted
+     for the whole session — fixes "turn 2 is silent" autoplay blocking).
+   - The NEXT question's audio is prefetched WHILE the user is still talking, so after the
+     AI parse the reply plays instantly (turn latency ≈ parse time only).
+   - Acks show as text on screen instead of being spoken — tighter loop, ChatGPT pacing.
+   Free speech: answers go to /api/axon/parse-checkin; one rambling answer can fill many fields. */
 (function () {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   var ov, qEl, subEl, trEl, valEl, micEl, progEl;
-  var cfg = null, active = false, recog = null, curAudio = null;
-  var filled = {};   // step.key -> true once answered
-  var _pre = null, _preGreet = '';   // preloaded opener audio (fetched before the user even taps)
+  var cfg = null, active = false, recog = null;
+  var filled = {};
+  var audioEl = null;                 // single trusted audio element (created on the start tap)
+  var ttsCache = {};                  // text -> objectURL (pre-fetched speech)
+  var _preGreet = '';
 
+  /* ---------- audio ---------- */
+  function ensureAudio() {
+    if (!audioEl) { audioEl = new Audio(); audioEl.setAttribute('playsinline', ''); }
+    return audioEl;
+  }
+  function warm(text) {               // prefetch speech for `text` into the cache
+    if (!text || ttsCache[text]) return;
+    ttsCache[text] = 'pending';
+    fetch('/api/axon/tts', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ text: text }) })
+      .then(function (r) { return r.status === 200 ? r.blob() : null; })
+      .then(function (b) { ttsCache[text] = b ? URL.createObjectURL(b) : ''; })
+      .catch(function () { ttsCache[text] = ''; });
+  }
+  function deviceSpeak(text, then) {
+    try {
+      if (!window.speechSynthesis) return then();
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.02;
+      var fired = false, go = function () { if (!fired) { fired = true; then(); } };
+      u.onend = go; u.onerror = go;
+      setTimeout(go, Math.min(9000, 2500 + text.length * 75));
+      speechSynthesis.speak(u);
+    } catch (e) { then(); }
+  }
+  function playUrl(url, text, then) {
+    var a = ensureAudio();
+    a.onended = function () { then(); };
+    a.onerror = function () { deviceSpeak(text, then); };
+    a.src = url;
+    a.play().catch(function () { deviceSpeak(text, then); });
+  }
+  function speak(text, then) {
+    var hit = ttsCache[text];
+    if (hit && hit !== 'pending') return playUrl(hit, text, then);
+    if (hit === 'pending') {          // fetch already in flight — wait briefly for it
+      var waited = 0, iv = setInterval(function () {
+        waited += 120;
+        var h = ttsCache[text];
+        if (h && h !== 'pending') { clearInterval(iv); playUrl(h, text, then); }
+        else if (waited > 4000) { clearInterval(iv); deviceSpeak(text, then); }
+      }, 120);
+      return;
+    }
+    fetch('/api/axon/tts', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ text: text }) })
+      .then(function (r) { return r.status === 200 ? r.blob() : null; })
+      .then(function (b) {
+        if (!b) return deviceSpeak(text, then);
+        var url = URL.createObjectURL(b);
+        ttsCache[text] = url;
+        playUrl(url, text, then);
+      })
+      .catch(function () { deviceSpeak(text, then); });
+  }
+
+  /* ---------- UI ---------- */
   function build() {
     if (ov) return;
     ov = document.createElement('div');
@@ -36,43 +97,6 @@
     ov.querySelector('[data-a="skip"]').onclick = function () { var s = current(); if (s) filled[s.key] = true; advance(); };
   }
 
-  /* ---------- speech out: real TTS first, device voice fallback ---------- */
-  function deviceSpeak(text, then) {
-    try {
-      if (!window.speechSynthesis) return then();
-      speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.02;
-      var fired = false, go = function () { if (!fired) { fired = true; then(); } };
-      u.onend = go; u.onerror = go;
-      setTimeout(go, Math.min(9000, 2500 + text.length * 75));
-      speechSynthesis.speak(u);
-    } catch (e) { then(); }
-  }
-  function speak(text, then) {
-    try { if (curAudio) { curAudio.pause(); curAudio = null; } } catch (e) {}
-    // preloaded opener: audio was fetched while the chooser was open — plays instantly
-    if (_pre && _pre.text === text && _pre.url) {
-      var pu = _pre.url; _pre = null;
-      curAudio = new Audio(pu);
-      curAudio.onended = function () { URL.revokeObjectURL(pu); then(); };
-      curAudio.onerror = function () { deviceSpeak(text, then); };
-      curAudio.play().catch(function () { deviceSpeak(text, then); });
-      return;
-    }
-    fetch('/api/axon/tts', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ text: text }) })
-      .then(function (r) { return r.status === 200 ? r.blob() : null; })
-      .then(function (blob) {
-        if (!blob) return deviceSpeak(text, then);
-        var url = URL.createObjectURL(blob);
-        curAudio = new Audio(url);
-        curAudio.onended = function () { URL.revokeObjectURL(url); then(); };
-        curAudio.onerror = function () { deviceSpeak(text, then); };
-        curAudio.play().catch(function () { deviceSpeak(text, then); });
-      })
-      .catch(function () { deviceSpeak(text, then); });
-  }
-
   /* ---------- speech in ---------- */
   function listen() {
     if (!SR || !active) return;
@@ -81,6 +105,7 @@
     recog.lang = 'en-US'; recog.interimResults = true; recog.continuous = false;
     micEl.classList.add('live'); trEl.textContent = '';
     subEl.textContent = 'Just talk — say as much as you want';
+    warmNext();                        // fetch the NEXT question's audio while they speak
     var finalT = '';
     recog.onresult = function (e) {
       var t = '';
@@ -101,13 +126,9 @@
     try { recog.start(); } catch (e) {}
   }
 
-  /* ---------- understanding: AXON AI first, local parse fallback ---------- */
-  function speakRetry(msg) {   // never leave dead air — say it, then listen again
-    subEl.textContent = '';
-    speak(msg, listen);
-  }
+  /* ---------- understanding ---------- */
+  function speakRetry(msg) { subEl.textContent = ''; speak(msg, listen); }
   function understand(said) {
-    // confusion/protest ("what are you talking about?") → apologize out loud and re-ask cleanly
     if (/(what are you talking about|what do you mean|makes no sense|that's wrong|huh\b|who is that|i never said)/i.test(said)) {
       var s = current();
       var q = s ? ((document.querySelector('[data-q="' + s.key + '"]') || {}).textContent || '') : '';
@@ -115,7 +136,8 @@
       return;
     }
     subEl.textContent = 'AXON is thinking…';
-    fetch('/api/axon/parse-checkin', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ kind: cfg.kind, transcript: said }) })
+    var unfilled = cfg.steps.filter(function (s) { return !filled[s.key]; }).map(function (s) { return s.key; }).join(',');
+    fetch('/api/axon/parse-checkin', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ kind: cfg.kind, transcript: said, unfilled: unfilled }) })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (!d || !d.ok || !d.data) return localFallback(said);
@@ -125,11 +147,18 @@
           if (applyValue(s, d.data[s.key])) { filled[s.key] = true; got.push(s.key); }
         });
         if (!got.length) return localFallback(said);
-        valEl.textContent = '✓ Got it';
+        var ack = (typeof d.data.ack === 'string' && d.data.ack) ? d.data.ack : '✓ Got it';
+        valEl.textContent = ack;
         if (navigator.vibrate) navigator.vibrate(12);
-        var ack = (typeof d.data.ack === 'string' && d.data.ack) ? d.data.ack : 'Got it.';
         subEl.textContent = '';
-        advance(ack);   // ack + next question spoken as ONE utterance (one fetch, no gap)
+        // fully-AI turn: if AXON wrote the next question for the step we're actually on, speak
+        // ack + its question as one utterance. Otherwise use the (pre-fetched, instant) static one.
+        var nxt = current();
+        if (nxt && d.data.next_key === nxt.key && typeof d.data.next_q === 'string' && d.data.next_q) {
+          ask('', ack + ' ' + d.data.next_q);
+        } else {
+          advance();
+        }
       })
       .catch(function () { localFallback(said); });
   }
@@ -155,7 +184,7 @@
     else if (s.type === 'match') ok = applyValue(s, low.split(/[^a-z]+/));
     else if (s.type === 'grats') ok = applyValue(s, said.split(/(?:,| and |;)+/i));
     else ok = applyValue(s, said);
-    if (!ok) {   // couldn't parse — SAY so (silence feels like a crash) and listen again
+    if (!ok) {
       var hint = (s.type === 'number' || s.type === 'scale') ? 'Just give me a number — like seven.'
                : (s.type === 'yesno') ? 'Simple one — yes or no?'
                : "Didn't catch that — one more time?";
@@ -165,7 +194,7 @@
     filled[s.key] = true;
     valEl.textContent = '✓ Got it';
     if (navigator.vibrate) navigator.vibrate(12);
-    advance('Got it.');
+    advance();
   }
 
   function applyValue(s, val) {
@@ -207,6 +236,22 @@
     for (var i = 0; i < cfg.steps.length; i++) if (!filled[cfg.steps[i].key]) return cfg.steps[i];
     return null;
   }
+  function nextAfterCurrent() {       // the most likely next step (assumes current gets answered)
+    var seen = false;
+    for (var i = 0; i < cfg.steps.length; i++) {
+      var s = cfg.steps[i];
+      if (filled[s.key]) continue;
+      if (!seen) { seen = true; continue; }   // skip the current one
+      return s;
+    }
+    return null;
+  }
+  function qText(s) { return s ? ((document.querySelector('[data-q="' + s.key + '"]') || {}).textContent || s.key) : ''; }
+  function warmNext() {
+    var n = nextAfterCurrent();
+    if (n) warm(qText(n));
+    if (!n) warm(cfg.doneLine || 'Done. Locked in.');
+  }
   function pickGreeting(kind, name) {
     if (typeof window.AXON_OPENER === 'string' && window.AXON_OPENER) return window.AXON_OPENER;
     var pools = kind === 'morning'
@@ -218,65 +263,51 @@
          'Hey ' + name + '. Day’s done — let’s take stock.'];
     return pools[Math.floor(Math.random() * pools.length)];
   }
-  function greeting() {
-    if (_preGreet) return _preGreet;   // matches the preloaded audio → instant start
-    // Prefer AXON's personalized opener ("Heard you had an issue with Melina — let's talk.")
-    if (typeof window.AXON_OPENER === 'string' && window.AXON_OPENER) return window.AXON_OPENER;
-    var name = cfg.name || '';
-    var pools = cfg.kind === 'morning'
-      ? ['Hey ' + name + '. Good to hear you — let’s take a minute on your morning.',
-         'Morning, ' + name + '. Quick check-in, then you’re off.',
-         'Hey ' + name + '. Let’s see where you’re at today.']
-      : ['Hey ' + name + '. Let’s close the day properly.',
-         'Evening, ' + name + '. Talk to me — how did today go?',
-         'Hey ' + name + '. Day’s done — let’s take stock.'];
-    return pools[Math.floor(Math.random() * pools.length)];
-  }
-  // ask(prefix): speaks prefix (greeting or ack) + the next question as ONE utterance — one fetch, zero gap
-  function ask(prefix) {
-    var s = current(); if (!s) return finish(prefix);
+  function greeting() { return _preGreet || pickGreeting(cfg.kind, cfg.name || ''); }
+  function ask(prefix, aiUtterance) {
+    var s = current(); if (!s) return finish();
     var done = cfg.steps.filter(function (x) { return filled[x.key]; }).length;
     progEl.textContent = done + ' / ' + cfg.steps.length;
-    var q = (document.querySelector('[data-q="' + s.key + '"]') || {}).textContent || s.key;
-    qEl.textContent = q; valEl.textContent = ''; trEl.textContent = '';
+    var q = qText(s);
+    qEl.textContent = aiUtterance ? aiUtterance : q;   // show what's actually being said
+    trEl.textContent = '';
     subEl.textContent = 'AXON is asking…';
     var idx = cfg.steps.indexOf(s);
     if (typeof window.show === 'function') { try { window.show(idx + 1); } catch (e) {} }
-    speak((prefix ? prefix + ' ' : '') + q, listen);
+    speak(aiUtterance ? aiUtterance : ((prefix ? prefix + ' ' : '') + q), listen);
   }
-  function advance(prefix) { if (!active) return; current() ? ask(prefix) : finish(prefix); }
-  function finish(prefix) {
+  function advance() { if (!active) return; current() ? ask() : finish(); }
+  function finish() {
     qEl.textContent = 'All done.'; subEl.textContent = 'Saving…'; trEl.textContent = '';
-    speak((prefix ? prefix + ' ' : '') + (cfg.doneLine || 'Done. Locked in.'), function () {});
+    speak(cfg.doneLine || 'Done. Locked in.', function () {});
     setTimeout(function () { stop(true); cfg.onDone(); }, 500);
   }
   function stop(silent) {
     active = false;
     try { if (recog) recog.stop(); } catch (e) {}
     try { speechSynthesis.cancel(); } catch (e) {}
-    try { if (curAudio) curAudio.pause(); } catch (e) {}
+    try { if (audioEl) audioEl.pause(); } catch (e) {}
+    for (var k in ttsCache) { if (ttsCache[k] && ttsCache[k] !== 'pending') { try { URL.revokeObjectURL(ttsCache[k]); } catch (e) {} } }
+    ttsCache = {}; _preGreet = '';
     if (ov) ov.classList.remove('on');
   }
 
   window.VoiceCheck = {
     supported: function () { return !!SR; },
-    // preload({kind,name,firstQ}) — fetch the opener's audio while the chooser is still open,
-    // so tapping "Talk it out" starts speaking instantly instead of waiting on the network.
+    // preload the opener's audio while the chooser is open → tap = instant speech
     preload: function (o) {
       if (!SR || !o || !o.firstQ) return;
       var g = pickGreeting(o.kind, o.name || '');
-      var text = g + ' ' + o.firstQ;
-      if (_pre && _pre.text === text) return;   // already preloaded
-      fetch('/api/axon/tts', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ text: text }) })
-        .then(function (r) { return r.status === 200 ? r.blob() : null; })
-        .then(function (b) { if (!b) return; _preGreet = g; _pre = { text: text, url: URL.createObjectURL(b) }; })
-        .catch(function () {});
+      _preGreet = g;
+      warm(g + ' ' + o.firstQ);
     },
     start: function (c) {
       if (!SR) { alert('Voice needs a supported browser (Safari/Chrome). Type it this time.'); return; }
       cfg = c; filled = {}; active = true;
       build(); ov.classList.add('on');
-      ask(greeting());   // opens like a person: "Hey Khalid. Good to hear you..." + first question
+      ensureAudio();                   // created inside the tap = trusted for the whole session
+      try { audioEl.play().catch(function () {}); } catch (e) {}   // unlock even before src is set
+      ask(greeting());
     }
   };
 })();

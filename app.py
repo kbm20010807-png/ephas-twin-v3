@@ -2172,7 +2172,8 @@ def axon_generate_questions(user, kind):
            "6) GROUNDING — ABSOLUTE RULE: only mention people, events or situations that appear WORD-FOR-WORD "
            "in the provided context. If the context has no recent words, write strong general questions and "
            "DO NOT invent anything (no imaginary weddings, funerals, jobs, names — nothing). "
-           "Each question (q) <= 10 words. Each hint <= 14 words. First name in AT MOST one question. "
+           "Each question (q) <= 10 words. Each hint <= 14 words. NEVER put their first name inside a "
+           "question — the spoken greeting already says their name (saying it twice sounds robotic). "
            "Return ONLY valid minified JSON, no prose, no code fences.")
     has_context = bool(getattr(user, 'axon_personalize', True) and (notes or mem))
     opener_ask = ((' — PLUS one extra key "opener": a one-sentence spoken greeting for them referencing '
@@ -2762,13 +2763,19 @@ def api_parse_checkin():
            '(e.g. "Good — keep it that way, and tell her that too."). '
            "GROUNDING: only reference what is in their transcript or the provided thread — never invent "
            "events, people or situations. "
-           "NEVER put a question in the ack (the next question is asked separately). No emojis.")
+           "NEVER put a question in the ack. NEVER use their first name (it sounds robotic mid-chat). "
+           "No emojis. "
+           'If a REMAINING-FIELDS list is provided, also include "next_key" (the FIRST remaining field '
+           'you did NOT extract) and "next_q": ONE natural spoken question for that field (max 14 words, '
+           "conversational, flows from the ack).")
+    unfilled = [k.strip() for k in (request.form.get('unfilled') or '').split(',') if k.strip()][:8]
     msg = (f"Their habit list: {', '.join(habit_names) if habit_names else 'none'}.\n"
            + (f"Their recent thread: {thread}\n" if thread else "")
-           + f"Extractable fields: {fields}\n\n"
-           f'They said: "{transcript}"\n\nJSON only.')
+           + f"Extractable fields: {fields}\n"
+           + (f"REMAINING-FIELDS (in order): {', '.join(unfilled)}\n" if unfilled else "")
+           + f'\nThey said: "{transcript}"\n\nJSON only.')
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
-    body = {"model": AXON_MODEL_FREE, "max_tokens": 220, "system": sys,
+    body = {"model": AXON_MODEL_FREE, "max_tokens": 280, "system": sys,
             "messages": [{"role": "user", "content": msg}]}
     try:
         raw = requests.post(ANTHROPIC_URL, headers=headers, json=body, timeout=12).json()['content'][0]['text'].strip()
