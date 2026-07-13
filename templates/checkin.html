@@ -280,10 +280,16 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 <script src="/static/voicecheck.js" defer></script>
 <script>
 // Offer the voice/manual choice up front (only when the browser supports speech)
+function vcPreload(){
+  if(!window.VoiceCheck || !VoiceCheck.supported()) return;
+  var q=document.querySelector('[data-q="sleep"]');
+  VoiceCheck.preload({kind:'morning', name:{{ u.first|tojson }}, firstQ:(q?q.textContent:'')});
+}
 window.addEventListener('load', function(){
   if(window.VoiceCheck && VoiceCheck.supported()){
     document.getElementById('modeOv').style.display='flex';
     if(typeof lucide!=='undefined') lucide.createIcons();
+    vcPreload();   // fetch the opener's audio while the user reads the chooser
   }
 });
 function startVoiceCheckin(){
@@ -417,7 +423,7 @@ updateProg();
 // AXON personalizes the questions in the background, then swaps them in.
 fetch('/api/axon/questions?kind=morning').then(r=>r.json()).then(d=>{
   const Q=d&&d.questions; if(!Q) return;
-  if(Q._opener && Q._opener.q) window.AXON_OPENER = Q._opener.q;   // personalized voice greeting
+  if(Q._opener && Q._opener.q){ window.AXON_OPENER = Q._opener.q; if(typeof vcPreload==='function') vcPreload(); }   // personalized voice greeting (re-preload its audio)
   // Only refresh steps the user hasn't reached — the question on screen never changes mid-read.
   const ORDER=['sleep','energy','mood','habits','win','reflection'];
   for(const k in Q){

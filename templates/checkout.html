@@ -247,10 +247,16 @@ body{min-height:100vh;display:flex;flex-direction:column;}
 </div>
 <script src="/static/voicecheck.js" defer></script>
 <script>
+function vcPreload(){
+  if(!window.VoiceCheck || !VoiceCheck.supported()) return;
+  var q=document.querySelector('[data-q="rating"]');
+  VoiceCheck.preload({kind:'evening', name:{{ u.first|tojson }}, firstQ:(q?q.textContent:'')});
+}
 window.addEventListener('load', function(){
   if(window.VoiceCheck && VoiceCheck.supported()){
     document.getElementById('modeOv').style.display='flex';
     if(typeof lucide!=='undefined') lucide.createIcons();
+    vcPreload();   // fetch the opener's audio while the user reads the chooser
   }
 });
 function startVoiceCheckout(){
@@ -344,7 +350,7 @@ updateProg();
 // so the question on screen never changes while you're reading it.
 fetch('/api/axon/questions?kind=evening').then(r=>r.json()).then(d=>{
   const Q=d&&d.questions; if(!Q) return;
-  if(Q._opener && Q._opener.q) window.AXON_OPENER = Q._opener.q;   // personalized voice greeting
+  if(Q._opener && Q._opener.q){ window.AXON_OPENER = Q._opener.q; if(typeof vcPreload==='function') vcPreload(); }   // personalized voice greeting (re-preload its audio)
   const ORDER=['rating','habits','goal','blocker','tomorrow','gratitude'];
   for(const k in Q){
     const idx=ORDER.indexOf(k);

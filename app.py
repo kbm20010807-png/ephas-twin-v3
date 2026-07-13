@@ -2169,13 +2169,18 @@ def axon_generate_questions(user, kind):
            "in the HINT (e.g. 'Movies streak says 0 — today's the day?'). NEVER a yes/no about one habit. "
            "4) Warm, human, zero judgment — a coach who's on their side, occasionally playful, never clinical. "
            "5) Every question different from each other; no generic templates when a follow-up exists. "
+           "6) GROUNDING — ABSOLUTE RULE: only mention people, events or situations that appear WORD-FOR-WORD "
+           "in the provided context. If the context has no recent words, write strong general questions and "
+           "DO NOT invent anything (no imaginary weddings, funerals, jobs, names — nothing). "
            "Each question (q) <= 10 words. Each hint <= 14 words. First name in AT MOST one question. "
            "Return ONLY valid minified JSON, no prose, no code fences.")
+    has_context = bool(getattr(user, 'axon_personalize', True) and (notes or mem))
+    opener_ask = ((' — PLUS one extra key "opener": a one-sentence spoken greeting for them referencing '
+                   'the most important recent thread (warm, specific, max 18 words)')
+                  if has_context else '')
     msg = (f"Context:\n{' '.join(ctx)}\n\nField meanings: {meaning}.\n\n"
            f"Return JSON with EXACTLY these keys: {steps}, "
-           'each an object {"q": "...", "hint": "..."} — PLUS one extra key "opener": '
-           "a one-sentence spoken greeting for them referencing the most important recent thread "
-           "(warm, specific, max 18 words, no question mark needed). JSON only.")
+           'each an object {"q": "...", "hint": "..."}' + opener_ask + ". JSON only.")
     headers = {"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
     body = {"model": AXON_MODEL_FREE, "max_tokens": 700, "system": sys,
             "messages": [{"role": "user", "content": msg}]}
@@ -2203,7 +2208,7 @@ def axon_generate_questions(user, kind):
                     ql = out[step]['q'].strip().lower()
                 seen_q.add(ql)
         opener = (data.get('opener') or '').strip()
-        if opener:
+        if opener and has_context:   # never ship an opener invented from thin air
             out['_opener'] = {'q': opener[:140], 'hint': ''}
         if len(out) >= max(3, len(steps) - 1):  # accept if it got most of them
             _QSET_CACHE[key] = out
@@ -2755,6 +2760,8 @@ def api_parse_checkin():
            "therapist-coach who KNOWS their ongoing situations — reflect something SPECIFIC they said, "
            "and when it connects to their recent thread, add ONE short practical nudge "
            '(e.g. "Good — keep it that way, and tell her that too."). '
+           "GROUNDING: only reference what is in their transcript or the provided thread — never invent "
+           "events, people or situations. "
            "NEVER put a question in the ack (the next question is asked separately). No emojis.")
     msg = (f"Their habit list: {', '.join(habit_names) if habit_names else 'none'}.\n"
            + (f"Their recent thread: {thread}\n" if thread else "")

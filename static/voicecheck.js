@@ -8,6 +8,7 @@
   var ov, qEl, subEl, trEl, valEl, micEl, progEl;
   var cfg = null, active = false, recog = null, curAudio = null;
   var filled = {};   // step.key -> true once answered
+  var _pre = null, _preGreet = '';   // preloaded opener audio (fetched before the user even taps)
 
   function build() {
     if (ov) return;
@@ -50,6 +51,15 @@
   }
   function speak(text, then) {
     try { if (curAudio) { curAudio.pause(); curAudio = null; } } catch (e) {}
+    // preloaded opener: audio was fetched while the chooser was open — plays instantly
+    if (_pre && _pre.text === text && _pre.url) {
+      var pu = _pre.url; _pre = null;
+      curAudio = new Audio(pu);
+      curAudio.onended = function () { URL.revokeObjectURL(pu); then(); };
+      curAudio.onerror = function () { deviceSpeak(text, then); };
+      curAudio.play().catch(function () { deviceSpeak(text, then); });
+      return;
+    }
     fetch('/api/axon/tts', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ text: text }) })
       .then(function (r) { return r.status === 200 ? r.blob() : null; })
       .then(function (blob) {
@@ -92,7 +102,18 @@
   }
 
   /* ---------- understanding: AXON AI first, local parse fallback ---------- */
+  function speakRetry(msg) {   // never leave dead air — say it, then listen again
+    subEl.textContent = '';
+    speak(msg, listen);
+  }
   function understand(said) {
+    // confusion/protest ("what are you talking about?") → apologize out loud and re-ask cleanly
+    if (/(what are you talking about|what do you mean|makes no sense|that's wrong|huh\b|who is that|i never said)/i.test(said)) {
+      var s = current();
+      var q = s ? ((document.querySelector('[data-q="' + s.key + '"]') || {}).textContent || '') : '';
+      speakRetry("My bad — scratch that. " + q);
+      return;
+    }
     subEl.textContent = 'AXON is thinking…';
     fetch('/api/axon/parse-checkin', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ kind: cfg.kind, transcript: said }) })
       .then(function (r) { return r.json(); })
@@ -134,7 +155,13 @@
     else if (s.type === 'match') ok = applyValue(s, low.split(/[^a-z]+/));
     else if (s.type === 'grats') ok = applyValue(s, said.split(/(?:,| and |;)+/i));
     else ok = applyValue(s, said);
-    if (!ok) { subEl.textContent = 'Say that another way?'; return; }
+    if (!ok) {   // couldn't parse — SAY so (silence feels like a crash) and listen again
+      var hint = (s.type === 'number' || s.type === 'scale') ? 'Just give me a number — like seven.'
+               : (s.type === 'yesno') ? 'Simple one — yes or no?'
+               : "Didn't catch that — one more time?";
+      speakRetry(hint);
+      return;
+    }
     filled[s.key] = true;
     valEl.textContent = '✓ Got it';
     if (navigator.vibrate) navigator.vibrate(12);
@@ -180,7 +207,19 @@
     for (var i = 0; i < cfg.steps.length; i++) if (!filled[cfg.steps[i].key]) return cfg.steps[i];
     return null;
   }
+  function pickGreeting(kind, name) {
+    if (typeof window.AXON_OPENER === 'string' && window.AXON_OPENER) return window.AXON_OPENER;
+    var pools = kind === 'morning'
+      ? ['Hey ' + name + '. Good to hear you — let’s take a minute on your morning.',
+         'Morning, ' + name + '. Quick check-in, then you’re off.',
+         'Hey ' + name + '. Let’s see where you’re at today.']
+      : ['Hey ' + name + '. Let’s close the day properly.',
+         'Evening, ' + name + '. Talk to me — how did today go?',
+         'Hey ' + name + '. Day’s done — let’s take stock.'];
+    return pools[Math.floor(Math.random() * pools.length)];
+  }
   function greeting() {
+    if (_preGreet) return _preGreet;   // matches the preloaded audio → instant start
     // Prefer AXON's personalized opener ("Heard you had an issue with Melina — let's talk.")
     if (typeof window.AXON_OPENER === 'string' && window.AXON_OPENER) return window.AXON_OPENER;
     var name = cfg.name || '';
@@ -221,6 +260,18 @@
 
   window.VoiceCheck = {
     supported: function () { return !!SR; },
+    // preload({kind,name,firstQ}) — fetch the opener's audio while the chooser is still open,
+    // so tapping "Talk it out" starts speaking instantly instead of waiting on the network.
+    preload: function (o) {
+      if (!SR || !o || !o.firstQ) return;
+      var g = pickGreeting(o.kind, o.name || '');
+      var text = g + ' ' + o.firstQ;
+      if (_pre && _pre.text === text) return;   // already preloaded
+      fetch('/api/axon/tts', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ text: text }) })
+        .then(function (r) { return r.status === 200 ? r.blob() : null; })
+        .then(function (b) { if (!b) return; _preGreet = g; _pre = { text: text, url: URL.createObjectURL(b) }; })
+        .catch(function () {});
+    },
     start: function (c) {
       if (!SR) { alert('Voice needs a supported browser (Safari/Chrome). Type it this time.'); return; }
       cfg = c; filled = {}; active = true;
