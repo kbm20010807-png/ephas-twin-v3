@@ -209,10 +209,15 @@ function onPick(input){
   reader.onload=e=>{
     const img=new Image();
     img.onload=()=>{
-      const max=1080; let {width:w,height:h}=img;
+      // Instagram ratio clamp: center-crop into [9:16 .. 1.91:1] so every post fits the app
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      const r=sw/sh, MIN=9/16, MAX=1.91;
+      if(r<MIN){ const nh=Math.round(sw/MIN); sy=Math.round((sh-nh)/2); sh=nh; }
+      else if(r>MAX){ const nw=Math.round(sh*MAX); sx=Math.round((sw-nw)/2); sw=nw; }
+      const max=1080; let w=sw, h=sh;
       if(w>max||h>max){ if(w>h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
       const c=document.createElement('canvas'); c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
+      c.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,w,h);
       postImage=c.toDataURL('image/jpeg',0.82);
       const pv=document.getElementById('upPreview');
       pv.src=postImage; pv.style.display='block';

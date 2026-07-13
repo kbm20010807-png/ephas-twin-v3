@@ -120,10 +120,15 @@ function fromGallery(inp){
   r.onload=e=>{
     const img=new Image();
     img.onload=function(){
+      // Instagram ratio clamp: center-crop into [9:16 .. 1.91:1]
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      const r=sw/sh, MIN=9/16, MAX=1.91;
+      if(r<MIN){ const nh=Math.round(sw/MIN); sy=Math.round((sh-nh)/2); sh=nh; }
+      else if(r>MAX){ const nw=Math.round(sh*MAX); sx=Math.round((sw-nw)/2); sw=nw; }
       const c=document.getElementById('dpCanvas');
-      const w=Math.min(img.width,1080), h=Math.round(img.height*(w/img.width));
+      const w=Math.min(sw,1080), h=Math.round(sh*(w/sw));
       c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
+      c.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,w,h);
       shotData=c.toDataURL('image/jpeg',0.82);
       showShot();
     };

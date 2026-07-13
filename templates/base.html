@@ -33,6 +33,19 @@
     }});
   }catch(e){}
 })();
+// Instagram-style media sizing: every post previews at its OWN ratio, clamped to IG's
+// allowed range — 9:16 (reel-tall) through 1.91:1 (landscape). Call from onload/onloadedmetadata.
+function igFit(m){
+  var w=m.naturalWidth||m.videoWidth, h=m.naturalHeight||m.videoHeight;
+  if(!w||!h) return;
+  var r=w/h, cr=Math.max(9/16, Math.min(1.91, r));
+  var box=m.parentElement;
+  if(box){ box.style.aspectRatio=String(cr); }
+  m.style.width='100%'; m.style.height='100%'; m.style.objectFit='cover';
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.fc-media img,.pc-img img').forEach(function(m){ if(m.complete) igFit(m); });
+});
 // Universal voice entry: twinDictate(btn, inputId) — speak into any field (on-device Web Speech)
 var _twinRecog=null;
 function twinDictate(btn,inputId){
